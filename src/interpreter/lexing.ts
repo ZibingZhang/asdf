@@ -60,7 +60,9 @@ class Lexer implements Stage {
       expectingElementToQuote = false;
     };
     let addNameToken = (lineno: number, colno: number, text: string): StageOutput | undefined => {
-      if (text.match(INTEGER_RE)) {
+      if (text === "...") {
+        addToken(lineno, colno, TokenType.PLACEHOLDER, text);
+      } else if (text.match(INTEGER_RE)) {
         addToken(lineno, colno, TokenType.INTEGER, text);
       } else if (text.match(RATIONAL_RE)) {
         if (text.match(DIV_BY_ZERO_RE)) {

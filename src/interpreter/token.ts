@@ -14,7 +14,8 @@ enum TokenType {
   NAME = "NAME",
   INTEGER = "INTEGER",
   RATIONAL = "RATIONAL",
-  DECIMAL = "DECIMAL"
+  DECIMAL = "DECIMAL",
+  PLACEHOLDER = "PLACEHOLDER"
 }
 
 class Token {
