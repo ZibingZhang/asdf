@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Author Meta -->
+  <meta name="author" content="Zibing Zhang">
+  <!-- Meta Description -->
+  <meta name="description" content=>
+  <!-- Meta Keyword -->
+  <meta name="keywords" content=>
+  <!-- Meta Character Set -->
+  <meta charset="UTF-8">
+
+  <!-- Site Title -->
+  <title>Racket IDE</title>
+
+  <!-- CSS -->
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+
+    body .CodeMirror {
+      height: 100%;
+    }
+  </style>
+
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css"></link>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/monokai.css"></link>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+
+  <script type="text/javascript" src="./CodeMirror/mode/racket/racket.js"></script>
+</head>
+
+<body>
+  <script>
+    CodeMirror(document.body, {
+      lineNumbers: true,
+      tabSize: 2,
+      value: "",
+      mode: "racket",
+      theme: "monokai",
+    });
+  </script>
+</body>

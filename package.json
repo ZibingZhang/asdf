@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "tsc && npm run copy-over",
+    "copy-over": "cp ./src/index.html ./build/index.html"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  }
+}
