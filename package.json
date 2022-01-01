@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "tsc && npm run copy-over",
-    "copy-over": "cp ./src/index.html ./build/index.html"
+    "copy-over": "cp ./src/index.html ./build/index.html && mkdir -p ./build/codemirror/theme && cp ./src/codemirror/theme/monokai.css ./build/codemirror/theme/monokai.css"
   },
   "devDependencies": {
     "typescript": "^4.5.4"
