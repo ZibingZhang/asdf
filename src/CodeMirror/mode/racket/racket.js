@@ -9,10 +9,11 @@
 "use strict";
 
 CodeMirror.defineMode("racket", function (config) {
-  let untilDelimiter = /^[^\s\"'\(\[{\)\]};#]*/;
+  let untilDelimiter = /^[^\s\"'\(\[{\)\]};#`,]*/;
+  let poundUntilDelimiter = /^[^\s\"'\(\[{\)\]};`,]*/;
   let openBrackets = "([{";
   let closeBrackets = ")]}";
-  let booleanLiteral = /^(t|true|True|f|false|False)$/;
+  let booleanLiteral = /^(t|true|f|false)$/;
   let specialForm = /^(and|check-expect|check-random|check-within|check-member-of|check-range|check-satisfied|check-error|cond|define|define-struct|if|lambda|or|quote|require)$/;
   let numLiteral = /^[+\-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
 
@@ -33,27 +34,28 @@ CodeMirror.defineMode("racket", function (config) {
 
     let ch = stream.next();
     if (openBrackets.includes(ch) || closeBrackets.includes(ch)) { return "bracket"; }
-    if (ch == ";") { stream.skipToEnd(); return "comment"; }
-    if (ch == "'") { return "keyword"; }
-    if (ch == "\"") {
+    if (ch === ";") { stream.skipToEnd(); return "comment"; }
+    if (ch.match(/['`,]/)) { return "keyword"; }
+    if (ch === "\"") {
       ch = stream.next();
-      while (ch != "\"") {
+      while (ch !== "\"") {
         if (stream.eol()) { return "error"; }
         ch = stream.next();
       }
       return "string";
     }
-    if (ch == "#") {
-      if (stream.eatSpace()) { return "error"; }
+    if (ch === "#") {
+      if (stream.eol() || stream.match(/^\s/, false)) { return "error"; }
+      if (stream.match(/!\/?/)) { stream.skipToEnd(); return "comment"; }
 
       ch = stream.next();
-      if (ch == ";") { return "comment"; }
-      if (ch == "|") {
+      if (ch === ";") { return "comment"; }
+      if (ch === "|") {
         state.tokenize = tokenComment(0);
         return state.tokenize(stream, state);
       }
 
-      let poundName = ch + stream.match(untilDelimiter)[0];
+      let poundName = ch + stream.match(poundUntilDelimiter)[0];
       if (poundName.match(booleanLiteral)) { return "atom"; }
       return "error";
     }
@@ -61,7 +63,7 @@ CodeMirror.defineMode("racket", function (config) {
     let name = ch + stream.match(untilDelimiter);
     if (name.match(specialForm)) { return "keyword"; }
     if (name.match(numLiteral)) { return "number"; }
-    if (name == "...") return "punctuation";
+    if (name === "...") return "punctuation";
     return null;
   }
 
@@ -79,8 +81,8 @@ CodeMirror.defineMode("racket", function (config) {
       return 0;
     },
 
-    closeBrackets: {pairs: "()[]{}\"\""},
-    lineComment: ";;",
+    closeBrackets: { pairs: "()[]{}\"\"" },
+    lineComment: ";",
     blockCommentStart: "#|",
     blockCommentEnd: "|#"
   };

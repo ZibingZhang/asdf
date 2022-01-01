@@ -30,10 +30,13 @@
 
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css"></link>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/monokai.css"></link>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/monokai.min.css"></link>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
 
+  <link rel="stylesheet" href="./codemirror/theme/monokai.css"></link>
   <script type="text/javascript" src="./codemirror/mode/racket/racket.js"></script>
+
+  <!-- Interpreter -->
   <script type="module" src="./interpreter/main.js"></script>
 </head>
 
@@ -42,12 +45,32 @@
     let editor = CodeMirror(document.body, {
       lineNumbers: true,
       tabSize: 2,
-      value: "",
+      value: "(+ 1 2)",
       mode: "racket",
       theme: "monokai",
       extraKeys: {
         "Alt-Enter": () => {
-          window.pipelines.evaluateProgram.run(editor.getValue());
+          let result = window.pipelines.evaluateProgram.run(editor.getValue());
+          // if (result.errors.length > 0) {
+          //   for (let error of result.errors) {
+          //     let lineno = error.lineno;
+          //     let colno = error.colno;
+          //     for (let ch of error.text) {
+          //       if (ch == '\n') { lineno++; colno = 0; }
+          //       else { colno++; }
+          //     }
+          //     editor.markText(
+          //       { line: error.lineno, ch: error.colno },
+          //       { line: lineno, ch: colno },
+          //       { className: "cm-error", title: error.msg }
+          //     );
+          //   }
+          // }
+          if (result.errors.length > 0) {
+            for (let error of result.errors) {
+              console.log(error);
+            }
+          }
         }
       }
     });

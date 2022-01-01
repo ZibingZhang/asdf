@@ -1,12 +1,22 @@
 export {
   Pipeline,
   Stage,
+  StageError,
   StageOutput
 };
 
-type StageError = {
-  readonly lineno: bigint,
-  readonly msg: string
+class StageError {
+  readonly lineno: number;
+  readonly colno: number;
+  readonly text: string;
+  readonly msg: string;
+
+  constructor(lineno: number, colno: number, text: string, msg: string) {
+    this.lineno = lineno;
+    this.colno = colno;
+    this.text = text;
+    this.msg = msg;
+  }
 }
 
 class StageOutput {
@@ -35,9 +45,9 @@ class Pipeline {
     for (let stage of this.stages) {
       nextInput = stage.run(nextInput);
       if (nextInput.errors.length > 0) {
-        return nextInput.errors;
+        return nextInput;
       }
     }
-    return nextInput.output;
+    return nextInput;
   }
 }
