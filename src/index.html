@@ -33,17 +33,23 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/monokai.css"></link>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
 
-  <script type="text/javascript" src="./CodeMirror/mode/racket/racket.js"></script>
+  <script type="text/javascript" src="./codemirror/mode/racket/racket.js"></script>
+  <script type="module" src="./interpreter/main.js"></script>
 </head>
 
 <body>
-  <script>
-    CodeMirror(document.body, {
+  <script defer>
+    let editor = CodeMirror(document.body, {
       lineNumbers: true,
       tabSize: 2,
       value: "",
       mode: "racket",
       theme: "monokai",
+      extraKeys: {
+        "Alt-Enter": () => {
+          window.pipelines.evaluateProgram.run(editor.getValue());
+        }
+      }
     });
   </script>
 </body>
