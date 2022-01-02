@@ -75,11 +75,11 @@ class Lexer implements Stage {
     let expectingElementToQuote = false;
 
     let addToken = (lineno: number, colno: number, type: TokenType, text: string): Token => {
-      let token = new Token(lineno, colno, type, text)
+      let token = new Token(lineno, colno, type, text);
       tokens.push(token);
       text = "";
       expectingElementToQuote = false;
-      return token
+      return token;
     };
     let addNameToken = (lineno: number, colno: number, text: string): StageOutput | undefined => {
       if (text === ".") {
@@ -99,7 +99,19 @@ class Lexer implements Stage {
       } else {
         addToken(lineno, colno, TokenType.NAME, text);
       }
-    }
+    };
+    let addLeftParenToken = (lineno: number, colno: number, paren: string) => {
+      parenStack.push(addToken(lineno, colno, TokenType.LEFT_PAREN, paren));
+    };
+    let addRightParenToken = (lineno: number, colno: number, paren: string): StageOutput | undefined => {
+      if (parenStack.length === 0) {
+        return this.error(lineno, colno, paren, UNEXPECTED_ERR(paren));
+      } else if (!this.matches(opening = parenStack.pop()?.text, paren)) {
+        return this.error(lineno, colno, paren, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening, paren));
+      } else {
+        addToken(lineno, colno, TokenType.RIGHT_PAREN, paren);
+      }
+    };
 
     while (!this.isAtEnd) {
       let ch = this.next();
@@ -112,11 +124,10 @@ class Lexer implements Stage {
           } else if (ch.match(/\s/)) {
             // skip
           } else if (ch.match(LEFT_PAREN_RE)) {
-            parenStack.push(addToken(lineno, colno, TokenType.LEFT_PAREN, ch));
+            addLeftParenToken(lineno, colno, ch);
           } else if (ch.match(RIGHT_PAREN_RE)) {
-            if (parenStack.length === 0) { return this.error(lineno, colno, ch, UNEXPECTED_ERR(ch)); }
-            if (!this.matches(opening = parenStack.pop()?.text, ch)) { return this.error(lineno, colno, ch, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening, ch)); }
-            addToken(lineno, colno, TokenType.RIGHT_PAREN, ch);
+            let error = addRightParenToken(lineno, colno, ch);
+            if (error) { return error; }
           } else if (ch === "\"") {
             state = State.STRING;
           } else if (ch === "#") {
@@ -200,14 +211,13 @@ class Lexer implements Stage {
           } else if (ch.match(LEFT_PAREN_RE)) {
             let error = addNameToken(lineno, colno, text);
             if (error) { return error; }
-            parenStack.push(addToken(lineno, colno + 1, TokenType.LEFT_PAREN, ch));
+            addLeftParenToken(lineno, colno + 1, ch);
             state = State.INIT;
           } else if (ch.match(RIGHT_PAREN_RE)) {
             let error = addNameToken(lineno, colno, text);
             if (error) { return error; }
-            if (parenStack.length === 0) { return this.error(lineno, colno, ch, UNEXPECTED_ERR(ch)); }
-            if (!this.matches(opening = parenStack.pop()?.text, ch)) { return this.error(lineno, colno, ch, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening, ch)); }
-            addToken(lineno, colno + 1, TokenType.RIGHT_PAREN, ch);
+            error = addRightParenToken(lineno, colno + 1, ch);
+            if (error) { return error; }
             state = State.INIT;
           } else if (ch === "\"") {
             let error = addNameToken(lineno, colno, text);
@@ -245,7 +255,7 @@ class Lexer implements Stage {
             } else {
               return this.error(lineno, colno, text, BAD_SYNTAX_ERR(text));
             }
-            parenStack.push(addToken(lineno, colno + 1, TokenType.LEFT_PAREN, ch));
+            addLeftParenToken(lineno, colno + 1, ch);
             state = State.INIT;
           } else if (ch.match(RIGHT_PAREN_RE)) {
             if (text.match(TRUE_LITERAL_RE)) {
@@ -255,9 +265,8 @@ class Lexer implements Stage {
             } else {
               return this.error(lineno, colno, text, BAD_SYNTAX_ERR(text));
             }
-            if (parenStack.length === 0) { return this.error(lineno, colno, ch, UNEXPECTED_ERR(ch)); }
-            if (!this.matches(opening = parenStack.pop()?.text, ch)) { return this.error(lineno, colno, ch, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening, ch)); }
-            addToken(lineno, colno + 1, TokenType.RIGHT_PAREN, ch);
+            let error = addRightParenToken(lineno, colno, ch);
+            if (error) { return error; }
             state = State.INIT;
           } else if (ch === "\"") {
             if (text.match(TRUE_LITERAL_RE)) {
@@ -291,7 +300,7 @@ class Lexer implements Stage {
           } else if (ch.match(/\s/)) {
             // skip
           } else if (ch.match(LEFT_PAREN_RE)) {
-            parenStack.push(addToken(lineno, colno, TokenType.LEFT_PAREN, ch));
+            addLeftParenToken(lineno, colno, ch);
             state = State.INIT;
           } else if (ch.match(RIGHT_PAREN_RE)) {
             return this.error(lineno, colno, ch, EXPECT_ELEMENT_FOR_QUOTING_ERR(ch));
