@@ -23,8 +23,22 @@
       height: 100%;
     }
 
-    body .CodeMirror {
+    #site, body .CodeMirror {
       height: 100%;
+    }
+
+    #site {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .CodeMirror:nth-child(1) {
+      width: 50%;
+      border-right: 1px solid white;
+    }
+
+    .CodeMirror:nth-child(2) {
+      width: 50%;
     }
   </style>
 
@@ -41,38 +55,54 @@
 </head>
 
 <body>
+  <div id=site>
+    <textarea id="editor"></textarea>
+    <textarea id="repl"></textarea>
+  </div>
+
   <script defer>
-    let editor = CodeMirror(document.body, {
-      lineNumbers: true,
-      tabSize: 2,
-      value: "(+ 1 2)",
-      mode: "racket",
-      theme: "monokai",
-      extraKeys: {
-        "Alt-Enter": () => {
-          let result = window.pipelines.evaluateProgram.run(editor.getValue());
-          // if (result.errors.length > 0) {
-          //   for (let error of result.errors) {
-          //     let lineno = error.lineno;
-          //     let colno = error.colno;
-          //     for (let ch of error.text) {
-          //       if (ch == '\n') { lineno++; colno = 0; }
-          //       else { colno++; }
-          //     }
-          //     editor.markText(
-          //       { line: error.lineno, ch: error.colno },
-          //       { line: lineno, ch: colno },
-          //       { className: "cm-error", title: error.msg }
-          //     );
-          //   }
-          // }
-          if (result.errors.length > 0) {
-            for (let error of result.errors) {
-              console.log(error);
+    const editorTextArea = document.getElementById("editor");
+    const replTextArea = document.getElementById("repl");
+
+    const appendToRepl = (text) => {
+      repl.setValue(`${repl.getValue()}${text}\n> `);
+    };
+
+    const editor = CodeMirror(
+      (elt) => {
+        editorTextArea.parentNode.replaceChild(elt, editorTextArea);
+      }, {
+        lineNumbers: true,
+        tabSize: 2,
+        value: "(+ 1 2)",
+        mode: "racket",
+        theme: "monokai",
+        extraKeys: {
+          "Alt-Enter": () => {
+            const result = window.pipelines.evaluateProgram.run(editor.getValue());
+            if (result.errors.length > 0) {
+              for (const error of result.errors) {
+                appendToRepl(error.msg);
+              }
+            } else {
+              appendToRepl(result.output);
             }
           }
         }
       }
-    });
+    );
+
+    const repl = CodeMirror(
+      (elt) => {
+        replTextArea.parentNode.replaceChild(elt, replTextArea);
+      }, {
+        tabSize: 2,
+        value: "> ",
+        mode: "racket",
+        theme: "monokai",
+        readOnly: true,
+        lineWrapping: true
+      }
+    );
   </script>
 </body>
