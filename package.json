@@ -1,8 +1,9 @@
 {
   "scripts": {
     "lint": "npx eslint ./src",
-    "build": "tsc && npm run copy-other",
-    "copy-other": "cp ./src/index.html ./build/index.html && mkdir -p ./build/codemirror/theme && cp ./src/codemirror/theme/monokai.css ./build/codemirror/theme/monokai.css"
+    "build": "tsc",
+    "build-copy": "tsc && npm run copy",
+    "copy": "cp ./src/index.html ./build/index.html && mkdir -p ./build/codemirror/theme && cp ./src/codemirror/theme/monokai.css ./build/codemirror/theme/monokai.css"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.8.1",
