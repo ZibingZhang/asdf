@@ -6,12 +6,13 @@ export {
   StageError,
   StageOutput
 };
-
-interface StageError {
-  readonly lineno: number;
-  readonly colno: number;
-  readonly text: string;
-  readonly msg: string;
+class StageError {
+  constructor(
+    readonly lineno: number,
+    readonly colno: number,
+    readonly text: string,
+    readonly msg: string
+  ) {}
 }
 
 class StageOutput {

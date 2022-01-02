@@ -1,4 +1,5 @@
-import { Stage, StageOutput } from "./pipeline.js";
+import { Stage, StageError, StageOutput } from "./pipeline.js";
+import { AtomSExpr, ListSExpr, SExpr } from "./sexpr.js";
 import { Token, TokenType } from "./token.js";
 
 export {
@@ -55,17 +56,19 @@ enum State {
 }
 
 class Lexer implements Stage {
-  position: number = 0;
-  input: string = "";
-  isAtEnd: boolean = false;
+  position = 0;
+  input = "";
+  isAtEnd = false;
 
   run(input: StageOutput): StageOutput {
     this.position = 0;
     this.input = input.output;
     this.isAtEnd = this.input.length === 0;
 
-    const tokens: Token[] = [];
-    const parenStack: Token[] = []; let opening;
+    const sexprs: SExpr[] = [];
+    const sexprStack: SExpr[][] = [];
+    const parenStack: Token[] = [];
+    let opening;
     let state = State.INIT;
     let text = "";
     let lineno = 0;
@@ -73,13 +76,22 @@ class Lexer implements Stage {
 
     let blockCommentDepth = 0;
     let expectingElementToQuote = false;
+    let sexprComment = new Token(-1, -1, TokenType.SEXPR_COMMENT, "#;");
+    let expectingSExprToComment = false;
 
-    const addToken = (lineno: number, colno: number, type: TokenType, text: string): Token => {
-      const token: Token = { lineno, colno, type, text };
-      tokens.push(token);
+    const addToken = (lineno: number, colno: number, type: TokenType, text: string) => {
+      const sexpr = new AtomSExpr(new Token(lineno, colno, type, text));
+      if (expectingSExprToComment) {
+        expectingSExprToComment = false;
+      } else {
+        if (sexprStack.length === 0) {
+          sexprs.push(sexpr);
+        } else {
+          sexprStack[sexprStack.length - 1].push(sexpr);
+        }
+      }
       text = "";
       expectingElementToQuote = false;
-      return token;
     };
     const addNameToken = (lineno: number, colno: number, text: string): StageOutput | undefined => {
       if (text === ".") {
@@ -101,7 +113,10 @@ class Lexer implements Stage {
       }
     };
     const addLeftParenToken = (lineno: number, colno: number, paren: string) => {
-      parenStack.push(addToken(lineno, colno, TokenType.LEFT_PAREN, paren));
+      sexprStack.push([]);
+      parenStack.push(new Token(lineno, colno, TokenType.LEFT_PAREN, paren));
+      text = "";
+      expectingElementToQuote = false;
     };
     const addRightParenToken = (lineno: number, colno: number, paren: string): StageOutput | undefined => {
       if (parenStack.length === 0) {
@@ -109,7 +124,18 @@ class Lexer implements Stage {
       } else if (!this.matches(opening = parenStack.pop()?.text, paren)) {
         return this.error(lineno, colno, paren, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening, paren));
       } else {
-        addToken(lineno, colno, TokenType.RIGHT_PAREN, paren);
+        const sexpr = new ListSExpr(sexprStack.pop() || []);
+        if (expectingSExprToComment) {
+          expectingSExprToComment = false;
+        } else {
+          if (sexprStack.length === 0) {
+            sexprs.push(sexpr);
+          } else {
+            sexprStack[sexprStack.length - 1].push(sexpr);
+          }
+        }
+        text = "";
+        expectingElementToQuote = false;
       }
     };
 
@@ -131,10 +157,10 @@ class Lexer implements Stage {
           } else if (ch === "\"") {
             state = State.STRING;
           } else if (ch === "#") {
-            if (this.peek() === ";") {
-              // turn into flag to ignore next sexpr
-              addToken(lineno, colno, TokenType.SEXPR_COMMENT, text + ch);
-            } else if (this.peek() === "|") {
+            if (this.match(";")) {
+              expectingSExprToComment = true;
+              sexprComment = new Token(lineno, colno, TokenType.SEXPR_COMMENT, text + ch);
+            } else if (this.match("|")) {
               blockCommentDepth = 0;
               state = State.BLOCK_COMMENT;
             } else if (this.peek(2).match(/!\/?/)) {
@@ -306,13 +332,12 @@ class Lexer implements Stage {
           } else if (ch.match(RIGHT_PAREN_RE)) {
             return this.error(lineno, colno, ch, EXPECT_ELEMENT_FOR_QUOTING_ERR(ch));
           } else if (ch === "\"") {
-            text = ch;
             state = State.STRING;
           } else if (ch === "#") {
-            if (this.peek() === ";") {
+            if (this.match(";")) {
               // turn into flag to ignore next sexpr
               addToken(lineno, colno, TokenType.SEXPR_COMMENT, text + ch);
-            } else if (this.peek() === "|") {
+            } else if (this.match("|")) {
               blockCommentDepth = 0;
               state = State.BLOCK_COMMENT;
             } else if (this.peek(2).match(/!\/?/)) {
@@ -326,7 +351,6 @@ class Lexer implements Stage {
             expectingElementToQuote = true;
             state = State.LINE_COMMENT;
           } else {
-            text = ch;
             state = State.NAME;
           }
           break;
@@ -359,8 +383,6 @@ class Lexer implements Stage {
           addToken(lineno, colno, TokenType.TRUE, text);
         } else if (text.match(FALSE_LITERAL_RE)) {
           addToken(lineno, colno, TokenType.FALSE, text);
-        } else if (text.match(/#;(.*;.*)?/)) {
-          return this.error(lineno, colno, text, EXPECT_COMMENTED_OUT_ELEMENT_ERR);
         } else {
           return this.error(lineno, colno, text, BAD_SYNTAX_ERR(text));
         }
@@ -380,15 +402,19 @@ class Lexer implements Stage {
       return this.error(lineno, colno, text, EXPECT_ELEMENT_FOR_QUOTING_ERR("end-of-file"));
     }
 
+    if (expectingSExprToComment) {
+      return this.error(sexprComment.lineno, sexprComment.colno, "#;", EXPECT_COMMENTED_OUT_ELEMENT_ERR);
+    }
+
     if ((opening = parenStack.pop())) {
       return this.error(lineno, colno, opening.text, EXPECT_CLOSING_PAREN_ERR(opening.text));
     }
 
-    for (const token of tokens) {
-      console.log(token);
+    for (const sexpr of sexprs) {
+      console.log(JSON.stringify(sexpr, null, 2));
     }
 
-    return new StageOutput(tokens);
+    return new StageOutput(sexprs);
   }
 
   matches(left: string | undefined, right: string): boolean {
@@ -401,7 +427,7 @@ class Lexer implements Stage {
   }
 
   error(lineno: number, colno: number, text: string, msg: string): StageOutput {
-    return new StageOutput(null, [{ lineno, colno, text, msg }]);
+    return new StageOutput(null, [new StageError(lineno, colno, text, msg)]);
   }
 
   next(): string {
@@ -410,8 +436,17 @@ class Lexer implements Stage {
     return this.input[this.position - 1];
   }
 
-  peek(n: number = 1): string {
+  peek(n = 1): string {
     return this.input.slice(this.position, Math.min(this.position + n, this.input.length));
+  }
+
+  match(s: string): boolean {
+    if (this.peek(s.length) === s) {
+      this.position += s.length;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   checkAtEnd() {

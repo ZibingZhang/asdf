@@ -18,9 +18,11 @@ enum TokenType {
   PLACEHOLDER = "PLACEHOLDER"
 }
 
-interface Token {
-  readonly lineno: number;
-  readonly colno: number;
-  readonly type: TokenType;
-  readonly text: string;
+class Token {
+  constructor(
+    readonly lineno: number,
+    readonly colno: number,
+    readonly type: TokenType,
+    readonly text: string
+  ) {}
 }

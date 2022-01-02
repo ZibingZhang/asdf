@@ -1,11 +1,17 @@
 import { Token } from "./token.js";
 
+export {
+  AtomSExpr,
+  ListSExpr,
+  SExpr
+};
+
 interface SExpr {}
 
-interface AtomSExpr extends SExpr {
-  readonly token: Token
+class AtomSExpr implements SExpr {
+  constructor(readonly token: Token) {}
 }
 
-interface ListSExpr extends SExpr {
-  readonly tokens: Token[]
+class ListSExpr implements SExpr {
+  constructor(readonly tokens: SExpr[]) {}
 }
