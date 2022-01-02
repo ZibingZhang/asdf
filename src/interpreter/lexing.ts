@@ -39,6 +39,7 @@ const EXPECT_CORRECT_CLOSING_PAREN_ERR = (opening: string | undefined, found: st
 };
 const EXPECT_ELEMENT_FOR_QUOTING_ERR = (found: string) => `read-syntax: expected an element for quoting "'", but found ${found}`;
 const ILLEGAL_USE_OF_DOT_ERR = "read-syntax: illegal use of `.`";
+const NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes not supported";
 const QUASI_QUOTE_UNSUPPORTED_ERR = "read-syntax: quasiquotes not supported";
 const UNCLOSED_STRING_ERR = "read-syntax: expected a closing `\"`";
 const UNEXPECTED_ERR = (found: string) => `read-syntax: unexpected \`${found}\``;
@@ -80,10 +81,13 @@ class Lexer implements Stage {
     let expectingSExprToComment = false;
 
     const addToken = (lineno: number, colno: number, type: TokenType, text: string) => {
-      const sexpr = new AtomSExpr(new Token(lineno, colno, type, text));
+      let sexpr: SExpr = new AtomSExpr(new Token(lineno, colno, type, text));
       if (expectingSExprToComment) {
         expectingSExprToComment = false;
       } else {
+        if (expectingElementToQuote) {
+          sexpr = new ListSExpr([new Token(-1, -1, TokenType.NAME, "quote"), sexpr]);
+        }
         if (sexprStack.length === 0) {
           sexprs.push(sexpr);
         } else {
@@ -116,7 +120,6 @@ class Lexer implements Stage {
       sexprStack.push([]);
       parenStack.push(new Token(lineno, colno, TokenType.LEFT_PAREN, paren));
       text = "";
-      expectingElementToQuote = false;
     };
     const addRightParenToken = (lineno: number, colno: number, paren: string): StageOutput | undefined => {
       if (parenStack.length === 0) {
@@ -124,10 +127,13 @@ class Lexer implements Stage {
       } else if (!this.matches(opening = parenStack.pop()?.text, paren)) {
         return this.error(lineno, colno, paren, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening, paren));
       } else {
-        const sexpr = new ListSExpr(sexprStack.pop() || []);
+        let sexpr: SExpr = new ListSExpr(sexprStack.pop() || []);
         if (expectingSExprToComment) {
           expectingSExprToComment = false;
         } else {
+          if (expectingElementToQuote) {
+            sexpr = new ListSExpr([new Token(-1, -1, TokenType.NAME, "quote"), sexpr]);
+          }
           if (sexprStack.length === 0) {
             sexprs.push(sexpr);
           } else {
@@ -169,7 +175,9 @@ class Lexer implements Stage {
               state = State.POUND;
             }
           } else if (ch === "'") {
-            addToken(lineno, colno, TokenType.QUOTE, ch);
+            if (expectingElementToQuote) {
+              return this.error(lineno, colno, text, NESTED_QUOTES_UNSUPPORTED_ERR);
+            }
             state = State.QUOTE;
           } else if (ch === ";") {
             state = State.LINE_COMMENT;
@@ -253,7 +261,6 @@ class Lexer implements Stage {
           } else if (ch === "'") {
             const error = addNameToken(lineno, colno, text);
             if (error) { return error; }
-            addToken(lineno, colno + 1, TokenType.QUOTE, ch);
             state = State.QUOTE;
           } else {
             text += ch;
@@ -312,7 +319,6 @@ class Lexer implements Stage {
             } else {
               return this.error(lineno, colno, text, BAD_SYNTAX_ERR(text));
             }
-            addToken(lineno, colno + 1, TokenType.QUOTE, ch);
             state = State.QUOTE;
           } else {
             text += ch;
@@ -322,6 +328,7 @@ class Lexer implements Stage {
 
         case State.QUOTE: {
           text = ch;
+          expectingElementToQuote = true;
           if (ch.match(QUASI_QUOTE_RE)) {
             return this.error(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR);
           } else if (ch.match(/\s/)) {
@@ -346,9 +353,8 @@ class Lexer implements Stage {
               state = State.POUND;
             }
           } else if (ch === "'") {
-            addToken(lineno, colno, TokenType.QUOTE, ch);
+            return this.error(lineno, colno, text, NESTED_QUOTES_UNSUPPORTED_ERR);
           } else if (ch === ";") {
-            expectingElementToQuote = true;
             state = State.LINE_COMMENT;
           } else {
             state = State.NAME;

@@ -8,7 +8,6 @@ enum TokenType {
   RIGHT_PAREN = "RIGHT_PAREN",
   TRUE = "TRUE",
   FALSE = "FALSE",
-  QUOTE = "QUOTE",
   SEXPR_COMMENT = "SEXPR_COMMENT",
   STRING = "STRING",
   NAME = "NAME",
