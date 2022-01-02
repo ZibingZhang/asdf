@@ -16,13 +16,10 @@ class StageError {
 }
 
 class StageOutput {
-  readonly output: any;
-  readonly errors: StageError[];
-
-  constructor(output: any, errors: StageError[] = []) {
-    this.output = output;
-    this.errors = errors;
-  }
+  constructor(
+    readonly output: any,
+    readonly errors: StageError[] = []
+  ) {}
 }
 
 interface Stage {
@@ -36,7 +33,7 @@ class Pipeline {
     this.stages = stages;
   }
 
-  run(program: string) {
+  run(program: string): StageOutput {
     let nextInput = new StageOutput(program);
     for (const stage of this.stages) {
       nextInput = stage.run(nextInput);
