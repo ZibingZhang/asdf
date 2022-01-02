@@ -6,7 +6,7 @@ export {
 };
 
 const LEFT_PAREN_RE = /^[([{]$/;
-const RIGHT_PAREN_RE = /^[)]\}]$/;
+const RIGHT_PAREN_RE = /^[)\]}]$/;
 const QUASI_QUOTE_RE = /^[`,]$/;
 const TRUE_LITERAL_RE = /^#(t|true)$/;
 const FALSE_LITERAL_RE = /^#(f|false)$/;
