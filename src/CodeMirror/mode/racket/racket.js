@@ -9,8 +9,7 @@
 "use strict";
 
 CodeMirror.defineMode("racket", function (config) {
-  let untilDelimiter = /^[^\s\"'\(\[{\)\]};#`,]*/;
-  let poundUntilDelimiter = /^[^\s\"'\(\[{\)\]};`,]*/;
+  let untilDelimiter = /^[^\s\"'\(\[{\)\]};`,]*/;
   let openBrackets = "([{";
   let closeBrackets = ")]}";
   let booleanLiteral = /^(t|true|f|false)$/;
@@ -55,7 +54,7 @@ CodeMirror.defineMode("racket", function (config) {
         return state.tokenize(stream, state);
       }
 
-      let poundName = ch + stream.match(poundUntilDelimiter)[0];
+      let poundName = ch + stream.match(untilDelimiter)[0];
       if (poundName.match(booleanLiteral)) { return "atom"; }
       return "error";
     }
