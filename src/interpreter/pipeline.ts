@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export {
   Pipeline,
   Stage,
@@ -5,18 +7,11 @@ export {
   StageOutput
 };
 
-class StageError {
+interface StageError {
   readonly lineno: number;
   readonly colno: number;
   readonly text: string;
   readonly msg: string;
-
-  constructor(lineno: number, colno: number, text: string, msg: string) {
-    this.lineno = lineno;
-    this.colno = colno;
-    this.text = text;
-    this.msg = msg;
-  }
 }
 
 class StageOutput {
@@ -42,7 +37,7 @@ class Pipeline {
 
   run(program: string) {
     let nextInput = new StageOutput(program);
-    for (let stage of this.stages) {
+    for (const stage of this.stages) {
       nextInput = stage.run(nextInput);
       if (nextInput.errors.length > 0) {
         return nextInput;

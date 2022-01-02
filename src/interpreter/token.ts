@@ -18,16 +18,9 @@ enum TokenType {
   PLACEHOLDER = "PLACEHOLDER"
 }
 
-class Token {
+interface Token {
   readonly lineno: number;
   readonly colno: number;
   readonly type: TokenType;
   readonly text: string;
-
-  constructor(lineno: number, colno: number, type: TokenType, text: string) {
-    this.lineno = lineno;
-    this.colno = colno;
-    this.type = type;
-    this.text = text;
-  }
 }
