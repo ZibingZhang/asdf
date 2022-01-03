@@ -476,8 +476,6 @@ class Lexer implements Stage {
       throw new LexerError(new SourceSpan(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.sourceSpan.startLineno, opening.sourceSpan.startColno + 1), EXPECTED_CLOSING_PAREN_ERR(opening.text));
     }
 
-    console.log(JSON.stringify(sexprs, null, 2));
-
     return sexprs;
   }
 
