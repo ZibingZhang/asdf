@@ -102,20 +102,28 @@ class Lexer implements Stage {
     let expectingElementToQuote = 0;
     let quoteSourceSpan = NO_SOURCE_SPAN;
     let sexprCommentSourceSpan = NO_SOURCE_SPAN;
-    let expectingSExprToComment = false;
+    let expectingSExprToComment = 0;
 
     const addToken = (lineno: number, colno: number, type: TokenType, text: string) => {
       const token = new Token(type, text, new SourceSpan(lineno, colno, lineno, colno + text.length));
       let sexpr: SExpr = new AtomSExpr(token, token.sourceSpan);
-      if (expectingSExprToComment) {
-        expectingSExprToComment = false;
+      if (expectingSExprToComment === 1) {
+        expectingSExprToComment--;
+      } else if (expectingSExprToComment > 1) {
+        // skip
       } else {
-        if (expectingElementToQuote) {
+        if (expectingElementToQuote > 0) {
           sexpr = new ListSExpr(
             [
-              new Token(
-                TokenType.NAME, "quote", NO_SOURCE_SPAN
-              ), sexpr
+              new AtomSExpr(
+                new Token(
+                  TokenType.NAME,
+                  "quote",
+                  NO_SOURCE_SPAN
+                ),
+                NO_SOURCE_SPAN
+              ),
+              sexpr
             ],
             new SourceSpan(
               quoteSourceSpan.startLineno,
@@ -154,6 +162,7 @@ class Lexer implements Stage {
       }
     };
     const addLeftParenToken = (lineno: number, colno: number, paren: string) => {
+      if (expectingSExprToComment > 0) { expectingSExprToComment++; }
       expectingElementToQuote--;
       sexprStack.push([]);
       parenStack.push(new Token(TokenType.LEFT_PAREN, paren, new SourceSpan(lineno, colno, lineno, colno + 1)));
@@ -175,21 +184,19 @@ class Lexer implements Stage {
             colno + 1
           )
         );
-        if (expectingSExprToComment) {
-          expectingSExprToComment = false;
+        if (expectingSExprToComment > 0) {
+          expectingSExprToComment--;
         } else {
-          if (expectingElementToQuote) {
+          if (expectingElementToQuote > 0) {
             sexpr = new ListSExpr(
               [
-                new Token(
-                  TokenType.NAME,
-                  "quote",
-                  new SourceSpan(
-                    opening.sourceSpan.startLineno,
-                    opening.sourceSpan.startColno,
-                    lineno,
-                    colno + 1
-                  )
+                new AtomSExpr(
+                  new Token(
+                    TokenType.NAME,
+                    "quote",
+                    NO_SOURCE_SPAN
+                  ),
+                  NO_SOURCE_SPAN
                 ),
                 sexpr
               ],
@@ -200,6 +207,7 @@ class Lexer implements Stage {
                 colno + 1
               )
             );
+            expectingElementToQuote--;
           }
           if (sexprStack.length === 0) {
             sexprs.push(sexpr);
@@ -208,7 +216,6 @@ class Lexer implements Stage {
           }
         }
         text = "";
-        expectingElementToQuote--;
       }
     };
 
@@ -230,7 +237,7 @@ class Lexer implements Stage {
             state = State.STRING;
           } else if (ch === "#") {
             if (this.match(";")) {
-              expectingSExprToComment = true;
+              expectingSExprToComment++;
               sexprCommentSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 2);
             } else if (this.match("|")) {
               blockCommentDepth = 0;
@@ -241,9 +248,6 @@ class Lexer implements Stage {
               state = State.POUND;
             }
           } else if (ch === "'") {
-            if (expectingElementToQuote) {
-              throw new LexerError(new SourceSpan(lineno, colno, lineno, colno + 1), NESTED_QUOTES_UNSUPPORTED_ERR);
-            }
             quoteSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 1);
             state = State.QUOTE;
           } else if (ch === ";") {
@@ -266,7 +270,8 @@ class Lexer implements Stage {
         case State.BLOCK_COMMENT_PIPE: {
           if (ch === "#") {
             if (blockCommentDepth === 0) {
-              if (expectingElementToQuote) {
+              if (expectingElementToQuote > 0) {
+                expectingElementToQuote--;
                 state = State.QUOTE;
               } else {
                 state = State.INIT;
@@ -293,7 +298,8 @@ class Lexer implements Stage {
 
         case State.LINE_COMMENT: {
           if (ch === "\n") {
-            if (expectingElementToQuote) {
+            if (expectingElementToQuote > 0) {
+              expectingElementToQuote--;
               state = State.QUOTE;
             } else {
               state = State.INIT;
@@ -394,7 +400,7 @@ class Lexer implements Stage {
           if (ch.match(QUASI_QUOTE_RE)) {
             throw new LexerError(new SourceSpan(lineno, colno, lineno, colno + 1), QUASI_QUOTE_UNSUPPORTED_ERR);
           } else if (ch.match(/\s/)) {
-            // skip
+            expectingElementToQuote--;
           } else if (ch.match(LEFT_PAREN_RE)) {
             addLeftParenToken(lineno, colno, ch);
             state = State.INIT;
@@ -404,7 +410,9 @@ class Lexer implements Stage {
             state = State.STRING;
           } else if (ch === "#") {
             if (this.match(";")) {
-              // skip
+              expectingElementToQuote--;
+              expectingSExprToComment++;
+              sexprCommentSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 2);
             } else if (this.match("|")) {
               blockCommentDepth = 0;
               state = State.BLOCK_COMMENT;
