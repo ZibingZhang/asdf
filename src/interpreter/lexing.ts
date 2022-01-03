@@ -64,9 +64,9 @@ class LexerError extends Error {
 }
 
 class Lexer implements Stage {
-  position = 0;
-  input = "";
-  isAtEnd = false;
+  private position = 0;
+  private input = "";
+  private isAtEnd = false;
 
   run(input: StageOutput): StageOutput {
     try {
