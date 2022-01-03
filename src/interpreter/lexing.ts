@@ -70,7 +70,7 @@ class Lexer implements Stage {
 
   run(input: StageOutput): StageOutput {
     try {
-      return this.runHelper(input.output);
+      return new StageOutput(this.runHelper(input.output));
     } catch (e) {
       if (e instanceof LexerError) {
         return new StageOutput(null, [e.stageError]);
@@ -80,7 +80,7 @@ class Lexer implements Stage {
     }
   }
 
-  private runHelper(input: string): StageOutput {
+  private runHelper(input: string): SExpr[] {
     this.position = 0;
     this.input = input;
     this.isAtEnd = this.input.length === 0;
@@ -470,11 +470,7 @@ class Lexer implements Stage {
       throw new LexerError(new StageError(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.text, EXPECT_CLOSING_PAREN_ERR(opening.text)));
     }
 
-    for (const sexpr of sexprs) {
-      console.log(JSON.stringify(sexpr, null, 2));
-    }
-
-    return new StageOutput(sexprs);
+    return sexprs;
   }
 
   private matches(left: string | undefined, right: string): boolean {
