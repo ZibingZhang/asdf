@@ -11,11 +11,11 @@ export {
   WellFormedProgram
 };
 
-class WellFormedError extends Error {
-  constructor(readonly stageError: StageError) {
-    super(stageError.msg);
-  }
-}
+const EXPECTED_FUNCTION = (found: string | null) => {
+  return `function call: expected a function after the open parenthesis, but ${found ? `a ${found}` : "nothing's there"}`;
+};
+
+class WellFormedError extends StageError {}
 
 class WellFormedSyntax implements Stage {
   run(input: StageOutput): StageOutput {
@@ -23,7 +23,7 @@ class WellFormedSyntax implements Stage {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
       if (e instanceof WellFormedError) {
-        return new StageOutput(null, [e.stageError]);
+        return new StageOutput(null, [e]);
       } else {
         throw e;
       }
@@ -71,6 +71,9 @@ class WellFormedSyntax implements Stage {
           throw "something?";
       }
     } else if (isListSExpr(sexpr)) {
+      if (sexpr.tokens.length === 0) {
+        throw new WellFormedError(sexpr.sourceSpan, EXPECTED_FUNCTION(null));
+      }
       const name = sexpr.tokens.shift();
       if (!name) {
         throw "some other sorta error";
@@ -91,7 +94,7 @@ class WellFormedProgram implements Stage {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
       if (e instanceof WellFormedError) {
-        return new StageOutput(null, [e.stageError]);
+        return new StageOutput(null, [e]);
       } else {
         throw e;
       }
