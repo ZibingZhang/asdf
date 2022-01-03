@@ -57,14 +57,32 @@ enum State {
   STRING
 }
 
+class LexerError extends Error {
+  constructor(readonly stageError: StageError) {
+    super(stageError.msg);
+  }
+}
+
 class Lexer implements Stage {
   position = 0;
   input = "";
   isAtEnd = false;
 
   run(input: StageOutput): StageOutput {
+    try {
+      return this.runHelper(input.output);
+    } catch (e) {
+      if (e instanceof LexerError) {
+        return new StageOutput(null, [e.stageError]);
+      } else {
+        throw "Unhandled exception";
+      }
+    }
+  }
+
+  private runHelper(input: string): StageOutput {
     this.position = 0;
-    this.input = input.output;
+    this.input = input;
     this.isAtEnd = this.input.length === 0;
 
     const sexprs: SExpr[] = [];
@@ -112,16 +130,16 @@ class Lexer implements Stage {
       text = "";
       expectingElementToQuote = false;
     };
-    const addNameToken = (lineno: number, colno: number, text: string): StageOutput | undefined => {
+    const addNameToken = (lineno: number, colno: number, text: string) => {
       if (text === ".") {
-        return this.error(lineno, colno, text, ILLEGAL_USE_OF_DOT_ERR);
+        throw new LexerError(new StageError(lineno, colno, text, ILLEGAL_USE_OF_DOT_ERR));
       } else if (text === "...") {
         addToken(lineno, colno, TokenType.PLACEHOLDER, text);
       } else if (text.match(INTEGER_RE)) {
         addToken(lineno, colno, TokenType.INTEGER, text);
       } else if (text.match(RATIONAL_RE)) {
         if (text.match(DIV_BY_ZERO_RE)) {
-          return this.error(lineno, colno, text, DIV_BY_ZERO_ERR(text));
+          throw new LexerError(new StageError(lineno, colno, text, DIV_BY_ZERO_ERR(text)));
         } else {
           addToken(lineno, colno, TokenType.RATIONAL, text);
         }
@@ -136,11 +154,11 @@ class Lexer implements Stage {
       parenStack.push(new Token(TokenType.LEFT_PAREN, paren, new SourceSpan(lineno, colno, lineno, colno + 1)));
       text = "";
     };
-    const addRightParenToken = (lineno: number, colno: number, paren: string): StageOutput | undefined => {
+    const addRightParenToken = (lineno: number, colno: number, paren: string) => {
       if (parenStack.length === 0) {
-        return this.error(lineno, colno, paren, UNEXPECTED_ERR(paren));
+        throw new LexerError(new StageError(lineno, colno, paren, UNEXPECTED_ERR(paren)));
       } else if (!this.matches((opening = parenStack.pop() || NO_TOKEN).text, paren)) {
-        return this.error(lineno, colno, paren, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening?.text, paren));
+        throw new LexerError(new StageError(lineno, colno, paren, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening?.text, paren)));
       } else {
         let sexpr: SExpr = new ListSExpr(
           sexprStack.pop() || [],
@@ -195,14 +213,13 @@ class Lexer implements Stage {
         case State.INIT: {
           text = ch;
           if (ch.match(QUASI_QUOTE_RE)) {
-            return this.error(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR);
+            throw new LexerError(new StageError(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR));
           } else if (ch.match(/\s/)) {
             // skip
           } else if (ch.match(LEFT_PAREN_RE)) {
             addLeftParenToken(lineno, colno, ch);
           } else if (ch.match(RIGHT_PAREN_RE)) {
-            const error = addRightParenToken(lineno, colno, ch);
-            if (error) { return error; }
+            addRightParenToken(lineno, colno, ch);
           } else if (ch === "\"") {
             state = State.STRING;
           } else if (ch === "#") {
@@ -219,7 +236,7 @@ class Lexer implements Stage {
             }
           } else if (ch === "'") {
             if (expectingElementToQuote) {
-              return this.error(lineno, colno, text, NESTED_QUOTES_UNSUPPORTED_ERR);
+              throw new LexerError(new StageError(lineno, colno, text, NESTED_QUOTES_UNSUPPORTED_ERR));
             }
             quoteSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 1);
             state = State.QUOTE;
@@ -281,30 +298,24 @@ class Lexer implements Stage {
 
         case State.NAME: {
           if (ch.match(QUASI_QUOTE_RE)) {
-            return this.error(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR);
+            throw new LexerError(new StageError(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR));
           } else if (ch.match(/\s/)) {
-            const error = addNameToken(lineno, colno - 1, text);
-            if (error) { return error; }
+            addNameToken(lineno, colno - 1, text);
             state = State.INIT;
           } else if (ch.match(LEFT_PAREN_RE)) {
-            const error = addNameToken(lineno, colno - 1, text);
-            if (error) { return error; }
+            addNameToken(lineno, colno - 1, text);
             addLeftParenToken(lineno, colno, ch);
             state = State.INIT;
           } else if (ch.match(RIGHT_PAREN_RE)) {
-            let error = addNameToken(lineno, colno - 1, text);
-            if (error) { return error; }
-            error = addRightParenToken(lineno, colno, ch);
-            if (error) { return error; }
+            addNameToken(lineno, colno - 1, text);
+            addRightParenToken(lineno, colno, ch);
             state = State.INIT;
           } else if (ch === "\"") {
-            const error = addNameToken(lineno, colno - 1, text);
-            if (error) { return error; }
+            addNameToken(lineno, colno - 1, text);
             text = ch;
             state = State.STRING;
           } else if (ch === "'") {
-            const error = addNameToken(lineno, colno - 1, text);
-            if (error) { return error; }
+            addNameToken(lineno, colno - 1, text);
             quoteSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 1);
             state = State.QUOTE;
           } else {
@@ -315,14 +326,14 @@ class Lexer implements Stage {
 
         case State.POUND: {
           if (ch.match(QUASI_QUOTE_RE)) {
-            return this.error(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR);
+            throw new LexerError(new StageError(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR));
           } else if (ch.match(/\s/)) {
             if (text.match(TRUE_LITERAL_RE)) {
               addToken(lineno, colno - text.length, TokenType.TRUE, text);
             } else if (text.match(FALSE_LITERAL_RE)) {
               addToken(lineno, colno - text.length, TokenType.FALSE, text);
             } else {
-              return this.error(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text));
+              throw new LexerError(new StageError(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text)));
             }
             state = State.INIT;
           } else if (ch.match(LEFT_PAREN_RE)) {
@@ -331,7 +342,7 @@ class Lexer implements Stage {
             } else if (text.match(FALSE_LITERAL_RE)) {
               addToken(lineno, colno - text.length, TokenType.FALSE, text);
             } else {
-              return this.error(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text));
+              throw new LexerError(new StageError(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text)));
             }
             addLeftParenToken(lineno, colno + 1, ch);
             state = State.INIT;
@@ -341,10 +352,9 @@ class Lexer implements Stage {
             } else if (text.match(FALSE_LITERAL_RE)) {
               addToken(lineno, colno - text.length, TokenType.FALSE, text);
             } else {
-              return this.error(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text));
+              throw new LexerError(new StageError(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text)));
             }
-            const error = addRightParenToken(lineno, colno, ch);
-            if (error) { return error; }
+            addRightParenToken(lineno, colno, ch);
             state = State.INIT;
           } else if (ch === "\"") {
             if (text.match(TRUE_LITERAL_RE)) {
@@ -352,7 +362,7 @@ class Lexer implements Stage {
             } else if (text.match(FALSE_LITERAL_RE)) {
               addToken(lineno, colno - text.length, TokenType.FALSE, text);
             } else {
-              return this.error(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text));
+              throw new LexerError(new StageError(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text)));
             }
             text = ch;
             state = State.STRING;
@@ -362,7 +372,7 @@ class Lexer implements Stage {
             } else if (text.match(FALSE_LITERAL_RE)) {
               addToken(lineno, colno - text.length, TokenType.FALSE, text);
             } else {
-              return this.error(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text));
+              throw new LexerError(new StageError(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text)));
             }
             quoteSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 1);
             state = State.QUOTE;
@@ -376,14 +386,14 @@ class Lexer implements Stage {
           text = ch;
           expectingElementToQuote = true;
           if (ch.match(QUASI_QUOTE_RE)) {
-            return this.error(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR);
+            throw new LexerError(new StageError(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR));
           } else if (ch.match(/\s/)) {
             // skip
           } else if (ch.match(LEFT_PAREN_RE)) {
             addLeftParenToken(lineno, colno, ch);
             state = State.INIT;
           } else if (ch.match(RIGHT_PAREN_RE)) {
-            return this.error(lineno, colno, ch, EXPECT_ELEMENT_FOR_QUOTING_ERR(ch));
+            throw new LexerError(new StageError(lineno, colno, ch, EXPECT_ELEMENT_FOR_QUOTING_ERR(ch)));
           } else if (ch === "\"") {
             state = State.STRING;
           } else if (ch === "#") {
@@ -398,7 +408,7 @@ class Lexer implements Stage {
               state = State.POUND;
             }
           } else if (ch === "'") {
-            return this.error(lineno, colno, text, NESTED_QUOTES_UNSUPPORTED_ERR);
+            throw new LexerError(new StageError(lineno, colno, text, NESTED_QUOTES_UNSUPPORTED_ERR));
           } else if (ch === ";") {
             state = State.LINE_COMMENT;
           } else {
@@ -412,7 +422,7 @@ class Lexer implements Stage {
             addToken(lineno, colno - text.length, TokenType.STRING, text + ch);
             state = State.INIT;
           } else if (ch === "\n") {
-            return this.error(lineno, colno - text.length, text, UNCLOSED_STRING_ERR);
+            throw new LexerError(new StageError(lineno, colno - text.length, text, UNCLOSED_STRING_ERR));
           }
           text += ch;
           break;
@@ -424,8 +434,7 @@ class Lexer implements Stage {
 
     switch (state) {
       case State.NAME: {
-        const error = addNameToken(lineno, colno, text);
-        if (error) { return error; }
+        addNameToken(lineno, colno, text);
         break;
       }
 
@@ -435,30 +444,30 @@ class Lexer implements Stage {
         } else if (text.match(FALSE_LITERAL_RE)) {
           addToken(lineno, colno - text.length, TokenType.FALSE, text);
         } else {
-          return this.error(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text));
+          throw new LexerError(new StageError(lineno, colno - text.length, text, BAD_SYNTAX_ERR(text)));
         }
         break;
       }
 
       case State.QUOTE: {
-        return this.error(lineno, colno - 1, text, EXPECT_ELEMENT_FOR_QUOTING_ERR("end-of-file"));
+        throw new LexerError(new StageError(lineno, colno - 1, text, EXPECT_ELEMENT_FOR_QUOTING_ERR("end-of-file")));
       }
 
       case State.STRING: {
-        return this.error(lineno, colno - text.length, text, UNCLOSED_STRING_ERR);
+        throw new LexerError(new StageError(lineno, colno - text.length, text, UNCLOSED_STRING_ERR));
       }
     }
 
     if (expectingElementToQuote) {
-      return this.error(quoteSourceSpan.startLineno, quoteSourceSpan.startColno, text, EXPECT_ELEMENT_FOR_QUOTING_ERR("end-of-file"));
+      throw new LexerError(new StageError(quoteSourceSpan.startLineno, quoteSourceSpan.startColno, text, EXPECT_ELEMENT_FOR_QUOTING_ERR("end-of-file")));
     }
 
     if (expectingSExprToComment) {
-      return this.error(sexprCommentSourceSpan.startLineno, sexprCommentSourceSpan.startColno, "#;", EXPECT_COMMENTED_OUT_ELEMENT_ERR);
+      throw new LexerError(new StageError(sexprCommentSourceSpan.startLineno, sexprCommentSourceSpan.startColno, "#;", EXPECT_COMMENTED_OUT_ELEMENT_ERR));
     }
 
     if ((opening = parenStack.pop())) {
-      return this.error(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.text, EXPECT_CLOSING_PAREN_ERR(opening.text));
+      throw new LexerError(new StageError(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.text, EXPECT_CLOSING_PAREN_ERR(opening.text)));
     }
 
     for (const sexpr of sexprs) {
