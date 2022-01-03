@@ -95,7 +95,7 @@ class Lexer implements Stage {
     let opening;
     let state = State.INIT;
     let text = "";
-    let lineno = 0;
+    let lineno = 1;
     let colno = 0;
 
     let blockCommentDepth = 0;
