@@ -40,8 +40,8 @@ const EXPECT_CORRECT_CLOSING_PAREN_ERR = (opening: string | null, found: string)
 };
 const EXPECT_ELEMENT_FOR_QUOTING_ERR = (found: string) => `read-syntax: expected an element for quoting "'", but found ${found}`;
 const ILLEGAL_USE_OF_DOT_ERR = "read-syntax: illegal use of `.`";
-const NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes not supported";
-const QUASI_QUOTE_UNSUPPORTED_ERR = "read-syntax: quasiquotes not supported";
+const NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes are not supported";
+const QUASI_QUOTE_UNSUPPORTED_ERR = "read-syntax: quasiquotes are not supported";
 const UNCLOSED_STRING_ERR = "read-syntax: expected a closing `\"`";
 const UNEXPECTED_ERR = (found: string) => `read-syntax: unexpected \`${found}\``;
 
