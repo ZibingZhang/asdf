@@ -99,7 +99,7 @@ class Lexer implements Stage {
     let colno = 0;
 
     let blockCommentDepth = 0;
-    let expectingElementToQuote = false;
+    let expectingElementToQuote = 0;
     let quoteSourceSpan = NO_SOURCE_SPAN;
     let sexprCommentSourceSpan = NO_SOURCE_SPAN;
     let expectingSExprToComment = false;
@@ -124,6 +124,7 @@ class Lexer implements Stage {
               sexpr.sourceSpan.endColno
             )
           );
+          expectingElementToQuote--;
         }
         if (sexprStack.length === 0) {
           sexprs.push(sexpr);
@@ -132,7 +133,6 @@ class Lexer implements Stage {
         }
       }
       text = "";
-      expectingElementToQuote = false;
     };
     const addNameToken = (lineno: number, colno: number, text: string) => {
       if (text === ".") {
@@ -154,11 +154,13 @@ class Lexer implements Stage {
       }
     };
     const addLeftParenToken = (lineno: number, colno: number, paren: string) => {
+      expectingElementToQuote--;
       sexprStack.push([]);
       parenStack.push(new Token(TokenType.LEFT_PAREN, paren, new SourceSpan(lineno, colno, lineno, colno + 1)));
       text = "";
     };
     const addRightParenToken = (lineno: number, colno: number, paren: string) => {
+      expectingElementToQuote++;
       if (parenStack.length === 0) {
         throw new LexerError(new SourceSpan(lineno, colno, lineno, colno + 1), UNEXPECTED_ERR(paren));
       } else if (!this.matches((opening = parenStack.pop() || NO_TOKEN).text, paren)) {
@@ -206,7 +208,7 @@ class Lexer implements Stage {
           }
         }
         text = "";
-        expectingElementToQuote = false;
+        expectingElementToQuote--;
       }
     };
 
@@ -388,7 +390,7 @@ class Lexer implements Stage {
 
         case State.QUOTE: {
           text = ch;
-          expectingElementToQuote = true;
+          expectingElementToQuote++;
           if (ch.match(QUASI_QUOTE_RE)) {
             throw new LexerError(new SourceSpan(lineno, colno, lineno, colno + 1), QUASI_QUOTE_UNSUPPORTED_ERR);
           } else if (ch.match(/\s/)) {
@@ -473,6 +475,8 @@ class Lexer implements Stage {
     if ((opening = parenStack.pop())) {
       throw new LexerError(new SourceSpan(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.sourceSpan.startLineno, opening.sourceSpan.startColno + 1), EXPECTED_CLOSING_PAREN_ERR(opening.text));
     }
+
+    console.log(JSON.stringify(sexprs, null, 2));
 
     return sexprs;
   }
