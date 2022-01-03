@@ -19,7 +19,7 @@ const DIV_BY_ZERO_RE = /^[+-]?\d+\/0+$/;
 
 const BAD_SYNTAX_ERR = (syntax: string) => `read-syntax: bad syntax \`${syntax}\``;
 const DIV_BY_ZERO_ERR = (number: string) => `read-syntax: division by zero in \`${number}\``;
-const EXPECT_CLOSING_PAREN_ERR = (opening: string) => {
+const EXPECTED_CLOSING_PAREN_ERR = (opening: string) => {
   if (opening === "(") {
     return "read-syntax: expected a `)` to close preceding `(`";
   } else if (opening === "[") {
@@ -28,8 +28,8 @@ const EXPECT_CLOSING_PAREN_ERR = (opening: string) => {
     return "read-syntax: expected a `}` to close preceding `{`";
   }
 };
-const EXPECT_COMMENTED_OUT_ELEMENT_ERR = "read-syntax: expected a commented-out element for `#;`, but found end-of-file";
-const EXPECT_CORRECT_CLOSING_PAREN_ERR = (opening: string | null, found: string): string => {
+const EXPECTED_COMMENTED_OUT_ELEMENT_ERR = "read-syntax: expected a commented-out element for `#;`, but found end-of-file";
+const EXPECTED_CORRECT_CLOSING_PAREN_ERR = (opening: string | null, found: string): string => {
   if (opening === "(") {
     return `read-syntax: expected \`)\` to close preceding \`(\`, found instead \`${found}\``;
   } else if (opening === "[") {
@@ -38,7 +38,7 @@ const EXPECT_CORRECT_CLOSING_PAREN_ERR = (opening: string | null, found: string)
     return `read-syntax: expected \`}\` to close preceding \`{\`, found instead \`${found}\``;
   }
 };
-const EXPECT_ELEMENT_FOR_QUOTING_ERR = (found: string) => `read-syntax: expected an element for quoting "'", but found ${found}`;
+const EXPECTED_ELEMENT_FOR_QUOTING_ERR = (found: string) => `read-syntax: expected an element for quoting "'", but found ${found}`;
 const ILLEGAL_USE_OF_DOT_ERR = "read-syntax: illegal use of `.`";
 const NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes are not supported";
 const QUASI_QUOTE_UNSUPPORTED_ERR = "read-syntax: quasiquotes are not supported";
@@ -158,7 +158,7 @@ class Lexer implements Stage {
       if (parenStack.length === 0) {
         throw new LexerError(new StageError(lineno, colno, paren, UNEXPECTED_ERR(paren)));
       } else if (!this.matches((opening = parenStack.pop() || NO_TOKEN).text, paren)) {
-        throw new LexerError(new StageError(lineno, colno, paren, EXPECT_CORRECT_CLOSING_PAREN_ERR(opening?.text, paren)));
+        throw new LexerError(new StageError(lineno, colno, paren, EXPECTED_CORRECT_CLOSING_PAREN_ERR(opening?.text, paren)));
       } else {
         let sexpr: SExpr = new ListSExpr(
           sexprStack.pop() || [],
@@ -393,7 +393,7 @@ class Lexer implements Stage {
             addLeftParenToken(lineno, colno, ch);
             state = State.INIT;
           } else if (ch.match(RIGHT_PAREN_RE)) {
-            throw new LexerError(new StageError(lineno, colno, ch, EXPECT_ELEMENT_FOR_QUOTING_ERR(ch)));
+            throw new LexerError(new StageError(lineno, colno, ch, EXPECTED_ELEMENT_FOR_QUOTING_ERR(ch)));
           } else if (ch === "\"") {
             state = State.STRING;
           } else if (ch === "#") {
@@ -450,7 +450,7 @@ class Lexer implements Stage {
       }
 
       case State.QUOTE: {
-        throw new LexerError(new StageError(lineno, colno - 1, text, EXPECT_ELEMENT_FOR_QUOTING_ERR("end-of-file")));
+        throw new LexerError(new StageError(lineno, colno - 1, text, EXPECTED_ELEMENT_FOR_QUOTING_ERR("end-of-file")));
       }
 
       case State.STRING: {
@@ -459,15 +459,15 @@ class Lexer implements Stage {
     }
 
     if (expectingElementToQuote) {
-      throw new LexerError(new StageError(quoteSourceSpan.startLineno, quoteSourceSpan.startColno, text, EXPECT_ELEMENT_FOR_QUOTING_ERR("end-of-file")));
+      throw new LexerError(new StageError(quoteSourceSpan.startLineno, quoteSourceSpan.startColno, text, EXPECTED_ELEMENT_FOR_QUOTING_ERR("end-of-file")));
     }
 
     if (expectingSExprToComment) {
-      throw new LexerError(new StageError(sexprCommentSourceSpan.startLineno, sexprCommentSourceSpan.startColno, "#;", EXPECT_COMMENTED_OUT_ELEMENT_ERR));
+      throw new LexerError(new StageError(sexprCommentSourceSpan.startLineno, sexprCommentSourceSpan.startColno, "#;", EXPECTED_COMMENTED_OUT_ELEMENT_ERR));
     }
 
     if ((opening = parenStack.pop())) {
-      throw new LexerError(new StageError(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.text, EXPECT_CLOSING_PAREN_ERR(opening.text)));
+      throw new LexerError(new StageError(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.text, EXPECTED_CLOSING_PAREN_ERR(opening.text)));
     }
 
     return sexprs;
