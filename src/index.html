@@ -86,7 +86,8 @@
             resetRepl();
             if (result.errors.length > 0) {
               for (const error of result.errors) {
-                appendToRepl(error.msg);
+                const location = `${error.sourcespan.startLineno}:${error.sourcespan.startColno}`;
+                appendToRepl(`[${location}] ${error.msg}`);
               }
             } else {
               for (const text of result.output) {
