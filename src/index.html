@@ -82,6 +82,7 @@
             const result = window.pipelines.evaluateProgram.run(editor.getValue());
             if (result.errors.length > 0) {
               for (const error of result.errors) {
+                console.log(error);
                 appendToRepl(error.msg);
               }
             } else {
