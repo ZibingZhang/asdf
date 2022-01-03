@@ -17,8 +17,12 @@ const RATIONAL_RE = /^[+-]?\d+\/\d+$/;
 const DECIMAL_RE = /^[+-]?\d*\.\d+$/;
 const DIV_BY_ZERO_RE = /^[+-]?\d+\/0+$/;
 
-const BAD_SYNTAX_ERR = (syntax: string) => `read-syntax: bad syntax \`${syntax}\``;
-const DIV_BY_ZERO_ERR = (number: string) => `read-syntax: division by zero in \`${number}\``;
+const BAD_SYNTAX_ERR = (syntax: string) => {
+  return `read-syntax: bad syntax \`${syntax}\``;
+};
+const DIV_BY_ZERO_ERR = (number: string) => {
+  return `read-syntax: division by zero in \`${number}\``;
+};
 const EXPECTED_CLOSING_PAREN_ERR = (opening: string) => {
   if (opening === "(") {
     return "read-syntax: expected a `)` to close preceding `(`";
@@ -38,12 +42,16 @@ const EXPECTED_CORRECT_CLOSING_PAREN_ERR = (opening: string | null, found: strin
     return `read-syntax: expected \`}\` to close preceding \`{\`, found instead \`${found}\``;
   }
 };
-const EXPECTED_ELEMENT_FOR_QUOTING_ERR = (found: string) => `read-syntax: expected an element for quoting "'", but found ${found}`;
+const EXPECTED_ELEMENT_FOR_QUOTING_ERR = (found: string) => {
+  return `read-syntax: expected an element for quoting "'", but found ${found}`;
+};
 const ILLEGAL_USE_OF_DOT_ERR = "read-syntax: illegal use of `.`";
 const NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes are not supported";
 const QUASI_QUOTE_UNSUPPORTED_ERR = "read-syntax: quasiquotes are not supported";
 const UNCLOSED_STRING_ERR = "read-syntax: expected a closing `\"`";
-const UNEXPECTED_ERR = (found: string) => `read-syntax: unexpected \`${found}\``;
+const UNEXPECTED_ERR = (found: string) => {
+  return `read-syntax: unexpected \`${found}\``;
+};
 
 enum State {
   INIT,
