@@ -9,7 +9,7 @@ export {
 // https://stackoverflow.com/questions/17445231/js-how-to-find-the-greatest-common-divisor
 function gcd(a: bigint, b: bigint): bigint {
   if (!b) {
-     return a;
+    return a;
   }
   return gcd(b, a % b);
 }

@@ -8,10 +8,10 @@ function prettyPrint(any) {
     JSON.stringify(
       any,
       (_, value) =>
-        typeof value === 'bigint'
-            ? value.toString()
-            : value /* return everything else unchanged */,
+        typeof value === "bigint"
+          ? value.toString()
+          : value /* return everything else unchanged */,
       2
     )
   );
-};
+}
