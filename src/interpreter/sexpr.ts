@@ -1,3 +1,4 @@
+import { SourceSpan } from "./sourcespan.js";
 import { Token } from "./token.js";
 
 export {
@@ -6,12 +7,24 @@ export {
   SExpr
 };
 
-interface SExpr {}
-
-class AtomSExpr implements SExpr {
-  constructor(readonly token: Token) {}
+class SExpr {
+  constructor(readonly sourceSpan: SourceSpan) {}
 }
 
-class ListSExpr implements SExpr {
-  constructor(readonly tokens: SExpr[]) {}
+class AtomSExpr extends SExpr {
+  constructor(
+    readonly token: Token,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+}
+
+class ListSExpr extends SExpr {
+  constructor(
+    readonly tokens: SExpr[],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
 }
