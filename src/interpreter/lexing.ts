@@ -101,7 +101,7 @@ class Lexer implements Stage {
     let expectingSExprToComment = false;
 
     const addToken = (lineno: number, colno: number, type: TokenType, text: string) => {
-      let token = new Token(type, text, new SourceSpan(lineno, colno, lineno, colno + text.length));
+      const token = new Token(type, text, new SourceSpan(lineno, colno, lineno, colno + text.length));
       let sexpr: SExpr = new AtomSExpr(token, token.sourceSpan);
       if (expectingSExprToComment) {
         expectingSExprToComment = false;
@@ -300,22 +300,22 @@ class Lexer implements Stage {
           if (ch.match(QUASI_QUOTE_RE)) {
             throw new LexerError(new StageError(lineno, colno, ch, QUASI_QUOTE_UNSUPPORTED_ERR));
           } else if (ch.match(/\s/)) {
-            addNameToken(lineno, colno - 1, text);
+            addNameToken(lineno, colno - text.length, text);
             state = State.INIT;
           } else if (ch.match(LEFT_PAREN_RE)) {
-            addNameToken(lineno, colno - 1, text);
+            addNameToken(lineno, colno - text.length, text);
             addLeftParenToken(lineno, colno, ch);
             state = State.INIT;
           } else if (ch.match(RIGHT_PAREN_RE)) {
-            addNameToken(lineno, colno - 1, text);
+            addNameToken(lineno, colno - text.length, text);
             addRightParenToken(lineno, colno, ch);
             state = State.INIT;
           } else if (ch === "\"") {
-            addNameToken(lineno, colno - 1, text);
+            addNameToken(lineno, colno - text.length, text);
             text = ch;
             state = State.STRING;
           } else if (ch === "'") {
-            addNameToken(lineno, colno - 1, text);
+            addNameToken(lineno, colno - text.length, text);
             quoteSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 1);
             state = State.QUOTE;
           } else {
@@ -434,7 +434,7 @@ class Lexer implements Stage {
 
     switch (state) {
       case State.NAME: {
-        addNameToken(lineno, colno, text);
+        addNameToken(lineno, colno - text.length, text);
         break;
       }
 
@@ -475,10 +475,6 @@ class Lexer implements Stage {
     }
 
     return new StageOutput(sexprs);
-  }
-
-  private error(lineno: number, colno: number, text: string, msg: string): StageOutput {
-    return new StageOutput(null, [new StageError(lineno, colno, text, msg)]);
   }
 
   private matches(left: string | undefined, right: string): boolean {
