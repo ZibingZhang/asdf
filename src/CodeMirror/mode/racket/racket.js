@@ -12,7 +12,7 @@ CodeMirror.defineMode("racket", function (config) {
   let untilDelimiter = /^[^\s\"'\(\[{\)\]};`,]*/;
   let openBrackets = "([{";
   let closeBrackets = ")]}";
-  let booleanLiteral = /^(t|true|f|false)$/;
+  let booleanLiteral = /^(T|t|true|F|f|false)$/;
   let specialForm = /^(and|check-expect|check-random|check-within|check-member-of|check-range|check-satisfied|check-error|cond|define|define-struct|if|lambda|or|quote|require)$/;
   let numLiteral = /^[+\-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
 

@@ -10,8 +10,8 @@ export {
 const LEFT_PAREN_RE = /^[([{]$/;
 const RIGHT_PAREN_RE = /^[)\]}]$/;
 const QUASI_QUOTE_RE = /^[`,]$/;
-const TRUE_LITERAL_RE = /^#(t|true)$/;
-const FALSE_LITERAL_RE = /^#(f|false)$/;
+const TRUE_LITERAL_RE = /^#(T|t|true)$/;
+const FALSE_LITERAL_RE = /^#(F|f|false)$/;
 const INTEGER_RE = /^[+-]?\d+\.?$/;
 const RATIONAL_RE = /^[+-]?\d+\/\d+$/;
 const DECIMAL_RE = /^[+-]?\d*\.\d+$/;
@@ -29,7 +29,7 @@ const EXPECT_CLOSING_PAREN_ERR = (opening: string) => {
   }
 };
 const EXPECT_COMMENTED_OUT_ELEMENT_ERR = "read-syntax: expected a commented-out element for `#;`, but found end-of-file";
-const EXPECT_CORRECT_CLOSING_PAREN_ERR = (opening: string | undefined, found: string): string => {
+const EXPECT_CORRECT_CLOSING_PAREN_ERR = (opening: string | null, found: string): string => {
   if (opening === "(") {
     return `read-syntax: expected \`)\` to close preceding \`(\`, found instead \`${found}\``;
   } else if (opening === "[") {
@@ -75,14 +75,14 @@ class Lexer implements Stage {
       if (e instanceof LexerError) {
         return new StageOutput(null, [e.stageError]);
       } else {
-        throw "Unhandled exception";
+        throw e;
       }
     }
   }
 
-  private runHelper(input: string): SExpr[] {
+  private runHelper(rawInput: string): SExpr[] {
     this.position = 0;
-    this.input = input;
+    this.input = rawInput;
     this.isAtEnd = this.input.length === 0;
 
     const sexprs: SExpr[] = [];
@@ -473,7 +473,7 @@ class Lexer implements Stage {
     return sexprs;
   }
 
-  private matches(left: string | undefined, right: string): boolean {
+  private matches(left: string | null, right: string): boolean {
     switch (left) {
       case "(": return right === ")";
       case "[": return right === "]";

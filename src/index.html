@@ -64,6 +64,9 @@
     const editorTextArea = document.getElementById("editor");
     const replTextArea = document.getElementById("repl");
 
+    const resetRepl = () => {
+      repl.setValue("> ");
+    }
     const appendToRepl = (text) => {
       repl.setValue(`${repl.getValue()}${text}\n> `);
     };
@@ -80,13 +83,15 @@
         extraKeys: {
           "Alt-Enter": () => {
             const result = window.pipelines.evaluateProgram.run(editor.getValue());
+            resetRepl();
             if (result.errors.length > 0) {
               for (const error of result.errors) {
-                console.log(error);
                 appendToRepl(error.msg);
               }
             } else {
-              appendToRepl(result.output);
+              for (const text of result.output) {
+                appendToRepl(text);
+              }
             }
           }
         }

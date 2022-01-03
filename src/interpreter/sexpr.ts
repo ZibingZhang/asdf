@@ -4,7 +4,9 @@ import { Token } from "./token.js";
 export {
   AtomSExpr,
   ListSExpr,
-  SExpr
+  SExpr,
+  isAtomSExpr,
+  isListSExpr
 };
 
 class SExpr {
@@ -27,4 +29,12 @@ class ListSExpr extends SExpr {
   ) {
     super(sourceSpan);
   }
+}
+
+function isAtomSExpr(sexpr: SExpr): sexpr is AtomSExpr {
+  return sexpr instanceof AtomSExpr;
+}
+
+function isListSExpr(sexpr: SExpr): sexpr is ListSExpr {
+  return sexpr instanceof ListSExpr;
 }
