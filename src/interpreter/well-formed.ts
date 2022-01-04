@@ -228,7 +228,8 @@ class WellFormedProgram implements Stage {
       this.scope.add(name);
     }
     try {
-      return new StageOutput(this.runHelper(input.output));
+      this.wellFormedProgram(input.output);
+      return input;
     } catch (e) {
       if (e instanceof StageError) {
         return new StageOutput(null, [e]);
@@ -238,18 +239,22 @@ class WellFormedProgram implements Stage {
     }
   }
 
-  private runHelper(program: Program): Program {
+  private wellFormedProgram(program: Program) {
     for (const expr of program.exprs) {
-      if (expr instanceof VariableNode) {
-        if (!this.scope.contains(expr.name.token.text)) {
-          throw new StageError(SC_UNDEFINED_VARIABLE(expr.name.token.text), expr.sourceSpan);
-        }
-      } else if (expr instanceof FunAppNode) {
-        if (!this.scope.contains(expr.fn.name.token.text)) {
-          throw new StageError(SC_UNDEFINED_VARIABLE(expr.fn.name.token.text), expr.fn.sourceSpan);
-        }
-      }
+      this.wellFormedNode(expr);
     }
-    return program;
+  }
+
+  private wellFormedNode(expr: ASTNode) {
+    if (expr instanceof VariableNode) {
+      if (!this.scope.contains(expr.name.token.text)) {
+        throw new StageError(SC_UNDEFINED_VARIABLE(expr.name.token.text), expr.sourceSpan);
+      }
+    } else if (expr instanceof FunAppNode) {
+      if (!this.scope.contains(expr.fn.name.token.text)) {
+        throw new StageError(SC_UNDEFINED_VARIABLE(expr.fn.name.token.text), expr.fn.sourceSpan);
+      }
+      expr.args.forEach(arg => this.wellFormedNode(arg));
+    }
   }
 }
