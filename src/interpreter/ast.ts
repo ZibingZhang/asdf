@@ -1,5 +1,19 @@
-import { BASE_ENVIRONMENT, Environment } from "./environment.js";
-import { RVal } from "./value.js";
+import {
+  Environment
+} from "./environment.js";
+import {
+  FC_EXPECTED_FUNCTION_ERR
+} from "./error.js";
+import {
+  StageError
+} from "./pipeline.js";
+import {
+  isRCallable,
+  RVal
+} from "./rvalue.js";
+import {
+  NO_SOURCE_SPAN
+} from "./sourcespan.js";
 
 export {
   ASTNode,
@@ -25,7 +39,12 @@ class FunAppNode implements ASTNode {
     readonly args: ASTNode[]
   ) {}
 
-  eval(env: Environment) {
-    return env.get(this.name);
+  eval(env: Environment): RVal {
+    const rval = env.get(this.name);
+    if (isRCallable(rval)) {
+      return rval.eval(env, this.args.map(node => node.eval(env)));
+    } else {
+      throw new StageError(FC_EXPECTED_FUNCTION_ERR("variable"), NO_SOURCE_SPAN);
+    }
   }
 }

@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { SourceSpan } from "./sourcespan.js";
+import {
+  SourceSpan
+} from "./sourcespan.js";
 
 export {
   Pipeline,
@@ -8,10 +10,11 @@ export {
   StageError,
   StageOutput
 };
+
 class StageError extends Error {
   constructor(
-    readonly sourcespan: SourceSpan,
-    readonly msg: string
+    readonly msg: string,
+    readonly sourcespan: SourceSpan
   ) {
     super(msg);
   }

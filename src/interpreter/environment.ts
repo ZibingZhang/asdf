@@ -1,7 +1,13 @@
-import { RVal } from "./value";
+import {
+  RPlus
+} from "./primitive.js";
+import {
+  isRNum,
+  RVal
+} from "./rvalue.js";
 
 export {
-  BASE_ENVIRONMENT,
+  PRIMITIVE_ENVIRONMENT,
   Environment
 };
 
@@ -21,11 +27,13 @@ class Environment {
     if (val) {
       return val;
     } else if (!this.parentEnv) {
-      throw "Illegal state";
+      throw "illegal state: name not in environment";
     } else {
       return this.parentEnv.get(name);
     }
   }
 }
 
-const BASE_ENVIRONMENT = new Environment();
+const PRIMITIVE_ENVIRONMENT = new Environment();
+
+PRIMITIVE_ENVIRONMENT.set("+", new RPlus("+", 2, "number", isRNum));

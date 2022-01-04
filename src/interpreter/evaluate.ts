@@ -1,32 +1,35 @@
-import { BASE_ENVIRONMENT, Environment } from "./environment.js";
-import { Stage, StageError, StageOutput } from "./pipeline.js";
-import { Program } from "./program.js";
+import {
+  Environment,
+  PRIMITIVE_ENVIRONMENT
+} from "./environment.js";
+import {
+  Stage,
+  StageError,
+  StageOutput
+} from "./pipeline.js";
+import {
+  Program
+} from "./program.js";
 
 export {
   EvaluateProgram
 };
 
-class EvaluateError extends Error {
-  constructor(readonly stageError: StageError) {
-    super(stageError.msg);
-  }
-}
-
 class EvaluateProgram implements Stage {
   private env: Environment;
 
   constructor() {
-    this.env = BASE_ENVIRONMENT;
+    this.env = PRIMITIVE_ENVIRONMENT;
   }
 
   run(input: StageOutput): StageOutput {
-    this.env = BASE_ENVIRONMENT;
+    this.env = PRIMITIVE_ENVIRONMENT;
 
     try {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
-      if (e instanceof EvaluateError) {
-        return new StageOutput(null, [e.stageError]);
+      if (e instanceof StageError) {
+        return new StageOutput(null, [e]);
       } else {
         throw e;
       }

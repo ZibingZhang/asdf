@@ -1,7 +1,16 @@
-import { EvaluateProgram } from "./evaluate.js";
-import { Lexer } from "./lexing.js";
-import { Pipeline } from "./pipeline.js";
-import { WellFormedProgram, WellFormedSyntax } from "./wellformed.js";
+import {
+  EvaluateProgram
+} from "./evaluate.js";
+import {
+  Lexer
+} from "./lexing.js";
+import {
+  Pipeline
+} from "./pipeline.js";
+import {
+  WellFormedProgram,
+  WellFormedSyntax
+} from "./well-formed.js";
 
 declare global {
   interface Window {

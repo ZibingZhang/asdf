@@ -1,9 +1,13 @@
-import { NO_SOURCE_SPAN, SourceSpan } from "./sourcespan.js";
+import {
+  NO_SOURCE_SPAN,
+  SourceSpan
+} from "./sourcespan.js";
 
 export {
   NO_TOKEN,
   Token,
-  TokenType
+  TokenType,
+  tokenTypeName
 };
 
 enum TokenType {
@@ -29,3 +33,17 @@ class Token {
 }
 
 const NO_TOKEN = new Token(TokenType.NONE, "", NO_SOURCE_SPAN);
+
+function tokenTypeName(type: TokenType): string {
+  switch (type) {
+    case TokenType.TRUE:
+    case TokenType.FALSE:
+      return "boolean"
+    case TokenType.INTEGER:
+    case TokenType.RATIONAL:
+    case TokenType.DECIMAL:
+      return "number";
+    default:
+      throw "illegal state: unsupported token type";
+  }
+}

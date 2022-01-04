@@ -1,28 +1,50 @@
-import { ASTNode, AtomNode, FunAppNode } from "./ast.js";
-import { prettyPrint } from "./dev-utils.js";
-import { Stage, StageError, StageOutput } from "./pipeline.js";
-import { Program } from "./program.js";
-import { isAtomSExpr, isListSExpr, SExpr } from "./sexpr.js";
-import { TokenType } from "./token.js";
-import { RBool, RNum, RString } from "./value.js";
+import {
+  ASTNode,
+  AtomNode,
+  FunAppNode
+} from "./ast.js";
+import {
+  prettyPrint
+} from "./dev-utils.js";
+import {
+  Stage,
+  StageError,
+  StageOutput
+} from "./pipeline.js";
+import {
+  Program
+} from "./program.js";
+import {
+  isAtomSExpr,
+  SExpr
+} from "./sexpr.js";
+import {
+  TokenType,
+  tokenTypeName
+} from "./token.js";
+import {
+  RBool,
+  RNum,
+  RString,
+  RSymbol,
+  R_EMPTY_LIST
+} from "./rvalue.js";
+import {
+  FC_EXPECTED_FUNCTION_ERR,
+  Q_EXPECTED_POST_QUOTE_ERR
+} from "./error.js";
 
 export {
   WellFormedSyntax,
   WellFormedProgram
 };
 
-const EXPECTED_FUNCTION = (found: string | null) => {
-  return `function call: expected a function after the open parenthesis, but ${found ? `a ${found}` : "nothing's there"}`;
-};
-
-class WellFormedError extends StageError {}
-
 class WellFormedSyntax implements Stage {
   run(input: StageOutput): StageOutput {
     try {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
-      if (e instanceof WellFormedError) {
+      if (e instanceof StageError) {
         return new StageOutput(null, [e]);
       } else {
         throw e;
@@ -70,20 +92,38 @@ class WellFormedSyntax implements Stage {
         default:
           throw "something?";
       }
-    } else if (isListSExpr(sexpr)) {
-      if (sexpr.tokens.length === 0) {
-        throw new WellFormedError(sexpr.sourceSpan, EXPECTED_FUNCTION(null));
-      }
-      const name = sexpr.tokens.shift();
-      if (!name) {
-        throw "some other sorta error";
-      } else if (isAtomSExpr(name)) {
-        return new FunAppNode(name.token.text, sexpr.tokens.map(token => this.toNode(token)));
+    } else {
+      const leadingSExpr = sexpr.tokens[0];
+      if (!leadingSExpr) {
+        throw new StageError(FC_EXPECTED_FUNCTION_ERR(null), sexpr.sourceSpan);
+      } else if (isAtomSExpr(leadingSExpr) && leadingSExpr.token.type === TokenType.NAME) {
+        if (leadingSExpr.token.text === "quote") {
+          return this.toQuoteNode(sexpr, sexpr.tokens[1]);
+        } else {
+          return new FunAppNode(leadingSExpr.token.text, sexpr.tokens.slice(1).map(token => this.toNode(token)));
+        }
+      } else if (isAtomSExpr(leadingSExpr)) {
+        throw new StageError(FC_EXPECTED_FUNCTION_ERR(tokenTypeName(leadingSExpr.token.type)), sexpr.sourceSpan);
       } else {
-        throw "some sorta error";
+        throw new StageError(FC_EXPECTED_FUNCTION_ERR("part"), sexpr.sourceSpan);
+      }
+    }
+  }
+
+  private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): ASTNode {
+    if (isAtomSExpr(quotedSexpr)) {
+      if (quotedSexpr.token.type === TokenType.NAME) {
+        return new AtomNode(new RSymbol(quotedSexpr.token.text));
+      } else {
+        throw new StageError(Q_EXPECTED_POST_QUOTE_ERR(tokenTypeName(quotedSexpr.token.type)), sexpr.sourceSpan);
       }
     } else {
-      throw "Illegal state";
+      if (quotedSexpr.tokens.length > 0) {
+        console.log(quotedSexpr);
+        throw new StageError(Q_EXPECTED_POST_QUOTE_ERR("part"), sexpr.sourceSpan, );
+      } else {
+        return new AtomNode(R_EMPTY_LIST);
+      }
     }
   }
 }
@@ -93,7 +133,7 @@ class WellFormedProgram implements Stage {
     try {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
-      if (e instanceof WellFormedError) {
+      if (e instanceof StageError) {
         return new StageOutput(null, [e]);
       } else {
         throw e;

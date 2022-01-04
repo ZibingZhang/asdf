@@ -1,4 +1,6 @@
-import { ASTNode } from "./ast";
+import {
+  ASTNode
+} from "./ast";
 
 export {
   Program
