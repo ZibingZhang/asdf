@@ -5,6 +5,8 @@ import {
   RPlus
 } from "./primitive.js";
 import {
+  RData,
+  RNumber,
   RPrimFun,
   RPrimFunConfig,
   RValue
@@ -36,15 +38,25 @@ class Environment {
       return this.parentEnv.get(name);
     }
   }
+
+  names(): IterableIterator<string> {
+    return this.map.keys();
+  }
 }
 
 const PRIMITIVE_ENVIRONMENT = new Environment();
 
-function addToPrimEnv(name: string, cls: typeof RPrimFun, config: RPrimFunConfig) {
+function addFnToPrimEnv(name: string, cls: typeof RPrimFun, config: RPrimFunConfig) {
   PRIMITIVE_ENVIRONMENT.set(name, new cls(name, config));
 }
+function addVarToPrimEnv(name: string, val: RData) {
+  PRIMITIVE_ENVIRONMENT.set(name, val);
+}
 
-addToPrimEnv("/", RDivide, { minArity: 2, allArgsTypeName: "number" });
-addToPrimEnv("-", RMinus, { minArity: 1, allArgsTypeName: "number" });
-addToPrimEnv("*", RMultiply, { minArity: 2, allArgsTypeName: "number" });
-addToPrimEnv("+", RPlus, { minArity: 2, allArgsTypeName: "number" });
+addFnToPrimEnv("/", RDivide, { minArity: 2, allArgsTypeName: "number" });
+addFnToPrimEnv("-", RMinus, { minArity: 1, allArgsTypeName: "number" });
+addFnToPrimEnv("*", RMultiply, { minArity: 2, allArgsTypeName: "number" });
+addFnToPrimEnv("+", RPlus, { minArity: 2, allArgsTypeName: "number" });
+
+addVarToPrimEnv("e", new RNumber(6121026514868073n, 2251799813685248n));
+addVarToPrimEnv("pi", new RNumber(884279719003555n, 281474976710656n));

@@ -1,7 +1,10 @@
 import {
+  AndNode,
   ASTNode,
   AtomNode,
-  FunAppNode
+  FunAppNode,
+  OrNode,
+  VariableNode
 } from "./ast.js";
 import {
   prettyPrint
@@ -26,15 +29,17 @@ import {
   RNumber,
   RString,
   RSymbol,
-  RVariable,
   R_EMPTY_LIST,
   R_FALSE,
   R_TRUE
 } from "./rvalue.js";
 import {
+  FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
-  Q_EXPECTED_POST_QUOTE_ERR
+  QU_EXPECTED_POST_QUOTE_ERR,
+  SC_UNDEFINED_VARIABLE
 } from "./error.js";
+import { PRIMITIVE_ENVIRONMENT } from "./environment.js";
 
 export {
   WellFormedSyntax,
@@ -109,6 +114,9 @@ class WellFormedSyntax implements Stage {
             sexpr.sourceSpan
           );
         }
+        case TokenType.NAME: {
+          return new VariableNode(sexpr);
+        }
         default:
           throw "something?";
       }
@@ -117,17 +125,43 @@ class WellFormedSyntax implements Stage {
       if (!leadingSExpr) {
         throw new StageError(FC_EXPECTED_FUNCTION_ERR(null), sexpr.sourceSpan);
       } else if (isAtomSExpr(leadingSExpr) && leadingSExpr.token.type === TokenType.NAME) {
-        if (leadingSExpr.token.text === "quote") {
-          return this.toQuoteNode(sexpr, sexpr.tokens[1]);
-        } else {
-          return new FunAppNode(
-            new AtomNode(
-              new RVariable(leadingSExpr.token.text),
-              leadingSExpr.sourceSpan
-            ),
-            sexpr.tokens.slice(1).map(token => this.toNode(token)),
-            sexpr.sourceSpan
-          );
+        switch (leadingSExpr.token.text) {
+          case "quote": {
+            return this.toQuoteNode(sexpr, sexpr.tokens[1]);
+          }
+          case "and": {
+            if (sexpr.tokens.length - 1 < 2) {
+              throw new StageError(
+                FA_MIN_ARITY_ERR("and", 2, sexpr.tokens.length - 1),
+                leadingSExpr.sourceSpan
+              );
+            }
+            return new AndNode(
+              leadingSExpr.sourceSpan,
+              sexpr.tokens.slice(1).map(token => this.toNode(token)),
+              sexpr.sourceSpan
+            );
+          }
+          case "or": {
+            if (sexpr.tokens.length - 1 < 2) {
+              throw new StageError(
+                FA_MIN_ARITY_ERR("or", 2, sexpr.tokens.length - 1),
+                leadingSExpr.sourceSpan
+              );
+            }
+            return new OrNode(
+              leadingSExpr.sourceSpan,
+              sexpr.tokens.slice(1).map(token => this.toNode(token)),
+              sexpr.sourceSpan
+            );
+          }
+          default: {
+            return new FunAppNode(
+              new VariableNode(leadingSExpr),
+              sexpr.tokens.slice(1).map(token => this.toNode(token)),
+              sexpr.sourceSpan
+            );
+          }
         }
       } else if (isAtomSExpr(leadingSExpr)) {
         throw new StageError(
@@ -152,15 +186,14 @@ class WellFormedSyntax implements Stage {
         );
       } else {
         throw new StageError(
-          Q_EXPECTED_POST_QUOTE_ERR(tokenTypeName(quotedSexpr.token.type)),
+          QU_EXPECTED_POST_QUOTE_ERR(tokenTypeName(quotedSexpr.token.type)),
           sexpr.sourceSpan
         );
       }
     } else {
       if (quotedSexpr.tokens.length > 0) {
-        console.log(quotedSexpr);
         throw new StageError(
-          Q_EXPECTED_POST_QUOTE_ERR("part"),
+          QU_EXPECTED_POST_QUOTE_ERR("part"),
           sexpr.sourceSpan
         );
       } else {
@@ -173,8 +206,27 @@ class WellFormedSyntax implements Stage {
   }
 }
 
+class Scope {
+  names: Set<string> = new Set();
+
+  constructor(readonly parentScope: Scope | false = false) {}
+
+  add(name: string) {
+    this.names.add(name);
+  }
+
+  contains(name: string): boolean {
+    return this.names.has(name) || (this.parentScope && this.parentScope.contains(name));
+  }
+}
+
 class WellFormedProgram implements Stage {
+  scope: Scope = new Scope();
+
   run(input: StageOutput): StageOutput {
+    for (const name of PRIMITIVE_ENVIRONMENT.names()) {
+      this.scope.add(name);
+    }
     try {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
@@ -187,6 +239,17 @@ class WellFormedProgram implements Stage {
   }
 
   private runHelper(program: Program): Program {
+    for (const expr of program.exprs) {
+      if (expr instanceof VariableNode) {
+        if (!this.scope.contains(expr.name.token.text)) {
+          throw new StageError(SC_UNDEFINED_VARIABLE(expr.name.token.text), expr.sourceSpan);
+        }
+      } else if (expr instanceof FunAppNode) {
+        if (!this.scope.contains(expr.fn.name.token.text)) {
+          throw new StageError(SC_UNDEFINED_VARIABLE(expr.fn.name.token.text), expr.fn.sourceSpan);
+        }
+      }
+    }
     return program;
   }
 }

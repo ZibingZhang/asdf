@@ -6,8 +6,9 @@ export {
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
+  FA_QUESTION_NOT_BOOL,
   FC_EXPECTED_FUNCTION_ERR,
-  Q_EXPECTED_POST_QUOTE_ERR,
+  QU_EXPECTED_POST_QUOTE_ERR,
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
@@ -18,7 +19,9 @@ export {
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
   RS_UNCLOSED_STRING_ERR,
-  RS_UNEXPECTED_ERR
+  RS_UNEXPECTED_ERR,
+  SC_UNDEFINED_FUNCTION,
+  SC_UNDEFINED_VARIABLE
 };
 
 const FA_DIV_BY_ZERO_ERR = "/: division by zero";
@@ -28,12 +31,15 @@ const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
 const FA_NTH_WRONG_TYPE_ERR = (name: string, n: number, expected: string, actual: string) => {
   return `${name}: expects a ${expected} as ${ordinalSuffixOf(n + 1)} argument, given ${actual}`;
 };
+const FA_QUESTION_NOT_BOOL = (name: string, found: string) => {
+  return `${name}: question result is not true or false: ${found}`;
+};
 
 const FC_EXPECTED_FUNCTION_ERR = (found: string | null) => {
   return `function call: expected a function after the open parenthesis, but ${found ? `found a ${found}`: "nothing's there"}`;
 };
 
-const Q_EXPECTED_POST_QUOTE_ERR = (found: string) => {
+const QU_EXPECTED_POST_QUOTE_ERR = (found: string) => {
   return `quote: expected the name of a symbol or () after the quote, but found a ${found}`;
 };
 
@@ -72,3 +78,10 @@ const RS_UNCLOSED_STRING_ERR = "read-syntax: expected a closing `\"`";
 const RS_UNEXPECTED_ERR = (found: string) => {
   return `read-syntax: unexpected \`${found}\``;
 };
+
+const SC_UNDEFINED_FUNCTION = (name: string) => {
+  return `${name}: this variable is undefined`;
+}
+const SC_UNDEFINED_VARIABLE = (name: string) => {
+  return `${name}: this variable is undefined`;
+}

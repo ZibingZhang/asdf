@@ -2,19 +2,21 @@ import {
   Environment
 } from "./environment.js";
 import {
-  FA_MIN_ARITY_ERR, FA_NTH_WRONG_TYPE_ERR
+  FA_MIN_ARITY_ERR,
+  FA_NTH_WRONG_TYPE_ERR
 } from "./error.js";
 import {
   StageError
 } from "./pipeline.js";
 import {
-  NO_SOURCE_SPAN, SourceSpan
+  SourceSpan
 } from "./sourcespan.js";
 
 export {
   R_EMPTY_LIST,
   R_FALSE,
   R_TRUE,
+  RData,
   RList,
   RMath,
   RNumber,
@@ -23,7 +25,7 @@ export {
   RString,
   RSymbol,
   RValue,
-  RVariable,
+  isRBoolean,
   isRCallable,
   isRData
 };
@@ -90,14 +92,6 @@ class RSymbol implements RAtomic {
   }
 }
 
-class RVariable implements RAtomic {
-  constructor(readonly val: string) {}
-
-  stringify(): string {
-    return this.val;
-  }
-}
-
 class RList implements RData {
   constructor(readonly vals: RValue[]) {}
 
@@ -161,6 +155,10 @@ class RPrimFun implements RCallable {
   call(_: Environment, __: RValue[], ___: SourceSpan): RValue {
     throw "illegal state: not implemented";
   }
+}
+
+function isRBoolean(rval: RValue): rval is RBoolean {
+  return rval instanceof RBoolean;
 }
 
 function isRData(rval: RValue): rval is RData {
