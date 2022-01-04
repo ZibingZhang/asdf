@@ -151,14 +151,14 @@ class RPrimFun implements RCallable {
         }
       }
     }
-    return this.call(env, args);
+    return this.call(env, args, sourceSpan);
   }
 
   stringify(): string {
     throw "illegal state: cannot stringify a callable";
   }
 
-  call(_: Environment, __: RValue[]): RValue {
+  call(_: Environment, __: RValue[], ___: SourceSpan): RValue {
     throw "illegal state: not implemented";
   }
 }
@@ -180,6 +180,41 @@ abstract class RMath {
     return new RNumber(
       rnum1.numerator * rnum2.denominator + rnum1.denominator * rnum2.numerator,
       rnum1.denominator * rnum2.denominator
+    );
+  }
+
+  static div(rnum1: RNumber, rnum2: RNumber): RNumber {
+    return new RNumber(
+      rnum1.numerator * rnum2.denominator,
+      rnum1.denominator * rnum2.numerator
+    );
+  }
+
+  static mul(rnum1: RNumber, rnum2: RNumber): RNumber {
+    return new RNumber(
+      rnum1.numerator * rnum2.numerator,
+      rnum1.denominator * rnum2.denominator
+    );
+  }
+
+  static sub(rnum1: RNumber, rnum2: RNumber): RNumber {
+    return new RNumber(
+      rnum1.numerator * rnum2.denominator - rnum1.denominator * rnum2.numerator,
+      rnum1.denominator * rnum2.denominator
+    );
+  }
+
+  static invert(rnum: RNumber) {
+    return new RNumber(
+      rnum.denominator,
+      rnum.numerator
+    );
+  }
+
+  static negate(rnum: RNumber) {
+    return new RNumber(
+      -1n * rnum.numerator,
+      rnum.denominator
     );
   }
 }

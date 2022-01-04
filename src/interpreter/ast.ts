@@ -53,7 +53,7 @@ class FunAppNode extends ASTNode {
     // temporary hack since `this.fn' can only be a variable post well-formed check
     const rValue = env.get(this.fn.RValue.stringify());
     if (isRCallable(rValue)) {
-      return rValue.eval(env, this.args.map(node => node.eval(env)), this.sourceSpan);
+      return rValue.eval(env, this.args.map(node => node.eval(env)), this.fn.sourceSpan);
     } else {
       throw new StageError(
         FC_EXPECTED_FUNCTION_ERR("variable"),

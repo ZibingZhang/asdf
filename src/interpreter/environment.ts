@@ -1,4 +1,7 @@
 import {
+  RDivide,
+  RMinus,
+  RMultiply,
   RPlus
 } from "./primitive.js";
 import {
@@ -41,4 +44,7 @@ function addToPrimEnv(name: string, cls: typeof RPrimFun, config: RPrimFunConfig
   PRIMITIVE_ENVIRONMENT.set(name, new cls(name, config));
 }
 
+addToPrimEnv("/", RDivide, { minArity: 2, allArgsTypeName: "number" });
+addToPrimEnv("-", RMinus, { minArity: 1, allArgsTypeName: "number" });
+addToPrimEnv("*", RMultiply, { minArity: 2, allArgsTypeName: "number" });
 addToPrimEnv("+", RPlus, { minArity: 2, allArgsTypeName: "number" });

@@ -3,6 +3,7 @@ import {
 } from "./utils.js";
 
 export {
+  FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
@@ -20,8 +21,9 @@ export {
   RS_UNEXPECTED_ERR
 };
 
+const FA_DIV_BY_ZERO_ERR = "/: division by zero";
 const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
-  return `${name}: expects at least ${expected} arguments, but found ${actual >= 2 ? actual : actual === 1 ? "only 1" : "none"}`;
+  return `${name}: expects at least ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual >= 2 ? actual : actual === 1 ? "only 1" : "none"}`;
 };
 const FA_NTH_WRONG_TYPE_ERR = (name: string, n: number, expected: string, actual: string) => {
   return `${name}: expects a ${expected} as ${ordinalSuffixOf(n + 1)} argument, given ${actual}`;
