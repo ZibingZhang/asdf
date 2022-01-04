@@ -80,7 +80,7 @@ const RS_UNEXPECTED_ERR = (found: string) => {
 };
 
 const SC_UNDEFINED_FUNCTION = (name: string) => {
-  return `${name}: this variable is undefined`;
+  return `${name}: this function is undefined`;
 }
 const SC_UNDEFINED_VARIABLE = (name: string) => {
   return `${name}: this variable is undefined`;

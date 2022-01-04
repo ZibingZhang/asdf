@@ -2,13 +2,13 @@ import {
   AndNode,
   ASTNode,
   AtomNode,
+  DefnNode,
+  ExprNode,
   FunAppNode,
+  isDefnNode,
   OrNode,
-  VariableNode
+  VarNode
 } from "./ast.js";
-import {
-  prettyPrint
-} from "./dev-utils.js";
 import {
   Stage,
   StageError,
@@ -37,9 +37,12 @@ import {
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
+  SC_UNDEFINED_FUNCTION,
   SC_UNDEFINED_VARIABLE
 } from "./error.js";
-import { PRIMITIVE_ENVIRONMENT } from "./environment.js";
+import {
+  PRIMITIVE_ENVIRONMENT
+} from "./environment.js";
 
 export {
   WellFormedSyntax,
@@ -47,9 +50,12 @@ export {
 };
 
 class WellFormedSyntax implements Stage {
+  level: number = 0;
+
   run(input: StageOutput): StageOutput {
+    this.level = 0;
     try {
-      return new StageOutput(this.runHelper(input.output));
+      return new StageOutput(this.processSExprs(input.output));
     } catch (e) {
       if (e instanceof StageError) {
         return new StageOutput(null, [e]);
@@ -59,20 +65,31 @@ class WellFormedSyntax implements Stage {
     }
   }
 
-  private runHelper(sexprs: SExpr[]): Program {
-    const asts: ASTNode[] = [];
+  private processSExprs(sexprs: SExpr[]): Program {
+    const nodes: ASTNode[] = [];
     for (const sexpr of sexprs) {
-      asts.push(this.toNode(sexpr));
+      nodes.push(this.toNode(sexpr));
     }
-
-    for (const ast of asts) {
-      prettyPrint(ast);
+    const defns: DefnNode[] = [];
+    const exprs: ExprNode[] = [];
+    for (const node of nodes) {
+      if (isDefnNode(node)) {
+        defns.push(node);
+      } else {
+        exprs.push(node);
+      }
     }
-
-    return new Program(asts);
+    return new Program(defns, exprs);
   }
 
   private toNode(sexpr: SExpr): ASTNode {
+    this.level++;
+    const node = this.toNodeHelper(sexpr);
+    this.level--;
+    return node;
+  }
+
+  private toNodeHelper(sexpr: SExpr): ASTNode {
     if (isAtomSExpr(sexpr)) {
       switch (sexpr.token.type) {
         case TokenType.TRUE: {
@@ -115,7 +132,7 @@ class WellFormedSyntax implements Stage {
           );
         }
         case TokenType.NAME: {
-          return new VariableNode(sexpr);
+          return new VarNode(sexpr);
         }
         default:
           throw "something?";
@@ -157,7 +174,7 @@ class WellFormedSyntax implements Stage {
           }
           default: {
             return new FunAppNode(
-              new VariableNode(leadingSExpr),
+              new VarNode(leadingSExpr),
               sexpr.tokens.slice(1).map(token => this.toNode(token)),
               sexpr.sourceSpan
             );
@@ -204,6 +221,10 @@ class WellFormedSyntax implements Stage {
       }
     }
   }
+
+  private atTopLevel() {
+    return this.level === 1;
+  }
 }
 
 class Scope {
@@ -246,13 +267,13 @@ class WellFormedProgram implements Stage {
   }
 
   private wellFormedNode(expr: ASTNode) {
-    if (expr instanceof VariableNode) {
+    if (expr instanceof VarNode) {
       if (!this.scope.contains(expr.name.token.text)) {
         throw new StageError(SC_UNDEFINED_VARIABLE(expr.name.token.text), expr.sourceSpan);
       }
     } else if (expr instanceof FunAppNode) {
       if (!this.scope.contains(expr.fn.name.token.text)) {
-        throw new StageError(SC_UNDEFINED_VARIABLE(expr.fn.name.token.text), expr.fn.sourceSpan);
+        throw new StageError(SC_UNDEFINED_FUNCTION(expr.fn.name.token.text), expr.fn.sourceSpan);
       }
       expr.args.forEach(arg => this.wellFormedNode(arg));
     }

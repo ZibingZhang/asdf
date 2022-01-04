@@ -15,7 +15,9 @@ import {
   R_FALSE,
   R_TRUE
 } from "./rvalue.js";
-import { AtomSExpr } from "./sexpr.js";
+import {
+  AtomSExpr
+} from "./sexpr.js";
 import {
   NO_SOURCE_SPAN, SourceSpan
 } from "./sourcespan.js";
@@ -24,21 +26,37 @@ export {
   ASTNode,
   AndNode,
   AtomNode,
+  DefnNode,
+  ExprNode,
   FunAppNode,
   OrNode,
-  VariableNode
+  VarDefnNode,
+  VarNode,
+  isDefnNode,
+  isExprNode
 };
 
-abstract class ASTNode {
+type ASTNode =
+  | DefnNode
+  | ExprNode;
+type DefnNode = VarDefnNode;
+type ExprNode =
+  | AndNode
+  | AtomNode
+  | FunAppNode
+  | OrNode
+  | VarNode;
+
+abstract class ASTNodeBase {
   constructor(readonly sourceSpan: SourceSpan) {};
 
   abstract eval(env: Environment): RValue;
 }
 
-class AndNode extends ASTNode {
+class AndNode extends ASTNodeBase {
   constructor(
     readonly andSourceSpan: SourceSpan,
-    readonly args: ASTNode[],
+    readonly args: ASTNodeBase[],
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
@@ -57,7 +75,7 @@ class AndNode extends ASTNode {
   }
 }
 
-class AtomNode extends ASTNode {
+class AtomNode extends ASTNodeBase {
   constructor(
     readonly rval: RValue,
     readonly sourceSpan: SourceSpan
@@ -70,9 +88,9 @@ class AtomNode extends ASTNode {
   }
 }
 
-class FunAppNode extends ASTNode {
+class FunAppNode extends ASTNodeBase {
   constructor(
-    readonly fn: VariableNode,
+    readonly fn: VarNode,
     readonly args: ASTNode[],
     readonly sourceSpan: SourceSpan
   ) {
@@ -92,7 +110,7 @@ class FunAppNode extends ASTNode {
   }
 }
 
-class OrNode extends ASTNode {
+class OrNode extends ASTNodeBase {
   constructor(
     readonly orSourceSpan: SourceSpan,
     readonly args: ASTNode[],
@@ -114,7 +132,7 @@ class OrNode extends ASTNode {
   }
 }
 
-class VariableNode extends ASTNode {
+class VarNode extends ASTNodeBase {
   constructor(
     readonly name: AtomSExpr
   ) {
@@ -124,4 +142,27 @@ class VariableNode extends ASTNode {
   eval(env: Environment): RValue {
     return env.get(this.name.token.text);
   }
+}
+
+class VarDefnNode extends ASTNodeBase {
+  constructor(
+    readonly defineSourceSpan: SourceSpan,
+    readonly name: AtomSExpr,
+    readonly value: ASTNode,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  eval(_: Environment): RValue {
+    throw "illegal state: evaluating variable definition";
+  }
+}
+
+function isDefnNode(node: ASTNode): node is DefnNode {
+  return node instanceof VarDefnNode;
+}
+
+function isExprNode(node: ASTNode): node is ExprNode {
+  return !isDefnNode(node);
 }
