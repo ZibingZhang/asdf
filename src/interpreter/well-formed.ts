@@ -7,6 +7,7 @@ import {
   FunAppNode,
   isDefnNode,
   OrNode,
+  VarDefnNode,
   VarNode
 } from "./ast.js";
 import {
@@ -19,6 +20,7 @@ import {
 } from "./program.js";
 import {
   isAtomSExpr,
+  ListSExpr,
   SExpr
 } from "./sexpr.js";
 import {
@@ -34,11 +36,16 @@ import {
   R_TRUE
 } from "./rvalue.js";
 import {
+  DF_FIRST_ARG_ERR,
+  DF_NO_SECOND_ARG_ERR,
+  DF_TOO_MANY_ARGS_ERR,
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
-  SC_UNDEFINED_FUNCTION,
-  SC_UNDEFINED_VARIABLE
+  SC_UNDEFINED_FUNCTION_ERR,
+  SC_UNDEFINED_VARIABLE_ERR,
+  SX_EXPECTED_OPEN_PAREN_ERR,
+  SX_NOT_TOP_LEVEL_DEFN_ERR
 } from "./error.js";
 import {
   PRIMITIVE_ENVIRONMENT
@@ -67,19 +74,18 @@ class WellFormedSyntax implements Stage {
 
   private processSExprs(sexprs: SExpr[]): Program {
     const nodes: ASTNode[] = [];
-    for (const sexpr of sexprs) {
-      nodes.push(this.toNode(sexpr));
-    }
     const defns: DefnNode[] = [];
     const exprs: ExprNode[] = [];
-    for (const node of nodes) {
+    for (const sexpr of sexprs) {
+      const node = this.toNode(sexpr);
+      nodes.push(this.toNode(sexpr));
       if (isDefnNode(node)) {
         defns.push(node);
       } else {
         exprs.push(node);
       }
     }
-    return new Program(defns, exprs);
+    return new Program(defns, exprs, nodes);
   }
 
   private toNode(sexpr: SExpr): ASTNode {
@@ -134,57 +140,79 @@ class WellFormedSyntax implements Stage {
         case TokenType.NAME: {
           return new VarNode(sexpr);
         }
+        case TokenType.KEYWORD: {
+          throw new StageError(
+            SX_EXPECTED_OPEN_PAREN_ERR(sexpr.token.text),
+            sexpr.sourceSpan
+          );
+        }
         default:
           throw "something?";
       }
     } else {
       const leadingSExpr = sexpr.tokens[0];
       if (!leadingSExpr) {
-        throw new StageError(FC_EXPECTED_FUNCTION_ERR(null), sexpr.sourceSpan);
-      } else if (isAtomSExpr(leadingSExpr) && leadingSExpr.token.type === TokenType.NAME) {
-        switch (leadingSExpr.token.text) {
-          case "quote": {
+        throw new StageError(
+          FC_EXPECTED_FUNCTION_ERR(),
+          sexpr.sourceSpan
+        );
+      } else if (isAtomSExpr(leadingSExpr)) {
+        if (leadingSExpr.token.type === TokenType.NAME) {
+          if (leadingSExpr.token.text === "quote") {
             return this.toQuoteNode(sexpr, sexpr.tokens[1]);
-          }
-          case "and": {
-            if (sexpr.tokens.length - 1 < 2) {
-              throw new StageError(
-                FA_MIN_ARITY_ERR("and", 2, sexpr.tokens.length - 1),
-                leadingSExpr.sourceSpan
-              );
-            }
-            return new AndNode(
-              leadingSExpr.sourceSpan,
-              sexpr.tokens.slice(1).map(token => this.toNode(token)),
-              sexpr.sourceSpan
-            );
-          }
-          case "or": {
-            if (sexpr.tokens.length - 1 < 2) {
-              throw new StageError(
-                FA_MIN_ARITY_ERR("or", 2, sexpr.tokens.length - 1),
-                leadingSExpr.sourceSpan
-              );
-            }
-            return new OrNode(
-              leadingSExpr.sourceSpan,
-              sexpr.tokens.slice(1).map(token => this.toNode(token)),
-              sexpr.sourceSpan
-            );
-          }
-          default: {
+          } else {
             return new FunAppNode(
               new VarNode(leadingSExpr),
               sexpr.tokens.slice(1).map(token => this.toNode(token)),
               sexpr.sourceSpan
             );
           }
+        } else if (leadingSExpr.token.type === TokenType.KEYWORD) {
+          switch (leadingSExpr.token.text) {
+            case "and": {
+              if (sexpr.tokens.length - 1 < 2) {
+                throw new StageError(
+                  FA_MIN_ARITY_ERR("and", 2, sexpr.tokens.length - 1),
+                  leadingSExpr.sourceSpan
+                );
+              }
+              return new AndNode(
+                leadingSExpr.sourceSpan,
+                sexpr.tokens.slice(1).map(token => this.toNode(token)),
+                sexpr.sourceSpan
+              );
+            }
+            case "define": {
+              if (!this.atTopLevel()) {
+                throw new StageError(
+                  SX_NOT_TOP_LEVEL_DEFN_ERR,
+                  leadingSExpr.token.sourceSpan
+                );
+              }
+              return this.toDefnNode(sexpr);
+            }
+            case "or": {
+              if (sexpr.tokens.length - 1 < 2) {
+                throw new StageError(
+                  FA_MIN_ARITY_ERR("or", 2, sexpr.tokens.length - 1),
+                  leadingSExpr.sourceSpan
+                );
+              }
+              return new OrNode(
+                leadingSExpr.sourceSpan,
+                sexpr.tokens.slice(1).map(token => this.toNode(token)),
+                sexpr.sourceSpan
+              );
+            }
+            default:
+              throw "illegal state: non-existent keyword";
+          }
+        } else {
+          throw new StageError(
+            FC_EXPECTED_FUNCTION_ERR(tokenTypeName(leadingSExpr.token.type)),
+            sexpr.sourceSpan
+          );
         }
-      } else if (isAtomSExpr(leadingSExpr)) {
-        throw new StageError(
-          FC_EXPECTED_FUNCTION_ERR(tokenTypeName(leadingSExpr.token.type)),
-          sexpr.sourceSpan)
-        ;
       } else {
         throw new StageError(
           FC_EXPECTED_FUNCTION_ERR("part"),
@@ -194,7 +222,45 @@ class WellFormedSyntax implements Stage {
     }
   }
 
-  private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): ASTNode {
+  private toDefnNode(sexpr: ListSExpr): DefnNode {
+    if (sexpr.tokens.length === 1) {
+      throw new StageError(
+        DF_FIRST_ARG_ERR(),
+        sexpr.sourceSpan
+      );
+    }
+    const name = sexpr.tokens[1];
+    if (isAtomSExpr(name)) {
+      if (name.token.type !== TokenType.NAME) {
+        throw new StageError(
+          DF_FIRST_ARG_ERR(tokenTypeName(name.token.type)),
+          name.sourceSpan
+        );
+      }
+      if (sexpr.tokens.length === 2) {
+        throw new StageError(
+          DF_NO_SECOND_ARG_ERR(name.token.text),
+          sexpr.sourceSpan
+        );
+      }
+      if (sexpr.tokens.length > 3) {
+        throw new StageError(
+          DF_TOO_MANY_ARGS_ERR(name.token.text, sexpr.tokens.length - 3),
+          sexpr.tokens[3].sourceSpan
+        );
+      }
+      return new VarDefnNode(
+        sexpr.tokens[0].sourceSpan,
+        name,
+        this.toNode(sexpr.tokens[2]),
+        sexpr.sourceSpan
+      );
+    } else {
+      throw "TODO: funs defs";
+    }
+  }
+
+  private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): AtomNode {
     if (isAtomSExpr(quotedSexpr)) {
       if (quotedSexpr.token.type === TokenType.NAME) {
         return new AtomNode(
@@ -245,6 +311,7 @@ class WellFormedProgram implements Stage {
   scope: Scope = new Scope();
 
   run(input: StageOutput): StageOutput {
+    this.scope = new Scope();
     for (const name of PRIMITIVE_ENVIRONMENT.names()) {
       this.scope.add(name);
     }
@@ -261,21 +328,28 @@ class WellFormedProgram implements Stage {
   }
 
   private wellFormedProgram(program: Program) {
-    for (const expr of program.exprs) {
-      this.wellFormedNode(expr);
+    program.defns.forEach(defn => this.scope.add(defn.name.token.text));
+    for (const node of program.nodes) {
+      this.wellFormedNode(node);
     }
   }
 
-  private wellFormedNode(expr: ASTNode) {
-    if (expr instanceof VarNode) {
-      if (!this.scope.contains(expr.name.token.text)) {
-        throw new StageError(SC_UNDEFINED_VARIABLE(expr.name.token.text), expr.sourceSpan);
+  private wellFormedNode(node: ASTNode) {
+    if (node instanceof VarNode) {
+      if (!this.scope.contains(node.name.token.text)) {
+        throw new StageError(
+          SC_UNDEFINED_VARIABLE_ERR(node.name.token.text),
+          node.sourceSpan
+        );
       }
-    } else if (expr instanceof FunAppNode) {
-      if (!this.scope.contains(expr.fn.name.token.text)) {
-        throw new StageError(SC_UNDEFINED_FUNCTION(expr.fn.name.token.text), expr.fn.sourceSpan);
+    } else if (node instanceof FunAppNode) {
+      if (!this.scope.contains(node.fn.name.token.text)) {
+        throw new StageError(
+          SC_UNDEFINED_FUNCTION_ERR(node.fn.name.token.text),
+          node.fn.sourceSpan
+        );
       }
-      expr.args.forEach(arg => this.wellFormedNode(arg));
+      node.args.forEach(arg => this.wellFormedNode(arg));
     }
   }
 }

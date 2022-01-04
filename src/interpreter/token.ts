@@ -18,6 +18,7 @@ enum TokenType {
   FALSE = "FALSE",
   STRING = "STRING",
   NAME = "NAME",
+  KEYWORD = "KEYWORD",
   INTEGER = "INTEGER",
   RATIONAL = "RATIONAL",
   DECIMAL = "DECIMAL",
@@ -43,6 +44,8 @@ function tokenTypeName(type: TokenType): string {
     case TokenType.RATIONAL:
     case TokenType.DECIMAL:
       return "number";
+    case TokenType.KEYWORD:
+      return "keyword";
     default:
       throw "illegal state: unsupported token type";
   }

@@ -1,4 +1,7 @@
 import {
+  isDefnNode
+} from "./ast.js";
+import {
   Environment,
   PRIMITIVE_ENVIRONMENT
 } from "./environment.js";
@@ -16,14 +19,10 @@ export {
 };
 
 class EvaluateProgram implements Stage {
-  private env: Environment;
-
-  constructor() {
-    this.env = PRIMITIVE_ENVIRONMENT;
-  }
+  private env: Environment = PRIMITIVE_ENVIRONMENT;
 
   run(input: StageOutput): StageOutput {
-    this.env = PRIMITIVE_ENVIRONMENT;
+    this.env = new Environment(PRIMITIVE_ENVIRONMENT);
 
     try {
       return new StageOutput(this.runHelper(input.output));
@@ -38,8 +37,13 @@ class EvaluateProgram implements Stage {
 
   private runHelper(program: Program): string[] {
     const output: string[] = [];
-    for (const expr of program.exprs) {
-      output.push(expr.eval(this.env).stringify());
+    for (const node of program.nodes) {
+      if (isDefnNode(node)) {
+        node.run(this.env);
+      } else {
+        output.push(node.eval(this.env).stringify());
+      }
+
     }
     return output;
   }

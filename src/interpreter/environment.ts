@@ -1,4 +1,11 @@
 import {
+  SC_UNDEFINED_FUNCTION_ERR,
+  SC_UNDEFINED_VARIABLE_ERR
+} from "./error.js";
+import {
+  StageError
+} from "./pipeline.js";
+import {
   RDivide,
   RMinus,
   RMultiply,
@@ -11,11 +18,20 @@ import {
   RPrimFunConfig,
   RValue
 } from "./rvalue.js";
+import {
+  SourceSpan
+} from "./sourcespan.js";
 
 export {
   PRIMITIVE_ENVIRONMENT,
-  Environment
+  Environment,
+  EnvironmentValType
 };
+
+enum EnvironmentValType {
+  Function,
+  Variable
+}
 
 class Environment {
   private map: Map<string, RValue>;
@@ -28,14 +44,24 @@ class Environment {
     this.map.set(name, value);
   }
 
-  get(name: string): RValue {
+  get(type: EnvironmentValType, name: string, sourceSpan: SourceSpan): RValue {
     const val = this.map.get(name);
     if (val) {
       return val;
     } else if (!this.parentEnv) {
-      throw "illegal state: name not in environment";
+      if (type === EnvironmentValType.Function) {
+        throw new StageError(
+          SC_UNDEFINED_FUNCTION_ERR(name),
+          sourceSpan
+        );
+      } else {
+        throw new StageError(
+          SC_UNDEFINED_VARIABLE_ERR(name),
+          sourceSpan
+        );
+      }
     } else {
-      return this.parentEnv.get(name);
+      return this.parentEnv.get(type, name, sourceSpan);
     }
   }
 

@@ -3,10 +3,13 @@ import {
 } from "./utils.js";
 
 export {
+  DF_FIRST_ARG_ERR,
+  DF_NO_SECOND_ARG_ERR,
+  DF_TOO_MANY_ARGS_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
-  FA_QUESTION_NOT_BOOL,
+  FA_QUESTION_NOT_BOOL_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   RS_BAD_SYNTAX_ERR,
@@ -20,8 +23,20 @@ export {
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
   RS_UNCLOSED_STRING_ERR,
   RS_UNEXPECTED_ERR,
-  SC_UNDEFINED_FUNCTION,
-  SC_UNDEFINED_VARIABLE
+  SC_UNDEFINED_FUNCTION_ERR,
+  SC_UNDEFINED_VARIABLE_ERR,
+  SX_EXPECTED_OPEN_PAREN_ERR,
+  SX_NOT_TOP_LEVEL_DEFN_ERR
+};
+
+const DF_FIRST_ARG_ERR = (found: string | null = null) => {
+  return `define: expected a variable name, or a function name and its variables (in parentheses), but ${found ? `found a ${found}` : "nothing's there"}`;
+};
+const DF_NO_SECOND_ARG_ERR = (name: string) => {
+  return `define: expected an expression after the variable name ${name}, but nothing's there`;
+};
+const DF_TOO_MANY_ARGS_ERR = (name: string, parts: number) => {
+  return `define: expected only one expression after the variable name ${name}, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
 
 const FA_DIV_BY_ZERO_ERR = "/: division by zero";
@@ -31,11 +46,11 @@ const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
 const FA_NTH_WRONG_TYPE_ERR = (name: string, n: number, expected: string, actual: string) => {
   return `${name}: expects a ${expected} as ${ordinalSuffixOf(n + 1)} argument, given ${actual}`;
 };
-const FA_QUESTION_NOT_BOOL = (name: string, found: string) => {
+const FA_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {
   return `${name}: question result is not true or false: ${found}`;
 };
 
-const FC_EXPECTED_FUNCTION_ERR = (found: string | null) => {
+const FC_EXPECTED_FUNCTION_ERR = (found: string | null = null) => {
   return `function call: expected a function after the open parenthesis, but ${found ? `found a ${found}`: "nothing's there"}`;
 };
 
@@ -79,9 +94,14 @@ const RS_UNEXPECTED_ERR = (found: string) => {
   return `read-syntax: unexpected \`${found}\``;
 };
 
-const SC_UNDEFINED_FUNCTION = (name: string) => {
+const SC_UNDEFINED_FUNCTION_ERR = (name: string) => {
   return `${name}: this function is undefined`;
-}
-const SC_UNDEFINED_VARIABLE = (name: string) => {
+};
+const SC_UNDEFINED_VARIABLE_ERR = (name: string) => {
   return `${name}: this variable is undefined`;
-}
+};
+
+const SX_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
+  return `${name}: expected an open parenthesis before ${name}, but found none`;
+};
+const SX_NOT_TOP_LEVEL_DEFN_ERR = "define: found a definition that is not at the top level";

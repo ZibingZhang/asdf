@@ -1,8 +1,9 @@
 import {
-  Environment
+  Environment,
+  EnvironmentValType
 } from "./environment.js";
 import {
-  FA_QUESTION_NOT_BOOL,
+  FA_QUESTION_NOT_BOOL_ERR,
   FC_EXPECTED_FUNCTION_ERR
 } from "./error.js";
 import {
@@ -19,7 +20,8 @@ import {
   AtomSExpr
 } from "./sexpr.js";
 import {
-  NO_SOURCE_SPAN, SourceSpan
+  NO_SOURCE_SPAN,
+  SourceSpan
 } from "./sourcespan.js";
 
 export {
@@ -32,8 +34,7 @@ export {
   OrNode,
   VarDefnNode,
   VarNode,
-  isDefnNode,
-  isExprNode
+  isDefnNode
 };
 
 type ASTNode =
@@ -69,7 +70,7 @@ class AndNode extends ASTNodeBase {
       if (result === R_FALSE) { return result; }
     }
     if (!isRBoolean(result)) {
-      throw new StageError(FA_QUESTION_NOT_BOOL("and", result.stringify()), this.andSourceSpan);
+      throw new StageError(FA_QUESTION_NOT_BOOL_ERR("and", result.stringify()), this.andSourceSpan);
     }
     return result;
   }
@@ -98,9 +99,13 @@ class FunAppNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    const rval = env.get(this.fn.name.token.text);
+    const rval = env.get(
+      EnvironmentValType.Function,
+      this.fn.name.token.text,
+      this.fn.name.sourceSpan
+    );
     if (isRCallable(rval)) {
-      return rval.eval(env, this.args.map(node => node.eval(env)), this.fn.sourceSpan);
+      return rval.eval(env, this.args.map(node => node.eval(env)), this.sourceSpan);
     } else {
       throw new StageError(
         FC_EXPECTED_FUNCTION_ERR("variable"),
@@ -126,7 +131,7 @@ class OrNode extends ASTNodeBase {
       if (result !== R_FALSE) { break; }
     }
     if (!isRBoolean(result)) {
-      throw new StageError(FA_QUESTION_NOT_BOOL("or", result.stringify()), this.orSourceSpan);
+      throw new StageError(FA_QUESTION_NOT_BOOL_ERR("or", result.stringify()), this.orSourceSpan);
     }
     return result;
   }
@@ -140,11 +145,19 @@ class VarNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    return env.get(this.name.token.text);
+    return env.get(
+      EnvironmentValType.Variable,
+      this.name.token.text,
+      this.name.token.sourceSpan
+    );
   }
 }
 
-class VarDefnNode extends ASTNodeBase {
+abstract class DefnNodeBase extends ASTNodeBase {
+  abstract run(env: Environment): void;
+}
+
+class VarDefnNode extends DefnNodeBase {
   constructor(
     readonly defineSourceSpan: SourceSpan,
     readonly name: AtomSExpr,
@@ -157,12 +170,12 @@ class VarDefnNode extends ASTNodeBase {
   eval(_: Environment): RValue {
     throw "illegal state: evaluating variable definition";
   }
+
+  run(env: Environment): void {
+    env.set(this.name.token.text, this.value.eval(env));
+  }
 }
 
 function isDefnNode(node: ASTNode): node is DefnNode {
   return node instanceof VarDefnNode;
-}
-
-function isExprNode(node: ASTNode): node is ExprNode {
-  return !isDefnNode(node);
 }

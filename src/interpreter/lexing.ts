@@ -35,6 +35,17 @@ export {
   Lexer
 };
 
+const KEYWORDS = new Set(
+  [
+    "and",
+    "cond",
+    "define",
+    "define-struct",
+    "if",
+    "or"
+  ]
+);
+
 const LEFT_PAREN_RE = /^[([{]$/;
 const RIGHT_PAREN_RE = /^[)\]}]$/;
 const QUASI_QUOTE_RE = /^[`,]$/;
@@ -152,6 +163,8 @@ class Lexer implements Stage {
         }
       } else if (text.match(DECIMAL_RE)) {
         addToken(lineno, colno, TokenType.DECIMAL, text);
+      } else if (KEYWORDS.has(text)) {
+        addToken(lineno, colno, TokenType.KEYWORD, text);
       } else {
         addToken(lineno, colno, TokenType.NAME, text);
       }

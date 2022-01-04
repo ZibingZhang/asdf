@@ -11,6 +11,7 @@ export {
 class Program {
   constructor(
     readonly defns: DefnNode[],
-    readonly exprs: ASTNode[]
+    readonly exprs: ExprNode[],
+    readonly nodes: ASTNode[]
   ) {}
 }
