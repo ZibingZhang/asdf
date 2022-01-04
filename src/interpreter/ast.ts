@@ -50,7 +50,7 @@ class FunAppNode extends ASTNode {
   }
 
   eval(env: Environment): RValue {
-    // temporary hack since `this.fn' can only be a
+    // temporary hack since `this.fn' can only be a variable post well-formed check
     const rValue = env.get(this.fn.RValue.stringify());
     if (isRCallable(rValue)) {
       return rValue.eval(env, this.args.map(node => node.eval(env)), this.sourceSpan);
