@@ -38,7 +38,7 @@ function tokenTypeName(type: TokenType): string {
   switch (type) {
     case TokenType.TRUE:
     case TokenType.FALSE:
-      return "boolean"
+      return "boolean";
     case TokenType.INTEGER:
     case TokenType.RATIONAL:
     case TokenType.DECIMAL:

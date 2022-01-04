@@ -1,4 +1,6 @@
-import { ordinalSuffixOf } from "./utils.js";
+import {
+  ordinalSuffixOf
+} from "./utils.js";
 
 export {
   FA_MIN_ARITY_ERR,
@@ -31,7 +33,7 @@ const FC_EXPECTED_FUNCTION_ERR = (found: string | null) => {
 
 const Q_EXPECTED_POST_QUOTE_ERR = (found: string) => {
   return `quote: expected the name of a symbol or () after the quote, but found a ${found}`;
-}
+};
 
 const RS_BAD_SYNTAX_ERR = (syntax: string) => {
   return `read-syntax: bad syntax \`${syntax}\``;

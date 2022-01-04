@@ -8,22 +8,24 @@ import {
   StageError
 } from "./pipeline.js";
 import {
-  NO_SOURCE_SPAN
+  NO_SOURCE_SPAN, SourceSpan
 } from "./sourcespan.js";
 
 export {
   R_EMPTY_LIST,
-  RBool,
+  R_FALSE,
+  R_TRUE,
   RList,
   RMath,
-  RNum,
+  RNumber,
   RPrimFun,
+  RPrimFunConfig,
   RString,
   RSymbol,
-  RVal,
+  RValue,
+  RVariable,
   isRCallable,
-  isRData,
-  isRNum
+  isRData
 };
 
 // https://stackoverflow.com/questions/17445231/js-how-to-find-the-greatest-common-divisor
@@ -34,7 +36,7 @@ function gcd(a: bigint, b: bigint): bigint {
   return gcd(b, a % b);
 }
 
-type RVal = RData | RCallable;
+type RValue = RData | RCallable;
 
 interface RValBase {
   stringify(): string;
@@ -44,7 +46,7 @@ interface RData extends RValBase {}
 
 interface RAtomic extends RData {}
 
-class RBool implements RAtomic {
+class RBoolean implements RAtomic {
   constructor(readonly val: boolean) {}
 
   stringify(): string {
@@ -52,12 +54,17 @@ class RBool implements RAtomic {
   }
 }
 
-class RNum implements RAtomic {
+class RNumber implements RAtomic {
   constructor(
     readonly numerator: bigint,
     readonly denominator: bigint
   ) {
-    const divisor = gcd(numerator >= 0 ? numerator : -1n * numerator, denominator);
+    const divisor = gcd(
+      numerator >= 0
+        ? numerator
+        : -1n * numerator,
+      denominator
+    );
     this.numerator = numerator / divisor;
     this.denominator = denominator / divisor;
   }
@@ -83,27 +90,29 @@ class RSymbol implements RAtomic {
   }
 }
 
-class RList implements RData {
-  constructor(readonly vals: RVal[]) {}
+class RVariable implements RAtomic {
+  constructor(readonly val: string) {}
 
   stringify(): string {
-    if (this.vals.length === 0) {
-      return "'()";
-    } else {
-      let output = "";
-      for (const val of this.vals) {
-        output += `(cons ${val.stringify()}`;
-      }
-      output += "'()" + ")".repeat(this.vals.length);
+    return this.val;
+  }
+}
+
+class RList implements RData {
+  constructor(readonly vals: RValue[]) {}
+
+  stringify(): string {
+    let output = "";
+    for (const val of this.vals) {
+      output += `(cons ${val.stringify()}`;
     }
-    return this.vals.length === 0
-      ? "'()"
-      : `(list ${this.vals.map(val => val.stringify()).join(" ")})`;
+    output += "'()" + ")".repeat(this.vals.length);
+    return output;
   }
 }
 
 interface RCallable extends RValBase {
-  eval(env: Environment, args: RVal[]): RVal;
+  eval(env: Environment, args: RValue[], sourceSpan: SourceSpan): RValue;
 }
 
 interface RPrimFunConfig {
@@ -111,28 +120,34 @@ interface RPrimFunConfig {
   allArgsTypeName?: string
 }
 
-abstract class RPrimFun implements RCallable {
+class RPrimFun implements RCallable {
   constructor(
     readonly name: string,
     readonly config: RPrimFunConfig
   ) {}
 
-  eval(env: Environment, args: RVal[]): RVal {
+  eval(env: Environment, args: RValue[], sourceSpan: SourceSpan): RValue {
     if (this.config.minArity && args.length < this.config.minArity) {
-      throw new StageError(FA_MIN_ARITY_ERR(this.name, this.config.minArity, args.length), NO_SOURCE_SPAN);
+      throw new StageError(
+        FA_MIN_ARITY_ERR(this.name, this.config.minArity, args.length),
+        sourceSpan
+      );
     }
     if (this.config.allArgsTypeName) {
       let typeGuard;
       switch (this.config.allArgsTypeName) {
         case "number":
-          typeGuard = isRNum;
+          typeGuard = isRNumber;
           break;
         default:
           throw "illegal state: unsupported allArgsTypeName";
       }
       for (const [idx, rval] of args.entries()) {
         if (!typeGuard(rval)) {
-          throw new StageError(FA_NTH_WRONG_TYPE_ERR(this.name, idx, this.config.allArgsTypeName, rval.stringify()), NO_SOURCE_SPAN);
+          throw new StageError(
+            FA_NTH_WRONG_TYPE_ERR(this.name, idx, this.config.allArgsTypeName, rval.stringify()),
+            sourceSpan
+          );
         }
       }
     }
@@ -143,28 +158,32 @@ abstract class RPrimFun implements RCallable {
     throw "illegal state: cannot stringify a callable";
   }
 
-  abstract call(env: Environment, args: RVal[]): RVal;
+  call(_: Environment, __: RValue[]): RValue {
+    throw "illegal state: not implemented";
+  }
 }
 
-function isRData(rval: RVal): rval is RData {
-  return !rval.hasOwnProperty("call");
+function isRData(rval: RValue): rval is RData {
+  return !Object.prototype.hasOwnProperty.call(rval, "call");
 }
 
-function isRNum(rval: RVal): rval is RNum {
-  return rval instanceof RNum;
+function isRNumber(rval: RValue): rval is RNumber {
+  return rval instanceof RNumber;
 }
 
-function isRCallable(rval: RVal): rval is RCallable {
+function isRCallable(rval: RValue): rval is RCallable {
   return "call" in rval;
 }
 
 abstract class RMath {
-  static add(rnum1: RNum, rnum2: RNum): RNum {
-    return new RNum(
+  static add(rnum1: RNumber, rnum2: RNumber): RNumber {
+    return new RNumber(
       rnum1.numerator * rnum2.denominator + rnum1.denominator * rnum2.numerator,
       rnum1.denominator * rnum2.denominator
     );
   }
 }
 
+const R_TRUE = new RBoolean(true);
+const R_FALSE = new RBoolean(false);
 const R_EMPTY_LIST = new RList([]);

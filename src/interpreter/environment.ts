@@ -2,8 +2,9 @@ import {
   RPlus
 } from "./primitive.js";
 import {
-  isRNum,
-  RVal
+  RPrimFun,
+  RPrimFunConfig,
+  RValue
 } from "./rvalue.js";
 
 export {
@@ -12,17 +13,17 @@ export {
 };
 
 class Environment {
-  private map: Map<string, RVal>;
+  private map: Map<string, RValue>;
 
   constructor(readonly parentEnv: Environment | null = null) {
     this.map = new Map();
   }
 
-  set(name: string, value: RVal) {
+  set(name: string, value: RValue) {
     this.map.set(name, value);
   }
 
-  get(name: string): RVal {
+  get(name: string): RValue {
     const val = this.map.get(name);
     if (val) {
       return val;
@@ -35,4 +36,9 @@ class Environment {
 }
 
 const PRIMITIVE_ENVIRONMENT = new Environment();
-PRIMITIVE_ENVIRONMENT.set("+", new RPlus("+", { minArity: 2, allArgsTypeName: "number" }));
+
+function addToPrimEnv(name: string, cls: typeof RPrimFun, config: RPrimFunConfig) {
+  PRIMITIVE_ENVIRONMENT.set(name, new cls(name, config));
+}
+
+addToPrimEnv("+", RPlus, { minArity: 2, allArgsTypeName: "number" });
