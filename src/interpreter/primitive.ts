@@ -2,6 +2,7 @@ import {
   Environment
 } from "./environment.js";
 import {
+  RMath,
   RNum,
   RPrimFun,
   RVal
@@ -13,7 +14,6 @@ export {
 
 class RPlus extends RPrimFun {
   call(_: Environment, args: RVal[]): RVal {
-    args.reduce((prev, curr) => <RNum>prev, new RNum(0n, 1n));
-    return args[0];
+    return args.reduce((prev, curr) => RMath.add(<RNum>prev, <RNum>curr), new RNum(0n, 1n));
   }
 }

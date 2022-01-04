@@ -35,5 +35,4 @@ class Environment {
 }
 
 const PRIMITIVE_ENVIRONMENT = new Environment();
-
-PRIMITIVE_ENVIRONMENT.set("+", new RPlus("+", 2, "number", isRNum));
+PRIMITIVE_ENVIRONMENT.set("+", new RPlus("+", { minArity: 2, allArgsTypeName: "number" }));

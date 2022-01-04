@@ -15,6 +15,7 @@ export {
   R_EMPTY_LIST,
   RBool,
   RList,
+  RMath,
   RNum,
   RPrimFun,
   RString,
@@ -105,23 +106,33 @@ interface RCallable extends RValBase {
   eval(env: Environment, args: RVal[]): RVal;
 }
 
+interface RPrimFunConfig {
+  minArity?: number,
+  allArgsTypeName?: string
+}
+
 abstract class RPrimFun implements RCallable {
   constructor(
     readonly name: string,
-    readonly minArity?: number,
-    readonly allArgsTypeName?: string,
-    readonly allArgsTypeGuard?: (rval: RVal) => boolean
+    readonly config: RPrimFunConfig
   ) {}
 
   eval(env: Environment, args: RVal[]): RVal {
-    if (this.minArity && args.length < this.minArity) {
-      throw new StageError(FA_MIN_ARITY_ERR(this.name, this.minArity, args.length), NO_SOURCE_SPAN);
+    if (this.config.minArity && args.length < this.config.minArity) {
+      throw new StageError(FA_MIN_ARITY_ERR(this.name, this.config.minArity, args.length), NO_SOURCE_SPAN);
     }
-    if (this.allArgsTypeName && this.allArgsTypeGuard) {
+    if (this.config.allArgsTypeName) {
+      let typeGuard;
+      switch (this.config.allArgsTypeName) {
+        case "number":
+          typeGuard = isRNum;
+          break;
+        default:
+          throw "illegal state: unsupported allArgsTypeName";
+      }
       for (const [idx, rval] of args.entries()) {
-        if (!this.allArgsTypeGuard(rval)) {
-          console.log(idx)
-          throw new StageError(FA_NTH_WRONG_TYPE_ERR(this.name, idx, this.allArgsTypeName, rval.stringify()), NO_SOURCE_SPAN);
+        if (!typeGuard(rval)) {
+          throw new StageError(FA_NTH_WRONG_TYPE_ERR(this.name, idx, this.config.allArgsTypeName, rval.stringify()), NO_SOURCE_SPAN);
         }
       }
     }
@@ -145,6 +156,15 @@ function isRNum(rval: RVal): rval is RNum {
 
 function isRCallable(rval: RVal): rval is RCallable {
   return "call" in rval;
+}
+
+abstract class RMath {
+  static add(rnum1: RNum, rnum2: RNum): RNum {
+    return new RNum(
+      rnum1.numerator * rnum2.denominator + rnum1.denominator * rnum2.numerator,
+      rnum1.denominator * rnum2.denominator
+    );
+  }
 }
 
 const R_EMPTY_LIST = new RList([]);
