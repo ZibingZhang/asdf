@@ -177,7 +177,6 @@ class WellFormedSyntax implements Stage {
                 );
               }
               return new AndNode(
-                leadingSExpr.sourceSpan,
                 sexpr.tokens.slice(1).map(token => this.toNode(token)),
                 sexpr.sourceSpan
               );
@@ -186,7 +185,7 @@ class WellFormedSyntax implements Stage {
               if (!this.atTopLevel()) {
                 throw new StageError(
                   SX_NOT_TOP_LEVEL_DEFN_ERR,
-                  leadingSExpr.token.sourceSpan
+                  sexpr.sourceSpan
                 );
               }
               return this.toDefnNode(sexpr);
@@ -199,7 +198,6 @@ class WellFormedSyntax implements Stage {
                 );
               }
               return new OrNode(
-                leadingSExpr.sourceSpan,
                 sexpr.tokens.slice(1).map(token => this.toNode(token)),
                 sexpr.sourceSpan
               );
@@ -210,13 +208,13 @@ class WellFormedSyntax implements Stage {
         } else {
           throw new StageError(
             FC_EXPECTED_FUNCTION_ERR(tokenTypeName(leadingSExpr.token.type)),
-            sexpr.sourceSpan
+            leadingSExpr.sourceSpan
           );
         }
       } else {
         throw new StageError(
           FC_EXPECTED_FUNCTION_ERR("part"),
-          sexpr.sourceSpan
+          leadingSExpr.sourceSpan
         );
       }
     }

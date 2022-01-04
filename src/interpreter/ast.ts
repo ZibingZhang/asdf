@@ -56,7 +56,6 @@ abstract class ASTNodeBase {
 
 class AndNode extends ASTNodeBase {
   constructor(
-    readonly andSourceSpan: SourceSpan,
     readonly args: ASTNodeBase[],
     readonly sourceSpan: SourceSpan
   ) {
@@ -70,7 +69,10 @@ class AndNode extends ASTNodeBase {
       if (result === R_FALSE) { return result; }
     }
     if (!isRBoolean(result)) {
-      throw new StageError(FA_QUESTION_NOT_BOOL_ERR("and", result.stringify()), this.andSourceSpan);
+      throw new StageError(
+        FA_QUESTION_NOT_BOOL_ERR("and", result.stringify()),
+        this.sourceSpan
+      );
     }
     return result;
   }
@@ -117,7 +119,6 @@ class FunAppNode extends ASTNodeBase {
 
 class OrNode extends ASTNodeBase {
   constructor(
-    readonly orSourceSpan: SourceSpan,
     readonly args: ASTNode[],
     readonly sourceSpan: SourceSpan
   ) {
@@ -131,7 +132,10 @@ class OrNode extends ASTNodeBase {
       if (result !== R_FALSE) { break; }
     }
     if (!isRBoolean(result)) {
-      throw new StageError(FA_QUESTION_NOT_BOOL_ERR("or", result.stringify()), this.orSourceSpan);
+      throw new StageError(
+        FA_QUESTION_NOT_BOOL_ERR("or", result.stringify()),
+        this.sourceSpan
+      );
     }
     return result;
   }
