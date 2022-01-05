@@ -12,6 +12,7 @@ import {
 import {
   isRBoolean,
   isRCallable,
+  isRTrue,
   RValue,
   R_FALSE,
   R_TRUE
@@ -32,6 +33,7 @@ export {
   EllipsisNode,
   ExprNode,
   FunAppNode,
+  IfNode,
   OrNode,
   VarDefnNode,
   VarNode,
@@ -47,6 +49,7 @@ type ExprNode =
   | AtomNode
   | EllipsisNode
   | FunAppNode
+  | IfNode
   | OrNode
   | VarNode;
 
@@ -130,6 +133,33 @@ class FunAppNode extends ASTNodeBase {
         FC_EXPECTED_FUNCTION_ERR("variable"),
         NO_SOURCE_SPAN
       );
+    }
+  }
+}
+
+class IfNode extends ASTNodeBase {
+  constructor(
+    readonly question: ASTNode,
+    readonly trueAnswer: ASTNode,
+    readonly falseAnswer: ASTNode,
+    readonly sourceSpan: SourceSpan,
+    readonly isTemplate: boolean
+  ) {
+    super(sourceSpan, isTemplate);
+  }
+
+  eval(env: Environment): RValue {
+    const questionResult = this.question.eval(env);
+    if (!isRBoolean(questionResult)) {
+      throw new StageError(
+        FA_QUESTION_NOT_BOOL_ERR("if", questionResult.stringify()),
+        this.sourceSpan
+      );
+    }
+    if (isRTrue(questionResult)) {
+      return this.trueAnswer.eval(env);
+    } else {
+      return this.falseAnswer.eval(env);
     }
   }
 }

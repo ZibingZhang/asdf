@@ -13,6 +13,7 @@ export {
   FA_NTH_WRONG_TYPE_ERR,
   FA_QUESTION_NOT_BOOL_ERR,
   FC_EXPECTED_FUNCTION_ERR,
+  IF_EXPECTED_THREE_PARTS,
   QU_EXPECTED_POST_QUOTE_ERR,
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
@@ -61,6 +62,18 @@ const FA_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {
 
 const FC_EXPECTED_FUNCTION_ERR = (found: string | null = null) => {
   return `function call: expected a function after the open parenthesis, but ${found ? `found a ${found}`: "nothing's there"}`;
+};
+
+const IF_EXPECTED_THREE_PARTS = (parts: number) => {
+  if (parts === 0) {
+    return "if: expected a question and two answers, but nothing's there";
+  } else if (parts === 1) {
+    return "if: expected a question and two answers, but found only 1 part";
+  } else if (parts === 2) {
+    return "if: expected a question and two answers, but found only 2 parts";
+  } else {
+    return `if: expected a question and two answers, but found ${parts} parts`;
+  }
 };
 
 const QU_EXPECTED_POST_QUOTE_ERR = (found: string) => {

@@ -27,7 +27,8 @@ export {
   RValue,
   isRBoolean,
   isRCallable,
-  isRData
+  isRData,
+  isRTrue
 };
 
 // https://stackoverflow.com/questions/17445231/js-how-to-find-the-greatest-common-divisor
@@ -161,6 +162,10 @@ function isRBoolean(rval: RValue): rval is RBoolean {
   return rval instanceof RBoolean;
 }
 
+function isRCallable(rval: RValue): rval is RCallable {
+  return "call" in rval;
+}
+
 function isRData(rval: RValue): rval is RData {
   return !Object.prototype.hasOwnProperty.call(rval, "call");
 }
@@ -169,8 +174,8 @@ function isRNumber(rval: RValue): rval is RNumber {
   return rval instanceof RNumber;
 }
 
-function isRCallable(rval: RValue): rval is RCallable {
-  return "call" in rval;
+function isRTrue(rval: RBoolean): boolean {
+  return rval === R_TRUE;
 }
 
 abstract class RMath {

@@ -6,6 +6,7 @@ import {
   EllipsisNode,
   ExprNode,
   FunAppNode,
+  IfNode,
   isDefnNode,
   OrNode,
   VarDefnNode,
@@ -44,6 +45,7 @@ import {
   EL_EXPECT_FINISHED_EXPR_ERR,
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
+  IF_EXPECTED_THREE_PARTS,
   QU_EXPECTED_POST_QUOTE_ERR,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
@@ -200,6 +202,21 @@ class WellFormedSyntax implements Stage {
                 );
               }
               return this.toDefnNode(sexpr);
+            }
+            case "if": {
+              if (sexpr.tokens.length - 1 !== 3) {
+                throw new StageError(
+                  IF_EXPECTED_THREE_PARTS(sexpr.tokens.length - 1),
+                  sexpr.sourceSpan
+                );
+              }
+              return new IfNode(
+                this.toNode(sexpr.tokens[1]),
+                this.toNode(sexpr.tokens[2]),
+                this.toNode(sexpr.tokens[3]),
+                sexpr.sourceSpan,
+                this.inTemplate
+              );
             }
             case "or": {
               if (sexpr.tokens.length - 1 < 2) {
