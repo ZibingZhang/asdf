@@ -104,14 +104,14 @@ class Lexer implements Stage {
     let quoteSourceSpan = NO_SOURCE_SPAN;
     let expectingElementToQuote = false;
     let sexprCommentSourceSpan = NO_SOURCE_SPAN;
-    let expectingSExprToComment = false;
-    let commentingListSExpr = false;
+    let sexprToCommentCount = 0;
+    let sexprToCommentCountStack: number[] = [];
 
     const addToken = (lineno: number, colno: number, type: TokenType, text: string) => {
       const token = new Token(type, text, new SourceSpan(lineno, colno, lineno, colno + text.length));
       let sexpr: SExpr = new AtomSExpr(token, token.sourceSpan);
-      if (expectingSExprToComment) {
-        expectingSExprToComment = false;
+      if (sexprToCommentCount > 0) {
+        sexprToCommentCount--;
       } else {
         if (expectingElementToQuote) {
           sexpr = new ListSExpr(
@@ -171,11 +171,12 @@ class Lexer implements Stage {
       }
     };
     const addLeftParenToken = (lineno: number, colno: number, paren: string) => {
-      if (expectingSExprToComment) {
-        expectingSExprToComment = false;
-        commentingListSExpr = true;
+      if (sexprToCommentCount > 0) {
+        sexprToCommentCountStack.push(sexprToCommentCount);
+        sexprToCommentCount = 0;
+      } else {
+        sexprStack.push([]);
       }
-      sexprStack.push([]);
       parenStack.push(new Token(TokenType.LEFT_PAREN, paren, new SourceSpan(lineno, colno, lineno, colno + 1)));
       text = "";
     };
@@ -190,6 +191,9 @@ class Lexer implements Stage {
           RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR(opening?.text, paren),
           new SourceSpan(lineno, colno, lineno, colno + 1)
         );
+      } else if (sexprToCommentCountStack.length > 0) {
+        sexprToCommentCount = <number>sexprToCommentCountStack.pop();
+        sexprToCommentCount--;
       } else {
         let sexpr: SExpr = new ListSExpr(
           sexprStack.pop() || [],
@@ -200,36 +204,32 @@ class Lexer implements Stage {
             colno + 1
           )
         );
-        if (commentingListSExpr) {
-          commentingListSExpr = false;
-        } else {
-          if (expectingElementToQuote) {
-            sexpr = new ListSExpr(
-              [
-                new AtomSExpr(
-                  new Token(
-                    TokenType.NAME,
-                    "quote",
-                    NO_SOURCE_SPAN
-                  ),
+        if (expectingElementToQuote) {
+          sexpr = new ListSExpr(
+            [
+              new AtomSExpr(
+                new Token(
+                  TokenType.NAME,
+                  "quote",
                   NO_SOURCE_SPAN
                 ),
-                sexpr
-              ],
-              new SourceSpan(
-                quoteSourceSpan.startLineno,
-                quoteSourceSpan.startColno,
-                lineno,
-                colno + 1
-              )
-            );
-            expectingElementToQuote = false;
-          }
-          if (sexprStack.length === 0) {
-            sexprs.push(sexpr);
-          } else {
-            sexprStack[sexprStack.length - 1].push(sexpr);
-          }
+                NO_SOURCE_SPAN
+              ),
+              sexpr
+            ],
+            new SourceSpan(
+              quoteSourceSpan.startLineno,
+              quoteSourceSpan.startColno,
+              lineno,
+              colno + 1
+            )
+          );
+          expectingElementToQuote = false;
+        }
+        if (sexprStack.length === 0) {
+          sexprs.push(sexpr);
+        } else {
+          sexprStack[sexprStack.length - 1].push(sexpr);
         }
         text = "";
       }
@@ -257,8 +257,8 @@ class Lexer implements Stage {
           } else if (ch === "#") {
             if (this.match(";")) {
               colno++;
-              expectingSExprToComment = true;
               sexprCommentSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 2);
+              sexprToCommentCount++;
             } else if (this.match("|")) {
               colno++;
               blockCommentDepth = 0;
@@ -291,11 +291,7 @@ class Lexer implements Stage {
         case State.BLOCK_COMMENT_PIPE: {
           if (ch === "#") {
             if (blockCommentDepth === 0) {
-              if (expectingElementToQuote) {
-                state = State.QUOTE;
-              } else {
-                state = State.INIT;
-              }
+              state = State.INIT;
             } else {
               blockCommentDepth--;
               state = State.BLOCK_COMMENT;
@@ -318,11 +314,7 @@ class Lexer implements Stage {
 
         case State.LINE_COMMENT: {
           if (ch === "\n") {
-            if (expectingElementToQuote) {
-              state = State.QUOTE;
-            } else {
-              state = State.INIT;
-            }
+            state = State.INIT;
           }
           break;
         }
@@ -436,7 +428,7 @@ class Lexer implements Stage {
 
         case State.QUOTE: {
           text = ch;
-          if (!expectingSExprToComment) { expectingElementToQuote = true; }
+          if (!sexprToCommentCount) { expectingElementToQuote = true; }
           if (ch.match(QUASI_QUOTE_RE)) {
             throw new StageError(
               RS_QUASI_QUOTE_UNSUPPORTED_ERR,
@@ -556,7 +548,7 @@ class Lexer implements Stage {
       );
     }
 
-    if (expectingSExprToComment && sexprCommentSourceSpan.comesAfter(errorSourceSpan)) {
+    if (sexprToCommentCount > 0 && sexprCommentSourceSpan.comesAfter(errorSourceSpan)) {
       error = new StageError(
         RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
         new SourceSpan(sexprCommentSourceSpan.startLineno, sexprCommentSourceSpan.startColno, lineno, colno)
