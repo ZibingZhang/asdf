@@ -5,6 +5,7 @@ import {
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
   RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR,
+  RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
   RS_ILLEGAL_USE_OF_DOT_ERR,
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
@@ -100,8 +101,8 @@ class Lexer implements Stage {
     let colno = 0;
 
     let blockCommentDepth = 0;
-    let expectingElementToQuote = false;
     let quoteSourceSpan = NO_SOURCE_SPAN;
+    let expectingElementToQuote = false;
     let sexprCommentSourceSpan = NO_SOURCE_SPAN;
     let expectingSExprToComment = false;
     let commentingListSExpr = false;
@@ -200,7 +201,7 @@ class Lexer implements Stage {
           )
         );
         if (commentingListSExpr) {
-          // skip
+          commentingListSExpr = false;
         } else {
           if (expectingElementToQuote) {
             sexpr = new ListSExpr(
@@ -255,9 +256,11 @@ class Lexer implements Stage {
             state = State.STRING;
           } else if (ch === "#") {
             if (this.match(";")) {
+              colno++;
               expectingSExprToComment = true;
               sexprCommentSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 2);
             } else if (this.match("|")) {
+              colno++;
               blockCommentDepth = 0;
               state = State.BLOCK_COMMENT;
             } else if (this.peek(2).match(/!\/?/)) {
@@ -433,14 +436,17 @@ class Lexer implements Stage {
 
         case State.QUOTE: {
           text = ch;
-          expectingElementToQuote = true;
+          if (!expectingSExprToComment) { expectingElementToQuote = true; }
           if (ch.match(QUASI_QUOTE_RE)) {
             throw new StageError(
               RS_QUASI_QUOTE_UNSUPPORTED_ERR,
               new SourceSpan(lineno, colno, lineno, colno + 1)
             );
           } else if (ch.match(/\s/)) {
-            // skip
+            throw new StageError(
+              RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
+              new SourceSpan(lineno, colno - 1, lineno, colno)
+            );
           } else if (ch.match(LEFT_PAREN_RE)) {
             addLeftParenToken(lineno, colno, ch);
             state = State.INIT;
@@ -453,13 +459,20 @@ class Lexer implements Stage {
             state = State.STRING;
           } else if (ch === "#") {
             if (this.match(";")) {
-              expectingSExprToComment = true;
-              sexprCommentSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 2);
+              throw new StageError(
+                RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
+                new SourceSpan(lineno, colno - 1, lineno, colno)
+              );
             } else if (this.match("|")) {
-              blockCommentDepth = 0;
-              state = State.BLOCK_COMMENT;
+              throw new StageError(
+                RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
+                new SourceSpan(lineno, colno - 1, lineno, colno)
+              );
             } else if (this.peek(2).match(/!\/?/)) {
-              state = State.LINE_COMMENT;
+              throw new StageError(
+                RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
+                new SourceSpan(lineno, colno - 1, lineno, colno)
+              );
             } else {
               state = State.POUND;
             }
@@ -469,7 +482,10 @@ class Lexer implements Stage {
               new SourceSpan(lineno, colno, lineno, colno + 1)
             );
           } else if (ch === ";") {
-            state = State.LINE_COMMENT;
+            throw new StageError(
+              RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
+              new SourceSpan(lineno, colno - 1, lineno, colno)
+            );
           } else {
             state = State.NAME;
           }
@@ -529,26 +545,32 @@ class Lexer implements Stage {
       }
     }
 
-    if (expectingElementToQuote) {
-      throw new StageError(
+    let errorSourceSpan = NO_SOURCE_SPAN;
+    let error: StageError | false = false;
+
+    if (expectingElementToQuote && quoteSourceSpan.comesAfter(errorSourceSpan)) {
+      errorSourceSpan = quoteSourceSpan;
+      error = new StageError(
         RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR("end-of-file"),
         new SourceSpan(quoteSourceSpan.startLineno, quoteSourceSpan.startColno, lineno, colno)
       );
     }
 
-    if (expectingSExprToComment) {
-      throw new StageError(
+    if (expectingSExprToComment && sexprCommentSourceSpan.comesAfter(errorSourceSpan)) {
+      error = new StageError(
         RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
         new SourceSpan(sexprCommentSourceSpan.startLineno, sexprCommentSourceSpan.startColno, lineno, colno)
       );
     }
 
-    if ((opening = parenStack.pop())) {
-      throw new StageError(
+    if ((opening = parenStack.pop()) && opening.sourceSpan.comesAfter(errorSourceSpan)) {
+      error = new StageError(
         RS_EXPECTED_CLOSING_PAREN_ERR(opening.text),
         new SourceSpan(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.sourceSpan.startLineno, opening.sourceSpan.startColno + 1)
       );
     }
+
+    if (error) { throw error; }
 
     return sexprs;
   }
