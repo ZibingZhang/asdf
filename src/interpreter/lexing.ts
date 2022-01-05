@@ -42,7 +42,9 @@ const KEYWORDS = new Set(
     "cond",
     "define",
     "define-struct",
+    "else",
     "if",
+    "lambda",
     "or"
   ]
 );
@@ -431,7 +433,7 @@ class Lexer implements Stage {
         }
 
         case State.QUOTE: {
-          if (elementToQuoteCount > 0 || elementToQuoteCountStack.length > 0) {
+          if (elementToQuoteCount > 0) {
             throw new StageError(
               RS_NESTED_QUOTES_UNSUPPORTED_ERR,
               new SourceSpan(lineno, colno, lineno, colno + 1)
