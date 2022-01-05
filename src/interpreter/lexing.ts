@@ -102,7 +102,8 @@ class Lexer implements Stage {
 
     let blockCommentDepth = 0;
     let quoteSourceSpan = NO_SOURCE_SPAN;
-    let expectingElementToQuote = false;
+    let elementToQuoteCount = 0;
+    let elementToQuoteCountStack: number[] = [];
     let sexprCommentSourceSpan = NO_SOURCE_SPAN;
     let sexprToCommentCount = 0;
     let sexprToCommentCountStack: number[] = [];
@@ -113,7 +114,8 @@ class Lexer implements Stage {
       if (sexprToCommentCount > 0) {
         sexprToCommentCount--;
       } else {
-        if (expectingElementToQuote) {
+        if (elementToQuoteCount > 0) {
+          elementToQuoteCount--;
           sexpr = new ListSExpr(
             [
               new AtomSExpr(
@@ -133,7 +135,6 @@ class Lexer implements Stage {
               sexpr.sourceSpan.endColno
             )
           );
-          expectingElementToQuote = false;
         }
         if (sexprStack.length === 0) {
           sexprs.push(sexpr);
@@ -164,7 +165,7 @@ class Lexer implements Stage {
         }
       } else if (text.match(DECIMAL_RE)) {
         addToken(lineno, colno, TokenType.DECIMAL, text);
-      } else if (KEYWORDS.has(text)) {
+      } else if (KEYWORDS.has(text) && elementToQuoteCount === 0) {
         addToken(lineno, colno, TokenType.KEYWORD, text);
       } else {
         addToken(lineno, colno, TokenType.NAME, text);
@@ -175,6 +176,8 @@ class Lexer implements Stage {
         sexprToCommentCountStack.push(sexprToCommentCount);
         sexprToCommentCount = 0;
       } else {
+        elementToQuoteCountStack.push(elementToQuoteCount);
+        elementToQuoteCount = 0;
         sexprStack.push([]);
       }
       parenStack.push(new Token(TokenType.LEFT_PAREN, paren, new SourceSpan(lineno, colno, lineno, colno + 1)));
@@ -195,6 +198,7 @@ class Lexer implements Stage {
         sexprToCommentCount = <number>sexprToCommentCountStack.pop();
         sexprToCommentCount--;
       } else {
+        elementToQuoteCount = <number>elementToQuoteCountStack.pop();
         let sexpr: SExpr = new ListSExpr(
           sexprStack.pop() || [],
           new SourceSpan(
@@ -204,7 +208,8 @@ class Lexer implements Stage {
             colno + 1
           )
         );
-        if (expectingElementToQuote) {
+        if (elementToQuoteCount) {
+          elementToQuoteCount--;
           sexpr = new ListSExpr(
             [
               new AtomSExpr(
@@ -224,7 +229,6 @@ class Lexer implements Stage {
               colno + 1
             )
           );
-          expectingElementToQuote = false;
         }
         if (sexprStack.length === 0) {
           sexprs.push(sexpr);
@@ -427,8 +431,14 @@ class Lexer implements Stage {
         }
 
         case State.QUOTE: {
+          if (elementToQuoteCount > 0 || elementToQuoteCountStack.length > 0) {
+            throw new StageError(
+              RS_NESTED_QUOTES_UNSUPPORTED_ERR,
+              new SourceSpan(lineno, colno, lineno, colno + 1)
+            );
+          }
           text = ch;
-          if (!sexprToCommentCount) { expectingElementToQuote = true; }
+          elementToQuoteCount++;
           if (ch.match(QUASI_QUOTE_RE)) {
             throw new StageError(
               RS_QUASI_QUOTE_UNSUPPORTED_ERR,
@@ -540,7 +550,7 @@ class Lexer implements Stage {
     let errorSourceSpan = NO_SOURCE_SPAN;
     let error: StageError | false = false;
 
-    if (expectingElementToQuote && quoteSourceSpan.comesAfter(errorSourceSpan)) {
+    if (elementToQuoteCount > 0 && quoteSourceSpan.comesAfter(errorSourceSpan)) {
       errorSourceSpan = quoteSourceSpan;
       error = new StageError(
         RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR("end-of-file"),
