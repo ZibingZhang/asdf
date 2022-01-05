@@ -6,6 +6,7 @@ export {
   DF_FIRST_ARG_ERR,
   DF_NO_SECOND_ARG_ERR,
   DF_TOO_MANY_ARGS_ERR,
+  EL_EXPECT_FINISHED_EXPR_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
@@ -18,6 +19,7 @@ export {
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
   RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR,
+  RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
   RS_ILLEGAL_USE_OF_DOT_ERR,
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
@@ -38,6 +40,8 @@ const DF_NO_SECOND_ARG_ERR = (name: string) => {
 const DF_TOO_MANY_ARGS_ERR = (name: string, parts: number) => {
   return `define: expected only one expression after the variable name ${name}, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
+
+const EL_EXPECT_FINISHED_EXPR_ERR = "...: expected a finished expression, but found a template";
 
 const FA_DIV_BY_ZERO_ERR = "/: division by zero";
 const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
@@ -86,6 +90,7 @@ const RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR = (opening: string | null, found: st
 const RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR = (found: string) => {
   return `read-syntax: expected an element for quoting "'", but found ${found}`;
 };
+const RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR = "read-syntax: expected an element for quoting immediately after quote";
 const RS_ILLEGAL_USE_OF_DOT_ERR = "read-syntax: illegal use of `.`";
 const RS_NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes are not supported";
 const RS_QUASI_QUOTE_UNSUPPORTED_ERR = "read-syntax: quasiquotes are not supported";

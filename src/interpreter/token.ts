@@ -46,6 +46,8 @@ function tokenTypeName(type: TokenType): string {
       return "number";
     case TokenType.KEYWORD:
       return "keyword";
+    case TokenType.PLACEHOLDER:
+      return "template";
     default:
       throw "illegal state: unsupported token type";
   }

@@ -29,6 +29,7 @@ export {
   AndNode,
   AtomNode,
   DefnNode,
+  EllipsisNode,
   ExprNode,
   FunAppNode,
   OrNode,
@@ -44,12 +45,16 @@ type DefnNode = VarDefnNode;
 type ExprNode =
   | AndNode
   | AtomNode
+  | EllipsisNode
   | FunAppNode
   | OrNode
   | VarNode;
 
 abstract class ASTNodeBase {
-  constructor(readonly sourceSpan: SourceSpan) {};
+  constructor(
+    readonly sourceSpan: SourceSpan,
+    readonly isTemplate: boolean = false,
+  ) {};
 
   abstract eval(env: Environment): RValue;
 }
@@ -57,9 +62,10 @@ abstract class ASTNodeBase {
 class AndNode extends ASTNodeBase {
   constructor(
     readonly args: ASTNodeBase[],
-    readonly sourceSpan: SourceSpan
+    readonly sourceSpan: SourceSpan,
+    readonly isTemplate: boolean
   ) {
-    super(sourceSpan);
+    super(sourceSpan, isTemplate);
   }
 
   eval(env: Environment): RValue {
@@ -91,13 +97,24 @@ class AtomNode extends ASTNodeBase {
   }
 }
 
+class EllipsisNode extends ASTNodeBase {
+  constructor(readonly sourceSpan: SourceSpan) {
+    super(sourceSpan, true);
+  }
+
+  eval(_: Environment): RValue {
+    throw "illegal state: evaluating ellipsis";
+  }
+}
+
 class FunAppNode extends ASTNodeBase {
   constructor(
     readonly fn: VarNode,
     readonly args: ASTNode[],
-    readonly sourceSpan: SourceSpan
+    readonly sourceSpan: SourceSpan,
+    readonly isTemplate: boolean
   ) {
-    super(sourceSpan);
+    super(sourceSpan, isTemplate);
   }
 
   eval(env: Environment): RValue {
@@ -120,9 +137,10 @@ class FunAppNode extends ASTNodeBase {
 class OrNode extends ASTNodeBase {
   constructor(
     readonly args: ASTNode[],
-    readonly sourceSpan: SourceSpan
+    readonly sourceSpan: SourceSpan,
+    readonly isTemplate: boolean
   ) {
-    super(sourceSpan);
+    super(sourceSpan, isTemplate);
   }
 
   eval(env: Environment): RValue {

@@ -3,6 +3,7 @@ import {
   ASTNode,
   AtomNode,
   DefnNode,
+  EllipsisNode,
   ExprNode,
   FunAppNode,
   isDefnNode,
@@ -39,6 +40,7 @@ import {
   DF_FIRST_ARG_ERR,
   DF_NO_SECOND_ARG_ERR,
   DF_TOO_MANY_ARGS_ERR,
+  EL_EXPECT_FINISHED_EXPR_ERR,
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
@@ -58,6 +60,7 @@ export {
 
 class WellFormedSyntax implements Stage {
   level: number = 0;
+  inTemplate: boolean = false;
 
   run(input: StageOutput): StageOutput {
     this.level = 0;
@@ -77,6 +80,7 @@ class WellFormedSyntax implements Stage {
     const defns: DefnNode[] = [];
     const exprs: ExprNode[] = [];
     for (const sexpr of sexprs) {
+      this.inTemplate = false;
       const node = this.toNode(sexpr);
       nodes.push(this.toNode(sexpr));
       if (isDefnNode(node)) {
@@ -88,14 +92,14 @@ class WellFormedSyntax implements Stage {
     return new Program(defns, exprs, nodes);
   }
 
-  private toNode(sexpr: SExpr): ASTNode {
+  private toNode(sexpr: SExpr, expectFinishedExpr: boolean = true): ASTNode {
     this.level++;
-    const node = this.toNodeHelper(sexpr);
+    const node = this.toNodeHelper(sexpr, expectFinishedExpr);
     this.level--;
     return node;
   }
 
-  private toNodeHelper(sexpr: SExpr): ASTNode {
+  private toNodeHelper(sexpr: SExpr, expectFinishedExpr: boolean): ASTNode {
     if (isAtomSExpr(sexpr)) {
       switch (sexpr.token.type) {
         case TokenType.TRUE: {
@@ -146,6 +150,10 @@ class WellFormedSyntax implements Stage {
             sexpr.sourceSpan
           );
         }
+        case TokenType.PLACEHOLDER: {
+          this.inTemplate = true;
+          return new EllipsisNode(sexpr.sourceSpan);
+        }
         default:
           throw "something?";
       }
@@ -164,7 +172,8 @@ class WellFormedSyntax implements Stage {
             return new FunAppNode(
               new VarNode(leadingSExpr),
               sexpr.tokens.slice(1).map(token => this.toNode(token)),
-              sexpr.sourceSpan
+              sexpr.sourceSpan,
+              this.inTemplate
             );
           }
         } else if (leadingSExpr.token.type === TokenType.KEYWORD) {
@@ -178,7 +187,8 @@ class WellFormedSyntax implements Stage {
               }
               return new AndNode(
                 sexpr.tokens.slice(1).map(token => this.toNode(token)),
-                sexpr.sourceSpan
+                sexpr.sourceSpan,
+                this.inTemplate
               );
             }
             case "define": {
@@ -199,12 +209,21 @@ class WellFormedSyntax implements Stage {
               }
               return new OrNode(
                 sexpr.tokens.slice(1).map(token => this.toNode(token)),
-                sexpr.sourceSpan
+                sexpr.sourceSpan,
+                this.inTemplate
               );
             }
             default:
               throw "illegal state: non-existent keyword";
           }
+        } else if (leadingSExpr.token.type === TokenType.PLACEHOLDER) {
+          this.inTemplate = true;
+          return new FunAppNode(
+            new VarNode(leadingSExpr),
+            sexpr.tokens.slice(1).map(token => this.toNode(token)),
+            sexpr.sourceSpan,
+            this.inTemplate
+          );
         } else {
           throw new StageError(
             FC_EXPECTED_FUNCTION_ERR(tokenTypeName(leadingSExpr.token.type)),
@@ -307,6 +326,7 @@ class Scope {
 
 class WellFormedProgram implements Stage {
   scope: Scope = new Scope();
+  allowTemplate: boolean = false;
 
   run(input: StageOutput): StageOutput {
     this.scope = new Scope();
@@ -333,14 +353,13 @@ class WellFormedProgram implements Stage {
   }
 
   private wellFormedNode(node: ASTNode) {
-    if (node instanceof VarNode) {
-      if (!this.scope.contains(node.name.token.text)) {
-        throw new StageError(
-          SC_UNDEFINED_VARIABLE_ERR(node.name.token.text),
-          node.sourceSpan
-        );
-      }
-    } else if (node instanceof FunAppNode) {
+    if (!this.allowTemplate && node.isTemplate) {
+      throw new StageError(
+        EL_EXPECT_FINISHED_EXPR_ERR,
+        node.sourceSpan
+      );
+    }
+    if (node instanceof FunAppNode) {
       if (!this.scope.contains(node.fn.name.token.text)) {
         throw new StageError(
           SC_UNDEFINED_FUNCTION_ERR(node.fn.name.token.text),
@@ -348,6 +367,15 @@ class WellFormedProgram implements Stage {
         );
       }
       node.args.forEach(arg => this.wellFormedNode(arg));
+    } else if (node instanceof VarDefnNode) {
+      this.wellFormedNode(node.value);
+    } else if (node instanceof VarNode) {
+      if (!this.scope.contains(node.name.token.text)) {
+        throw new StageError(
+          SC_UNDEFINED_VARIABLE_ERR(node.name.token.text),
+          node.sourceSpan
+        );
+      }
     }
   }
 }
