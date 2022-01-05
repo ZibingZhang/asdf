@@ -39,6 +39,7 @@ import {
 import {
   DF_FIRST_ARG_ERR,
   DF_NO_SECOND_ARG_ERR,
+  DF_PREVIOUSLY_DEFINED_NAME,
   DF_TOO_MANY_ARGS_ERR,
   EL_EXPECT_FINISHED_EXPR_ERR,
   FA_MIN_ARITY_ERR,
@@ -319,19 +320,21 @@ class Scope {
     this.names.add(name);
   }
 
-  contains(name: string): boolean {
-    return this.names.has(name) || (this.parentScope && this.parentScope.contains(name));
+  has(name: string): boolean {
+    return this.names.has(name) || (this.parentScope && this.parentScope.has(name));
   }
 }
 
 class WellFormedProgram implements Stage {
-  scope: Scope = new Scope();
+  globalScope: Scope = new Scope();
+  executionScope: Scope = new Scope();
   allowTemplate = false;
 
   run(input: StageOutput): StageOutput {
-    this.scope = new Scope();
+    this.globalScope = new Scope();
+    this.executionScope = new Scope();
     for (const name of PRIMITIVE_ENVIRONMENT.names()) {
-      this.scope.add(name);
+      this.globalScope.add(name);
     }
     try {
       this.wellFormedProgram(input.output);
@@ -346,7 +349,7 @@ class WellFormedProgram implements Stage {
   }
 
   private wellFormedProgram(program: Program) {
-    program.defns.forEach(defn => this.scope.add(defn.name.token.text));
+    program.defns.forEach(defn => this.globalScope.add(defn.name.token.text));
     for (const node of program.nodes) {
       this.wellFormedNode(node);
     }
@@ -359,8 +362,9 @@ class WellFormedProgram implements Stage {
         node.sourceSpan
       );
     }
+
     if (node instanceof FunAppNode) {
-      if (!this.scope.contains(node.fn.name.token.text)) {
+      if (!this.scopeHas(node.fn.name.token.text)) {
         throw new StageError(
           SC_UNDEFINED_FUNCTION_ERR(node.fn.name.token.text),
           node.fn.sourceSpan
@@ -368,14 +372,29 @@ class WellFormedProgram implements Stage {
       }
       node.args.forEach(arg => this.wellFormedNode(arg));
     } else if (node instanceof VarDefnNode) {
+      if (this.executionScopeHas(node.name.token.text)) {
+        throw new StageError(
+          DF_PREVIOUSLY_DEFINED_NAME(node.name.token.text),
+          node.name.sourceSpan
+        );
+      }
+      this.executionScope.add(node.name.token.text);
       this.wellFormedNode(node.value);
     } else if (node instanceof VarNode) {
-      if (!this.scope.contains(node.name.token.text)) {
+      if (!this.scopeHas(node.name.token.text)) {
         throw new StageError(
           SC_UNDEFINED_VARIABLE_ERR(node.name.token.text),
           node.sourceSpan
         );
       }
     }
+  }
+
+  private scopeHas(name: string): boolean {
+    return this.globalScope.has(name) || this.executionScope.has(name);
+  }
+
+  private executionScopeHas(name: string): boolean {
+    return this.executionScope.has(name);
   }
 }

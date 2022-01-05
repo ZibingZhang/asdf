@@ -6,6 +6,7 @@ export {
   DF_FIRST_ARG_ERR,
   DF_NO_SECOND_ARG_ERR,
   DF_TOO_MANY_ARGS_ERR,
+  DF_PREVIOUSLY_DEFINED_NAME,
   EL_EXPECT_FINISHED_EXPR_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
@@ -27,6 +28,7 @@ export {
   RS_UNEXPECTED_ERR,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
+  SC_USED_BEFORE_DEFINITION,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR
 };
@@ -40,6 +42,9 @@ const DF_NO_SECOND_ARG_ERR = (name: string) => {
 const DF_TOO_MANY_ARGS_ERR = (name: string, parts: number) => {
   return `define: expected only one expression after the variable name ${name}, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
+const DF_PREVIOUSLY_DEFINED_NAME = (name: string) => {
+  return `${name}: this name was defined previously and cannot be re-defined`;
+}
 
 const EL_EXPECT_FINISHED_EXPR_ERR = "...: expected a finished expression, but found a template";
 
@@ -103,8 +108,11 @@ const SC_UNDEFINED_FUNCTION_ERR = (name: string) => {
   return `${name}: this function is undefined`;
 };
 const SC_UNDEFINED_VARIABLE_ERR = (name: string) => {
-  return `${name}: this variable is undefined`;
+  return `${name}: this variable is not defined`;
 };
+const SC_USED_BEFORE_DEFINITION = (name: string) => {
+  return `${name} is used here before its definition`;
+}
 
 const SX_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
   return `${name}: expected an open parenthesis before ${name}, but found none`;
