@@ -64,7 +64,7 @@
     const replTextArea = document.getElementById("repl");
 
     const resetRepl = () => {
-      repl.setValue("> ");
+      repl.setValue("");
     }
     const appendToRepl = (text) => {
       repl.setValue(`${repl.getValue()}${text}\n> `);
@@ -103,7 +103,7 @@
         replTextArea.parentNode.replaceChild(elt, replTextArea);
       }, {
         tabSize: 2,
-        value: "> ",
+        value: "",
         mode: null,
         theme: "monokai",
         readOnly: true,
