@@ -13,7 +13,7 @@ CodeMirror.defineMode("racket", function (config) {
   let openBrackets = "([{";
   let closeBrackets = ")]}";
   let booleanLiteral = /^(T|t|true|F|f|false)$/;
-  let specialForm = /^(and|check-expect|check-random|check-within|check-member-of|check-range|check-satisfied|check-error|cond|define|define-struct|if|lambda|or|quote|require)$/;
+  // let specialForm = /^(and|check-expect|check-random|check-within|check-member-of|check-range|check-satisfied|check-error|cond|define|define-struct|if|lambda|or|quote|require)$/;
   let numLiteral = /^[+\-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
 
   // unclosed block comments should be "error", but aren't
@@ -60,7 +60,7 @@ CodeMirror.defineMode("racket", function (config) {
     }
 
     let name = ch + stream.match(untilDelimiter);
-    if (name.match(specialForm)) { return "keyword"; }
+    // if (name.match(specialForm)) { return "keyword"; }
     if (name.match(numLiteral)) { return "number"; }
     if (name === "...") return "punctuation";
     return null;
