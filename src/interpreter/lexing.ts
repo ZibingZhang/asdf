@@ -103,10 +103,10 @@ class Lexer implements Stage {
     let blockCommentDepth = 0;
     let quoteSourceSpan = NO_SOURCE_SPAN;
     let elementToQuoteCount = 0;
-    let elementToQuoteCountStack: number[] = [];
+    const elementToQuoteCountStack: number[] = [];
     let sexprCommentSourceSpan = NO_SOURCE_SPAN;
     let sexprToCommentCount = 0;
-    let sexprToCommentCountStack: number[] = [];
+    const sexprToCommentCountStack: number[] = [];
 
     const addToken = (lineno: number, colno: number, type: TokenType, text: string) => {
       const token = new Token(type, text, new SourceSpan(lineno, colno, lineno, colno + text.length));

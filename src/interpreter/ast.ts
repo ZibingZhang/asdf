@@ -53,8 +53,8 @@ type ExprNode =
 abstract class ASTNodeBase {
   constructor(
     readonly sourceSpan: SourceSpan,
-    readonly isTemplate: boolean = false,
-  ) {};
+    readonly isTemplate: boolean = false
+  ) {}
 
   abstract eval(env: Environment): RValue;
 }

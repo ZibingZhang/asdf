@@ -31,7 +31,7 @@ class RDivide extends RPrimFun {
             FA_DIV_BY_ZERO_ERR, sourceSpan
           );
         }
-        return RMath.div(<RNumber>prev, <RNumber>curr)
+        return RMath.div(<RNumber>prev, <RNumber>curr);
       },
       args[0]
     );

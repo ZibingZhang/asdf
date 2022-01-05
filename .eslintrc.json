@@ -16,23 +16,26 @@
     "@typescript-eslint"
   ],
   "rules": {
-    "indent": [
-      "error",
-      2,
-      { "SwitchCase": 1 }
-    ],
-    "quotes": [
-      "error",
-      "double"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ],
+    "camelcase": "error",
+    "comma-dangle": ["error", "never"],
+    "comma-spacing": ["error", {
+      "after": true,
+      "before": false
+    }],
+    "comma-style": "error",
+    "curly": "error",
+    "indent": ["error", 2, {
+      "SwitchCase": 1
+    }],
+    "no-unused-private-class-members": "error",
+    "no-var": "error",
+    "one-var": ["error", "never"],
+    "prefer-const": "error",
+    "quotes": ["error", "double"],
+    "semi": ["error", "always"],
     "@typescript-eslint/no-empty-interface": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      { "argsIgnorePattern": "^_" }
-    ]
+    "@typescript-eslint/no-unused-vars": ["error", {
+        "argsIgnorePattern": "^_"
+    }]
   }
 }

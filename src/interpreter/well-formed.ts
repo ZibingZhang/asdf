@@ -59,8 +59,8 @@ export {
 };
 
 class WellFormedSyntax implements Stage {
-  level: number = 0;
-  inTemplate: boolean = false;
+  level = 0;
+  inTemplate = false;
 
   run(input: StageOutput): StageOutput {
     this.level = 0;
@@ -92,14 +92,14 @@ class WellFormedSyntax implements Stage {
     return new Program(defns, exprs, nodes);
   }
 
-  private toNode(sexpr: SExpr, expectFinishedExpr: boolean = true): ASTNode {
+  private toNode(sexpr: SExpr): ASTNode {
     this.level++;
-    const node = this.toNodeHelper(sexpr, expectFinishedExpr);
+    const node = this.toNodeHelper(sexpr);
     this.level--;
     return node;
   }
 
-  private toNodeHelper(sexpr: SExpr, expectFinishedExpr: boolean): ASTNode {
+  private toNodeHelper(sexpr: SExpr): ASTNode {
     if (isAtomSExpr(sexpr)) {
       switch (sexpr.token.type) {
         case TokenType.TRUE: {
@@ -326,7 +326,7 @@ class Scope {
 
 class WellFormedProgram implements Stage {
   scope: Scope = new Scope();
-  allowTemplate: boolean = false;
+  allowTemplate = false;
 
   run(input: StageOutput): StageOutput {
     this.scope = new Scope();

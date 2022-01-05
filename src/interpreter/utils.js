@@ -4,8 +4,8 @@ export {
 
 // https://stackoverflow.com/questions/13627308/add-st-nd-rd-and-th-ordinal-suffix-to-a-number
 function ordinalSuffixOf(i) {
-  let j = i % 10;
-  let k = i % 100;
+  const j = i % 10;
+  const k = i % 100;
   if (j == 1 && k != 11) {
     return i + "st";
   }
