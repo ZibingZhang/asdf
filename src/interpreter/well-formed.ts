@@ -24,11 +24,11 @@ import {
 import {
   isAtomSExpr,
   ListSExpr,
-  SExpr
+  SExpr,
+  sexprTypeName
 } from "./sexpr.js";
 import {
-  TokenType,
-  tokenTypeName
+  TokenType
 } from "./token.js";
 import {
   RNumber,
@@ -43,7 +43,6 @@ import {
   DF_NO_SECOND_ARG_ERR,
   DF_PREVIOUSLY_DEFINED_NAME,
   DF_TOO_MANY_ARGS_ERR,
-  EL_EXPECT_FINISHED_EXPR_ERR,
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS,
@@ -232,13 +231,13 @@ class WellFormedSyntax implements Stage {
           }
         } else {
           throw new StageError(
-            FC_EXPECTED_FUNCTION_ERR(tokenTypeName(leadingSExpr.token.type)),
+            FC_EXPECTED_FUNCTION_ERR(sexprTypeName(leadingSExpr)),
             leadingSExpr.sourceSpan
           );
         }
       } else {
         throw new StageError(
-          FC_EXPECTED_FUNCTION_ERR("part"),
+          FC_EXPECTED_FUNCTION_ERR(sexprTypeName(leadingSExpr)),
           leadingSExpr.sourceSpan
         );
       }
@@ -256,7 +255,7 @@ class WellFormedSyntax implements Stage {
     if (isAtomSExpr(name)) {
       if (name.token.type !== TokenType.NAME) {
         throw new StageError(
-          DF_FIRST_ARG_ERR(tokenTypeName(name.token.type)),
+          DF_FIRST_ARG_ERR(sexprTypeName(name)),
           name.sourceSpan
         );
       }
@@ -304,14 +303,14 @@ class WellFormedSyntax implements Stage {
         );
       } else {
         throw new StageError(
-          QU_EXPECTED_POST_QUOTE_ERR(tokenTypeName(quotedSexpr.token.type)),
+          QU_EXPECTED_POST_QUOTE_ERR(sexprTypeName(sexpr)),
           sexpr.sourceSpan
         );
       }
     } else {
       if (quotedSexpr.tokens.length > 0) {
         throw new StageError(
-          QU_EXPECTED_POST_QUOTE_ERR("part"),
+          QU_EXPECTED_POST_QUOTE_ERR(sexprTypeName(sexpr)),
           sexpr.sourceSpan
         );
       } else {

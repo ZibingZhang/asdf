@@ -6,12 +6,10 @@ import {
 export {
   NO_TOKEN,
   Token,
-  TokenType,
-  tokenTypeName
+  TokenType
 };
 
 enum TokenType {
-  NONE = "NONE",
   LEFT_PAREN = "LEFT_PAREN",
   RIGHT_PAREN = "RIGHT_PAREN",
   TRUE = "TRUE",
@@ -33,22 +31,4 @@ class Token {
   ) {}
 }
 
-const NO_TOKEN = new Token(TokenType.NONE, "", NO_SOURCE_SPAN);
-
-function tokenTypeName(type: TokenType): string {
-  switch (type) {
-    case TokenType.TRUE:
-    case TokenType.FALSE:
-      return "boolean";
-    case TokenType.INTEGER:
-    case TokenType.RATIONAL:
-    case TokenType.DECIMAL:
-      return "number";
-    case TokenType.KEYWORD:
-      return "keyword";
-    case TokenType.PLACEHOLDER:
-      return "template";
-    default:
-      throw "illegal state: unsupported token type";
-  }
-}
+const NO_TOKEN = new Token(<TokenType><unknown>null, "", NO_SOURCE_SPAN);
