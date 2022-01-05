@@ -67,7 +67,7 @@
       repl.setValue("");
     }
     const appendToRepl = (text) => {
-      repl.setValue(`${repl.getValue()}${text}\n> `);
+      repl.setValue(`${repl.getValue()}${text}\n`);
     };
 
     const editor = CodeMirror(
