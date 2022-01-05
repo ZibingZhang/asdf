@@ -1,6 +1,4 @@
 import {
-  SC_UNDEFINED_FUNCTION_ERR,
-  SC_UNDEFINED_VARIABLE_ERR,
   SC_USED_BEFORE_DEFINITION
 } from "./error.js";
 import {
@@ -53,7 +51,7 @@ class Environment {
       throw new StageError(
         SC_USED_BEFORE_DEFINITION(name),
         sourceSpan
-      )
+      );
     } else {
       return this.parentEnv.get(type, name, sourceSpan);
     }

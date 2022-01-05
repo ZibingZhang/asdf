@@ -45,7 +45,7 @@ const DF_TOO_MANY_ARGS_ERR = (name: string, parts: number) => {
 };
 const DF_PREVIOUSLY_DEFINED_NAME = (name: string) => {
   return `${name}: this name was defined previously and cannot be re-defined`;
-}
+};
 
 const EL_EXPECT_FINISHED_EXPR_ERR = "...: expected a finished expression, but found a template";
 
@@ -125,7 +125,7 @@ const SC_UNDEFINED_VARIABLE_ERR = (name: string) => {
 };
 const SC_USED_BEFORE_DEFINITION = (name: string) => {
   return `${name} is used here before its definition`;
-}
+};
 
 const SX_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
   return `${name}: expected an open parenthesis before ${name}, but found none`;

@@ -3,6 +3,7 @@ import {
   EnvironmentValType
 } from "./environment.js";
 import {
+  EL_EXPECT_FINISHED_EXPR_ERR,
   FA_QUESTION_NOT_BOOL_ERR,
   FC_EXPECTED_FUNCTION_ERR
 } from "./error.js";
@@ -12,7 +13,9 @@ import {
 import {
   isRBoolean,
   isRCallable,
+  isRPrimFun,
   isRTrue,
+  RLambda,
   RValue,
   R_FALSE,
   R_TRUE
@@ -30,12 +33,13 @@ export {
   AndNode,
   AtomNode,
   DefnNode,
+  EllipsisFunAppNode,
   EllipsisNode,
   ExprNode,
   FunAppNode,
   IfNode,
+  LambdaNode,
   OrNode,
-  VarDefnNode,
   VarNode,
   isDefnNode
 };
@@ -43,10 +47,10 @@ export {
 type ASTNode =
   | DefnNode
   | ExprNode;
-type DefnNode = VarDefnNode;
 type ExprNode =
   | AndNode
   | AtomNode
+  | EllipsisFunAppNode
   | EllipsisNode
   | FunAppNode
   | IfNode
@@ -55,8 +59,7 @@ type ExprNode =
 
 abstract class ASTNodeBase {
   constructor(
-    readonly sourceSpan: SourceSpan,
-    readonly isTemplate: boolean = false
+    readonly sourceSpan: SourceSpan
   ) {}
 
   abstract eval(env: Environment): RValue;
@@ -65,10 +68,9 @@ abstract class ASTNodeBase {
 class AndNode extends ASTNodeBase {
   constructor(
     readonly args: ASTNodeBase[],
-    readonly sourceSpan: SourceSpan,
-    readonly isTemplate: boolean
+    readonly sourceSpan: SourceSpan
   ) {
-    super(sourceSpan, isTemplate);
+    super(sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -100,13 +102,29 @@ class AtomNode extends ASTNodeBase {
   }
 }
 
-class EllipsisNode extends ASTNodeBase {
+class EllipsisFunAppNode extends ASTNodeBase {
   constructor(readonly sourceSpan: SourceSpan) {
-    super(sourceSpan, true);
+    super(sourceSpan);
   }
 
   eval(_: Environment): RValue {
-    throw "illegal state: evaluating ellipsis";
+    throw new StageError(
+      EL_EXPECT_FINISHED_EXPR_ERR,
+      this.sourceSpan
+    );
+  }
+}
+
+class EllipsisNode extends ASTNodeBase {
+  constructor(readonly sourceSpan: SourceSpan) {
+    super(sourceSpan);
+  }
+
+  eval(_: Environment): RValue {
+    throw new StageError(
+      EL_EXPECT_FINISHED_EXPR_ERR,
+      this.sourceSpan
+    );
   }
 }
 
@@ -114,10 +132,9 @@ class FunAppNode extends ASTNodeBase {
   constructor(
     readonly fn: VarNode,
     readonly args: ASTNode[],
-    readonly sourceSpan: SourceSpan,
-    readonly isTemplate: boolean
+    readonly sourceSpan: SourceSpan
   ) {
-    super(sourceSpan, isTemplate);
+    super(sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -127,7 +144,15 @@ class FunAppNode extends ASTNodeBase {
       this.fn.name.sourceSpan
     );
     if (isRCallable(rval)) {
-      return rval.eval(env, this.args.map(node => node.eval(env)), this.sourceSpan);
+      if (isRPrimFun(rval)) {
+        return rval.eval(env, this.args.map(node => node.eval(env)), this.sourceSpan);
+      } else {
+        const childEnv = new Environment();
+        for (let idx = 0; idx < this.args.length; idx++) {
+          childEnv.set(rval.params[idx], this.args[idx].eval(env));
+        }
+        return rval.eval(childEnv);
+      }
     } else {
       throw new StageError(
         FC_EXPECTED_FUNCTION_ERR("variable"),
@@ -142,10 +167,9 @@ class IfNode extends ASTNodeBase {
     readonly question: ASTNode,
     readonly trueAnswer: ASTNode,
     readonly falseAnswer: ASTNode,
-    readonly sourceSpan: SourceSpan,
-    readonly isTemplate: boolean
+    readonly sourceSpan: SourceSpan
   ) {
-    super(sourceSpan, isTemplate);
+    super(sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -164,13 +188,26 @@ class IfNode extends ASTNodeBase {
   }
 }
 
+class LambdaNode extends ASTNodeBase {
+  constructor(
+    readonly params: string[],
+    readonly body: ASTNode,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  eval(_: Environment): RValue {
+    return new RLambda(this.params, this.body);
+  }
+}
+
 class OrNode extends ASTNodeBase {
   constructor(
     readonly args: ASTNode[],
     readonly sourceSpan: SourceSpan,
-    readonly isTemplate: boolean
   ) {
-    super(sourceSpan, isTemplate);
+    super(sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -205,13 +242,8 @@ class VarNode extends ASTNodeBase {
   }
 }
 
-abstract class DefnNodeBase extends ASTNodeBase {
-  abstract run(env: Environment): void;
-}
-
-class VarDefnNode extends DefnNodeBase {
+class DefnNode extends ASTNodeBase {
   constructor(
-    readonly defineSourceSpan: SourceSpan,
     readonly name: AtomSExpr,
     readonly value: ASTNode,
     readonly sourceSpan: SourceSpan
@@ -229,5 +261,5 @@ class VarDefnNode extends DefnNodeBase {
 }
 
 function isDefnNode(node: ASTNode): node is DefnNode {
-  return node instanceof VarDefnNode;
+  return node instanceof DefnNode;
 }

@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import {
+  ASTNode
+} from "./ast.js";
 import {
   Environment
 } from "./environment.js";
@@ -17,6 +22,7 @@ export {
   R_FALSE,
   R_TRUE,
   RData,
+  RLambda,
   RList,
   RMath,
   RNumber,
@@ -28,6 +34,7 @@ export {
   isRBoolean,
   isRCallable,
   isRData,
+  isRPrimFun,
   isRTrue
 };
 
@@ -40,6 +47,7 @@ function gcd(a: bigint, b: bigint): bigint {
 }
 
 type RValue = RData | RCallable;
+type RCallable = RLambda | RPrimFun;
 
 interface RValBase {
   stringify(): string;
@@ -106,16 +114,29 @@ class RList implements RData {
   }
 }
 
-interface RCallable extends RValBase {
-  eval(env: Environment, args: RValue[], sourceSpan: SourceSpan): RValue;
-}
+interface RCallableBase extends RValBase {}
 
 interface RPrimFunConfig {
   minArity?: number,
   allArgsTypeName?: string
 }
 
-class RPrimFun implements RCallable {
+class RLambda implements RCallableBase {
+  constructor(
+    readonly params: string[],
+    readonly body: ASTNode
+  ) {}
+
+  eval(env: Environment): RValue {
+    return this.body.eval(env);
+  }
+
+  stringify(): string {
+    throw "illegal state: cannot stringify a callable";
+  }
+}
+
+class RPrimFun implements RCallableBase {
   constructor(
     readonly name: string,
     readonly config: RPrimFunConfig
@@ -163,15 +184,19 @@ function isRBoolean(rval: RValue): rval is RBoolean {
 }
 
 function isRCallable(rval: RValue): rval is RCallable {
-  return "call" in rval;
+  return "eval" in rval;
 }
 
 function isRData(rval: RValue): rval is RData {
-  return !Object.prototype.hasOwnProperty.call(rval, "call");
+  return !Object.prototype.hasOwnProperty.call(rval, "eval");
 }
 
 function isRNumber(rval: RValue): rval is RNumber {
   return rval instanceof RNumber;
+}
+
+function isRPrimFun(rval: RCallable): rval is RPrimFun {
+  return rval instanceof RPrimFun;
 }
 
 function isRTrue(rval: RBoolean): boolean {

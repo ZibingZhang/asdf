@@ -3,13 +3,14 @@ import {
   ASTNode,
   AtomNode,
   DefnNode,
+  EllipsisFunAppNode,
   EllipsisNode,
   ExprNode,
   FunAppNode,
   IfNode,
   isDefnNode,
+  LambdaNode,
   OrNode,
-  VarDefnNode,
   VarNode
 } from "./ast.js";
 import {
@@ -63,7 +64,6 @@ export {
 
 class WellFormedSyntax implements Stage {
   level = 0;
-  inTemplate = false;
 
   run(input: StageOutput): StageOutput {
     this.level = 0;
@@ -83,7 +83,6 @@ class WellFormedSyntax implements Stage {
     const defns: DefnNode[] = [];
     const exprs: ExprNode[] = [];
     for (const sexpr of sexprs) {
-      this.inTemplate = false;
       const node = this.toNode(sexpr);
       nodes.push(this.toNode(sexpr));
       if (isDefnNode(node)) {
@@ -154,7 +153,6 @@ class WellFormedSyntax implements Stage {
           );
         }
         case TokenType.PLACEHOLDER: {
-          this.inTemplate = true;
           return new EllipsisNode(sexpr.sourceSpan);
         }
         default:
@@ -168,15 +166,16 @@ class WellFormedSyntax implements Stage {
           sexpr.sourceSpan
         );
       } else if (isAtomSExpr(leadingSExpr)) {
-        if (leadingSExpr.token.type === TokenType.NAME) {
+        if (leadingSExpr.token.type === TokenType.PLACEHOLDER) {
+          return new EllipsisFunAppNode(sexpr.sourceSpan);
+        } else if (leadingSExpr.token.type === TokenType.NAME) {
           if (leadingSExpr.token.text === "quote") {
             return this.toQuoteNode(sexpr, sexpr.tokens[1]);
           } else {
             return new FunAppNode(
               new VarNode(leadingSExpr),
               sexpr.tokens.slice(1).map(token => this.toNode(token)),
-              sexpr.sourceSpan,
-              this.inTemplate
+              sexpr.sourceSpan
             );
           }
         } else if (leadingSExpr.token.type === TokenType.KEYWORD) {
@@ -190,8 +189,7 @@ class WellFormedSyntax implements Stage {
               }
               return new AndNode(
                 sexpr.tokens.slice(1).map(token => this.toNode(token)),
-                sexpr.sourceSpan,
-                this.inTemplate
+                sexpr.sourceSpan
               );
             }
             case "define": {
@@ -214,8 +212,7 @@ class WellFormedSyntax implements Stage {
                 this.toNode(sexpr.tokens[1]),
                 this.toNode(sexpr.tokens[2]),
                 this.toNode(sexpr.tokens[3]),
-                sexpr.sourceSpan,
-                this.inTemplate
+                sexpr.sourceSpan
               );
             }
             case "or": {
@@ -227,21 +224,12 @@ class WellFormedSyntax implements Stage {
               }
               return new OrNode(
                 sexpr.tokens.slice(1).map(token => this.toNode(token)),
-                sexpr.sourceSpan,
-                this.inTemplate
+                sexpr.sourceSpan
               );
             }
             default:
               throw "illegal state: non-existent keyword";
           }
-        } else if (leadingSExpr.token.type === TokenType.PLACEHOLDER) {
-          this.inTemplate = true;
-          return new FunAppNode(
-            new VarNode(leadingSExpr),
-            sexpr.tokens.slice(1).map(token => this.toNode(token)),
-            sexpr.sourceSpan,
-            this.inTemplate
-          );
         } else {
           throw new StageError(
             FC_EXPECTED_FUNCTION_ERR(tokenTypeName(leadingSExpr.token.type)),
@@ -264,7 +252,7 @@ class WellFormedSyntax implements Stage {
         sexpr.sourceSpan
       );
     }
-    const name = sexpr.tokens[1];
+    let name = sexpr.tokens[1];
     if (isAtomSExpr(name)) {
       if (name.token.type !== TokenType.NAME) {
         throw new StageError(
@@ -284,14 +272,26 @@ class WellFormedSyntax implements Stage {
           sexpr.tokens[3].sourceSpan
         );
       }
-      return new VarDefnNode(
-        sexpr.tokens[0].sourceSpan,
+      return new DefnNode(
         name,
         this.toNode(sexpr.tokens[2]),
         sexpr.sourceSpan
       );
     } else {
-      throw "TODO: funs defs";
+      const nameAndArgs = name;
+      name = nameAndArgs.tokens[0];
+      if (isAtomSExpr(name)) {
+        return new DefnNode(
+          name,
+          new LambdaNode(
+            nameAndArgs.tokens.slice(1).map(arg => isAtomSExpr(arg) ? arg.token.text : ""),
+            this.toNode(sexpr.tokens[2]),
+            sexpr.sourceSpan
+          ),
+          sexpr.sourceSpan
+        )
+      }
+      throw "err";
     }
   }
 
@@ -373,22 +373,7 @@ class WellFormedProgram implements Stage {
   }
 
   private wellFormedNode(node: ASTNode) {
-    if (!this.allowTemplate && node.isTemplate) {
-      throw new StageError(
-        EL_EXPECT_FINISHED_EXPR_ERR,
-        node.sourceSpan
-      );
-    }
-
-    if (node instanceof FunAppNode) {
-      if (!this.scopeHas(node.fn.name.token.text)) {
-        throw new StageError(
-          SC_UNDEFINED_FUNCTION_ERR(node.fn.name.token.text),
-          node.fn.sourceSpan
-        );
-      }
-      node.args.forEach(arg => this.wellFormedNode(arg));
-    } else if (node instanceof VarDefnNode) {
+    if (node instanceof DefnNode) {
       if (this.executionScopeHas(node.name.token.text)) {
         throw new StageError(
           DF_PREVIOUSLY_DEFINED_NAME(node.name.token.text),
@@ -397,6 +382,14 @@ class WellFormedProgram implements Stage {
       }
       this.executionScope.add(node.name.token.text);
       this.wellFormedNode(node.value);
+    } else if (node instanceof FunAppNode) {
+      if (!this.scopeHas(node.fn.name.token.text)) {
+        throw new StageError(
+          SC_UNDEFINED_FUNCTION_ERR(node.fn.name.token.text),
+          node.fn.sourceSpan
+        );
+      }
+      node.args.forEach(arg => this.wellFormedNode(arg));
     } else if (node instanceof VarNode) {
       if (!this.scopeHas(node.name.token.text)) {
         throw new StageError(
