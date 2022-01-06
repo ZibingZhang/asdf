@@ -49,6 +49,9 @@
 
   <script type="text/javascript" src="./codemirror/mode/racket/racket.js"></script>
 
+  <script type="text/javascript" src="./codemirror/editor.js" defer></script>
+  <script type="text/javascript" src="./codemirror/repl.js" defer></script>
+
   <!-- Interpreter -->
   <script type="module" src="./interpreter/main.js"></script>
 </head>
@@ -58,57 +61,4 @@
     <textarea id="editor"></textarea>
     <textarea id="repl"></textarea>
   </div>
-
-  <script defer>
-    const editorTextArea = document.getElementById("editor");
-    const replTextArea = document.getElementById("repl");
-
-    const resetRepl = () => {
-      repl.setValue("");
-    }
-    const appendToRepl = (text) => {
-      repl.setValue(`${repl.getValue()}${text}\n`);
-    };
-
-    const editor = CodeMirror(
-      (elt) => {
-        editorTextArea.parentNode.replaceChild(elt, editorTextArea);
-      }, {
-        lineNumbers: true,
-        tabSize: 2,
-        value: "(+ 1 2)",
-        mode: "racket",
-        theme: "monokai",
-        extraKeys: {
-          "Alt-Enter": () => {
-            const result = window.pipelines.evaluateProgram.run(editor.getValue());
-            resetRepl();
-            if (result.errors.length > 0) {
-              for (const error of result.errors) {
-                const location = `${error.sourcespan.startLineno}:${error.sourcespan.startColno}`;
-                appendToRepl(`[${location}] ${error.msg}`);
-              }
-            } else {
-              for (const text of result.output) {
-                appendToRepl(text);
-              }
-            }
-          }
-        }
-      }
-    );
-
-    const repl = CodeMirror(
-      (elt) => {
-        replTextArea.parentNode.replaceChild(elt, replTextArea);
-      }, {
-        tabSize: 2,
-        value: "",
-        mode: null,
-        theme: "monokai",
-        readOnly: true,
-        lineWrapping: true
-      }
-    );
-  </script>
 </body>
