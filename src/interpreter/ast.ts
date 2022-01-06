@@ -155,7 +155,7 @@ class FunAppNode extends ASTNodeBase {
       }
     } else {
       throw new StageError(
-        FC_EXPECTED_FUNCTION_ERR("variable"),
+        FC_EXPECTED_FUNCTION_ERR(new String("variable")),
         NO_SOURCE_SPAN
       );
     }

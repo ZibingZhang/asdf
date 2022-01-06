@@ -27,7 +27,6 @@ import {
   SourceSpan
 } from "./sourcespan.js";
 import {
-  NO_TOKEN,
   Token,
   TokenType
 } from "./token.js";
@@ -191,7 +190,7 @@ class Lexer implements Stage {
           RS_UNEXPECTED_ERR(paren),
           new SourceSpan(lineno, colno, lineno, colno + 1)
         );
-      } else if (!this.matches((opening = parenStack.pop() || NO_TOKEN).text, paren)) {
+      } else if (!this.matches((opening = <Token>parenStack.pop()).text, paren)) {
         throw new StageError(
           RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR(opening?.text, paren),
           new SourceSpan(lineno, colno, lineno, colno + 1)

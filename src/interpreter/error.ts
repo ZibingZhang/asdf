@@ -1,12 +1,25 @@
 import {
+  isAtomSExpr,
+  SExpr
+} from "./sexpr.js";
+import {
+  TokenType
+} from "./token.js";
+import {
   ordinalSuffixOf
 } from "./utils.js";
 
 export {
+  DF_DUPLICATE_VARIABLE,
+  DF_EXPECTED_AT_LEAST_ONE_PARAM_ERR,
+  DF_EXPECTED_EXPR_ERR,
+  DF_EXPECTED_FUNCTION_BODY_ERR,
+  DF_EXPECTED_FUNCTION_NAME_ERR,
+  DF_EXPECTED_VARIABLE_ERR,
   DF_FIRST_ARG_ERR,
-  DF_NO_SECOND_ARG_ERR,
-  DF_TOO_MANY_ARGS_ERR,
-  DF_PREVIOUSLY_DEFINED_NAME,
+  DF_TOO_MANY_EXPRS_ERR,
+  DF_TOO_MANY_FUNCTION_BODIES_ERR,
+  DF_PREVIOUSLY_DEFINED_NAME_ERR,
   EL_EXPECT_FINISHED_EXPR_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
@@ -29,21 +42,65 @@ export {
   RS_UNEXPECTED_ERR,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
-  SC_USED_BEFORE_DEFINITION,
+  SC_USED_BEFORE_DEFINITION_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
-  SX_NOT_TOP_LEVEL_DEFN_ERR
+  SX_NOT_TOP_LEVEL_DEFN_ERR,
+  WF_ARG_ARITY_ERR,
+  WF_EXPECTED_OPEN_PARENTHESIS_ERR
 };
 
-const DF_FIRST_ARG_ERR = (found: string | null = null) => {
-  return `define: expected a variable name, or a function name and its variables (in parentheses), but ${found ? `found a ${found}` : "nothing's there"}`;
+function foundStr(found: SExpr | String): string {
+  if (found instanceof String) {
+    return found.toString();
+  } else {
+    if (isAtomSExpr(found)) {
+      switch (found.token.type) {
+        case TokenType.TRUE:
+        case TokenType.FALSE:
+          return "boolean";
+        case TokenType.INTEGER:
+        case TokenType.RATIONAL:
+        case TokenType.DECIMAL:
+          return "number";
+        case TokenType.STRING:
+          return "string";
+        case TokenType.KEYWORD:
+          return "keyword";
+        case TokenType.PLACEHOLDER:
+          return "template";
+        default:
+          throw "illegal state: unsupported token type";
+      }
+    } else {
+      return "part";
+    }
+  }
+}
+
+const DF_DUPLICATE_VARIABLE = (name: string) => {
+  return `define: found a variable that is used more than once: ${name}`;
 };
-const DF_NO_SECOND_ARG_ERR = (name: string) => {
+const DF_EXPECTED_AT_LEAST_ONE_PARAM_ERR = "define: expected at least one variable after the function name, but found none";
+const DF_EXPECTED_EXPR_ERR = (name: string) => {
   return `define: expected an expression after the variable name ${name}, but nothing's there`;
 };
-const DF_TOO_MANY_ARGS_ERR = (name: string, parts: number) => {
+const DF_EXPECTED_FUNCTION_BODY_ERR = "define: expected an expression for the function body, but nothing's there";
+const DF_EXPECTED_FUNCTION_NAME_ERR = (found: SExpr | null = null) => {
+  return `define: expected the name of the function, but ${found ? `found a ${foundStr(found)}` : "nothing's there" }`;
+};
+const DF_EXPECTED_VARIABLE_ERR = (found: SExpr) => {
+  return `define: expected a variable, but found a ${foundStr(found)}`;
+};
+const DF_FIRST_ARG_ERR = (found: SExpr | null = null) => {
+  return `define: expected a variable name, or a function name and its variables (in parentheses), but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
+};
+const DF_TOO_MANY_EXPRS_ERR = (name: string, parts: number) => {
   return `define: expected only one expression after the variable name ${name}, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
-const DF_PREVIOUSLY_DEFINED_NAME = (name: string) => {
+const DF_TOO_MANY_FUNCTION_BODIES_ERR = (parts: number) => {
+  return `define: expected only one expression for the function body, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
+};
+const DF_PREVIOUSLY_DEFINED_NAME_ERR = (name: string) => {
   return `${name}: this name was defined previously and cannot be re-defined`;
 };
 
@@ -60,8 +117,8 @@ const FA_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {
   return `${name}: question result is not true or false: ${found}`;
 };
 
-const FC_EXPECTED_FUNCTION_ERR = (found: string | null = null) => {
-  return `function call: expected a function after the open parenthesis, but ${found ? `found a ${found}`: "nothing's there"}`;
+const FC_EXPECTED_FUNCTION_ERR = (found: SExpr | String | null = null) => {
+  return `function call: expected a function after the open parenthesis, but ${found ? `found a ${foundStr(found)}`: "nothing's there"}`;
 };
 
 const IF_EXPECTED_THREE_PARTS = (parts: number) => {
@@ -76,8 +133,8 @@ const IF_EXPECTED_THREE_PARTS = (parts: number) => {
   }
 };
 
-const QU_EXPECTED_POST_QUOTE_ERR = (found: string) => {
-  return `quote: expected the name of a symbol or () after the quote, but found a ${found}`;
+const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
+  return `quote: expected the name of a symbol or () after the quote, but found a ${foundStr(found)}`;
 };
 
 const RS_BAD_SYNTAX_ERR = (syntax: string) => {
@@ -123,7 +180,7 @@ const SC_UNDEFINED_FUNCTION_ERR = (name: string) => {
 const SC_UNDEFINED_VARIABLE_ERR = (name: string) => {
   return `${name}: this variable is not defined`;
 };
-const SC_USED_BEFORE_DEFINITION = (name: string) => {
+const SC_USED_BEFORE_DEFINITION_ERR = (name: string) => {
   return `${name} is used here before its definition`;
 };
 
@@ -131,3 +188,14 @@ const SX_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
   return `${name}: expected an open parenthesis before ${name}, but found none`;
 };
 const SX_NOT_TOP_LEVEL_DEFN_ERR = "define: found a definition that is not at the top level";
+
+const WF_ARG_ARITY_ERR = (name: string, expected: number, actual: number) => {
+  if (expected < actual) {
+    return `${name}: expects only ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual}`;
+  } else {
+    return `${name} expects ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual === 0 ? "none" : `only ${actual}`}`;
+  }
+}
+const WF_EXPECTED_OPEN_PARENTHESIS_ERR = (name: string) => {
+  return `${name}: expected a function call, but there is no open parenthesis before this function`;
+};

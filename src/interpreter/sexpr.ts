@@ -11,8 +11,7 @@ export {
   ListSExpr,
   SExpr,
   isAtomSExpr,
-  isListSExpr,
-  sexprTypeName
+  isListSExpr
 };
 
 type SExpr = AtomSExpr | ListSExpr;
@@ -55,26 +54,4 @@ function isAtomSExpr(sexpr: SExpr): sexpr is AtomSExpr {
 
 function isListSExpr(sexpr: SExpr): sexpr is ListSExpr {
   return sexpr instanceof ListSExpr;
-}
-
-function sexprTypeName(sexpr: SExpr): string {
-  if (isAtomSExpr(sexpr)) {
-    switch (sexpr.token.type) {
-      case TokenType.TRUE:
-      case TokenType.FALSE:
-        return "boolean";
-      case TokenType.INTEGER:
-      case TokenType.RATIONAL:
-      case TokenType.DECIMAL:
-        return "number";
-      case TokenType.KEYWORD:
-        return "keyword";
-      case TokenType.PLACEHOLDER:
-        return "template";
-      default:
-        throw "illegal state: unsupported token type";
-    }
-  } else {
-    return "part";
-  }
 }

@@ -1,5 +1,5 @@
 import {
-  SC_USED_BEFORE_DEFINITION
+  SC_USED_BEFORE_DEFINITION_ERR
 } from "./error.js";
 import {
   StageError
@@ -22,7 +22,9 @@ import {
 } from "./sourcespan.js";
 
 export {
+  PRIMITIVE_DATA_NAMES,
   PRIMITIVE_ENVIRONMENT,
+  PRIMITIVE_FUNCTION_NAMES,
   Environment,
   EnvironmentValType
 };
@@ -49,7 +51,7 @@ class Environment {
       return val;
     } else if (!this.parentEnv) {
       throw new StageError(
-        SC_USED_BEFORE_DEFINITION(name),
+        SC_USED_BEFORE_DEFINITION_ERR(name),
         sourceSpan
       );
     } else {
@@ -63,11 +65,16 @@ class Environment {
 }
 
 const PRIMITIVE_ENVIRONMENT = new Environment();
+const PRIMITIVE_DATA_NAMES: Set<string> = new Set();
+const PRIMITIVE_FUNCTION_NAMES: Set<string> = new Set();
+
 
 function addFnToPrimEnv(name: string, cls: typeof RPrimFun, config: RPrimFunConfig) {
+  PRIMITIVE_FUNCTION_NAMES.add(name);
   PRIMITIVE_ENVIRONMENT.set(name, new cls(name, config));
 }
-function addVarToPrimEnv(name: string, val: RData) {
+function addDataToPrimEnv(name: string, val: RData) {
+  PRIMITIVE_DATA_NAMES.add(name);
   PRIMITIVE_ENVIRONMENT.set(name, val);
 }
 
@@ -76,5 +83,5 @@ addFnToPrimEnv("-", RMinus, { minArity: 1, allArgsTypeName: "number" });
 addFnToPrimEnv("*", RMultiply, { minArity: 2, allArgsTypeName: "number" });
 addFnToPrimEnv("+", RPlus, { minArity: 2, allArgsTypeName: "number" });
 
-addVarToPrimEnv("e", new RNumber(6121026514868073n, 2251799813685248n));
-addVarToPrimEnv("pi", new RNumber(884279719003555n, 281474976710656n));
+addDataToPrimEnv("e", new RNumber(6121026514868073n, 2251799813685248n));
+addDataToPrimEnv("pi", new RNumber(884279719003555n, 281474976710656n));
