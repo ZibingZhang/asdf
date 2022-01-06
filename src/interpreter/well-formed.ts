@@ -5,7 +5,6 @@ import {
   DefnNode,
   EllipsisFunAppNode,
   EllipsisNode,
-  ExprNode,
   FunAppNode,
   IfNode,
   isDefnNode,
@@ -19,6 +18,7 @@ import {
   StageOutput
 } from "./pipeline.js";
 import {
+  DProgram,
   Program
 } from "./program.js";
 import {
@@ -48,6 +48,7 @@ import {
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
   DF_TOO_MANY_EXPRS_ERR,
   DF_TOO_MANY_FUNCTION_BODIES_ERR,
+  FA_ARITY_ERR,
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS,
@@ -56,7 +57,6 @@ import {
   SC_UNDEFINED_VARIABLE_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
-  WF_ARG_ARITY_ERR,
   WF_EXPECTED_OPEN_PARENTHESIS_ERR
 } from "./error.js";
 import {
@@ -89,17 +89,14 @@ class WellFormedSyntax implements Stage {
   private processSExprs(sexprs: SExpr[]): Program {
     const nodes: ASTNode[] = [];
     const defns: DefnNode[] = [];
-    const exprs: ExprNode[] = [];
     for (const sexpr of sexprs) {
       const node = this.toNode(sexpr);
       nodes.push(this.toNode(sexpr));
       if (isDefnNode(node)) {
         defns.push(node);
-      } else {
-        exprs.push(node);
       }
     }
-    return new Program(defns, exprs, nodes);
+    return new Program(defns, nodes);
   }
 
   private toNode(sexpr: SExpr): ASTNode {
@@ -203,7 +200,16 @@ class WellFormedSyntax implements Stage {
             case "define": {
               if (!this.atTopLevel()) {
                 throw new StageError(
-                  SX_NOT_TOP_LEVEL_DEFN_ERR,
+                  SX_NOT_TOP_LEVEL_DEFN_ERR("define"),
+                  sexpr.sourceSpan
+                );
+              }
+              return this.toDefnNode(sexpr);
+            }
+            case "define-struct": {
+              if (!this.atTopLevel()) {
+                throw new StageError(
+                  SX_NOT_TOP_LEVEL_DEFN_ERR("define-struct"),
                   sexpr.sourceSpan
                 );
               }
@@ -399,7 +405,7 @@ class WellFormedProgram implements Stage {
     }
   }
 
-  private wellFormedProgram(program: Program) {
+  private wellFormedProgram(program: DProgram) {
     for (const defn of program.defns) {
       if (defn.value instanceof LambdaNode) {
         this.globalScope.add(
@@ -414,13 +420,13 @@ class WellFormedProgram implements Stage {
       }
     }
     for (const node of program.nodes) {
-      this.wellFormedNode(node);
+      this.wellFormedNode(node, false);
     }
   }
 
-  private wellFormedNode(node: ASTNode) {
+  private wellFormedNode(node: ASTNode, deferFunApp: boolean) {
     if (node instanceof AndNode) {
-      node.args.forEach(arg => this.wellFormedNode(arg));
+      node.args.forEach(arg => this.wellFormedNode(arg, deferFunApp));
     } else if (node instanceof DefnNode) {
       if (this.executionScopeHas(node.name.token.text)) {
         throw new StageError(
@@ -439,28 +445,33 @@ class WellFormedProgram implements Stage {
       } else {
         this.executionScope.add(node.name.token.text, DATA_VARIABLE_META);
       }
-      this.wellFormedNode(node.value);
+      this.wellFormedNode(node.value, true);
     } else if (node instanceof FunAppNode) {
-      const meta = this.executionScope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
+      let meta: VariableMeta;
+      if (deferFunApp) {
+        meta = this.globalScope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
+      } else {
+        meta = this.executionScope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
+      }
       if (meta.type === VariableType.USER_DEFINED_FUNCTION && meta.arity != node.args.length) {
         throw new StageError(
-          WF_ARG_ARITY_ERR(node.fn.name.token.text, meta.arity, node.args.length),
+          FA_ARITY_ERR(node.fn.name.token.text, meta.arity, node.args.length),
           node.sourceSpan
         );
       }
-      node.args.forEach(arg => this.wellFormedNode(arg));
+      node.args.forEach(arg => this.wellFormedNode(arg, deferFunApp));
     } else if (node instanceof IfNode) {
-      this.wellFormedNode(node.question);
-      this.wellFormedNode(node.trueAnswer);
-      this.wellFormedNode(node.falseAnswer);
+      this.wellFormedNode(node.question, deferFunApp);
+      this.wellFormedNode(node.trueAnswer, deferFunApp);
+      this.wellFormedNode(node.falseAnswer, deferFunApp);
     } else if (node instanceof LambdaNode) {
       const outerScope = this.executionScope;
       this.executionScope = new Scope(this.executionScope);
       node.params.forEach(param => this.executionScope.add(param, DATA_VARIABLE_META));
-      this.wellFormedNode(node.body);
+      this.wellFormedNode(node.body, deferFunApp);
       this.executionScope = outerScope;
     } else if (node instanceof OrNode) {
-      node.args.forEach(arg => this.wellFormedNode(arg));
+      node.args.forEach(arg => this.wellFormedNode(arg, deferFunApp));
     } else if (node instanceof VarNode) {
       const meta = this.executionScope.get(node.name.token.text, true, node.sourceSpan);
       if (meta.type !== VariableType.DATA) {

@@ -1,6 +1,5 @@
 import {
-  Environment,
-  EnvironmentValType
+  Environment
 } from "./environment.js";
 import {
   EL_EXPECT_FINISHED_EXPR_ERR,
@@ -32,6 +31,7 @@ export {
   ASTNode,
   AndNode,
   AtomNode,
+  DASTNode,
   DefnNode,
   EllipsisFunAppNode,
   EllipsisNode,
@@ -56,6 +56,11 @@ type ExprNode =
   | IfNode
   | OrNode
   | VarNode;
+
+  type DASTNode =
+  | DefnNode
+  | DefnStructNode
+  | ExprNode;
 
 abstract class ASTNodeBase {
   constructor(
@@ -128,6 +133,42 @@ class EllipsisNode extends ASTNodeBase {
   }
 }
 
+class DefnNode extends ASTNodeBase {
+  constructor(
+    readonly name: AtomSExpr,
+    readonly value: ASTNode,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  eval(_: Environment): RValue {
+    throw "illegal state: evaluating variable definition";
+  }
+
+  run(env: Environment): void {
+    env.set(this.name.token.text, this.value.eval(env));
+  }
+}
+
+class DefnStructNode extends ASTNodeBase {
+  constructor(
+    readonly name: AtomSExpr,
+    readonly params: string[],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  eval(_: Environment): RValue {
+    throw "illegal state: evaluating structure definition";
+  }
+
+  run(env: Environment): void {
+    throw "illegal state: running structure definition";
+  }
+}
+
 class FunAppNode extends ASTNodeBase {
   constructor(
     readonly fn: VarNode,
@@ -139,7 +180,6 @@ class FunAppNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     const rval = env.get(
-      EnvironmentValType.Function,
       this.fn.name.token.text,
       this.fn.name.sourceSpan
     );
@@ -147,11 +187,11 @@ class FunAppNode extends ASTNodeBase {
       if (isRPrimFun(rval)) {
         return rval.eval(env, this.args.map(node => node.eval(env)), this.sourceSpan);
       } else {
-        const childEnv = new Environment();
+        const paramEnv = new Environment();
         for (let idx = 0; idx < this.args.length; idx++) {
-          childEnv.set(rval.params[idx], this.args[idx].eval(env));
+          paramEnv.set(rval.params[idx], this.args[idx].eval(env));
         }
-        return rval.eval(childEnv);
+        return rval.eval(paramEnv, env);
       }
     } else {
       throw new StageError(
@@ -197,8 +237,8 @@ class LambdaNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  eval(_: Environment): RValue {
-    return new RLambda(this.params, this.body);
+  eval(env: Environment): RValue {
+    return new RLambda(env.copy(), this.params, this.body);
   }
 }
 
@@ -235,28 +275,9 @@ class VarNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     return env.get(
-      EnvironmentValType.Variable,
       this.name.token.text,
       this.name.token.sourceSpan
     );
-  }
-}
-
-class DefnNode extends ASTNodeBase {
-  constructor(
-    readonly name: AtomSExpr,
-    readonly value: ASTNode,
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
-
-  eval(_: Environment): RValue {
-    throw "illegal state: evaluating variable definition";
-  }
-
-  run(env: Environment): void {
-    env.set(this.name.token.text, this.value.eval(env));
   }
 }
 

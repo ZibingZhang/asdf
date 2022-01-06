@@ -11,12 +11,17 @@ import {
   RMath,
   RNumber,
   RPrimFun,
-  RValue
+  RValue,
+  R_FALSE,
+  R_TRUE
 } from "./rvalue.js";
-import { SourceSpan } from "./sourcespan.js";
+import {
+  SourceSpan
+} from "./sourcespan.js";
 
 export {
   RDivide,
+  RIsZero,
   RMinus,
   RMultiply,
   RPlus
@@ -35,6 +40,12 @@ class RDivide extends RPrimFun {
       },
       args[0]
     );
+  }
+}
+
+class RIsZero extends RPrimFun {
+  call(_: Environment, args: RValue[], sourceSpan: SourceSpan): RValue {
+    return (<RNumber>args[0]).numerator === 0n ? R_TRUE : R_FALSE;
   }
 }
 

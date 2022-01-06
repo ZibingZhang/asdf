@@ -7,8 +7,10 @@ import {
   Environment
 } from "./environment.js";
 import {
+  FA_ARITY_ERR,
   FA_MIN_ARITY_ERR,
-  FA_NTH_WRONG_TYPE_ERR
+  FA_NTH_WRONG_TYPE_ERR,
+  FA_WRONG_TYPE_ERR
 } from "./error.js";
 import {
   StageError
@@ -29,6 +31,7 @@ export {
   RPrimFun,
   RPrimFunConfig,
   RString,
+  RStruct,
   RSymbol,
   RValue,
   isRBoolean,
@@ -114,21 +117,35 @@ class RList implements RData {
   }
 }
 
+class RStruct implements RData {
+  constructor(readonly name: string, readonly vals: RValue[]) {}
+
+  stringify(): string {
+    return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
+  }
+}
+
 interface RCallableBase extends RValBase {}
 
 interface RPrimFunConfig {
   minArity?: number,
+  arity?: number,
+  onlyArgTypeName?: string,
   allArgsTypeName?: string
 }
 
 class RLambda implements RCallableBase {
   constructor(
+    readonly closure: Environment,
     readonly params: string[],
     readonly body: ASTNode
   ) {}
 
-  eval(env: Environment): RValue {
-    return this.body.eval(env);
+  eval(paramEnv: Environment, env: Environment): RValue {
+    const closureCopy = this.closure.copy();
+    closureCopy.parentEnv = env;
+    paramEnv.parentEnv = closureCopy;
+    return this.body.eval(paramEnv);
   }
 
   stringify(): string {
@@ -137,6 +154,15 @@ class RLambda implements RCallableBase {
 }
 
 class RPrimFun implements RCallableBase {
+  private typeGuardOf = (typeName: string) => {
+    switch(typeName) {
+      case "number":
+        return isRNumber;
+      default:
+        throw "illegal state: unsupported allArgsTypeName";
+    }
+  };
+
   constructor(
     readonly name: string,
     readonly config: RPrimFunConfig
@@ -149,15 +175,23 @@ class RPrimFun implements RCallableBase {
         sourceSpan
       );
     }
-    if (this.config.allArgsTypeName) {
-      let typeGuard;
-      switch (this.config.allArgsTypeName) {
-        case "number":
-          typeGuard = isRNumber;
-          break;
-        default:
-          throw "illegal state: unsupported allArgsTypeName";
+    if (this.config.arity && args.length !== this.config.arity) {
+      throw new StageError(
+        FA_ARITY_ERR(this.name, this.config.arity, args.length),
+        sourceSpan
+      );
+    }
+    if (this.config.onlyArgTypeName) {
+      const typeGuard = this.typeGuardOf(this.config.onlyArgTypeName);
+      if (!typeGuard(args[0])) {
+        throw new StageError(
+          FA_WRONG_TYPE_ERR(this.name, this.config.onlyArgTypeName, args[0].stringify()),
+          sourceSpan
+        );
       }
+    }
+    if (this.config.allArgsTypeName) {
+      const typeGuard = this.typeGuardOf(this.config.allArgsTypeName);
       for (const [idx, rval] of args.entries()) {
         if (!typeGuard(rval)) {
           throw new StageError(

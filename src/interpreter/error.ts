@@ -21,10 +21,12 @@ export {
   DF_TOO_MANY_FUNCTION_BODIES_ERR,
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
   EL_EXPECT_FINISHED_EXPR_ERR,
+  FA_ARITY_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
   FA_QUESTION_NOT_BOOL_ERR,
+  FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS,
   QU_EXPECTED_POST_QUOTE_ERR,
@@ -45,7 +47,6 @@ export {
   SC_USED_BEFORE_DEFINITION_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
-  WF_ARG_ARITY_ERR,
   WF_EXPECTED_OPEN_PARENTHESIS_ERR
 };
 
@@ -106,6 +107,13 @@ const DF_PREVIOUSLY_DEFINED_NAME_ERR = (name: string) => {
 
 const EL_EXPECT_FINISHED_EXPR_ERR = "...: expected a finished expression, but found a template";
 
+const FA_ARITY_ERR = (name: string, expected: number, actual: number) => {
+  if (expected < actual) {
+    return `${name}: expects only ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual}`;
+  } else {
+    return `${name}: expects ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual === 0 ? "none" : `only ${actual}`}`;
+  }
+}
 const FA_DIV_BY_ZERO_ERR = "/: division by zero";
 const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
   return `${name}: expects at least ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual >= 2 ? actual : actual === 1 ? "only 1" : "none"}`;
@@ -115,6 +123,9 @@ const FA_NTH_WRONG_TYPE_ERR = (name: string, n: number, expected: string, actual
 };
 const FA_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {
   return `${name}: question result is not true or false: ${found}`;
+};
+const FA_WRONG_TYPE_ERR = (name: string, expected: string, actual: string) => {
+  return `${name}: expects a ${expected}, given ${actual}`;
 };
 
 const FC_EXPECTED_FUNCTION_ERR = (found: SExpr | String | null = null) => {
@@ -175,6 +186,7 @@ const RS_UNEXPECTED_ERR = (found: string) => {
 };
 
 const SC_UNDEFINED_FUNCTION_ERR = (name: string) => {
+  console.trace()
   return `${name}: this function is undefined`;
 };
 const SC_UNDEFINED_VARIABLE_ERR = (name: string) => {
@@ -187,15 +199,10 @@ const SC_USED_BEFORE_DEFINITION_ERR = (name: string) => {
 const SX_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
   return `${name}: expected an open parenthesis before ${name}, but found none`;
 };
-const SX_NOT_TOP_LEVEL_DEFN_ERR = "define: found a definition that is not at the top level";
+const SX_NOT_TOP_LEVEL_DEFN_ERR = (name: string) => {
+  return `${name}: found a definition that is not at the top level`;
+};
 
-const WF_ARG_ARITY_ERR = (name: string, expected: number, actual: number) => {
-  if (expected < actual) {
-    return `${name}: expects only ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual}`;
-  } else {
-    return `${name} expects ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual === 0 ? "none" : `only ${actual}`}`;
-  }
-}
 const WF_EXPECTED_OPEN_PARENTHESIS_ERR = (name: string) => {
   return `${name}: expected a function call, but there is no open parenthesis before this function`;
 };

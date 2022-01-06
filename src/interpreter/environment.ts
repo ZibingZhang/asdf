@@ -6,6 +6,7 @@ import {
 } from "./pipeline.js";
 import {
   RDivide,
+  RIsZero,
   RMinus,
   RMultiply,
   RPlus
@@ -25,19 +26,17 @@ export {
   PRIMITIVE_DATA_NAMES,
   PRIMITIVE_ENVIRONMENT,
   PRIMITIVE_FUNCTION_NAMES,
-  Environment,
-  EnvironmentValType
+  Environment
 };
 
-enum EnvironmentValType {
-  Function,
-  Variable
-}
-
 class Environment {
+  parentEnv: Environment | null;
   private map: Map<string, RValue>;
 
-  constructor(readonly parentEnv: Environment | null = null) {
+  constructor(
+    parentEnv: Environment | null = null,
+  ) {
+    this.parentEnv = parentEnv;
     this.map = new Map();
   }
 
@@ -45,7 +44,7 @@ class Environment {
     this.map.set(name, value);
   }
 
-  get(type: EnvironmentValType, name: string, sourceSpan: SourceSpan): RValue {
+  get(name: string, sourceSpan: SourceSpan): RValue {
     const val = this.map.get(name);
     if (val) {
       return val;
@@ -55,12 +54,35 @@ class Environment {
         sourceSpan
       );
     } else {
-      return this.parentEnv.get(type, name, sourceSpan);
+      return this.parentEnv.get(name, sourceSpan);
     }
   }
 
-  names(): IterableIterator<string> {
-    return this.map.keys();
+  has(name: string): boolean {
+    return this.names().includes(name);
+  }
+
+  copy(): Environment {
+    const env = new Environment();
+    for (const entry of this.map.entries()) {
+      env.set(entry[0], entry[1]);
+    }
+    let ancestorEnv: Environment | null = this;
+    while (ancestorEnv.parentEnv) {
+      ancestorEnv = ancestorEnv.parentEnv;
+      for (const entry of ancestorEnv.map.entries()) {
+        env.set(entry[0], entry[1]);
+      }
+    }
+    return env;
+  }
+
+  names(): Array<string> {
+    const names = [...this.map.keys()];
+    if (this.parentEnv) {
+      names.push(...this.parentEnv.names());
+    }
+    return names;
   }
 }
 
@@ -82,6 +104,7 @@ addFnToPrimEnv("/", RDivide, { minArity: 2, allArgsTypeName: "number" });
 addFnToPrimEnv("-", RMinus, { minArity: 1, allArgsTypeName: "number" });
 addFnToPrimEnv("*", RMultiply, { minArity: 2, allArgsTypeName: "number" });
 addFnToPrimEnv("+", RPlus, { minArity: 2, allArgsTypeName: "number" });
+addFnToPrimEnv("zero?", RIsZero, { arity: 1, onlyArgTypeName: "number" });
 
 addDataToPrimEnv("e", new RNumber(6121026514868073n, 2251799813685248n));
 addDataToPrimEnv("pi", new RNumber(884279719003555n, 281474976710656n));

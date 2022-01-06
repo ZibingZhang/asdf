@@ -1,5 +1,4 @@
 import {
-  EllipsisNode,
   isDefnNode
 } from "./ast.js";
 import {

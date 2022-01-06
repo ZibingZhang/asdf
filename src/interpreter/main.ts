@@ -1,4 +1,7 @@
 import {
+  Desugar
+} from "./desugar.js";
+import {
   EvaluateProgram
 } from "./evaluate.js";
 import {
@@ -25,6 +28,7 @@ window.pipelines = {
     new Lexer(),
     new WellFormedSyntax(),
     new WellFormedProgram(),
+    new Desugar(),
     new EvaluateProgram()
   ])
 };
