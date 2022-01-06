@@ -10,7 +10,7 @@ import {
 } from "./utils.js";
 
 export {
-  DF_DUPLICATE_VARIABLE,
+  DF_DUPLICATE_VARIABLE_ERR,
   DF_EXPECTED_AT_LEAST_ONE_PARAM_ERR,
   DF_EXPECTED_EXPR_ERR,
   DF_EXPECTED_FUNCTION_BODY_ERR,
@@ -28,7 +28,7 @@ export {
   FA_QUESTION_NOT_BOOL_ERR,
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
-  IF_EXPECTED_THREE_PARTS,
+  IF_EXPECTED_THREE_PARTS_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
@@ -50,8 +50,8 @@ export {
   WF_EXPECTED_OPEN_PARENTHESIS_ERR
 };
 
-function foundStr(found: SExpr | String): string {
-  if (found instanceof String) {
+function foundStr(found: SExpr | string): string {
+  if (typeof found === "string") {
     return found.toString();
   } else {
     if (isAtomSExpr(found)) {
@@ -78,7 +78,7 @@ function foundStr(found: SExpr | String): string {
   }
 }
 
-const DF_DUPLICATE_VARIABLE = (name: string) => {
+const DF_DUPLICATE_VARIABLE_ERR = (name: string) => {
   return `define: found a variable that is used more than once: ${name}`;
 };
 const DF_EXPECTED_AT_LEAST_ONE_PARAM_ERR = "define: expected at least one variable after the function name, but found none";
@@ -113,7 +113,7 @@ const FA_ARITY_ERR = (name: string, expected: number, actual: number) => {
   } else {
     return `${name}: expects ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual === 0 ? "none" : `only ${actual}`}`;
   }
-}
+};
 const FA_DIV_BY_ZERO_ERR = "/: division by zero";
 const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
   return `${name}: expects at least ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual >= 2 ? actual : actual === 1 ? "only 1" : "none"}`;
@@ -128,11 +128,11 @@ const FA_WRONG_TYPE_ERR = (name: string, expected: string, actual: string) => {
   return `${name}: expects a ${expected}, given ${actual}`;
 };
 
-const FC_EXPECTED_FUNCTION_ERR = (found: SExpr | String | null = null) => {
+const FC_EXPECTED_FUNCTION_ERR = (found: SExpr | string | null = null) => {
   return `function call: expected a function after the open parenthesis, but ${found ? `found a ${foundStr(found)}`: "nothing's there"}`;
 };
 
-const IF_EXPECTED_THREE_PARTS = (parts: number) => {
+const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {
   if (parts === 0) {
     return "if: expected a question and two answers, but nothing's there";
   } else if (parts === 1) {
@@ -186,7 +186,6 @@ const RS_UNEXPECTED_ERR = (found: string) => {
 };
 
 const SC_UNDEFINED_FUNCTION_ERR = (name: string) => {
-  console.trace()
   return `${name}: this function is undefined`;
 };
 const SC_UNDEFINED_VARIABLE_ERR = (name: string) => {

@@ -33,9 +33,7 @@ class Environment {
   parentEnv: Environment | null;
   private map: Map<string, RValue>;
 
-  constructor(
-    parentEnv: Environment | null = null,
-  ) {
+  constructor(parentEnv: Environment | null = null) {
     this.parentEnv = parentEnv;
     this.map = new Map();
   }
@@ -62,15 +60,12 @@ class Environment {
     }
   }
 
-  has(name: string): boolean {
-    return this.map.has(name) || this.parentEnv?.map.has(name) || PRIMITIVE_ENVIRONMENT.map.has(name);
-  }
-
   copy(): Environment {
     const env = new Environment();
     for (const entry of this.map.entries()) {
       env.set(entry[0], entry[1]);
     }
+    /* eslint-disable @typescript-eslint/no-this-alias */
     let ancestorEnv: Environment | null = this;
     while (ancestorEnv.parentEnv) {
       ancestorEnv = ancestorEnv.parentEnv;

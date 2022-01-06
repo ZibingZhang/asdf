@@ -1,8 +1,7 @@
 import {
   ASTNode,
   DASTNode,
-  DefnNode,
-  ExprNode
+  DefnNode
 } from "./ast";
 
 export {

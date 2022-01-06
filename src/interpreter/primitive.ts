@@ -44,7 +44,7 @@ class RDivide extends RPrimFun {
 }
 
 class RIsZero extends RPrimFun {
-  call(_: Environment, args: RValue[], sourceSpan: SourceSpan): RValue {
+  call(_: Environment, args: RValue[], __: SourceSpan): RValue {
     return (<RNumber>args[0]).numerator === 0n ? R_TRUE : R_FALSE;
   }
 }

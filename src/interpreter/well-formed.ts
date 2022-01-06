@@ -24,7 +24,7 @@ import {
 import {
   isAtomSExpr,
   ListSExpr,
-  SExpr,
+  SExpr
 } from "./sexpr.js";
 import {
   TokenType
@@ -38,7 +38,7 @@ import {
   R_TRUE
 } from "./rvalue.js";
 import {
-  DF_DUPLICATE_VARIABLE,
+  DF_DUPLICATE_VARIABLE_ERR,
   DF_EXPECTED_AT_LEAST_ONE_PARAM_ERR,
   DF_EXPECTED_EXPR_ERR,
   DF_EXPECTED_FUNCTION_BODY_ERR,
@@ -51,7 +51,7 @@ import {
   FA_ARITY_ERR,
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
-  IF_EXPECTED_THREE_PARTS,
+  IF_EXPECTED_THREE_PARTS_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
@@ -218,7 +218,7 @@ class WellFormedSyntax implements Stage {
             case "if": {
               if (sexpr.tokens.length - 1 !== 3) {
                 throw new StageError(
-                  IF_EXPECTED_THREE_PARTS(sexpr.tokens.length - 1),
+                  IF_EXPECTED_THREE_PARTS_ERR(sexpr.tokens.length - 1),
                   sexpr.sourceSpan
                 );
               }
@@ -322,7 +322,7 @@ class WellFormedSyntax implements Stage {
         }
         if (params.includes(arg.token.text)) {
           throw new StageError(
-            DF_DUPLICATE_VARIABLE(arg.token.text),
+            DF_DUPLICATE_VARIABLE_ERR(arg.token.text),
             arg.sourceSpan
           );
         }
@@ -519,7 +519,7 @@ class Scope {
         throw new StageError(
           SC_UNDEFINED_FUNCTION_ERR(name),
           sourceSpan
-        )
+        );
       }
     }
     return meta;

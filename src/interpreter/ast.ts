@@ -164,7 +164,7 @@ class DefnStructNode extends ASTNodeBase {
     throw "illegal state: evaluating structure definition";
   }
 
-  run(env: Environment): void {
+  run(_: Environment): void {
     throw "illegal state: running structure definition";
   }
 }
@@ -195,7 +195,7 @@ class FunAppNode extends ASTNodeBase {
       }
     } else {
       throw new StageError(
-        FC_EXPECTED_FUNCTION_ERR(new String("variable")),
+        FC_EXPECTED_FUNCTION_ERR("variable"),
         NO_SOURCE_SPAN
       );
     }
@@ -245,7 +245,7 @@ class LambdaNode extends ASTNodeBase {
 class OrNode extends ASTNodeBase {
   constructor(
     readonly args: ASTNode[],
-    readonly sourceSpan: SourceSpan,
+    readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
   }

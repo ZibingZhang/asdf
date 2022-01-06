@@ -2,8 +2,7 @@ import {
   SourceSpan
 } from "./sourcespan.js";
 import {
-  Token,
-  TokenType
+  Token
 } from "./token.js";
 
 export {
