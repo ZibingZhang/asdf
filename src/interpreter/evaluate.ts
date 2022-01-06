@@ -2,8 +2,7 @@ import {
   isDefnNode
 } from "./ast.js";
 import {
-  Environment,
-  PRIMITIVE_ENVIRONMENT
+  Environment
 } from "./environment.js";
 import {
   Stage,
@@ -19,10 +18,10 @@ export {
 };
 
 class EvaluateProgram implements Stage {
-  private env: Environment = PRIMITIVE_ENVIRONMENT;
+  private env: Environment = <Environment><unknown>null;
 
   run(input: StageOutput): StageOutput {
-    this.env = new Environment(PRIMITIVE_ENVIRONMENT);
+    this.env = new Environment();
 
     try {
       return new StageOutput(this.runHelper(input.output));

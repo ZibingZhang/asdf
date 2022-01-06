@@ -61,7 +61,7 @@ import {
 } from "./error.js";
 import {
   PRIMITIVE_DATA_NAMES,
-  PRIMITIVE_ENVIRONMENT, PRIMITIVE_FUNCTION_NAMES
+  PRIMITIVE_FUNCTION_NAMES
 } from "./environment.js";
 import { SourceSpan } from "./sourcespan.js";
 

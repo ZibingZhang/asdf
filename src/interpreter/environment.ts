@@ -49,17 +49,21 @@ class Environment {
     if (val) {
       return val;
     } else if (!this.parentEnv) {
-      throw new StageError(
-        SC_USED_BEFORE_DEFINITION_ERR(name),
-        sourceSpan
-      );
+      if (PRIMITIVE_ENVIRONMENT.map.has(name)) {
+        return PRIMITIVE_ENVIRONMENT.get(name, sourceSpan);
+      } else {
+        throw new StageError(
+          SC_USED_BEFORE_DEFINITION_ERR(name),
+          sourceSpan
+        );
+      }
     } else {
       return this.parentEnv.get(name, sourceSpan);
     }
   }
 
   has(name: string): boolean {
-    return this.names().includes(name);
+    return this.map.has(name) || this.parentEnv?.map.has(name) || PRIMITIVE_ENVIRONMENT.map.has(name);
   }
 
   copy(): Environment {
@@ -75,14 +79,6 @@ class Environment {
       }
     }
     return env;
-  }
-
-  names(): Array<string> {
-    const names = [...this.map.keys()];
-    if (this.parentEnv) {
-      names.push(...this.parentEnv.names());
-    }
-    return names;
   }
 }
 
