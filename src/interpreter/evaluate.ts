@@ -4,6 +4,7 @@ import {
 import {
   Environment
 } from "./environment.js";
+import { RT_EXCEEDED_RECURSION_DEPTH } from "./error.js";
 import {
   Stage,
   StageError,
@@ -12,6 +13,7 @@ import {
 import {
   Program
 } from "./program.js";
+import { NO_SOURCE_SPAN } from "./sourcespan.js";
 
 export {
   EvaluateProgram
@@ -28,6 +30,16 @@ class EvaluateProgram implements Stage {
     } catch (e) {
       if (e instanceof StageError) {
         return new StageOutput(null, [e]);
+      } else if (e instanceof Error && e.message === "too much recursion") {
+        return new StageOutput(
+          null,
+          [
+            new StageError(
+            RT_EXCEEDED_RECURSION_DEPTH,
+            NO_SOURCE_SPAN
+            )
+          ]
+        );
       } else {
         throw e;
       }

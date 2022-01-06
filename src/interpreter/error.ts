@@ -42,6 +42,7 @@ export {
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
   RS_UNCLOSED_STRING_ERR,
   RS_UNEXPECTED_ERR,
+  RT_EXCEEDED_RECURSION_DEPTH,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
   SC_USED_BEFORE_DEFINITION_ERR,
@@ -184,6 +185,8 @@ const RS_UNCLOSED_STRING_ERR = "read-syntax: expected a closing `\"`";
 const RS_UNEXPECTED_ERR = (found: string) => {
   return `read-syntax: unexpected \`${found}\``;
 };
+
+const RT_EXCEEDED_RECURSION_DEPTH = "runtime: recursion depth exceeded";
 
 const SC_UNDEFINED_FUNCTION_ERR = (name: string) => {
   return `${name}: this function is undefined`;
