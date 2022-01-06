@@ -63,11 +63,13 @@ import {
   PRIMITIVE_DATA_NAMES,
   PRIMITIVE_FUNCTION_NAMES
 } from "./environment.js";
-import { SourceSpan } from "./sourcespan.js";
+import {
+  SourceSpan
+} from "./sourcespan.js";
 
 export {
-  WellFormedSyntax,
-  WellFormedProgram
+  WELL_FORMED_SYNTAX_STAGE,
+  WELL_FORMED_PROGRAM_STAGE
 };
 
 class WellFormedSyntax implements Stage {
@@ -386,13 +388,15 @@ class WellFormedSyntax implements Stage {
 }
 
 class WellFormedProgram implements Stage {
-  globalScope: Scope = new Scope();
-  executionScope: Scope = new Scope();
-  allowTemplate = false;
+  globalScope: Scope = new Scope(PRIMITIVE_SCOPE);
+  executionScope: Scope = new Scope(PRIMITIVE_SCOPE);
 
-  run(input: StageOutput): StageOutput {
+  reset() {
     this.globalScope = new Scope(PRIMITIVE_SCOPE);
     this.executionScope = new Scope(PRIMITIVE_SCOPE);
+  }
+
+  run(input: StageOutput): StageOutput {
     try {
       this.wellFormedProgram(input.output);
       return input;
@@ -553,3 +557,6 @@ for (const name of PRIMITIVE_DATA_NAMES) {
 for (const name of PRIMITIVE_FUNCTION_NAMES) {
   PRIMITIVE_SCOPE.add(name, PRIMITIVE_FUNCTION_VARIABLE_META);
 }
+
+const WELL_FORMED_SYNTAX_STAGE = new WellFormedSyntax();
+const WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();

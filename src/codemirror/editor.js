@@ -15,12 +15,13 @@ extraKeys: {
     if (result.errors.length > 0) {
       for (const error of result.errors) {
         const location = `${error.sourcespan.startLineno}:${error.sourcespan.startColno}`;
-        appendToRepl(`[${location}] ${error.msg}`);
+        appendToReplLn(`[${location}] ${error.msg}`);
       }
     } else {
       for (const text of result.output) {
-        appendToRepl(text);
+        appendToReplLn(text);
       }
     }
+    appendToRepl("> ");
   }
 }});

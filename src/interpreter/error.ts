@@ -192,6 +192,7 @@ const SC_UNDEFINED_FUNCTION_ERR = (name: string) => {
   return `${name}: this function is undefined`;
 };
 const SC_UNDEFINED_VARIABLE_ERR = (name: string) => {
+  console.trace()
   return `${name}: this variable is not defined`;
 };
 const SC_USED_BEFORE_DEFINITION_ERR = (name: string) => {

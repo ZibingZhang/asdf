@@ -4,7 +4,9 @@ import {
 import {
   Environment
 } from "./environment.js";
-import { RT_EXCEEDED_RECURSION_DEPTH } from "./error.js";
+import {
+  RT_EXCEEDED_RECURSION_DEPTH
+} from "./error.js";
 import {
   Stage,
   StageError,
@@ -13,18 +15,22 @@ import {
 import {
   Program
 } from "./program.js";
-import { NO_SOURCE_SPAN } from "./sourcespan.js";
+import {
+  NO_SOURCE_SPAN
+} from "./sourcespan.js";
 
 export {
-  EvaluateProgram
+  EVALUATE_CODE_STAGE
 };
 
-class EvaluateProgram implements Stage {
-  private env: Environment = <Environment><unknown>null;
+class EvaluateCode implements Stage {
+  private env: Environment = new Environment();
+
+  reset() {
+    this.env = new Environment();
+  }
 
   run(input: StageOutput): StageOutput {
-    this.env = new Environment();
-
     try {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
@@ -35,8 +41,8 @@ class EvaluateProgram implements Stage {
           null,
           [
             new StageError(
-            RT_EXCEEDED_RECURSION_DEPTH,
-            NO_SOURCE_SPAN
+              RT_EXCEEDED_RECURSION_DEPTH,
+              NO_SOURCE_SPAN
             )
           ]
         );
@@ -59,3 +65,5 @@ class EvaluateProgram implements Stage {
     return output;
   }
 }
+
+const EVALUATE_CODE_STAGE = new EvaluateCode();

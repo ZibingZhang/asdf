@@ -1,34 +1,44 @@
 import {
-  Desugar
+  DESUGAR_STAGE
 } from "./desugar.js";
 import {
-  EvaluateProgram
+  EVALUATE_CODE_STAGE
 } from "./evaluate.js";
 import {
-  Lexer
+  LEXING_STAGE
 } from "./lexing.js";
 import {
   Pipeline
 } from "./pipeline.js";
+import { RESET_STAGE } from "./reset.js";
 import {
-  WellFormedProgram,
-  WellFormedSyntax
+  WELL_FORMED_PROGRAM_STAGE,
+  WELL_FORMED_SYNTAX_STAGE
 } from "./well-formed.js";
 
 declare global {
   interface Window {
     pipelines: {
-      evaluateProgram: Pipeline
+      evaluateProgram: Pipeline,
+      evaluateRepl: Pipeline
     }
   }
 }
 
 window.pipelines = {
   evaluateProgram: new Pipeline([
-    new Lexer(),
-    new WellFormedSyntax(),
-    new WellFormedProgram(),
-    new Desugar(),
-    new EvaluateProgram()
+    RESET_STAGE,
+    LEXING_STAGE,
+    WELL_FORMED_SYNTAX_STAGE,
+    WELL_FORMED_PROGRAM_STAGE,
+    DESUGAR_STAGE,
+    EVALUATE_CODE_STAGE
+  ]),
+  evaluateRepl: new Pipeline([
+    LEXING_STAGE,
+    WELL_FORMED_SYNTAX_STAGE,
+    WELL_FORMED_PROGRAM_STAGE,
+    DESUGAR_STAGE,
+    EVALUATE_CODE_STAGE
   ])
 };

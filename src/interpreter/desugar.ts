@@ -4,7 +4,7 @@ import {
 } from "./pipeline.js";
 
 export {
-  Desugar
+  DESUGAR_STAGE
 };
 
 class Desugar implements Stage {
@@ -12,3 +12,5 @@ class Desugar implements Stage {
     return input;
   }
 }
+
+const DESUGAR_STAGE = new Desugar();
