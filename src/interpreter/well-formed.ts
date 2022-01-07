@@ -565,11 +565,30 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgra
         }
         this.scope.add(
           `make-${defn.name}`,
-          new VariableMeta(
-            VariableType.USER_DEFINED_FUNCTION,
-            defn.fields.length
-          )
+          new VariableMeta(VariableType.USER_DEFINED_FUNCTION, defn.fields.length)
         );
+        if (this.scope.has(`${defn.name}?`)) {
+          throw new StageError(
+            DF_PREVIOUSLY_DEFINED_NAME_ERR(`${defn.name}?`),
+            defn.sourceSpan
+          );
+        }
+        this.scope.add(
+          `${defn.name}?`,
+          new VariableMeta(VariableType.USER_DEFINED_FUNCTION, 1)
+        );
+        for (const field of defn.fields) {
+          if (this.scope.has(`${defn.name}-${field}`)) {
+            throw new StageError(
+              DF_PREVIOUSLY_DEFINED_NAME_ERR(`${defn.name}-${field}`),
+              defn.sourceSpan
+            );
+          }
+          this.scope.add(
+            `${defn.name}-${field}`,
+            new VariableMeta(VariableType.USER_DEFINED_FUNCTION, 1)
+          );
+        }
       }
     }
     for (const node of program.nodes) {

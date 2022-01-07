@@ -52,7 +52,7 @@ class Pipeline {
     for (const stage of this.stages) {
       nextInput = stage.run(nextInput);
       if (nextInput.errors.length > 0) {
-        resetStages();
+        if (this.reset) { resetStages(); }
         return nextInput;
       }
     }

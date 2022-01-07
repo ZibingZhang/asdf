@@ -16,6 +16,7 @@ export {
   R_NONE,
   R_TRUE,
   RData,
+  RIsStructFun,
   RLambda,
   RList,
   RMakeStructFun,
@@ -25,6 +26,7 @@ export {
   RPrimFunConfig,
   RString,
   RStruct,
+  RStructGetFun,
   RSymbol,
   RValue,
   isRBoolean,
@@ -143,11 +145,14 @@ abstract class RCallableBase implements RValBase {
   }
 }
 
-interface RPrimFunConfig {
-  minArity?: number,
-  arity?: number,
-  onlyArgTypeName?: string,
-  allArgsTypeName?: string
+class RIsStructFun extends RCallableBase {
+  constructor(readonly name: string) {
+    super();
+  }
+
+  accept<T>(visitor: RCallableVisitor<T>): T {
+    return visitor.visitRIsStructFun(this);
+  }
 }
 
 class RMakeStructFun extends RCallableBase {
@@ -177,6 +182,13 @@ class RLambda extends RCallableBase {
   }
 }
 
+interface RPrimFunConfig {
+  minArity?: number,
+  arity?: number,
+  onlyArgTypeName?: string,
+  allArgsTypeName?: string
+}
+
 class RPrimFun extends RCallableBase {
   typeGuardOf = (typeName: string) => {
     switch(typeName) {
@@ -200,6 +212,20 @@ class RPrimFun extends RCallableBase {
 
   call(_: Environment, __: RValue[], ___: SourceSpan): RValue {
     throw "illegal state: not implemented";
+  }
+}
+
+class RStructGetFun extends RCallableBase {
+  constructor(
+    readonly name: string,
+    readonly fieldName: string,
+    readonly idx: number
+  ) {
+    super();
+  }
+
+  accept<T>(visitor: RCallableVisitor<T>): T {
+    return visitor.visitRStructGetFun(this);
   }
 }
 
@@ -277,7 +303,9 @@ const R_FALSE = new RBoolean(false);
 const R_EMPTY_LIST = new RList([]);
 
 interface RCallableVisitor<T> {
-  visitRMakeStructFun(rcallable: RMakeStructFun): T;
-  visitRLambda(rcallable: RLambda): T;
-  visitRPrimFun(rcallable: RPrimFun): T;
+  visitRIsStructFun(rval: RIsStructFun): T;
+  visitRMakeStructFun(rval: RMakeStructFun): T;
+  visitRLambda(rval: RLambda): T;
+  visitRPrimFun(rval: RPrimFun): T;
+  visitRStructGetFun(rval: RStructGetFun): T;
 }

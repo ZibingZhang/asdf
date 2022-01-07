@@ -18,10 +18,12 @@ import {
   isRCallable,
   isRTrue,
   RCallableVisitor,
+  RIsStructFun,
   RLambda,
   RMakeStructFun,
   RPrimFun,
   RStruct,
+  RStructGetFun,
   RValue,
   R_FALSE,
   R_NONE,
@@ -146,6 +148,10 @@ class DefnStructNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     env.set(`make-${this.name}`, new RMakeStructFun(this.name, this.fields.length));
+    env.set(`${this.name}?`, new RIsStructFun(this.name));
+    for (const [idx, field] of this.fields.entries()) {
+      env.set(`${this.name}-${field}`, new RStructGetFun(this.name, field, idx));
+    }
     return R_NONE;
   }
 }
@@ -358,6 +364,21 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
     readonly sourceSpan: SourceSpan
   ) {}
 
+  visitRIsStructFun(rval: RIsStructFun): RValue {
+    if (this.args.length !== 1) {
+      throw new StageError(
+        FA_ARITY_ERR(rval.name, 1, this.args.length),
+        NO_SOURCE_SPAN
+      );
+    }
+    const argVal = this.args[0].eval(this.env);
+    if (argVal instanceof RStruct && argVal.name === rval.name) {
+      return R_TRUE;
+    } else {
+      return R_FALSE;
+    }
+  }
+
   visitRMakeStructFun(rval: RMakeStructFun): RValue {
     if (rval.arity !== this.args.length) {
       throw new StageError(
@@ -414,5 +435,22 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
       }
     }
     return rval.call(this.env, argVals, this.sourceSpan);
+  }
+
+  visitRStructGetFun(rval: RStructGetFun): RValue {
+    if (this.args.length !== 1) {
+      throw new StageError(
+        FA_ARITY_ERR(rval.name, 1, this.args.length),
+        NO_SOURCE_SPAN
+      );
+    }
+    const argVal = this.args[0].eval(this.env);
+    if (!(argVal instanceof RStruct) || argVal.name != rval.name) {
+      throw new StageError(
+        FA_WRONG_TYPE_ERR(`${rval.name}-${rval.fieldName}`, rval.name, argVal.stringify()),
+        NO_SOURCE_SPAN
+      );
+    }
+    return argVal.vals[rval.idx];
   }
 }
