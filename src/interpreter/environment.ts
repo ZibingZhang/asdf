@@ -5,23 +5,41 @@ import {
   StageError
 } from "./pipeline.js";
 import {
-  RDivide,
-  RIsZero,
-  RMinus,
-  RMultiply,
-  RPlus,
+  RPFAreBooleansEqual,
+  RPFBooleanToString,
+  RPFIsBoolean,
+  RPFIsFalse,
+  RPFNot
+} from "./primitive/booleans.js";
+import {
+  RPFCons,
+  RPFList,
+  R_NULL
+} from "./primitive/lists.js";
+import {
+  RPFDivide,
+  RPFIsZero,
+  RPFMinus,
+  RPFMultiply,
+  RPFPlus,
   R_E,
   R_PI
 } from "./primitive/numbers.js";
 import {
+  RPFAreSymbolsEqual,
+  RPFIsSymbol,
+  RPFSymbolToString
+} from "./primitive/symbols.js";
+import {
   RData,
   RIsStructFun,
   RMakeStructFun,
-  RNumber,
   RPrimFun,
-  RPrimFunConfig,
   RStructGetFun,
-  RValue
+  RValue,
+  R_EMPTY_LIST,
+  R_FALSE,
+  R_TRUE
 } from "./rvalue.js";
 import {
   SourceSpan
@@ -91,9 +109,9 @@ function addDataToPrimEnv(name: string, val: RData) {
   PRIMITIVE_ENVIRONMENT.set(name, val);
 }
 
-function addFnToPrimEnv(name: string, cls: typeof RPrimFun, config: RPrimFunConfig) {
-  PRIMITIVE_FUNCTION_NAMES.add(name);
-  PRIMITIVE_ENVIRONMENT.set(name, new cls(name, config));
+function addFnToPrimEnv(val: RPrimFun) {
+  PRIMITIVE_FUNCTION_NAMES.add(val.name);
+  PRIMITIVE_ENVIRONMENT.set(val.name, val);
 }
 
 function addStructToPrimEnv(name: string, fields: string[]) {
@@ -109,13 +127,38 @@ function addStructToPrimEnv(name: string, fields: string[]) {
   });
 }
 
+// predefined variables
+addDataToPrimEnv("empty", R_EMPTY_LIST);
+addDataToPrimEnv("true", R_TRUE);
+addDataToPrimEnv("false", R_FALSE);
+
+// constants
 addDataToPrimEnv("e", R_E);
 addDataToPrimEnv("pi", R_PI);
+addDataToPrimEnv("null", R_NULL);
 
-addFnToPrimEnv("/", RDivide, { minArity: 2, allArgsTypeName: "number" });
-addFnToPrimEnv("-", RMinus, { minArity: 1, allArgsTypeName: "number" });
-addFnToPrimEnv("*", RMultiply, { minArity: 2, allArgsTypeName: "number" });
-addFnToPrimEnv("+", RPlus, { minArity: 2, allArgsTypeName: "number" });
-addFnToPrimEnv("zero?", RIsZero, { arity: 1, onlyArgTypeName: "number" });
+// numbers
+addFnToPrimEnv(new RPFMultiply());
+addFnToPrimEnv(new RPFPlus());
+addFnToPrimEnv(new RPFMinus());
+addFnToPrimEnv(new RPFDivide());
+addFnToPrimEnv(new RPFIsZero());
 
+// booleans
+addFnToPrimEnv(new RPFBooleanToString());
+addFnToPrimEnv(new RPFAreBooleansEqual());
+addFnToPrimEnv(new RPFIsBoolean());
+addFnToPrimEnv(new RPFIsFalse());
+addFnToPrimEnv(new RPFNot());
+
+// symbols
+addFnToPrimEnv(new RPFSymbolToString());
+addFnToPrimEnv(new RPFAreSymbolsEqual());
+addFnToPrimEnv(new RPFIsSymbol());
+
+// lists
+addFnToPrimEnv(new RPFCons());
+addFnToPrimEnv(new RPFList());
+
+// posns
 addStructToPrimEnv("posn", ["x", "y"]);

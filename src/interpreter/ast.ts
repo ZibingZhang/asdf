@@ -435,13 +435,24 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
       for (const [idx, argVal] of argVals.entries()) {
         if (!typeGuard(argVal)) {
           throw new StageError(
-            FA_NTH_WRONG_TYPE_ERR(rval.name, idx, rval.config.allArgsTypeName, rval.stringify()),
+            FA_NTH_WRONG_TYPE_ERR(rval.name, rval.config.allArgsTypeName, idx, argVal.stringify()),
             this.sourceSpan
           );
         }
       }
     }
-    return rval.call(this.env, argVals, this.sourceSpan);
+    if (rval.config.argsTypeNames) {
+      for (const [idx, argVal] of argVals.entries()) {
+        const typeGuard = rval.typeGuardOf(rval.config.argsTypeNames[idx]);
+        if (!typeGuard(argVal)) {
+          throw new StageError(
+            FA_NTH_WRONG_TYPE_ERR(rval.name, rval.config.argsTypeNames[idx], idx, argVal.stringify()),
+            this.sourceSpan
+          );
+        }
+      }
+    }
+    return rval.call(argVals, this.sourceSpan);
   }
 
   visitRStructGetFun(rval: RStructGetFun): RValue {

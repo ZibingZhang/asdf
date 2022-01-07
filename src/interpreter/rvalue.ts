@@ -32,8 +32,9 @@ export {
   RValue,
   isRBoolean,
   isRCallable,
-  isRData,
+  isRList,
   isRPrimFun,
+  isRSymbol,
   isRTrue,
   RCallableVisitor
 };
@@ -101,7 +102,7 @@ class RString implements RAtomic {
   constructor(readonly val: string) {}
 
   stringify(): string {
-    return this.val;
+    return `"${this.val}"`;
   }
 }
 
@@ -117,12 +118,16 @@ class RList implements RData {
   constructor(readonly vals: RValue[]) {}
 
   stringify(): string {
-    let output = "";
-    for (const val of this.vals) {
-      output += `(cons ${val.stringify()}`;
+    if (this.vals.length === 0) {
+      return "'()";
+    } else {
+      let output = `(cons ${this.vals[0].stringify()}`;
+      for (const val of this.vals.slice(1)) {
+        output += ` (cons ${val.stringify()}`;
+      }
+      output += " '()" + ")".repeat(this.vals.length);
+      return output;
     }
-    output += "'()" + ")".repeat(this.vals.length);
-    return output;
   }
 }
 
@@ -153,6 +158,7 @@ abstract class RCallableBase implements RValBase {
   abstract accept<T>(visitor: RCallableVisitor<T>): T;
 
   stringify(): string {
+    console.trace()
     throw "illegal state: cannot stringify a callable";
   }
 }
@@ -198,19 +204,11 @@ interface RPrimFunConfig {
   minArity?: number,
   arity?: number,
   onlyArgTypeName?: string,
-  allArgsTypeName?: string
+  allArgsTypeName?: string,
+  argsTypeNames?: string[]
 }
 
 class RPrimFun extends RCallableBase {
-  typeGuardOf = (typeName: string) => {
-    switch(typeName) {
-      case "number":
-        return isRNumber;
-      default:
-        throw "illegal state: unsupported allArgsTypeName";
-    }
-  };
-
   constructor(
     readonly name: string,
     readonly config: RPrimFunConfig
@@ -218,11 +216,28 @@ class RPrimFun extends RCallableBase {
     super();
   }
 
+  typeGuardOf(typeName: string): (rval: RValue) => boolean {
+    switch(typeName) {
+      case "any":
+        return () => true;
+      case "boolean":
+        return isRBoolean;
+      case "list":
+        return isRList;
+      case "number":
+        return isRNumber;
+      case "symbol":
+        return isRSymbol;
+      default:
+        throw "illegal state: unsupported allArgsTypeName";
+    }
+  };
+
   accept<T>(visitor: RCallableVisitor<T>): T {
     return visitor.visitRPrimFun(this);
   }
 
-  call(_: Environment, __: RValue[], ___: SourceSpan): RValue {
+  call(_: RValue[], __: SourceSpan): RValue {
     throw "illegal state: not implemented";
   }
 }
@@ -249,8 +264,8 @@ function isRCallable(rval: RValue): rval is RCallable {
   return rval instanceof RCallableBase;
 }
 
-function isRData(rval: RValue): rval is RData {
-  return !Object.prototype.hasOwnProperty.call(rval, "eval");
+function isRList(rval: RValue): rval is RList {
+  return rval instanceof RList;
 }
 
 function isRNumber(rval: RValue): rval is RNumber {
@@ -259,6 +274,10 @@ function isRNumber(rval: RValue): rval is RNumber {
 
 function isRPrimFun(rval: RCallable): rval is RPrimFun {
   return rval instanceof RPrimFun;
+}
+
+function isRSymbol(rval: RValue): rval is RSymbol {
+  return rval instanceof RSymbol;
 }
 
 function isRTrue(rval: RBoolean): boolean {

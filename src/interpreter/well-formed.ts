@@ -149,7 +149,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
         }
         case TokenType.STRING: {
           return new AtomNode(
-            new RString(sexpr.token.text),
+            new RString(sexpr.token.text.slice(1, -1)),
             sexpr.sourceSpan
           );
         }
