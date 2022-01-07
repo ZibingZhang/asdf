@@ -1,7 +1,7 @@
 import {
   ASTNode,
   DefnNode,
-  isDefnNode,
+  isDefnNode
 } from "./ast.js";
 import {
   Stage,
@@ -13,7 +13,7 @@ import {
 } from "./program.js";
 
 export {
-  DESUGAR_STAGE
+  Desugar
 };
 
 class Desugar implements Stage<Program, DProgram> {
@@ -31,5 +31,3 @@ class Desugar implements Stage<Program, DProgram> {
     return new StageOutput(new DProgram(defns, nodes));
   }
 }
-
-const DESUGAR_STAGE = new Desugar();

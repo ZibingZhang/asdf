@@ -19,7 +19,7 @@ import {
 } from "./sourcespan.js";
 
 export {
-  EVALUATE_CODE_STAGE
+  EvaluateCode
 };
 
 class EvaluateCode implements Stage<DProgram, string[]> {
@@ -62,5 +62,3 @@ class EvaluateCode implements Stage<DProgram, string[]> {
     return output;
   }
 }
-
-const EVALUATE_CODE_STAGE = new EvaluateCode();

@@ -81,6 +81,8 @@ abstract class ASTNodeBase {
     readonly sourceSpan: SourceSpan
   ) {}
 
+  abstract accept<T>(visitor: ASTNodeVisitor<T>): T;
+
   abstract eval(env: Environment): RValue;
 }
 
@@ -90,6 +92,10 @@ class AndNode extends ASTNodeBase {
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitAndNode(this);
   }
 
   eval(env: Environment): RValue {
@@ -116,6 +122,10 @@ class AtomNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitAtomNode(this);
+  }
+
   eval(_: Environment) {
     return this.rval;
   }
@@ -128,6 +138,10 @@ class DefnStructNode extends ASTNodeBase {
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitDefnStructNode(this);
   }
 
   eval(env: Environment): RValue {
@@ -146,6 +160,10 @@ class DefnVarNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitDefnVarNode(this);
+  }
+
   eval(env: Environment): RValue {
     env.set(this.name, this.value.eval(env));
     return R_NONE;
@@ -155,6 +173,10 @@ class DefnVarNode extends ASTNodeBase {
 class EllipsisFunAppNode extends ASTNodeBase {
   constructor(readonly sourceSpan: SourceSpan) {
     super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitEllipsisFunAllNode(this);
   }
 
   eval(_: Environment): RValue {
@@ -168,6 +190,10 @@ class EllipsisFunAppNode extends ASTNodeBase {
 class EllipsisNode extends ASTNodeBase {
   constructor(readonly sourceSpan: SourceSpan) {
     super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitEllipsisNode(this);
   }
 
   eval(_: Environment): RValue {
@@ -185,6 +211,10 @@ class FunAppNode extends ASTNodeBase {
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitFunAppNode(this);
   }
 
   eval(env: Environment): RValue {
@@ -217,6 +247,10 @@ class IfNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitIfNode(this);
+  }
+
   eval(env: Environment): RValue {
     const questionResult = this.question.eval(env);
     if (!isRBoolean(questionResult)) {
@@ -242,6 +276,10 @@ class LambdaNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitLambdaNode(this);
+  }
+
   eval(env: Environment): RValue {
     return new RLambda(env.copy(), this.params, this.body);
   }
@@ -253,6 +291,10 @@ class OrNode extends ASTNodeBase {
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitOrNode(this);
   }
 
   eval(env: Environment): RValue {
@@ -276,6 +318,10 @@ class VarNode extends ASTNodeBase {
     readonly name: AtomSExpr
   ) {
     super(name.sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitVarNode(this);
   }
 
   eval(env: Environment): RValue {

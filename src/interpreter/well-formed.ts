@@ -1,6 +1,7 @@
 import {
   AndNode,
   ASTNode,
+  ASTNodeVisitor,
   AtomNode,
   DefnNode,
   DefnStructNode,
@@ -74,8 +75,8 @@ import {
 } from "./sourcespan.js";
 
 export {
-  WELL_FORMED_SYNTAX_STAGE,
-  WELL_FORMED_PROGRAM_STAGE
+  WellFormedSyntax,
+  WellFormedProgram
 };
 
 class WellFormedSyntax implements Stage<SExpr[], Program> {
@@ -440,7 +441,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
   }
 }
 
-class WellFormedProgram implements Stage<DProgram, DProgram> {
+class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgram> {
   scope: Scope = new Scope(PRIMITIVE_SCOPE);
 
   reset() {
@@ -449,7 +450,7 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
 
   run(input: StageOutput<DProgram>): StageOutput<DProgram> {
     try {
-      this.wellFormedProgram(input.output);
+      this.assertWellFormedProgram(input.output);
       return input;
     } catch (e) {
       if (e instanceof StageError) {
@@ -460,7 +461,76 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
     }
   }
 
-  private wellFormedProgram(program: DProgram) {
+  visitAndNode(node: AndNode): void {
+    node.args.forEach(arg => arg.accept(this));
+  }
+
+  visitAtomNode(_: AtomNode): void {
+    // always well-formed
+  }
+
+  visitDefnVarNode(node: DefnVarNode): void {
+    node.value.accept(this);
+  }
+
+  visitDefnStructNode(_: DefnStructNode): void {
+    // always well-formed
+  }
+
+  visitEllipsisFunAllNode(_: EllipsisFunAppNode): void {
+    // skip well-formed check on template
+  }
+
+  visitEllipsisNode(_: EllipsisNode): void {
+    // skip well-formed check on template
+  }
+
+  visitFunAppNode(node: FunAppNode): void {
+    const meta = this.scope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
+    if (meta.type === VariableType.USER_DEFINED_FUNCTION && meta.arity != node.args.length) {
+      throw new StageError(
+        FA_ARITY_ERR(node.fn.name.token.text, meta.arity, node.args.length),
+        node.sourceSpan
+      );
+    }
+    node.args.forEach(arg => arg.accept(this));
+  }
+
+  visitIfNode(node: IfNode): void {
+    node.question.accept(this);
+    node.trueAnswer.accept(this);
+    node.falseAnswer.accept(this);
+  }
+
+  visitLambdaNode(node: LambdaNode): void {
+    const outerScope = this.scope;
+    this.scope = new Scope(this.scope);
+    node.params.forEach(param => this.scope.add(param, DATA_VARIABLE_META));
+    node.body.accept(this);
+    this.scope = outerScope;
+  }
+
+  visitOrNode(node: OrNode): void {
+    node.args.forEach(arg => arg.accept(this));
+  }
+
+  visitVarNode(node: VarNode): void {
+    const meta = this.scope.get(node.name.token.text, true, node.sourceSpan);
+    if (meta.type !== VariableType.DATA) {
+      throw new StageError(
+        WF_EXPECTED_OPEN_PARENTHESIS_ERR(node.name.token.text),
+        node.sourceSpan
+      );
+    }
+    if (!this.scope.has(node.name.token.text)) {
+      throw new StageError(
+        SC_UNDEFINED_VARIABLE_ERR(node.name.token.text),
+        node.sourceSpan
+      );
+    }
+  }
+
+  private assertWellFormedProgram(program: DProgram) {
     for (const defn of program.defns) {
       if (defn instanceof DefnVarNode) {
         if (defn.value instanceof LambdaNode) {
@@ -503,50 +573,7 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
       }
     }
     for (const node of program.nodes) {
-      this.wellFormedNode(node);
-    }
-  }
-
-  private wellFormedNode(node: ASTNode) {
-    if (node instanceof AndNode) {
-      node.args.forEach(arg => this.wellFormedNode(arg));
-    } else if (node instanceof DefnVarNode) {
-      this.wellFormedNode(node.value);
-    } else if (node instanceof FunAppNode) {
-      let meta = this.scope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
-      if (meta.type === VariableType.USER_DEFINED_FUNCTION && meta.arity != node.args.length) {
-        throw new StageError(
-          FA_ARITY_ERR(node.fn.name.token.text, meta.arity, node.args.length),
-          node.sourceSpan
-        );
-      }
-      node.args.forEach(arg => this.wellFormedNode(arg));
-    } else if (node instanceof IfNode) {
-      this.wellFormedNode(node.question);
-      this.wellFormedNode(node.trueAnswer);
-      this.wellFormedNode(node.falseAnswer);
-    } else if (node instanceof LambdaNode) {
-      const outerScope = this.scope;
-      this.scope = new Scope(this.scope);
-      node.params.forEach(param => this.scope.add(param, DATA_VARIABLE_META));
-      this.wellFormedNode(node.body);
-      this.scope = outerScope;
-    } else if (node instanceof OrNode) {
-      node.args.forEach(arg => this.wellFormedNode(arg));
-    } else if (node instanceof VarNode) {
-      const meta = this.scope.get(node.name.token.text, true, node.sourceSpan);
-      if (meta.type !== VariableType.DATA) {
-        throw new StageError(
-          WF_EXPECTED_OPEN_PARENTHESIS_ERR(node.name.token.text),
-          node.sourceSpan
-        );
-      }
-      if (!this.scope.has(node.name.token.text)) {
-        throw new StageError(
-          SC_UNDEFINED_VARIABLE_ERR(node.name.token.text),
-          node.sourceSpan
-        );
-      }
+      node.accept(this);
     }
   }
 }
@@ -606,6 +633,3 @@ for (const name of PRIMITIVE_DATA_NAMES) {
 for (const name of PRIMITIVE_FUNCTION_NAMES) {
   PRIMITIVE_SCOPE.add(name, PRIMITIVE_FUNCTION_VARIABLE_META);
 }
-
-const WELL_FORMED_SYNTAX_STAGE = new WellFormedSyntax();
-const WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();

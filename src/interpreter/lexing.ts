@@ -32,7 +32,7 @@ import {
 } from "./token.js";
 
 export {
-  LEXING_STAGE
+  Lexer
 };
 
 const KEYWORDS = new Set(
@@ -610,5 +610,3 @@ class Lexer implements Stage<string, SExpr[]> {
     if (this.position == this.input.length) { this.isAtEnd = true; }
   }
 }
-
-const LEXING_STAGE = new Lexer();
