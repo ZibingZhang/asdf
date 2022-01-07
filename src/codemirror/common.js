@@ -2,8 +2,8 @@ export {
   evaluate
 };
 
-function evaluate(text) {
-  const stageOutput = window.pipelines.evaluateRepl.run(text);
+function evaluate(pipeline, text) {
+  const stageOutput = pipeline.run(text);
   let output = "";
   if (stageOutput.errors.length > 0) {
     for (const error of stageOutput.errors) {

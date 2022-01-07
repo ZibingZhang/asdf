@@ -10,7 +10,9 @@ import {
 import {
   Pipeline
 } from "./pipeline.js";
-import { RESET_STAGE } from "./reset.js";
+import {
+  RESET_STAGE
+} from "./reset.js";
 import {
   WELL_FORMED_PROGRAM_STAGE,
   WELL_FORMED_SYNTAX_STAGE

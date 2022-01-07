@@ -45,7 +45,10 @@ repl.on("keydown",
         event.preventDefault();
         appendToReplLn("");
         const text = replDoc.getLine(replDoc.lastLine() - 1).slice(2);
-        const result = evaluate(text);
+        const result = evaluate(
+          window.pipelines.evaluateRepl,
+          text
+        );
         appendToRepl(result);
         break;
       }

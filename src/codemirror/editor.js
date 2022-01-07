@@ -20,7 +20,10 @@ theme: "monokai",
 extraKeys: {
   "Alt-Enter": () => {
     resetRepl();
-    const result = evaluate(editor.getValue());
+    const result = evaluate(
+      window.pipelines.evaluateProgram,
+      editor.getValue()
+    );
     appendToRepl(result);
   }
 }});
