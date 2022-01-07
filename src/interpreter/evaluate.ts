@@ -15,6 +15,7 @@ import {
 import {
   Program
 } from "./program.js";
+import { R_NONE } from "./rvalue.js";
 import {
   NO_SOURCE_SPAN
 } from "./sourcespan.js";
@@ -55,12 +56,10 @@ class EvaluateCode implements Stage {
   private runHelper(program: Program): string[] {
     const output: string[] = [];
     for (const node of program.nodes) {
-      if (isDefnNode(node)) {
-        node.run(this.env);
-      } else {
-        output.push(node.eval(this.env).stringify());
+      const result = node.eval(this.env);
+      if (result !== R_NONE) {
+        output.push(result.stringify());
       }
-
     }
     return output;
   }

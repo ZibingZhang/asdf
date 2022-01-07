@@ -22,6 +22,7 @@ import {
 export {
   R_EMPTY_LIST,
   R_FALSE,
+  R_NONE,
   R_TRUE,
   RData,
   RLambda,
@@ -49,11 +50,22 @@ function gcd(a: bigint, b: bigint): bigint {
   return gcd(b, a % b);
 }
 
-type RValue = RData | RCallable;
-type RCallable = RLambda | RPrimFun;
+type RValue =
+  | RData
+  | RCallable
+  | RNone;
+type RCallable =
+  | RLambda
+  | RPrimFun;
 
 interface RValBase {
   stringify(): string;
+}
+
+class RNone implements RValBase {
+  stringify(): string {
+    throw "illegal state: trying to stringify RNone";
+  }
 }
 
 interface RData extends RValBase {}
@@ -281,6 +293,7 @@ abstract class RMath {
   }
 }
 
+const R_NONE = new RNone();
 const R_TRUE = new RBoolean(true);
 const R_FALSE = new RBoolean(false);
 const R_EMPTY_LIST = new RList([]);

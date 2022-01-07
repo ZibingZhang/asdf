@@ -17,6 +17,7 @@ import {
   RLambda,
   RValue,
   R_FALSE,
+  R_NONE,
   R_TRUE
 } from "./rvalue.js";
 import {
@@ -33,6 +34,8 @@ export {
   AtomNode,
   DASTNode,
   DefnNode,
+  DefnStructNode,
+  DefnVarNode,
   EllipsisFunAppNode,
   EllipsisNode,
   ExprNode,
@@ -47,6 +50,13 @@ export {
 type ASTNode =
   | DefnNode
   | ExprNode;
+type DASTNode =
+| DefnVarNode
+| ExprNode;
+
+type DefnNode =
+| DefnStructNode
+| DefnVarNode;
 type ExprNode =
   | AndNode
   | AtomNode
@@ -56,11 +66,6 @@ type ExprNode =
   | IfNode
   | OrNode
   | VarNode;
-
-  type DASTNode =
-  | DefnNode
-  | DefnStructNode
-  | ExprNode;
 
 abstract class ASTNodeBase {
   constructor(
@@ -107,6 +112,35 @@ class AtomNode extends ASTNodeBase {
   }
 }
 
+class DefnStructNode extends ASTNodeBase {
+  constructor(
+    readonly name: AtomSExpr,
+    readonly params: string[],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  eval(_: Environment): RValue {
+    throw "illegal state: structure definition should have been desugared";
+  }
+}
+
+class DefnVarNode extends ASTNodeBase {
+  constructor(
+    readonly name: AtomSExpr,
+    readonly value: ASTNode,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  eval(env: Environment): RValue {
+    env.set(this.name.token.text, this.value.eval(env));
+    return R_NONE;
+  }
+}
+
 class EllipsisFunAppNode extends ASTNodeBase {
   constructor(readonly sourceSpan: SourceSpan) {
     super(sourceSpan);
@@ -130,42 +164,6 @@ class EllipsisNode extends ASTNodeBase {
       EL_EXPECT_FINISHED_EXPR_ERR,
       this.sourceSpan
     );
-  }
-}
-
-class DefnNode extends ASTNodeBase {
-  constructor(
-    readonly name: AtomSExpr,
-    readonly value: ASTNode,
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
-
-  eval(_: Environment): RValue {
-    throw "illegal state: evaluating variable definition";
-  }
-
-  run(env: Environment): void {
-    env.set(this.name.token.text, this.value.eval(env));
-  }
-}
-
-class DefnStructNode extends ASTNodeBase {
-  constructor(
-    readonly name: AtomSExpr,
-    readonly params: string[],
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
-
-  eval(_: Environment): RValue {
-    throw "illegal state: evaluating structure definition";
-  }
-
-  run(_: Environment): void {
-    throw "illegal state: running structure definition";
   }
 }
 
@@ -282,5 +280,6 @@ class VarNode extends ASTNodeBase {
 }
 
 function isDefnNode(node: ASTNode): node is DefnNode {
-  return node instanceof DefnNode;
+  return node instanceof DefnStructNode
+    || node instanceof DefnVarNode;
 }

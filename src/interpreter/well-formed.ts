@@ -3,6 +3,8 @@ import {
   ASTNode,
   AtomNode,
   DefnNode,
+  DefnStructNode,
+  DefnVarNode,
   EllipsisFunAppNode,
   EllipsisNode,
   FunAppNode,
@@ -22,6 +24,7 @@ import {
   Program
 } from "./program.js";
 import {
+  AtomSExpr,
   isAtomSExpr,
   ListSExpr,
   SExpr
@@ -215,7 +218,7 @@ class WellFormedSyntax implements Stage {
                   sexpr.sourceSpan
                 );
               }
-              return this.toDefnNode(sexpr);
+              return this.toDefnStructNode(sexpr);
             }
             case "if": {
               if (sexpr.tokens.length - 1 !== 3) {
@@ -288,7 +291,7 @@ class WellFormedSyntax implements Stage {
           sexpr.tokens[3].sourceSpan
         );
       }
-      return new DefnNode(
+      return new DefnVarNode(
         name,
         this.toNode(sexpr.tokens[2]),
         sexpr.sourceSpan
@@ -342,7 +345,7 @@ class WellFormedSyntax implements Stage {
           sexpr.tokens[3].sourceSpan
         );
       }
-      return new DefnNode(
+      return new DefnVarNode(
         name,
         new LambdaNode(
           params,
@@ -352,6 +355,14 @@ class WellFormedSyntax implements Stage {
         sexpr.sourceSpan
       );
     }
+  }
+
+  private toDefnStructNode(sexpr: ListSExpr): DefnStructNode {
+    return new DefnStructNode(
+      <AtomSExpr>sexpr.tokens[0],
+      [],
+      sexpr.sourceSpan
+    )
   }
 
   private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): AtomNode {
@@ -431,7 +442,7 @@ class WellFormedProgram implements Stage {
   private wellFormedNode(node: ASTNode, deferFunApp: boolean) {
     if (node instanceof AndNode) {
       node.args.forEach(arg => this.wellFormedNode(arg, deferFunApp));
-    } else if (node instanceof DefnNode) {
+    } else if (node instanceof DefnVarNode) {
       if (this.executionScopeHas(node.name.token.text)) {
         throw new StageError(
           DF_PREVIOUSLY_DEFINED_NAME_ERR(node.name.token.text),
