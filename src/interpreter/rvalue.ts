@@ -7,15 +7,6 @@ import {
   Environment
 } from "./environment.js";
 import {
-  FA_ARITY_ERR,
-  FA_MIN_ARITY_ERR,
-  FA_NTH_WRONG_TYPE_ERR,
-  FA_WRONG_TYPE_ERR
-} from "./error.js";
-import {
-  StageError
-} from "./pipeline.js";
-import {
   SourceSpan
 } from "./sourcespan.js";
 
@@ -40,7 +31,8 @@ export {
   isRCallable,
   isRData,
   isRPrimFun,
-  isRTrue
+  isRTrue,
+  RCallableVisitor
 };
 
 // https://stackoverflow.com/questions/17445231/js-how-to-find-the-greatest-common-divisor
@@ -144,6 +136,8 @@ class RStruct implements RData {
 }
 
 abstract class RCallableBase implements RValBase {
+  abstract accept<T>(visitor: RCallableVisitor<T>): T;
+
   stringify(): string {
     throw "illegal state: cannot stringify a callable";
   }
@@ -164,8 +158,8 @@ class RMakeStructFun extends RCallableBase {
     super();
   }
 
-  eval(args: RValue[]): RStruct {
-    return new RStruct(this.name, args);
+  accept<T>(visitor: RCallableVisitor<T>): T {
+    return visitor.visitRMakeStructFun(this);
   }
 }
 
@@ -178,16 +172,13 @@ class RLambda extends RCallableBase {
     super();
   }
 
-  eval(paramEnv: Environment, env: Environment): RValue {
-    const closureCopy = this.closure.copy();
-    closureCopy.parentEnv = env;
-    paramEnv.parentEnv = closureCopy;
-    return this.body.eval(paramEnv);
+  accept<T>(visitor: RCallableVisitor<T>): T {
+    return visitor.visitRLambda(this);
   }
 }
 
 class RPrimFun extends RCallableBase {
-  private typeGuardOf = (typeName: string) => {
+  typeGuardOf = (typeName: string) => {
     switch(typeName) {
       case "number":
         return isRNumber;
@@ -203,43 +194,11 @@ class RPrimFun extends RCallableBase {
     super();
   }
 
-  eval(env: Environment, args: RValue[], sourceSpan: SourceSpan): RValue {
-    if (this.config.minArity && args.length < this.config.minArity) {
-      throw new StageError(
-        FA_MIN_ARITY_ERR(this.name, this.config.minArity, args.length),
-        sourceSpan
-      );
-    }
-    if (this.config.arity && args.length !== this.config.arity) {
-      throw new StageError(
-        FA_ARITY_ERR(this.name, this.config.arity, args.length),
-        sourceSpan
-      );
-    }
-    if (this.config.onlyArgTypeName) {
-      const typeGuard = this.typeGuardOf(this.config.onlyArgTypeName);
-      if (!typeGuard(args[0])) {
-        throw new StageError(
-          FA_WRONG_TYPE_ERR(this.name, this.config.onlyArgTypeName, args[0].stringify()),
-          sourceSpan
-        );
-      }
-    }
-    if (this.config.allArgsTypeName) {
-      const typeGuard = this.typeGuardOf(this.config.allArgsTypeName);
-      for (const [idx, rval] of args.entries()) {
-        if (!typeGuard(rval)) {
-          throw new StageError(
-            FA_NTH_WRONG_TYPE_ERR(this.name, idx, this.config.allArgsTypeName, rval.stringify()),
-            sourceSpan
-          );
-        }
-      }
-    }
-    return this.call(env, args, sourceSpan);
+  accept<T>(visitor: RCallableVisitor<T>): T {
+    return visitor.visitRPrimFun(this);
   }
 
-  protected call(_: Environment, __: RValue[], ___: SourceSpan): RValue {
+  call(_: Environment, __: RValue[], ___: SourceSpan): RValue {
     throw "illegal state: not implemented";
   }
 }
@@ -249,7 +208,7 @@ function isRBoolean(rval: RValue): rval is RBoolean {
 }
 
 function isRCallable(rval: RValue): rval is RCallable {
-  return "eval" in rval;
+  return rval instanceof RCallableBase;
 }
 
 function isRData(rval: RValue): rval is RData {
@@ -316,3 +275,9 @@ const R_NONE = new RNone();
 const R_TRUE = new RBoolean(true);
 const R_FALSE = new RBoolean(false);
 const R_EMPTY_LIST = new RList([]);
+
+interface RCallableVisitor<T> {
+  visitRMakeStructFun(rcallable: RMakeStructFun): T;
+  visitRLambda(rcallable: RLambda): T;
+  visitRPrimFun(rcallable: RPrimFun): T;
+}

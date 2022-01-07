@@ -28,7 +28,7 @@ export {
 };
 
 class RDivide extends RPrimFun {
-  protected call(_: Environment, args: RValue[], sourceSpan: SourceSpan): RValue {
+  call(_: Environment, args: RValue[], sourceSpan: SourceSpan): RValue {
     return args.slice(1).reduce(
       (prev, curr) => {
         if ((<RNumber>curr).numerator === 0n) {
@@ -44,13 +44,13 @@ class RDivide extends RPrimFun {
 }
 
 class RIsZero extends RPrimFun {
-  protected call(_: Environment, args: RValue[], __: SourceSpan): RValue {
+  call(_: Environment, args: RValue[], __: SourceSpan): RValue {
     return (<RNumber>args[0]).numerator === 0n ? R_TRUE : R_FALSE;
   }
 }
 
 class RMinus extends RPrimFun {
-  protected call(_: Environment, args: RValue[]): RValue {
+  call(_: Environment, args: RValue[]): RValue {
     if (args.length === 1) {
       return RMath.negate(<RNumber>args[0]);
     }
@@ -61,7 +61,7 @@ class RMinus extends RPrimFun {
 }
 
 class RMultiply extends RPrimFun {
-  protected call(_: Environment, args: RValue[]): RValue {
+  call(_: Environment, args: RValue[]): RValue {
     return args.reduce(
       (prev, curr) => RMath.mul(<RNumber>prev, <RNumber>curr), new RNumber(1n, 1n)
     );
@@ -69,7 +69,7 @@ class RMultiply extends RPrimFun {
 }
 
 class RPlus extends RPrimFun {
-  protected call(_: Environment, args: RValue[]): RValue {
+  call(_: Environment, args: RValue[]): RValue {
     return args.reduce(
       (prev, curr) => RMath.add(<RNumber>prev, <RNumber>curr), new RNumber(0n, 1n)
     );

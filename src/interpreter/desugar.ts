@@ -3,8 +3,7 @@ import {
   DefnStructNode,
   DefnVarNode,
   isDefnNode,
-  LambdaNode,
-  MakeStructNode
+  MakeStructLambdaNode
 } from "./ast.js";
 import {
   Stage,
@@ -31,7 +30,7 @@ class Desugar implements Stage<Program, DProgram> {
           structNodes.push(new DefnVarNode(
             `make-${structName}`,
             node.sourceSpan,
-            new MakeStructNode(
+            new MakeStructLambdaNode(
               structName,
               node.params.length,
               node.sourceSpan

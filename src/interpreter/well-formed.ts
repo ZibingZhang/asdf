@@ -2,6 +2,7 @@ import {
   AndNode,
   ASTNode,
   AtomNode,
+  DASTNode,
   DefnNode,
   DefnStructNode,
   DefnVarNode,
@@ -10,7 +11,7 @@ import {
   FunAppNode,
   IfNode,
   LambdaNode,
-  MakeStructNode,
+  MakeStructLambdaNode,
   OrNode,
   VarNode
 } from "./ast.js";
@@ -463,7 +464,7 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
 
   private wellFormedProgram(program: DProgram) {
     for (const defn of program.defns) {
-      if (defn.value instanceof MakeStructNode) {
+      if (defn.value instanceof MakeStructLambdaNode) {
         if (this.scope.has(defn.name)) {
           throw new StageError(
             DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
@@ -506,7 +507,7 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
     }
   }
 
-  private wellFormedNode(node: ASTNode) {
+  private wellFormedNode(node: DASTNode) {
     if (node instanceof AndNode) {
       node.args.forEach(arg => this.wellFormedNode(arg));
     } else if (node instanceof DefnVarNode) {

@@ -4,7 +4,10 @@ import {
 import {
   EL_EXPECT_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
+  FA_MIN_ARITY_ERR,
+  FA_NTH_WRONG_TYPE_ERR,
   FA_QUESTION_NOT_BOOL_ERR,
+  FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR
 } from "./error.js";
 import {
@@ -13,8 +16,8 @@ import {
 import {
   isRBoolean,
   isRCallable,
-  isRPrimFun,
   isRTrue,
+  RCallableVisitor,
   RLambda,
   RMakeStructFun,
   RPrimFun,
@@ -47,7 +50,7 @@ export {
   FunAppNode,
   IfNode,
   LambdaNode,
-  MakeStructNode,
+  MakeStructLambdaNode,
   OrNode,
   VarNode,
   isDefnNode
@@ -76,7 +79,7 @@ type ExprNode =
 
 type DExprNode =
   | ExprNode
-  | MakeStructNode
+  | MakeStructLambdaNode
 
 abstract class ASTNodeBase {
   constructor(
@@ -194,23 +197,11 @@ class FunAppNode extends ASTNodeBase {
       this.fn.name.sourceSpan
     );
     if (isRCallable(rval)) {
-      if (rval instanceof RMakeStructFun) {
-        if (rval.arity !== this.args.length) {
-          throw new StageError(
-            FA_ARITY_ERR(rval.name, rval.arity, this.args.length),
-            NO_SOURCE_SPAN
-          );
-        }
-        return rval.eval(this.args.map(node => node.eval(env)));
-      } else if (rval instanceof RPrimFun) {
-        return rval.eval(env, this.args.map(node => node.eval(env)), this.sourceSpan);
-      } else {
-        const paramEnv = new Environment();
-        for (let idx = 0; idx < this.args.length; idx++) {
-          paramEnv.set(rval.params[idx], this.args[idx].eval(env));
-        }
-        return rval.eval(paramEnv, env);
-      }
+      return rval.accept(new EvaluateRCallableVisitor(
+        this.args,
+        env,
+        this.sourceSpan
+      ));
     } else {
       throw new StageError(
         FC_EXPECTED_FUNCTION_ERR("variable"),
@@ -260,7 +251,7 @@ class LambdaNode extends ASTNodeBase {
   }
 }
 
-class MakeStructNode extends ASTNodeBase {
+class MakeStructLambdaNode extends ASTNodeBase {
   constructor(
     readonly name: string,
     readonly arity: number,
@@ -316,4 +307,70 @@ class VarNode extends ASTNodeBase {
 function isDefnNode(node: ASTNode): node is DefnNode {
   return node instanceof DefnStructNode
     || node instanceof DefnVarNode;
+}
+
+class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
+  constructor(
+    readonly args: ASTNode[],
+    readonly env: Environment,
+    readonly sourceSpan: SourceSpan
+  ) {}
+
+  visitRMakeStructFun(rval: RMakeStructFun): RValue {
+    if (rval.arity !== this.args.length) {
+      throw new StageError(
+        FA_ARITY_ERR(rval.name, rval.arity, this.args.length),
+        NO_SOURCE_SPAN
+      );
+    }
+    return new RStruct(rval.name, this.args.map(node => node.eval(this.env)));
+  }
+
+  visitRLambda(rval: RLambda): RValue {
+    const paramEnv = new Environment();
+    for (let idx = 0; idx < this.args.length; idx++) {
+      paramEnv.set(rval.params[idx], this.args[idx].eval(this.env));
+    }
+    const closureCopy = rval.closure.copy();
+    closureCopy.parentEnv = this.env;
+    paramEnv.parentEnv = closureCopy;
+    return rval.body.eval(paramEnv);
+  }
+
+  visitRPrimFun(rval: RPrimFun): RValue {
+    if (rval.config.minArity && this.args.length < rval.config.minArity) {
+      throw new StageError(
+        FA_MIN_ARITY_ERR(rval.name, rval.config.minArity, this.args.length),
+        this.sourceSpan
+      );
+    }
+    if (rval.config.arity && this.args.length !== rval.config.arity) {
+      throw new StageError(
+        FA_ARITY_ERR(rval.name, rval.config.arity, this.args.length),
+        this.sourceSpan
+      );
+    }
+    const argVals = this.args.map(arg => arg.eval(this.env));
+    if (rval.config.onlyArgTypeName) {
+      const typeGuard = rval.typeGuardOf(rval.config.onlyArgTypeName);
+      if (!typeGuard(argVals[0])) {
+        throw new StageError(
+          FA_WRONG_TYPE_ERR(rval.name, rval.config.onlyArgTypeName, argVals[0].stringify()),
+          this.sourceSpan
+        );
+      }
+    }
+    if (rval.config.allArgsTypeName) {
+      const typeGuard = rval.typeGuardOf(rval.config.allArgsTypeName);
+      for (const [idx, argVal] of argVals.entries()) {
+        if (!typeGuard(argVal)) {
+          throw new StageError(
+            FA_NTH_WRONG_TYPE_ERR(rval.name, idx, rval.config.allArgsTypeName, rval.stringify()),
+            this.sourceSpan
+          );
+        }
+      }
+    }
+    return rval.call(this.env, argVals, this.sourceSpan);
+  }
 }
