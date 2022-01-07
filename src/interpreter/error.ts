@@ -42,7 +42,7 @@ export {
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
   RS_UNCLOSED_STRING_ERR,
   RS_UNEXPECTED_ERR,
-  RT_EXCEEDED_RECURSION_DEPTH,
+  RT_MAX_CALL_STACK_SIZE_ERR,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
   SC_USED_BEFORE_DEFINITION_ERR,
@@ -186,13 +186,12 @@ const RS_UNEXPECTED_ERR = (found: string) => {
   return `read-syntax: unexpected \`${found}\``;
 };
 
-const RT_EXCEEDED_RECURSION_DEPTH = "runtime: recursion depth exceeded";
+const RT_MAX_CALL_STACK_SIZE_ERR = "runtime: maximum call stack size exceeded";
 
 const SC_UNDEFINED_FUNCTION_ERR = (name: string) => {
   return `${name}: this function is undefined`;
 };
 const SC_UNDEFINED_VARIABLE_ERR = (name: string) => {
-  console.trace()
   return `${name}: this variable is not defined`;
 };
 const SC_USED_BEFORE_DEFINITION_ERR = (name: string) => {

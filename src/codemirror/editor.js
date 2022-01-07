@@ -1,3 +1,12 @@
+import {
+  evaluate
+} from "./common.js";
+import {
+  appendToRepl,
+  resetRepl
+} from "./repl.js";
+
+const initValue = ";; Use `Alt-Enter' to run the code\n";
 const editorTextArea = document.getElementById("editor");
 const editor = CodeMirror(
 (elt) => {
@@ -5,23 +14,13 @@ const editor = CodeMirror(
 }, {
 lineNumbers: true,
 tabSize: 2,
-value: "(+ 1 2)",
+value: initValue,
 mode: "racket",
 theme: "monokai",
 extraKeys: {
   "Alt-Enter": () => {
-    const result = window.pipelines.evaluateProgram.run(editor.getValue());
     resetRepl();
-    if (result.errors.length > 0) {
-      for (const error of result.errors) {
-        const location = `${error.sourcespan.startLineno}:${error.sourcespan.startColno}`;
-        appendToReplLn(`[${location}] ${error.msg}`);
-      }
-    } else {
-      for (const text of result.output) {
-        appendToReplLn(text);
-      }
-    }
-    appendToRepl("> ");
+    const result = evaluate(editor.getValue());
+    appendToRepl(result);
   }
 }});

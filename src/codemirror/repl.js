@@ -1,3 +1,12 @@
+import {
+  evaluate
+} from "./common.js";
+
+export {
+  resetRepl,
+  appendToRepl
+};
+
 const replTextArea = document.getElementById("repl");
 const repl = CodeMirror(
 (elt) => {
@@ -10,6 +19,7 @@ const repl = CodeMirror(
   lineWrapping: true,
   smartIndent: false
 });
+const replDoc = repl.getDoc();
 
 const resetRepl =
   () => repl.setValue("");
@@ -23,22 +33,22 @@ repl.on("cursorActivity",
 );
 repl.on("keydown",
   (_, event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      appendToReplLn("");
-      const lastLine = repl.getLine(repl.lastLine() - 1).slice(2);
-      const result = window.pipelines.evaluateRepl.run(lastLine);
-      if (result.errors.length > 0) {
-        for (const error of result.errors) {
-          const location = `${error.sourcespan.startLineno}:${error.sourcespan.startColno}`;
-          appendToReplLn(`[${location}] ${error.msg}`);
+    switch (event.key) {
+      case "Backspace": {
+        const lastLine = replDoc.getLine(replDoc.lastLine());
+        if (lastLine === "> ") {
+          event.preventDefault();
         }
-      } else {
-        for (const text of result.output) {
-          appendToReplLn(text);
-        }
+        break;
       }
-      appendToRepl("> ");
+      case "Enter": {
+        event.preventDefault();
+        appendToReplLn("");
+        const text = replDoc.getLine(replDoc.lastLine() - 1).slice(2);
+        const result = evaluate(text);
+        appendToRepl(result);
+        break;
+      }
     }
   }
 );

@@ -5,7 +5,7 @@ import {
   Environment
 } from "./environment.js";
 import {
-  RT_EXCEEDED_RECURSION_DEPTH
+  RT_MAX_CALL_STACK_SIZE_ERR
 } from "./error.js";
 import {
   Stage,
@@ -41,7 +41,7 @@ class EvaluateCode implements Stage {
           null,
           [
             new StageError(
-              RT_EXCEEDED_RECURSION_DEPTH,
+              RT_MAX_CALL_STACK_SIZE_ERR,
               NO_SOURCE_SPAN
             )
           ]
