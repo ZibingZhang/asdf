@@ -6,7 +6,10 @@ import {
   resetRepl
 } from "./repl.js";
 
-const initValue = ";; Use `Alt-Enter' to run the code\n";
+const initValue =
+`;; Source code at https://github.com/ZibingZhang/racket-online-ide
+;; Use \`Alt-Enter' to run the code
+`;
 const editorTextArea = document.getElementById("editor");
 const editor = CodeMirror(
 (elt) => {
