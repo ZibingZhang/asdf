@@ -13,7 +13,8 @@ CodeMirror.defineMode("racket", function (config) {
   let openBrackets = "([{";
   let closeBrackets = ")]}";
   let booleanLiteral = /^(T|t|true|F|f|false)$/;
-  // let specialForm = /^(and|check-expect|check-random|check-within|check-member-of|check-range|check-satisfied|check-error|cond|define|define-struct|if|lambda|or|quote|require)$/;
+  let specialForm = /^(and|cond|define|define-struct|if|lambda|or|quote|require)$/;
+  let quotedSpecialForm = /^(and|cond|define|define-struct|if|lambda|or|quote|require)/;
   let numLiteral = /^[+\-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
 
   // unclosed block comments should be "error", but aren't
@@ -34,7 +35,8 @@ CodeMirror.defineMode("racket", function (config) {
     let ch = stream.next();
     if (openBrackets.includes(ch) || closeBrackets.includes(ch)) { return "bracket"; }
     if (ch === ";") { stream.skipToEnd(); return "comment"; }
-    if (ch.match(/['`,]/)) { return "keyword"; }
+    if (ch.match(/^['`]/) && stream.match(quotedSpecialForm, false)) { state.ignoreNextKeyword = true; return "keyword"; }
+    if (ch.match(/^['`,]/)) { return "keyword"; }
     if (ch === "\"") {
       ch = stream.next();
       while (ch !== "\"") {
@@ -45,7 +47,7 @@ CodeMirror.defineMode("racket", function (config) {
     }
     if (ch === "#") {
       if (stream.eol() || stream.match(/^\s/, false)) { return "error"; }
-      if (stream.match(/!\/?/)) { stream.skipToEnd(); return "comment"; }
+      if (stream.match(/^![\/ ]/)) { stream.skipToEnd(); return "comment"; }
 
       ch = stream.next();
       if (ch === ";") { return "comment"; }
@@ -60,7 +62,14 @@ CodeMirror.defineMode("racket", function (config) {
     }
 
     let name = ch + stream.match(untilDelimiter);
-    // if (name.match(specialForm)) { return "keyword"; }
+    if (name.match(specialForm)) {
+      if (state.ignoreNextKeyword) {
+        state.ignoreNextKeyword = false;
+        return null;
+      } else {
+        return "keyword";
+      }
+    }
     if (name.match(numLiteral)) { return "number"; }
     if (name === "...") return "punctuation";
     return null;
@@ -68,7 +77,7 @@ CodeMirror.defineMode("racket", function (config) {
 
   return {
     startState: function () {
-      return {ctx: {prev: null, start: 0, indentTo: 0}, lastType: null, tokenize: tokenBase};
+      return { tokenize: tokenBase, ignoreNextKeyword: false };
     },
 
     token: function (stream, state) {
@@ -76,7 +85,7 @@ CodeMirror.defineMode("racket", function (config) {
       return style;
     },
 
-    indent: function (state, _textAfter) {
+    indent: function (_state, _textAfter) {
       return 0;
     },
 
