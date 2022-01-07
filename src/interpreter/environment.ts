@@ -9,8 +9,10 @@ import {
   RIsZero,
   RMinus,
   RMultiply,
-  RPlus
-} from "./primitive.js";
+  RPlus,
+  R_E,
+  R_PI
+} from "./primitive/numbers.js";
 import {
   RData,
   RIsStructFun,
@@ -19,7 +21,6 @@ import {
   RPrimFun,
   RPrimFunConfig,
   RStructGetFun,
-  RStructType,
   RValue
 } from "./rvalue.js";
 import {
@@ -108,8 +109,8 @@ function addStructToPrimEnv(name: string, fields: string[]) {
   });
 }
 
-addDataToPrimEnv("e", new RNumber(6121026514868073n, 2251799813685248n));
-addDataToPrimEnv("pi", new RNumber(884279719003555n, 281474976710656n));
+addDataToPrimEnv("e", R_E);
+addDataToPrimEnv("pi", R_PI);
 
 addFnToPrimEnv("/", RDivide, { minArity: 2, allArgsTypeName: "number" });
 addFnToPrimEnv("-", RMinus, { minArity: 1, allArgsTypeName: "number" });
