@@ -1,7 +1,4 @@
 import {
-  isDefnNode
-} from "./ast.js";
-import {
   Environment
 } from "./environment.js";
 import {
@@ -13,6 +10,7 @@ import {
   StageOutput
 } from "./pipeline.js";
 import {
+  DProgram,
   Program
 } from "./program.js";
 import { R_NONE } from "./rvalue.js";
@@ -24,22 +22,22 @@ export {
   EVALUATE_CODE_STAGE
 };
 
-class EvaluateCode implements Stage {
+class EvaluateCode implements Stage<DProgram, string[]> {
   private env: Environment = new Environment();
 
   reset() {
     this.env = new Environment();
   }
 
-  run(input: StageOutput): StageOutput {
+  run(input: StageOutput<DProgram>): StageOutput<string[]> {
     try {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput(null, [e]);
+        return new StageOutput([], [e]);
       } else if (e instanceof Error && e.message === "too much recursion") {
         return new StageOutput(
-          null,
+          [],
           [
             new StageError(
               RT_MAX_CALL_STACK_SIZE_ERR,

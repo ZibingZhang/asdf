@@ -114,7 +114,7 @@ class AtomNode extends ASTNodeBase {
 
 class DefnStructNode extends ASTNodeBase {
   constructor(
-    readonly name: AtomSExpr,
+    readonly name: string,
     readonly params: string[],
     readonly sourceSpan: SourceSpan
   ) {
@@ -128,7 +128,8 @@ class DefnStructNode extends ASTNodeBase {
 
 class DefnVarNode extends ASTNodeBase {
   constructor(
-    readonly name: AtomSExpr,
+    readonly name: string,
+    readonly nameSourceSpan: SourceSpan,
     readonly value: ASTNode,
     readonly sourceSpan: SourceSpan
   ) {
@@ -136,7 +137,7 @@ class DefnVarNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    env.set(this.name.token.text, this.value.eval(env));
+    env.set(this.name, this.value.eval(env));
     return R_NONE;
   }
 }

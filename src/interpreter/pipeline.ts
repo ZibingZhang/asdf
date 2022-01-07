@@ -20,25 +20,25 @@ class StageError extends Error {
   }
 }
 
-class StageOutput {
+class StageOutput<T> {
   constructor(
-    readonly output: any,
+    readonly output: T,
     readonly errors: StageError[] = []
   ) {}
 }
 
-interface Stage {
-  run(input: StageOutput): StageOutput;
+interface Stage<S, T> {
+  run(input: StageOutput<S>): StageOutput<T>;
 }
 
 class Pipeline {
-  readonly stages: Stage[];
+  readonly stages: Stage<any, any>[];
 
-  constructor(stages: Stage[]) {
+  constructor(stages: Stage<any, any>[]) {
     this.stages = stages;
   }
 
-  run(program: string): StageOutput {
+  run(program: string): StageOutput<any> {
     let nextInput = new StageOutput(program);
     for (const stage of this.stages) {
       nextInput = stage.run(nextInput);

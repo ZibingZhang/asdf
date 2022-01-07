@@ -9,7 +9,6 @@ import {
   EllipsisNode,
   FunAppNode,
   IfNode,
-  isDefnNode,
   LambdaNode,
   OrNode,
   VarNode
@@ -24,8 +23,8 @@ import {
   Program
 } from "./program.js";
 import {
-  AtomSExpr,
   isAtomSExpr,
+  isListSExpr,
   ListSExpr,
   SExpr
 } from "./sexpr.js";
@@ -46,8 +45,8 @@ import {
   DF_EXPECTED_EXPR_ERR,
   DF_EXPECTED_FUNCTION_BODY_ERR,
   DF_EXPECTED_FUNCTION_NAME_ERR,
+  DF_EXPECTED_VAR_OR_FUN_NAME_ERR,
   DF_EXPECTED_VARIABLE_ERR,
-  DF_FIRST_ARG_ERR,
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
   DF_TOO_MANY_EXPRS_ERR,
   DF_TOO_MANY_FUNCTION_BODIES_ERR,
@@ -60,7 +59,11 @@ import {
   SC_UNDEFINED_VARIABLE_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
-  WF_EXPECTED_OPEN_PARENTHESIS_ERR
+  WF_EXPECTED_OPEN_PARENTHESIS_ERR,
+  DS_EXPECTED_STRUCT_NAME_ERR,
+  DS_EXPECTED_FIELD_NAMES_ERR,
+  DS_EXPECTED_FIELD_NAME_ERR,
+  DS_EXTRA_PARTS_ERR
 } from "./error.js";
 import {
   PRIMITIVE_DATA_NAMES,
@@ -75,16 +78,16 @@ export {
   WELL_FORMED_PROGRAM_STAGE
 };
 
-class WellFormedSyntax implements Stage {
+class WellFormedSyntax implements Stage<SExpr[], Program> {
   level = 0;
 
-  run(input: StageOutput): StageOutput {
+  run(input: StageOutput<SExpr[]>): StageOutput<Program> {
     this.level = 0;
     try {
       return new StageOutput(this.processSExprs(input.output));
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput(null, [e]);
+        return new StageOutput(<Program><unknown>null, [e]);
       } else {
         throw e;
       }
@@ -93,15 +96,10 @@ class WellFormedSyntax implements Stage {
 
   private processSExprs(sexprs: SExpr[]): Program {
     const nodes: ASTNode[] = [];
-    const defns: DefnNode[] = [];
     for (const sexpr of sexprs) {
-      const node = this.toNode(sexpr);
       nodes.push(this.toNode(sexpr));
-      if (isDefnNode(node)) {
-        defns.push(node);
-      }
     }
-    return new Program(defns, nodes);
+    return new Program(nodes);
   }
 
   private toNode(sexpr: SExpr): ASTNode {
@@ -267,7 +265,7 @@ class WellFormedSyntax implements Stage {
   private toDefnNode(sexpr: ListSExpr): DefnNode {
     if (sexpr.tokens.length - 1 === 0) {
       throw new StageError(
-        DF_FIRST_ARG_ERR(),
+        DF_EXPECTED_VAR_OR_FUN_NAME_ERR(),
         sexpr.sourceSpan
       );
     }
@@ -275,7 +273,7 @@ class WellFormedSyntax implements Stage {
     if (isAtomSExpr(name)) {
       if (name.token.type !== TokenType.NAME) {
         throw new StageError(
-          DF_FIRST_ARG_ERR(name),
+          DF_EXPECTED_VAR_OR_FUN_NAME_ERR(name),
           name.sourceSpan
         );
       }
@@ -292,7 +290,8 @@ class WellFormedSyntax implements Stage {
         );
       }
       return new DefnVarNode(
-        name,
+        name.token.text,
+        name.sourceSpan,
         this.toNode(sexpr.tokens[2]),
         sexpr.sourceSpan
       );
@@ -346,7 +345,8 @@ class WellFormedSyntax implements Stage {
         );
       }
       return new DefnVarNode(
-        name,
+        name.token.text,
+        name.sourceSpan,
         new LambdaNode(
           params,
           this.toNode(sexpr.tokens[2]),
@@ -358,11 +358,53 @@ class WellFormedSyntax implements Stage {
   }
 
   private toDefnStructNode(sexpr: ListSExpr): DefnStructNode {
+    if (sexpr.tokens.length - 1 === 0) {
+      throw new StageError(
+        DS_EXPECTED_STRUCT_NAME_ERR(),
+        sexpr.sourceSpan
+      );
+    }
+    const name = sexpr.tokens[1];
+    if (!isAtomSExpr(name) || name.token.type !== TokenType.NAME) {
+      throw new StageError(
+        DS_EXPECTED_STRUCT_NAME_ERR(name),
+        name.sourceSpan
+      );
+    }
+    if (sexpr.tokens.length - 1 === 1) {
+      throw new StageError(
+        DS_EXPECTED_FIELD_NAMES_ERR(),
+        sexpr.sourceSpan
+      );
+    }
+    const fieldNamesSExpr = sexpr.tokens[2];
+    if (!isListSExpr(fieldNamesSExpr)) {
+      throw new StageError(
+        DS_EXPECTED_FIELD_NAMES_ERR(fieldNamesSExpr),
+        fieldNamesSExpr.sourceSpan
+      );
+    }
+    const fieldNames: string[] = [];
+    for (const fieldNameSExpr of fieldNamesSExpr.tokens) {
+      if (!isAtomSExpr(fieldNameSExpr) || fieldNameSExpr.token.type !== TokenType.NAME) {
+        throw new StageError(
+          DS_EXPECTED_FIELD_NAME_ERR(fieldNameSExpr),
+          fieldNameSExpr.sourceSpan
+        );
+      }
+      fieldNames.push(fieldNameSExpr.token.text);
+    }
+    if (sexpr.tokens.length - 1 > 2) {
+      throw new StageError(
+        DS_EXTRA_PARTS_ERR(sexpr.tokens.length - 3),
+        sexpr.tokens[3].sourceSpan
+      );
+    }
     return new DefnStructNode(
-      <AtomSExpr>sexpr.tokens[0],
-      [],
+      name.token.text,
+      fieldNames,
       sexpr.sourceSpan
-    )
+    );
   }
 
   private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): AtomNode {
@@ -398,7 +440,7 @@ class WellFormedSyntax implements Stage {
   }
 }
 
-class WellFormedProgram implements Stage {
+class WellFormedProgram implements Stage<DProgram, DProgram> {
   globalScope: Scope = new Scope(PRIMITIVE_SCOPE);
   executionScope: Scope = new Scope(PRIMITIVE_SCOPE);
 
@@ -407,13 +449,13 @@ class WellFormedProgram implements Stage {
     this.executionScope = new Scope(PRIMITIVE_SCOPE);
   }
 
-  run(input: StageOutput): StageOutput {
+  run(input: StageOutput<DProgram>): StageOutput<DProgram> {
     try {
       this.wellFormedProgram(input.output);
       return input;
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput(null, [e]);
+        return new StageOutput(<DProgram><unknown>null, [e]);
       } else {
         throw e;
       }
@@ -424,14 +466,14 @@ class WellFormedProgram implements Stage {
     for (const defn of program.defns) {
       if (defn.value instanceof LambdaNode) {
         this.globalScope.add(
-          defn.name.token.text,
+          defn.name,
           new VariableMeta(
             VariableType.USER_DEFINED_FUNCTION,
             defn.value.params.length
           )
         );
       } else {
-        this.globalScope.add(defn.name.token.text, DATA_VARIABLE_META);
+        this.globalScope.add(defn.name, DATA_VARIABLE_META);
       }
     }
     for (const node of program.nodes) {
@@ -443,22 +485,22 @@ class WellFormedProgram implements Stage {
     if (node instanceof AndNode) {
       node.args.forEach(arg => this.wellFormedNode(arg, deferFunApp));
     } else if (node instanceof DefnVarNode) {
-      if (this.executionScopeHas(node.name.token.text)) {
+      if (this.executionScopeHas(node.name)) {
         throw new StageError(
-          DF_PREVIOUSLY_DEFINED_NAME_ERR(node.name.token.text),
-          node.name.sourceSpan
+          DF_PREVIOUSLY_DEFINED_NAME_ERR(node.name),
+          node.nameSourceSpan
         );
       }
       if (node.value instanceof LambdaNode) {
         this.executionScope.add(
-          node.name.token.text,
+          node.name,
           new VariableMeta(
             VariableType.USER_DEFINED_FUNCTION,
             node.value.params.length
           )
         );
       } else {
-        this.executionScope.add(node.name.token.text, DATA_VARIABLE_META);
+        this.executionScope.add(node.name, DATA_VARIABLE_META);
       }
       this.wellFormedNode(node.value, true);
     } else if (node instanceof FunAppNode) {
