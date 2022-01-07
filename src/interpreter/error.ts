@@ -52,7 +52,8 @@ export {
   SC_USED_BEFORE_DEFINITION_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
-  WF_EXPECTED_OPEN_PARENTHESIS_ERR
+  WF_EXPECTED_OPEN_PARENTHESIS_ERR,
+  WF_STRUCTURE_TYPE_ERR
 };
 
 function foundStr(found: SExpr | string): string {
@@ -228,4 +229,7 @@ const SX_NOT_TOP_LEVEL_DEFN_ERR = (name: string) => {
 
 const WF_EXPECTED_OPEN_PARENTHESIS_ERR = (name: string) => {
   return `${name}: expected a function call, but there is no open parenthesis before this function`;
+};
+const WF_STRUCTURE_TYPE_ERR = (name: string) => {
+  return `${name}: structure type; do you mean make-${name}`;
 };

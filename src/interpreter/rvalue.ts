@@ -27,6 +27,7 @@ export {
   RString,
   RStruct,
   RStructGetFun,
+  RStructType,
   RSymbol,
   RValue,
   isRBoolean,
@@ -126,7 +127,10 @@ class RList implements RData {
 }
 
 class RStruct implements RData {
-  constructor(readonly name: string, readonly vals: RValue[]) {}
+  constructor(
+    readonly name: string,
+    readonly vals: RValue[]
+  ) {}
 
   stringify(): string {
     if (this.vals.length === 0) {
@@ -134,6 +138,14 @@ class RStruct implements RData {
     } else {
       return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
     }
+  }
+}
+
+class RStructType implements RData {
+  constructor(readonly name: string) {}
+
+  stringify(): string {
+    throw `illegal state: cannot stringify a structure type`;
   }
 }
 

@@ -13,9 +13,13 @@ import {
 } from "./primitive.js";
 import {
   RData,
+  RIsStructFun,
+  RMakeStructFun,
   RNumber,
   RPrimFun,
   RPrimFunConfig,
+  RStructGetFun,
+  RStructType,
   RValue
 } from "./rvalue.js";
 import {
@@ -81,15 +85,31 @@ const PRIMITIVE_ENVIRONMENT = new Environment();
 const PRIMITIVE_DATA_NAMES: Set<string> = new Set();
 const PRIMITIVE_FUNCTION_NAMES: Set<string> = new Set();
 
+function addDataToPrimEnv(name: string, val: RData) {
+  PRIMITIVE_DATA_NAMES.add(name);
+  PRIMITIVE_ENVIRONMENT.set(name, val);
+}
 
 function addFnToPrimEnv(name: string, cls: typeof RPrimFun, config: RPrimFunConfig) {
   PRIMITIVE_FUNCTION_NAMES.add(name);
   PRIMITIVE_ENVIRONMENT.set(name, new cls(name, config));
 }
-function addDataToPrimEnv(name: string, val: RData) {
-  PRIMITIVE_DATA_NAMES.add(name);
-  PRIMITIVE_ENVIRONMENT.set(name, val);
+
+function addStructToPrimEnv(name: string, fields: string[]) {
+  PRIMITIVE_FUNCTION_NAMES.add(`make-${name}`);
+  PRIMITIVE_FUNCTION_NAMES.add(`${name}?`);
+  fields.forEach((field) => {
+    PRIMITIVE_FUNCTION_NAMES.add(`${name}-${field}`);
+  });
+  PRIMITIVE_ENVIRONMENT.set(`make-${name}`, new RMakeStructFun(name, fields.length));
+  PRIMITIVE_ENVIRONMENT.set(`${name}?`, new RIsStructFun(name));
+  fields.forEach((field, idx) => {
+    PRIMITIVE_ENVIRONMENT.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
+  });
 }
+
+addDataToPrimEnv("e", new RNumber(6121026514868073n, 2251799813685248n));
+addDataToPrimEnv("pi", new RNumber(884279719003555n, 281474976710656n));
 
 addFnToPrimEnv("/", RDivide, { minArity: 2, allArgsTypeName: "number" });
 addFnToPrimEnv("-", RMinus, { minArity: 1, allArgsTypeName: "number" });
@@ -97,5 +117,4 @@ addFnToPrimEnv("*", RMultiply, { minArity: 2, allArgsTypeName: "number" });
 addFnToPrimEnv("+", RPlus, { minArity: 2, allArgsTypeName: "number" });
 addFnToPrimEnv("zero?", RIsZero, { arity: 1, onlyArgTypeName: "number" });
 
-addDataToPrimEnv("e", new RNumber(6121026514868073n, 2251799813685248n));
-addDataToPrimEnv("pi", new RNumber(884279719003555n, 281474976710656n));
+addStructToPrimEnv("posn", ["x", "y"]);

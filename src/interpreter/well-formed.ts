@@ -64,7 +64,8 @@ import {
   DS_EXPECTED_STRUCT_NAME_ERR,
   DS_EXPECTED_FIELD_NAMES_ERR,
   DS_EXPECTED_FIELD_NAME_ERR,
-  DS_EXTRA_PARTS_ERR
+  DS_EXTRA_PARTS_ERR,
+  WF_STRUCTURE_TYPE_ERR
 } from "./error.js";
 import {
   PRIMITIVE_DATA_NAMES,
@@ -153,7 +154,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           );
         }
         case TokenType.NAME: {
-          return new VarNode(sexpr);
+          return new VarNode(sexpr.token.text, sexpr.sourceSpan);
         }
         case TokenType.KEYWORD: {
           throw new StageError(
@@ -182,7 +183,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
             return this.toQuoteNode(sexpr, sexpr.tokens[1]);
           } else {
             return new FunAppNode(
-              new VarNode(leadingSExpr),
+              new VarNode(leadingSExpr.token.text, leadingSExpr.sourceSpan),
               sexpr.tokens.slice(1).map(token => this.toNode(token)),
               sexpr.sourceSpan
             );
@@ -486,10 +487,10 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgra
   }
 
   visitFunAppNode(node: FunAppNode): void {
-    const meta = this.scope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
+    const meta = this.scope.get(node.fn.name, false, node.fn.sourceSpan);
     if (meta.type === VariableType.USER_DEFINED_FUNCTION && meta.arity != node.args.length) {
       throw new StageError(
-        FA_ARITY_ERR(node.fn.name.token.text, meta.arity, node.args.length),
+        FA_ARITY_ERR(node.fn.name, meta.arity, node.args.length),
         node.sourceSpan
       );
     }
@@ -515,16 +516,22 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgra
   }
 
   visitVarNode(node: VarNode): void {
-    const meta = this.scope.get(node.name.token.text, true, node.sourceSpan);
-    if (meta.type !== VariableType.DATA) {
+    const meta = this.scope.get(node.name, true, node.sourceSpan);
+    if (meta.type === VariableType.STRUCTURE_TYPE) {
       throw new StageError(
-        WF_EXPECTED_OPEN_PARENTHESIS_ERR(node.name.token.text),
+        WF_STRUCTURE_TYPE_ERR(node.name),
         node.sourceSpan
       );
     }
-    if (!this.scope.has(node.name.token.text)) {
+    if (meta.type !== VariableType.DATA) {
       throw new StageError(
-        SC_UNDEFINED_VARIABLE_ERR(node.name.token.text),
+        WF_EXPECTED_OPEN_PARENTHESIS_ERR(node.name),
+        node.sourceSpan
+      );
+    }
+    if (!this.scope.has(node.name)) {
+      throw new StageError(
+        SC_UNDEFINED_VARIABLE_ERR(node.name),
         node.sourceSpan
       );
     }
@@ -557,6 +564,13 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgra
           this.scope.add(defn.name, DATA_VARIABLE_META);
         }
       } else {
+        if (this.scope.has(defn.name)) {
+          throw new StageError(
+            DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
+            defn.sourceSpan
+          );
+        }
+        this.scope.add(defn.name, STRUCTURE_TYPE_VARIABLE_META);
         if (this.scope.has(`make-${defn.name}`)) {
           throw new StageError(
             DF_PREVIOUSLY_DEFINED_NAME_ERR(`make-${defn.name}`),
@@ -577,7 +591,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgra
           `${defn.name}?`,
           new VariableMeta(VariableType.USER_DEFINED_FUNCTION, 1)
         );
-        for (const field of defn.fields) {
+        defn.fields.forEach(field => {
           if (this.scope.has(`${defn.name}-${field}`)) {
             throw new StageError(
               DF_PREVIOUSLY_DEFINED_NAME_ERR(`${defn.name}-${field}`),
@@ -588,7 +602,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgra
             `${defn.name}-${field}`,
             new VariableMeta(VariableType.USER_DEFINED_FUNCTION, 1)
           );
-        }
+        });
       }
     }
     for (const node of program.nodes) {
@@ -630,9 +644,10 @@ class Scope {
 }
 
 enum VariableType {
-  DATA,
-  PRIMITIVE_FUNCTION,
-  USER_DEFINED_FUNCTION
+  DATA = "DATA",
+  PRIMITIVE_FUNCTION = "PRIMITIVE_FUNCTION",
+  STRUCTURE_TYPE = "STRUCTURE_TYPE",
+  USER_DEFINED_FUNCTION = "USER_DEFINED_FUNCTION"
 }
 
 class VariableMeta {
@@ -643,12 +658,9 @@ class VariableMeta {
 }
 
 const DATA_VARIABLE_META = new VariableMeta(VariableType.DATA);
-const PRIMITIVE_FUNCTION_VARIABLE_META = new VariableMeta(VariableType.DATA);
+const PRIMITIVE_FUNCTION_VARIABLE_META = new VariableMeta(VariableType.PRIMITIVE_FUNCTION);
+const STRUCTURE_TYPE_VARIABLE_META = new VariableMeta(VariableType.STRUCTURE_TYPE);
 
 const PRIMITIVE_SCOPE = new Scope();
-for (const name of PRIMITIVE_DATA_NAMES) {
-  PRIMITIVE_SCOPE.add(name, DATA_VARIABLE_META);
-}
-for (const name of PRIMITIVE_FUNCTION_NAMES) {
-  PRIMITIVE_SCOPE.add(name, PRIMITIVE_FUNCTION_VARIABLE_META);
-}
+PRIMITIVE_DATA_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, DATA_VARIABLE_META));
+PRIMITIVE_FUNCTION_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, PRIMITIVE_FUNCTION_VARIABLE_META));

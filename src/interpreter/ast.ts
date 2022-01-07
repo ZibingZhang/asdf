@@ -24,6 +24,7 @@ import {
   RPrimFun,
   RStruct,
   RStructGetFun,
+  RStructType,
   RValue,
   R_FALSE,
   R_NONE,
@@ -147,11 +148,12 @@ class DefnStructNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
+    env.set(this.name, new RStructType(this.name));
     env.set(`make-${this.name}`, new RMakeStructFun(this.name, this.fields.length));
     env.set(`${this.name}?`, new RIsStructFun(this.name));
-    for (const [idx, field] of this.fields.entries()) {
+    this.fields.forEach((field, idx) => {
       env.set(`${this.name}-${field}`, new RStructGetFun(this.name, field, idx));
-    }
+    });
     return R_NONE;
   }
 }
@@ -225,8 +227,8 @@ class FunAppNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     const rval = env.get(
-      this.fn.name.token.text,
-      this.fn.name.sourceSpan
+      this.fn.name,
+      this.fn.sourceSpan
     );
     if (isRCallable(rval)) {
       return rval.accept(new EvaluateRCallableVisitor(
@@ -236,7 +238,11 @@ class FunAppNode extends ASTNodeBase {
       ));
     } else {
       throw new StageError(
-        FC_EXPECTED_FUNCTION_ERR("variable"),
+        FC_EXPECTED_FUNCTION_ERR(
+          rval instanceof RStructType
+            ? `structure type (do you mean make-${rval.name})`
+            : "variable"
+        ),
         NO_SOURCE_SPAN
       );
     }
@@ -321,9 +327,10 @@ class OrNode extends ASTNodeBase {
 
 class VarNode extends ASTNodeBase {
   constructor(
-    readonly name: AtomSExpr
+    readonly name: string,
+    readonly sourceSpan: SourceSpan
   ) {
-    super(name.sourceSpan);
+    super(sourceSpan);
   }
 
   accept<T>(visitor: ASTNodeVisitor<T>): T {
@@ -332,8 +339,8 @@ class VarNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     return env.get(
-      this.name.token.text,
-      this.name.token.sourceSpan
+      this.name,
+      this.sourceSpan
     );
   }
 }
