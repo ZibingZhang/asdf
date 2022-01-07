@@ -2,7 +2,6 @@ import {
   AndNode,
   ASTNode,
   AtomNode,
-  DASTNode,
   DefnNode,
   DefnStructNode,
   DefnVarNode,
@@ -11,7 +10,6 @@ import {
   FunAppNode,
   IfNode,
   LambdaNode,
-  MakeStructLambdaNode,
   OrNode,
   VarNode
 } from "./ast.js";
@@ -464,42 +462,44 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
 
   private wellFormedProgram(program: DProgram) {
     for (const defn of program.defns) {
-      if (defn.value instanceof MakeStructLambdaNode) {
-        if (this.scope.has(defn.name)) {
-          throw new StageError(
-            DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
-            defn.nameSourceSpan
+      if (defn instanceof DefnVarNode) {
+        if (defn.value instanceof LambdaNode) {
+          if (this.scope.has(defn.name)) {
+            throw new StageError(
+              DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
+              defn.nameSourceSpan
+            );
+          }
+          this.scope.add(
+            defn.name,
+            new VariableMeta(
+              VariableType.USER_DEFINED_FUNCTION,
+              defn.value.params.length
+            )
           );
+        } else {
+          if (this.scope.has(defn.name)) {
+            throw new StageError(
+              DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
+              defn.nameSourceSpan
+            );
+          }
+          this.scope.add(defn.name, DATA_VARIABLE_META);
         }
-        this.scope.add(
-          defn.name,
-          new VariableMeta(
-            VariableType.USER_DEFINED_FUNCTION,
-            defn.value.arity
-          )
-        );
-      } else if (defn.value instanceof LambdaNode) {
-        if (this.scope.has(defn.name)) {
-          throw new StageError(
-            DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
-            defn.nameSourceSpan
-          );
-        }
-        this.scope.add(
-          defn.name,
-          new VariableMeta(
-            VariableType.USER_DEFINED_FUNCTION,
-            defn.value.params.length
-          )
-        );
       } else {
-        if (this.scope.has(defn.name)) {
+        if (this.scope.has(`make-${defn.name}`)) {
           throw new StageError(
-            DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
-            defn.nameSourceSpan
+            DF_PREVIOUSLY_DEFINED_NAME_ERR(`make-${defn.name}`),
+            defn.sourceSpan
           );
         }
-        this.scope.add(defn.name, DATA_VARIABLE_META);
+        this.scope.add(
+          `make-${defn.name}`,
+          new VariableMeta(
+            VariableType.USER_DEFINED_FUNCTION,
+            defn.fields.length
+          )
+        );
       }
     }
     for (const node of program.nodes) {
@@ -507,7 +507,7 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
     }
   }
 
-  private wellFormedNode(node: DASTNode) {
+  private wellFormedNode(node: ASTNode) {
     if (node instanceof AndNode) {
       node.args.forEach(arg => this.wellFormedNode(arg));
     } else if (node instanceof DefnVarNode) {

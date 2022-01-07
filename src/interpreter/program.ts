@@ -1,7 +1,6 @@
 import {
   ASTNode,
-  DASTNode,
-  DefnVarNode
+  DefnNode
 } from "./ast";
 
 export {
@@ -17,7 +16,7 @@ class Program {
 
 class DProgram {
   constructor(
-    readonly defns: DefnVarNode[],
-    readonly nodes: DASTNode[]
+    readonly defns: DefnNode[],
+    readonly nodes: ASTNode[]
   ) {}
 }

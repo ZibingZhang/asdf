@@ -24,7 +24,7 @@ export {
   DS_EXPECTED_FIELD_NAMES_ERR,
   DS_EXPECTED_STRUCT_NAME_ERR,
   DS_EXTRA_PARTS_ERR,
-  EL_EXPECT_FINISHED_EXPR_ERR,
+  EL_EXPECTED_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
@@ -123,7 +123,7 @@ const DS_EXTRA_PARTS_ERR = (parts: number) => {
   return `define-struct: expected nothing after the field names, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
 
-const EL_EXPECT_FINISHED_EXPR_ERR = "...: expected a finished expression, but found a template";
+const EL_EXPECTED_FINISHED_EXPR_ERR = "...: expected a finished expression, but found a template";
 
 const FA_ARITY_ERR = (name: string, expected: number, actual: number) => {
   if (expected < actual) {

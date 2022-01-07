@@ -2,7 +2,7 @@ import {
   Environment
 } from "./environment.js";
 import {
-  EL_EXPECT_FINISHED_EXPR_ERR,
+  EL_EXPECTED_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
@@ -39,7 +39,6 @@ export {
   ASTNode,
   AndNode,
   AtomNode,
-  DASTNode,
   DefnNode,
   DefnStructNode,
   DefnVarNode,
@@ -50,18 +49,15 @@ export {
   FunAppNode,
   IfNode,
   LambdaNode,
-  MakeStructLambdaNode,
   OrNode,
   VarNode,
-  isDefnNode
+  isDefnNode,
+  ASTNodeVisitor
 };
 
 type ASTNode =
   | DefnNode
   | ExprNode;
-type DASTNode =
-| DefnVarNode
-| DExprNode;
 
 type DefnNode =
 | DefnStructNode
@@ -79,7 +75,6 @@ type ExprNode =
 
 type DExprNode =
   | ExprNode
-  | MakeStructLambdaNode
 
 abstract class ASTNodeBase {
   constructor(
@@ -129,14 +124,15 @@ class AtomNode extends ASTNodeBase {
 class DefnStructNode extends ASTNodeBase {
   constructor(
     readonly name: string,
-    readonly params: string[],
+    readonly fields: string[],
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
   }
 
-  eval(_: Environment): RValue {
-    throw "illegal state: structure definition should have been desugared";
+  eval(env: Environment): RValue {
+    env.set(`make-${this.name}`, new RMakeStructFun(this.name, this.fields.length));
+    return R_NONE;
   }
 }
 
@@ -163,7 +159,7 @@ class EllipsisFunAppNode extends ASTNodeBase {
 
   eval(_: Environment): RValue {
     throw new StageError(
-      EL_EXPECT_FINISHED_EXPR_ERR,
+      EL_EXPECTED_FINISHED_EXPR_ERR,
       this.sourceSpan
     );
   }
@@ -176,7 +172,7 @@ class EllipsisNode extends ASTNodeBase {
 
   eval(_: Environment): RValue {
     throw new StageError(
-      EL_EXPECT_FINISHED_EXPR_ERR,
+      EL_EXPECTED_FINISHED_EXPR_ERR,
       this.sourceSpan
     );
   }
@@ -251,20 +247,6 @@ class LambdaNode extends ASTNodeBase {
   }
 }
 
-class MakeStructLambdaNode extends ASTNodeBase {
-  constructor(
-    readonly name: string,
-    readonly arity: number,
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
-
-  eval(_: Environment): RMakeStructFun {
-    return new RMakeStructFun(this.name, this.arity);
-  }
-}
-
 class OrNode extends ASTNodeBase {
   constructor(
     readonly args: ASTNode[],
@@ -307,6 +289,20 @@ class VarNode extends ASTNodeBase {
 function isDefnNode(node: ASTNode): node is DefnNode {
   return node instanceof DefnStructNode
     || node instanceof DefnVarNode;
+}
+
+interface ASTNodeVisitor<T> {
+  visitAndNode(node: AndNode): T;
+  visitAtomNode(node: AtomNode): T;
+  visitDefnVarNode(node: DefnVarNode): T;
+  visitDefnStructNode(node: DefnStructNode): T;
+  visitEllipsisFunAllNode(node: EllipsisFunAppNode): T;
+  visitEllipsisNode(node: EllipsisNode): T;
+  visitFunAppNode(node: FunAppNode): T;
+  visitIfNode(node: IfNode): T;
+  visitLambdaNode(node: LambdaNode): T;
+  visitOrNode(node: OrNode): T;
+  visitVarNode(node: VarNode): T;
 }
 
 class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {

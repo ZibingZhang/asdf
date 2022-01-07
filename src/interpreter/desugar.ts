@@ -1,9 +1,7 @@
 import {
-  DASTNode,
-  DefnStructNode,
-  DefnVarNode,
+  ASTNode,
+  DefnNode,
   isDefnNode,
-  MakeStructLambdaNode
 } from "./ast.js";
 import {
   Stage,
@@ -20,31 +18,12 @@ export {
 
 class Desugar implements Stage<Program, DProgram> {
   run(input: StageOutput<Program>): StageOutput<DProgram> {
-    const defns: DefnVarNode[] = [];
-    const nodes: DASTNode[] = [];
+    const defns: DefnNode[] = [];
+    const nodes: ASTNode[] = [];
     for (const node of input.output.nodes) {
       if (isDefnNode(node)) {
-        if (node instanceof DefnStructNode) {
-          const structName = node.name;
-          const structNodes = [];
-          structNodes.push(new DefnVarNode(
-            `make-${structName}`,
-            node.sourceSpan,
-            new MakeStructLambdaNode(
-              structName,
-              node.params.length,
-              node.sourceSpan
-            ),
-            node.sourceSpan
-          ));
-          for (const node of structNodes) {
-            defns.push(node);
-            nodes.push(node);
-          }
-        } else {
-          defns.push(node);
-          nodes.push(node);
-        }
+        defns.push(node);
+        nodes.push(node);
       } else {
         nodes.push(node);
       }
