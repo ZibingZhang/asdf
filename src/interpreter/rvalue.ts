@@ -27,6 +27,7 @@ export {
   RData,
   RLambda,
   RList,
+  RMakeStructFun,
   RMath,
   RNumber,
   RPrimFun,
@@ -55,6 +56,7 @@ type RValue =
   | RCallable
   | RNone;
 type RCallable =
+  | RMakeStructFun
   | RLambda
   | RPrimFun;
 
@@ -133,11 +135,19 @@ class RStruct implements RData {
   constructor(readonly name: string, readonly vals: RValue[]) {}
 
   stringify(): string {
-    return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
+    if (this.vals.length === 0) {
+      return `(make-${this.name})`;
+    } else {
+      return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
+    }
   }
 }
 
-interface RCallableBase extends RValBase {}
+abstract class RCallableBase implements RValBase {
+  stringify(): string {
+    throw "illegal state: cannot stringify a callable";
+  }
+}
 
 interface RPrimFunConfig {
   minArity?: number,
@@ -146,12 +156,27 @@ interface RPrimFunConfig {
   allArgsTypeName?: string
 }
 
-class RLambda implements RCallableBase {
+class RMakeStructFun extends RCallableBase {
+  constructor(
+    readonly name: string,
+    readonly arity: number
+  ) {
+    super();
+  }
+
+  eval(args: RValue[]): RStruct {
+    return new RStruct(this.name, args);
+  }
+}
+
+class RLambda extends RCallableBase {
   constructor(
     readonly closure: Environment,
     readonly params: string[],
     readonly body: ASTNode
-  ) {}
+  ) {
+    super();
+  }
 
   eval(paramEnv: Environment, env: Environment): RValue {
     const closureCopy = this.closure.copy();
@@ -159,13 +184,9 @@ class RLambda implements RCallableBase {
     paramEnv.parentEnv = closureCopy;
     return this.body.eval(paramEnv);
   }
-
-  stringify(): string {
-    throw "illegal state: cannot stringify a callable";
-  }
 }
 
-class RPrimFun implements RCallableBase {
+class RPrimFun extends RCallableBase {
   private typeGuardOf = (typeName: string) => {
     switch(typeName) {
       case "number":
@@ -178,7 +199,9 @@ class RPrimFun implements RCallableBase {
   constructor(
     readonly name: string,
     readonly config: RPrimFunConfig
-  ) {}
+  ) {
+    super();
+  }
 
   eval(env: Environment, args: RValue[], sourceSpan: SourceSpan): RValue {
     if (this.config.minArity && args.length < this.config.minArity) {
@@ -216,11 +239,7 @@ class RPrimFun implements RCallableBase {
     return this.call(env, args, sourceSpan);
   }
 
-  stringify(): string {
-    throw "illegal state: cannot stringify a callable";
-  }
-
-  call(_: Environment, __: RValue[], ___: SourceSpan): RValue {
+  protected call(_: Environment, __: RValue[], ___: SourceSpan): RValue {
     throw "illegal state: not implemented";
   }
 }

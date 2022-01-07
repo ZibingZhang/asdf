@@ -3,6 +3,7 @@ import {
 } from "./environment.js";
 import {
   EL_EXPECT_FINISHED_EXPR_ERR,
+  FA_ARITY_ERR,
   FA_QUESTION_NOT_BOOL_ERR,
   FC_EXPECTED_FUNCTION_ERR
 } from "./error.js";
@@ -15,6 +16,9 @@ import {
   isRPrimFun,
   isRTrue,
   RLambda,
+  RMakeStructFun,
+  RPrimFun,
+  RStruct,
   RValue,
   R_FALSE,
   R_NONE,
@@ -36,12 +40,14 @@ export {
   DefnNode,
   DefnStructNode,
   DefnVarNode,
+  DExprNode,
   EllipsisFunAppNode,
   EllipsisNode,
   ExprNode,
   FunAppNode,
   IfNode,
   LambdaNode,
+  MakeStructNode,
   OrNode,
   VarNode,
   isDefnNode
@@ -52,7 +58,7 @@ type ASTNode =
   | ExprNode;
 type DASTNode =
 | DefnVarNode
-| ExprNode;
+| DExprNode;
 
 type DefnNode =
 | DefnStructNode
@@ -64,8 +70,13 @@ type ExprNode =
   | EllipsisNode
   | FunAppNode
   | IfNode
+  | LambdaNode
   | OrNode
   | VarNode;
+
+type DExprNode =
+  | ExprNode
+  | MakeStructNode
 
 abstract class ASTNodeBase {
   constructor(
@@ -130,7 +141,7 @@ class DefnVarNode extends ASTNodeBase {
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,
-    readonly value: ASTNode,
+    readonly value: ExprNode,
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
@@ -183,7 +194,15 @@ class FunAppNode extends ASTNodeBase {
       this.fn.name.sourceSpan
     );
     if (isRCallable(rval)) {
-      if (isRPrimFun(rval)) {
+      if (rval instanceof RMakeStructFun) {
+        if (rval.arity !== this.args.length) {
+          throw new StageError(
+            FA_ARITY_ERR(rval.name, rval.arity, this.args.length),
+            NO_SOURCE_SPAN
+          );
+        }
+        return rval.eval(this.args.map(node => node.eval(env)));
+      } else if (rval instanceof RPrimFun) {
         return rval.eval(env, this.args.map(node => node.eval(env)), this.sourceSpan);
       } else {
         const paramEnv = new Environment();
@@ -238,6 +257,20 @@ class LambdaNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     return new RLambda(env.copy(), this.params, this.body);
+  }
+}
+
+class MakeStructNode extends ASTNodeBase {
+  constructor(
+    readonly name: string,
+    readonly arity: number,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  eval(_: Environment): RMakeStructFun {
+    return new RMakeStructFun(this.name, this.arity);
   }
 }
 

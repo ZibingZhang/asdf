@@ -10,6 +10,7 @@ import {
   FunAppNode,
   IfNode,
   LambdaNode,
+  MakeStructNode,
   OrNode,
   VarNode
 } from "./ast.js";
@@ -441,12 +442,10 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
 }
 
 class WellFormedProgram implements Stage<DProgram, DProgram> {
-  globalScope: Scope = new Scope(PRIMITIVE_SCOPE);
-  executionScope: Scope = new Scope(PRIMITIVE_SCOPE);
+  scope: Scope = new Scope(PRIMITIVE_SCOPE);
 
   reset() {
-    this.globalScope = new Scope(PRIMITIVE_SCOPE);
-    this.executionScope = new Scope(PRIMITIVE_SCOPE);
+    this.scope = new Scope(PRIMITIVE_SCOPE);
   }
 
   run(input: StageOutput<DProgram>): StageOutput<DProgram> {
@@ -464,8 +463,28 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
 
   private wellFormedProgram(program: DProgram) {
     for (const defn of program.defns) {
-      if (defn.value instanceof LambdaNode) {
-        this.globalScope.add(
+      if (defn.value instanceof MakeStructNode) {
+        if (this.scope.has(defn.name)) {
+          throw new StageError(
+            DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
+            defn.nameSourceSpan
+          );
+        }
+        this.scope.add(
+          defn.name,
+          new VariableMeta(
+            VariableType.USER_DEFINED_FUNCTION,
+            defn.value.arity
+          )
+        );
+      } else if (defn.value instanceof LambdaNode) {
+        if (this.scope.has(defn.name)) {
+          throw new StageError(
+            DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
+            defn.nameSourceSpan
+          );
+        }
+        this.scope.add(
           defn.name,
           new VariableMeta(
             VariableType.USER_DEFINED_FUNCTION,
@@ -473,85 +492,61 @@ class WellFormedProgram implements Stage<DProgram, DProgram> {
           )
         );
       } else {
-        this.globalScope.add(defn.name, DATA_VARIABLE_META);
+        if (this.scope.has(defn.name)) {
+          throw new StageError(
+            DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
+            defn.nameSourceSpan
+          );
+        }
+        this.scope.add(defn.name, DATA_VARIABLE_META);
       }
     }
     for (const node of program.nodes) {
-      this.wellFormedNode(node, false);
+      this.wellFormedNode(node);
     }
   }
 
-  private wellFormedNode(node: ASTNode, deferFunApp: boolean) {
+  private wellFormedNode(node: ASTNode) {
     if (node instanceof AndNode) {
-      node.args.forEach(arg => this.wellFormedNode(arg, deferFunApp));
+      node.args.forEach(arg => this.wellFormedNode(arg));
     } else if (node instanceof DefnVarNode) {
-      if (this.executionScopeHas(node.name)) {
-        throw new StageError(
-          DF_PREVIOUSLY_DEFINED_NAME_ERR(node.name),
-          node.nameSourceSpan
-        );
-      }
-      if (node.value instanceof LambdaNode) {
-        this.executionScope.add(
-          node.name,
-          new VariableMeta(
-            VariableType.USER_DEFINED_FUNCTION,
-            node.value.params.length
-          )
-        );
-      } else {
-        this.executionScope.add(node.name, DATA_VARIABLE_META);
-      }
-      this.wellFormedNode(node.value, true);
+      this.wellFormedNode(node.value);
     } else if (node instanceof FunAppNode) {
-      let meta: VariableMeta;
-      if (deferFunApp) {
-        meta = this.globalScope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
-      } else {
-        meta = this.executionScope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
-      }
+      let meta = this.scope.get(node.fn.name.token.text, false, node.fn.sourceSpan);
       if (meta.type === VariableType.USER_DEFINED_FUNCTION && meta.arity != node.args.length) {
         throw new StageError(
           FA_ARITY_ERR(node.fn.name.token.text, meta.arity, node.args.length),
           node.sourceSpan
         );
       }
-      node.args.forEach(arg => this.wellFormedNode(arg, deferFunApp));
+      node.args.forEach(arg => this.wellFormedNode(arg));
     } else if (node instanceof IfNode) {
-      this.wellFormedNode(node.question, deferFunApp);
-      this.wellFormedNode(node.trueAnswer, deferFunApp);
-      this.wellFormedNode(node.falseAnswer, deferFunApp);
+      this.wellFormedNode(node.question);
+      this.wellFormedNode(node.trueAnswer);
+      this.wellFormedNode(node.falseAnswer);
     } else if (node instanceof LambdaNode) {
-      const outerScope = this.executionScope;
-      this.executionScope = new Scope(this.executionScope);
-      node.params.forEach(param => this.executionScope.add(param, DATA_VARIABLE_META));
-      this.wellFormedNode(node.body, deferFunApp);
-      this.executionScope = outerScope;
+      const outerScope = this.scope;
+      this.scope = new Scope(this.scope);
+      node.params.forEach(param => this.scope.add(param, DATA_VARIABLE_META));
+      this.wellFormedNode(node.body);
+      this.scope = outerScope;
     } else if (node instanceof OrNode) {
-      node.args.forEach(arg => this.wellFormedNode(arg, deferFunApp));
+      node.args.forEach(arg => this.wellFormedNode(arg));
     } else if (node instanceof VarNode) {
-      const meta = this.executionScope.get(node.name.token.text, true, node.sourceSpan);
+      const meta = this.scope.get(node.name.token.text, true, node.sourceSpan);
       if (meta.type !== VariableType.DATA) {
         throw new StageError(
           WF_EXPECTED_OPEN_PARENTHESIS_ERR(node.name.token.text),
           node.sourceSpan
         );
       }
-      if (!this.scopeHas(node.name.token.text)) {
+      if (!this.scope.has(node.name.token.text)) {
         throw new StageError(
           SC_UNDEFINED_VARIABLE_ERR(node.name.token.text),
           node.sourceSpan
         );
       }
     }
-  }
-
-  private scopeHas(name: string): boolean {
-    return this.globalScope.has(name) || this.executionScope.has(name);
-  }
-
-  private executionScopeHas(name: string): boolean {
-    return this.executionScope.has(name);
   }
 }
 

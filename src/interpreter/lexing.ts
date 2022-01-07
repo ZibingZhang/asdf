@@ -70,17 +70,17 @@ enum State {
   STRING
 }
 
-class Lexer implements Stage {
+class Lexer implements Stage<string, SExpr[]> {
   private position = 0;
   private input = "";
   private isAtEnd = false;
 
-  run(input: StageOutput): StageOutput {
+  run(input: StageOutput<string>): StageOutput<SExpr[]> {
     try {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput(null, [e]);
+        return new StageOutput(<SExpr[]><unknown>null, [e]);
       } else {
         throw e;
       }

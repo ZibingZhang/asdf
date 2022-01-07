@@ -127,7 +127,11 @@ const EL_EXPECT_FINISHED_EXPR_ERR = "...: expected a finished expression, but fo
 
 const FA_ARITY_ERR = (name: string, expected: number, actual: number) => {
   if (expected < actual) {
-    return `${name}: expects only ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual}`;
+    if (expected === 0) {
+      return `${name}: expects no argument, but found ${actual}`;
+    } else {
+      return `${name}: expects only ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual}`;
+    }
   } else {
     return `${name}: expects ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual === 0 ? "none" : `only ${actual}`}`;
   }

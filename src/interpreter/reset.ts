@@ -13,8 +13,8 @@ export {
   RESET_STAGE
 };
 
-class Reset implements Stage {
-  run(input: StageOutput): StageOutput {
+class Reset implements Stage<string, string> {
+  run(input: StageOutput<string>): StageOutput<string> {
     WELL_FORMED_PROGRAM_STAGE.reset();
     EVALUATE_CODE_STAGE.reset();
     return input;
