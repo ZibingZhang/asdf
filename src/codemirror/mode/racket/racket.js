@@ -13,8 +13,7 @@ CodeMirror.defineMode("racket", function (config) {
   let openBrackets = "([{";
   let closeBrackets = ")]}";
   let booleanLiteral = /^(T|t|true|F|f|false)$/;
-  let specialForm = /^(and|cond|define|define-struct|if|lambda|or|quote|require)$/;
-  let quotedSpecialForm = /^(and|cond|define|define-struct|if|lambda|or|quote|require)/;
+  let specialForm = /^(and|cond|define|define-struct|else|if|lambda|or|quote|require)$/;
   let numLiteral = /^[+\-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
 
   // unclosed block comments should be "error", but aren't
@@ -35,7 +34,7 @@ CodeMirror.defineMode("racket", function (config) {
     let ch = stream.next();
     if (openBrackets.includes(ch) || closeBrackets.includes(ch)) { return "bracket"; }
     if (ch === ";") { stream.skipToEnd(); return "comment"; }
-    if (ch.match(/^['`]/) && stream.match(quotedSpecialForm, false)) { state.ignoreNextKeyword = true; return "keyword"; }
+    if (ch.match(/^['`]/) && stream.match(specialForm, false)) { state.ignoreNextKeyword = true; return "keyword"; }
     if (ch.match(/^['`,]/)) { return "keyword"; }
     if (ch === "\"") {
       ch = stream.next();
