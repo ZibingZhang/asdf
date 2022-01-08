@@ -1,22 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  WellFormedProgram,
-  WellFormedSyntax
-} from "./well-formed.js";
-import {
   EvaluateCode
 } from "./evaluate.js";
 import {
   Lexer
 } from "./lexing.js";
 import {
+  ParseSExpr
+} from "./parse.js";
+import {
   SourceSpan
 } from "./sourcespan.js";
+import {
+  WellFormedProgram
+} from "./well-formed.js";
 
 export {
   EVALUATE_CODE_STAGE,
   LEXING_STAGE,
-  WELL_FORMED_SYNTAX_STAGE,
+  PARSE_SEXPR_STAGE,
   WELL_FORMED_PROGRAM_STAGE,
   Pipeline,
   Stage,
@@ -74,7 +76,7 @@ class Pipeline {
 }
 
 const LEXING_STAGE = new Lexer();
-const WELL_FORMED_SYNTAX_STAGE = new WellFormedSyntax();
+const PARSE_SEXPR_STAGE = new ParseSExpr();
 const WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
 const EVALUATE_CODE_STAGE = new EvaluateCode();
 
