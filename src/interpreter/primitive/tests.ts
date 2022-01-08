@@ -1,9 +1,9 @@
 import {
-  isRData,
-  isRInexact,
   RPrimFun,
   RTestResult,
-  RValue
+  RValue,
+  isRData,
+  isRInexact
 } from "../rvalue.js";
 
 export {

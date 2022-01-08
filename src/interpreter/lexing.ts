@@ -1,4 +1,13 @@
 import {
+  AtomSExpr,
+  ListSExpr,
+  SExpr
+} from "./sexpr.js";
+import {
+  NO_SOURCE_SPAN,
+  SourceSpan
+} from "./sourcespan.js";
+import {
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
@@ -17,15 +26,6 @@ import {
   StageError,
   StageOutput
 } from "./pipeline.js";
-import {
-  AtomSExpr,
-  ListSExpr,
-  SExpr
-} from "./sexpr.js";
-import {
-  NO_SOURCE_SPAN,
-  SourceSpan
-} from "./sourcespan.js";
 import {
   Token,
   TokenType

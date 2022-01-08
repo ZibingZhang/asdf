@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "lint": "npx eslint ./src",
+    "lint": "npx eslint ./src --fix",
     "build": "npm run compile && npm run copy",
     "compile": "tsc",
     "copy": "cp ./src/index.html ./build/index.html"

@@ -1,11 +1,11 @@
 import {
-  isRSymbol,
   RPrimFun,
   RString,
   RSymbol,
   RValue,
   R_FALSE,
-  R_TRUE
+  R_TRUE,
+  isRSymbol
 } from "../rvalue.js";
 
 export {

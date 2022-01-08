@@ -1,7 +1,7 @@
 import {
+  SExpr,
   isAtomSExpr,
-  isListSExpr,
-  SExpr
+  isListSExpr
 } from "./sexpr.js";
 import {
   TokenType

@@ -1,9 +1,7 @@
 import {
-  Environment
-} from "./environment.js";
-import {
-  RT_MAX_CALL_STACK_SIZE_ERR
-} from "./error.js";
+  RTestResult,
+  R_VOID
+} from "./rvalue.js";
 import {
   Stage,
   StageError,
@@ -11,15 +9,17 @@ import {
   StageTestResult
 } from "./pipeline.js";
 import {
-  Program
-} from "./program.js";
-import {
-  RTestResult,
-  R_VOID
-} from "./rvalue.js";
+  Environment
+} from "./environment.js";
 import {
   NO_SOURCE_SPAN
 } from "./sourcespan.js";
+import {
+  Program
+} from "./program.js";
+import {
+  RT_MAX_CALL_STACK_SIZE_ERR
+} from "./error.js";
 
 export {
   EvaluateCode

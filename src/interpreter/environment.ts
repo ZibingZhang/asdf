@@ -1,54 +1,4 @@
 import {
-  SC_USED_BEFORE_DEFINITION_ERR
-} from "./error.js";
-import {
-  StageError
-} from "./pipeline.js";
-import {
-  RPFAreBooleansEqual,
-  RPFBooleanToString,
-  RPFIsBoolean,
-  RPFIsFalse,
-  RPFNot
-} from "./primitive/booleans.js";
-import {
-  RPFAppend,
-  RPFCons,
-  RPFIsEmpty,
-  RPFList,
-  R_NULL
-} from "./primitive/lists.js";
-import {
-  RPFAreEq,
-  RPFAreEqual,
-  RPFAreEqv
-} from "./primitive/misc.js";
-import {
-  RPFDivide,
-  RPFIsZero,
-  RPFMinus,
-  RPFMultiply,
-  RPFPlus,
-  RPC_E,
-  RPC_PI,
-  RPFLess,
-  RPFLessThan,
-  RPFEqual,
-  RPFGreater,
-  RPFGreaterThan,
-  RPFAbs,
-  RPFAdd1,
-  RPFSub1
-} from "./primitive/numbers.js";
-import {
-  RPFAreSymbolsEqual,
-  RPFIsSymbol,
-  RPFSymbolToString
-} from "./primitive/symbols.js";
-import {
-  RPFCheckExpect
-} from "./primitive/tests.js";
-import {
   RData,
   RIsStructFun,
   RMakeStructFun,
@@ -61,8 +11,58 @@ import {
   R_TRUE
 } from "./rvalue.js";
 import {
+  RPC_E,
+  RPC_PI,
+  RPFAbs,
+  RPFAdd1,
+  RPFDivide,
+  RPFEqual,
+  RPFGreater,
+  RPFGreaterThan,
+  RPFIsZero,
+  RPFLess,
+  RPFLessThan,
+  RPFMinus,
+  RPFMultiply,
+  RPFPlus,
+  RPFSub1
+} from "./primitive/numbers.js";
+import {
+  RPFAppend,
+  RPFCons,
+  RPFIsEmpty,
+  RPFList,
+  R_NULL
+} from "./primitive/lists.js";
+import {
+  RPFAreBooleansEqual,
+  RPFBooleanToString,
+  RPFIsBoolean,
+  RPFIsFalse,
+  RPFNot
+} from "./primitive/booleans.js";
+import {
+  RPFAreEq,
+  RPFAreEqual,
+  RPFAreEqv
+} from "./primitive/misc.js";
+import {
+  RPFAreSymbolsEqual,
+  RPFIsSymbol,
+  RPFSymbolToString
+} from "./primitive/symbols.js";
+import {
+  RPFCheckExpect
+} from "./primitive/tests.js";
+import {
+  SC_USED_BEFORE_DEFINITION_ERR
+} from "./error.js";
+import {
   SourceSpan
 } from "./sourcespan.js";
+import {
+  StageError
+} from "./pipeline.js";
 
 export {
   PRIMITIVE_DATA_NAMES,

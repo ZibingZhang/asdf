@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  WellFormedProgram,
+  WellFormedSyntax
+} from "./well-formed.js";
+import {
   EvaluateCode
 } from "./evaluate.js";
 import {
@@ -8,10 +12,6 @@ import {
 import {
   SourceSpan
 } from "./sourcespan.js";
-import {
-  WellFormedProgram,
-  WellFormedSyntax
-} from "./well-formed.js";
 
 export {
   EVALUATE_CODE_STAGE,

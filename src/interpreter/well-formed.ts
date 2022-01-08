@@ -1,7 +1,7 @@
 import {
-  AndNode,
   ASTNode,
   ASTNodeVisitor,
+  AndNode,
   AtomNode,
   CondNode,
   DefnNode,
@@ -11,48 +11,30 @@ import {
   EllipsisNode,
   FunAppNode,
   IfNode,
-  isDefnNode,
   LambdaNode,
   OrNode,
-  VarNode
+  VarNode,
+  isDefnNode
 } from "./ast.js";
 import {
-  Stage,
-  StageError,
-  StageOutput
-} from "./pipeline.js";
-import {
-  Program
-} from "./program.js";
-import {
-  isAtomSExpr,
-  isListSExpr,
-  ListSExpr,
-  SExpr
-} from "./sexpr.js";
-import {
-  TokenType
-} from "./token.js";
-import {
-  RExactReal,
-  RPrimTestFun,
-  RString,
-  RSymbol,
-  R_EMPTY_LIST,
-  R_FALSE,
-  R_TRUE
-} from "./rvalue.js";
-import {
+  CE_TEST_NOT_TOP_LEVEL_ERR,
+  CN_ELSE_NOT_LAST_CLAUSE_ERR,
+  CN_EXPECTED_TWO_PART_CLAUSE_ERR,
   DF_DUPLICATE_VARIABLE_ERR,
   DF_EXPECTED_AT_LEAST_ONE_PARAM_ERR,
   DF_EXPECTED_EXPR_ERR,
   DF_EXPECTED_FUNCTION_BODY_ERR,
   DF_EXPECTED_FUNCTION_NAME_ERR,
-  DF_EXPECTED_VAR_OR_FUN_NAME_ERR,
   DF_EXPECTED_VARIABLE_ERR,
+  DF_EXPECTED_VAR_OR_FUN_NAME_ERR,
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
   DF_TOO_MANY_EXPRS_ERR,
   DF_TOO_MANY_FUNCTION_BODIES_ERR,
+  DS_EXPECTED_FIELD_NAMES_ERR,
+  DS_EXPECTED_FIELD_NAME_ERR,
+  DS_EXPECTED_STRUCT_NAME_ERR,
+  DS_EXTRA_PARTS_ERR,
+  ES_NOT_IN_COND_ERR,
   FA_ARITY_ERR,
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
@@ -63,24 +45,42 @@ import {
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
   WF_EXPECTED_OPEN_PAREN_ERR,
-  DS_EXPECTED_STRUCT_NAME_ERR,
-  DS_EXPECTED_FIELD_NAMES_ERR,
-  DS_EXPECTED_FIELD_NAME_ERR,
-  DS_EXTRA_PARTS_ERR,
-  WF_STRUCTURE_TYPE_ERR,
-  ES_NOT_IN_COND_ERR,
-  CN_EXPECTED_TWO_PART_CLAUSE_ERR,
-  CN_ELSE_NOT_LAST_CLAUSE_ERR,
-  CE_TEST_NOT_TOP_LEVEL_ERR
+  WF_STRUCTURE_TYPE_ERR
 } from "./error.js";
+import {
+  ListSExpr,
+  SExpr,
+  isAtomSExpr,
+  isListSExpr
+} from "./sexpr.js";
 import {
   PRIMITIVE_DATA_NAMES,
   PRIMITIVE_FUNCTION_NAMES,
   PRIMITIVE_TEST_FUNCTIONS
 } from "./environment.js";
 import {
+  RExactReal,
+  RPrimTestFun,
+  RString,
+  RSymbol,
+  R_EMPTY_LIST,
+  R_FALSE,
+  R_TRUE
+} from "./rvalue.js";
+import {
+  Stage,
+  StageError,
+  StageOutput
+} from "./pipeline.js";
+import {
+  Program
+} from "./program.js";
+import {
   SourceSpan
 } from "./sourcespan.js";
+import {
+  TokenType
+} from "./token.js";
 
 export {
   WellFormedSyntax,

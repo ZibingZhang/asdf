@@ -1,10 +1,4 @@
 import {
-  FA_DIV_BY_ZERO_ERR
-} from "../error.js";
-import {
-  StageError
-} from "../pipeline.js";
-import {
   RExactReal,
   RInexactRational,
   RMath,
@@ -15,8 +9,14 @@ import {
   R_TRUE
 } from "../rvalue.js";
 import {
+  FA_DIV_BY_ZERO_ERR
+} from "../error.js";
+import {
   SourceSpan
 } from "../sourcespan.js";
+import {
+  StageError
+} from "../pipeline.js";
 
 export {
   RPFMultiply,

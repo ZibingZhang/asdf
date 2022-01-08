@@ -1,7 +1,4 @@
 import {
-  Environment
-} from "./environment.js";
-import {
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
   EL_EXPECTED_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
@@ -12,12 +9,10 @@ import {
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error.js";
 import {
-  StageError
-} from "./pipeline.js";
+  NO_SOURCE_SPAN,
+  SourceSpan
+} from "./sourcespan.js";
 import {
-  isRBoolean,
-  isRCallable,
-  isRTrue,
   RCallableVisitor,
   RIsStructFun,
   RLambda,
@@ -30,12 +25,17 @@ import {
   RValue,
   R_FALSE,
   R_TRUE,
-  R_VOID
+  R_VOID,
+  isRBoolean,
+  isRCallable,
+  isRTrue
 } from "./rvalue.js";
 import {
-  NO_SOURCE_SPAN,
-  SourceSpan
-} from "./sourcespan.js";
+  Environment
+} from "./environment.js";
+import {
+  StageError
+} from "./pipeline.js";
 
 export {
   ASTNode,

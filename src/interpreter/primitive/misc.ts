@@ -1,9 +1,9 @@
 import {
-  isRData,
   RPrimFun,
   RValue,
   R_FALSE,
-  R_TRUE
+  R_TRUE,
+  isRData
 } from "../rvalue.js";
 
 export {

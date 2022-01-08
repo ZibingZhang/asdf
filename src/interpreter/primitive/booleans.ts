@@ -1,10 +1,10 @@
 import {
-  isRBoolean,
   RPrimFun,
   RString,
   RValue,
   R_FALSE,
-  R_TRUE
+  R_TRUE,
+  isRBoolean
 } from "../rvalue.js";
 
 export {
