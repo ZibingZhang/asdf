@@ -23,13 +23,21 @@ export {
   RPFPlus,
   RPFMinus,
   RPFDivide,
-  R_E,
-  RPFIsZero,
-  R_PI
+  RPFLess,
+  RPFLessThan,
+  RPFEqual,
+  RPFGreater,
+  RPFGreaterThan,
+  RPFAbs,
+  RPFAdd1,
+  RPC_E,
+  RPC_PI,
+  RPFSub1,
+  RPFIsZero
 };
 
-const R_E = new RInexactRational(6121026514868073n, 2251799813685248n);
-const R_PI = new RInexactRational(884279719003555n, 281474976710656n);
+const RPC_E = new RInexactRational(6121026514868073n, 2251799813685248n);
+const RPC_PI = new RInexactRational(884279719003555n, 281474976710656n);
 
 class RPFMultiply extends RPrimFun {
   constructor() {
@@ -87,6 +95,116 @@ class RPFDivide extends RPrimFun {
       },
       args[0]
     );
+  }
+}
+
+class RPFLess extends RPrimFun {
+  constructor() {
+    super("<", { minArity: 1, allArgsTypeName: "real" });
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().value < (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFLessThan extends RPrimFun {
+  constructor() {
+    super("<=", { minArity: 1, allArgsTypeName: "real" });
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().value <= (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFEqual extends RPrimFun {
+  constructor() {
+    super("=", { minArity: 1, allArgsTypeName: "real" });
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().value === (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFGreater extends RPrimFun {
+  constructor() {
+    super(">", { minArity: 1, allArgsTypeName: "real" });
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().value > (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFGreaterThan extends RPrimFun {
+  constructor() {
+    super(">=", { minArity: 1, allArgsTypeName: "real" });
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().value >= (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFAbs extends RPrimFun {
+  constructor() {
+    super("abs", { arity: 1, onlyArgTypeName: "real" });
+  }
+
+  call(args: RValue[]): RValue {
+    const number = <RNumber>args[0];
+    if (number.toInexactDecimal().value < 0) {
+      return number.negate();
+    } else {
+      return number;
+    }
+  }
+}
+
+class RPFAdd1 extends RPrimFun {
+  constructor() {
+    super("add1", { arity: 1, onlyArgTypeName: "number" });
+  }
+
+  call(args: RValue[]): RValue {
+    return RMath.add(<RNumber>args[0], new RExactReal(1n, 1n));
+  }
+}
+
+class RPFSub1 extends RPrimFun {
+  constructor() {
+    super("sub1", { arity: 1, onlyArgTypeName: "number" });
+  }
+
+  call(args: RValue[]): RValue {
+    return RMath.add(<RNumber>args[0], new RExactReal(1n, 1n));
   }
 }
 

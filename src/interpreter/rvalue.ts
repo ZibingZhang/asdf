@@ -320,6 +320,7 @@ class RPrimFun extends RCallableBase {
       case "list":
         return isRList;
       case "number":
+      case "real":
         return isRNumber;
       case "symbol":
         return isRSymbol;

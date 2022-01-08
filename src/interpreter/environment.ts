@@ -12,7 +12,9 @@ import {
   RPFNot
 } from "./primitive/booleans.js";
 import {
+  RPFAppend,
   RPFCons,
+  RPFIsEmpty,
   RPFList,
   R_NULL
 } from "./primitive/lists.js";
@@ -22,8 +24,16 @@ import {
   RPFMinus,
   RPFMultiply,
   RPFPlus,
-  R_E,
-  R_PI
+  RPC_E,
+  RPC_PI,
+  RPFLess,
+  RPFLessThan,
+  RPFEqual,
+  RPFGreater,
+  RPFGreaterThan,
+  RPFAbs,
+  RPFAdd1,
+  RPFSub1
 } from "./primitive/numbers.js";
 import {
   RPFAreSymbolsEqual,
@@ -133,8 +143,8 @@ addDataToPrimEnv("true", R_TRUE);
 addDataToPrimEnv("false", R_FALSE);
 
 // constants
-addDataToPrimEnv("e", R_E);
-addDataToPrimEnv("pi", R_PI);
+addDataToPrimEnv("e", RPC_E);
+addDataToPrimEnv("pi", RPC_PI);
 addDataToPrimEnv("null", R_NULL);
 
 // numbers
@@ -142,6 +152,14 @@ addFnToPrimEnv(new RPFMultiply());
 addFnToPrimEnv(new RPFPlus());
 addFnToPrimEnv(new RPFMinus());
 addFnToPrimEnv(new RPFDivide());
+addFnToPrimEnv(new RPFLess());
+addFnToPrimEnv(new RPFLessThan());
+addFnToPrimEnv(new RPFEqual());
+addFnToPrimEnv(new RPFGreater());
+addFnToPrimEnv(new RPFGreaterThan());
+addFnToPrimEnv(new RPFAbs());
+addFnToPrimEnv(new RPFAdd1());
+addFnToPrimEnv(new RPFSub1());
 addFnToPrimEnv(new RPFIsZero());
 
 // booleans
@@ -157,7 +175,9 @@ addFnToPrimEnv(new RPFAreSymbolsEqual());
 addFnToPrimEnv(new RPFIsSymbol());
 
 // lists
+addFnToPrimEnv(new RPFAppend());
 addFnToPrimEnv(new RPFCons());
+addFnToPrimEnv(new RPFIsEmpty());
 addFnToPrimEnv(new RPFList());
 
 // posns
