@@ -3,8 +3,7 @@ import {
   RPrimFun,
   RValue,
   R_EMPTY_LIST,
-  R_FALSE,
-  R_TRUE
+  toRBoolean
 } from "../rvalue.js";
 
 export {
@@ -43,7 +42,7 @@ class RPFIsEmpty extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return args[0] === R_EMPTY_LIST ? R_TRUE : R_FALSE;
+    return toRBoolean(args[0] === R_EMPTY_LIST);
   }
 }
 

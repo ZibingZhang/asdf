@@ -44,7 +44,9 @@ import {
 import {
   RPFAreEq,
   RPFAreEqual,
-  RPFAreEqv
+  RPFAreEqv,
+  RPFIdentity,
+  RPFIsStruct
 } from "./primitive/misc.js";
 import {
   RPFAreSymbolsEqual,
@@ -195,3 +197,5 @@ addStructToPrimEnv("posn", ["x", "y"]);
 addFnToPrimEnv(new RPFAreEq());
 addFnToPrimEnv(new RPFAreEqual());
 addFnToPrimEnv(new RPFAreEqv());
+addFnToPrimEnv(new RPFIdentity());
+addFnToPrimEnv(new RPFIsStruct());

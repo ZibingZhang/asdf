@@ -6,7 +6,8 @@ import {
   RPrimFun,
   RValue,
   R_FALSE,
-  R_TRUE
+  R_TRUE,
+  toRBoolean
 } from "../rvalue.js";
 import {
   FA_DIV_BY_ZERO_ERR
@@ -214,6 +215,6 @@ class RPFIsZero extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return (<RNumber>args[0]).isZero() ? R_TRUE : R_FALSE;
+    return toRBoolean((<RNumber>args[0]).isZero());
   }
 }

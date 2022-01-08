@@ -14,6 +14,7 @@ export {
   R_FALSE,
   R_TRUE,
   R_VOID,
+  RBoolean,
   RData,
   RExactReal,
   RInexactRational,
@@ -39,8 +40,10 @@ export {
   isRInexact,
   isRList,
   isRPrimFun,
+  isRStruct,
   isRSymbol,
   isRTrue,
+  toRBoolean,
   RCallableVisitor
 };
 
@@ -554,6 +557,10 @@ function isRTrue(rval: RBoolean): boolean {
 
 function isRVoid(rval: RValue): rval is RVoid {
   return rval instanceof RVoid;
+}
+
+function toRBoolean(val: boolean): RBoolean {
+  return val ? R_TRUE : R_FALSE;
 }
 
 abstract class RMath {

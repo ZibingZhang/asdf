@@ -3,9 +3,8 @@ import {
   RString,
   RSymbol,
   RValue,
-  R_FALSE,
-  R_TRUE,
-  isRSymbol
+  isRSymbol,
+  toRBoolean
 } from "../rvalue.js";
 
 export {
@@ -30,7 +29,7 @@ class RPFAreSymbolsEqual extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return (<RSymbol>args[0]).val === (<RSymbol>args[1]).val ? R_TRUE : R_FALSE;
+    return toRBoolean((<RSymbol>args[0]).val === (<RSymbol>args[1]).val);
   }
 }
 
@@ -40,6 +39,6 @@ class RPFIsSymbol extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return isRSymbol(args[0]) ? R_TRUE : R_FALSE;
+    return toRBoolean(isRSymbol(args[0]));
   }
 }

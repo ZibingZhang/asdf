@@ -1,10 +1,10 @@
 import {
+  RBoolean,
   RPrimFun,
   RString,
   RValue,
-  R_FALSE,
-  R_TRUE,
-  isRBoolean
+  isRBoolean,
+  toRBoolean
 } from "../rvalue.js";
 
 export {
@@ -21,7 +21,7 @@ class RPFBooleanToString extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return args[0] === R_TRUE ? new RString("#true") : new RString("#false");
+    return (<RBoolean>args[0]).val ? new RString("#true") : new RString("#false");
   }
 }
 
@@ -31,7 +31,7 @@ class RPFAreBooleansEqual extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return args[0] === args[1] ? R_TRUE : R_FALSE;
+    return toRBoolean(args[0] === args[1]);
   }
 }
 
@@ -41,7 +41,7 @@ class RPFIsBoolean extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return isRBoolean(args[0]) ? R_TRUE : R_FALSE;
+    return toRBoolean(isRBoolean(args[0]));
   }
 }
 
@@ -51,7 +51,7 @@ class RPFIsFalse extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return args[0] === R_FALSE ? R_TRUE : R_FALSE;
+    return toRBoolean((<RBoolean>args[0]).val === false);
   }
 }
 
@@ -61,6 +61,6 @@ class RPFNot extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return args[0] === R_TRUE ? R_FALSE : R_TRUE;
+    return toRBoolean(!(<RBoolean>args[0]).val);
   }
 }
