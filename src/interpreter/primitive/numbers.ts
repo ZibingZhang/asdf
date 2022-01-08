@@ -204,7 +204,7 @@ class RPFSub1 extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return RMath.add(<RNumber>args[0], new RExactReal(1n, 1n));
+    return RMath.sub(<RNumber>args[0], new RExactReal(1n, 1n));
   }
 }
 

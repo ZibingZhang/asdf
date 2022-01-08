@@ -4,6 +4,7 @@ import {
   AtomNode,
   CheckNode,
   CondNode,
+  DefnNode,
   DefnStructNode,
   DefnVarNode,
   EllipsisFunAppNode,
@@ -150,7 +151,12 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   private assertWellFormedProgram(program: Program) {
-    for (const defn of program.defns) {
+    this.addDefinitionsToScope(program.defns);
+    program.nodes.forEach(node => node.accept(this));
+  }
+
+  private addDefinitionsToScope(defns: DefnNode[]) {
+    for (const defn of defns) {
       if (defn instanceof DefnVarNode) {
         if (defn.value instanceof LambdaNode) {
           if (this.scope.has(defn.name)) {
@@ -217,7 +223,6 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         });
       }
     }
-    program.nodes.forEach(node => node.accept(this));
   }
 }
 
@@ -231,7 +236,8 @@ class Scope {
   }
 
   get(name: string, expectData: boolean, sourceSpan: SourceSpan): VariableMeta {
-    const meta = this.variables.get(name) || (this.parentScope && this.parentScope.get(name, expectData, sourceSpan));
+    const meta = this.variables.get(name)
+      || (this.parentScope && this.parentScope.get(name, expectData, sourceSpan));
     if (!meta) {
       if (expectData) {
         throw new StageError(
@@ -249,7 +255,8 @@ class Scope {
   }
 
   has(name: string): boolean {
-    return this.variables.has(name) || (this.parentScope && this.parentScope.has(name));
+    return this.variables.has(name)
+      || (this.parentScope && this.parentScope.has(name));
   }
 }
 

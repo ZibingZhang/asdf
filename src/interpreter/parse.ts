@@ -182,10 +182,18 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           FC_EXPECTED_FUNCTION_ERR(),
           sexpr.sourceSpan
         );
-      } else if (isAtomSExpr(leadingSExpr)) {
-        if (leadingSExpr.token.type === TokenType.PLACEHOLDER) {
+      }
+      if (isListSExpr(leadingSExpr)) {
+        throw new StageError(
+          FC_EXPECTED_FUNCTION_ERR(leadingSExpr),
+          leadingSExpr.sourceSpan
+        );
+      }
+      switch (leadingSExpr.token.type) {
+        case TokenType.PLACEHOLDER: {
           return new EllipsisFunAppNode(sexpr.sourceSpan);
-        } else if (leadingSExpr.token.type === TokenType.NAME) {
+        }
+        case TokenType.NAME: {
           if (leadingSExpr.token.text === "quote") {
             return this.toQuoteNode(sexpr, sexpr.subExprs[1]);
           } else {
@@ -195,7 +203,8 @@ class ParseSExpr implements Stage<SExpr[], Program> {
               sexpr.sourceSpan
             );
           }
-        } else if (leadingSExpr.token.type === TokenType.KEYWORD) {
+        }
+        case TokenType.KEYWORD: {
           switch (leadingSExpr.token.text) {
             case "and": {
               if (sexpr.subExprs.length - 1 < 2) {
@@ -268,22 +277,19 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             default:
               throw "illegal state: non-existent keyword";
           }
-        } else {
+        }
+        default: {
           throw new StageError(
             FC_EXPECTED_FUNCTION_ERR(leadingSExpr),
             leadingSExpr.sourceSpan
           );
         }
-      } else {
-        throw new StageError(
-          FC_EXPECTED_FUNCTION_ERR(leadingSExpr),
-          leadingSExpr.sourceSpan
-        );
       }
     }
   }
 
   private toCheckNode(checkName: string, sexpr: ListSExpr): CheckNode {
+    // (check-... ...)
     if (!this.atTopLevel()) {
       throw new StageError(
         CE_TEST_NOT_TOP_LEVEL_ERR(checkName),
@@ -305,6 +311,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
   }
 
   private toCondNode(sexpr: ListSExpr): CondNode {
+    // (cond ...)
     const questionAnswerClauses: [ASTNode, ASTNode][] = [];
     if (sexpr.subExprs.length - 1 === 0) {
       throw new StageError(
@@ -339,6 +346,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
   }
 
   private toDefnNode(sexpr: ListSExpr): DefnNode {
+    // (define ...)
     if (sexpr.subExprs.length - 1 === 0) {
       throw new StageError(
         DF_EXPECTED_VAR_OR_FUN_NAME_ERR(),
@@ -347,6 +355,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     }
     let name = sexpr.subExprs[1];
     if (isAtomSExpr(name)) {
+      // (define variable-name ...)
       if (name.token.type !== TokenType.NAME) {
         throw new StageError(
           DF_EXPECTED_VAR_OR_FUN_NAME_ERR(name),
@@ -372,6 +381,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         sexpr.sourceSpan
       );
     } else {
+      // (define (function-name ...) ...)
       const nameAndArgs = name;
       if (nameAndArgs.subExprs.length === 0) {
         throw new StageError(
@@ -434,6 +444,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
   }
 
   private toDefnStructNode(sexpr: ListSExpr): DefnStructNode {
+    // (define-struct ...)
     if (sexpr.subExprs.length - 1 === 0) {
       throw new StageError(
         DS_EXPECTED_STRUCT_NAME_ERR(),
@@ -484,6 +495,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
   }
 
   private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): AtomNode {
+    // '...
     if (isAtomSExpr(quotedSexpr)) {
       if (quotedSexpr.token.type === TokenType.NAME) {
         return new AtomNode(
