@@ -140,7 +140,12 @@ class RExactReal extends RNumberBase {
   }
 
   stringify(): string {
-    return (Number(this.numerator) / Number(this.denominator)).toString();
+    if (this.denominator === 1n) {
+      return this.numerator.toString();
+    } else {
+      const flooredValue = this.numerator / this.denominator;
+      return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+    }
   }
 }
 
@@ -195,7 +200,12 @@ class RInexactRational extends RNumberBase {
   }
 
   stringify(): string {
-    return `#i${(Number(this.numerator) / Number(this.denominator)).toString()}`;
+    if (this.denominator === 1n) {
+      return `#i${this.numerator.toString()}`;
+    } else {
+      const flooredValue = this.numerator / this.denominator;
+      return `#i${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+    }
   }
 }
 
