@@ -13,19 +13,19 @@ const testOutput = CodeMirror(
 }, {
 lineNumbers: false,
 tabSize: 2,
-value: "",
+value: "\n\n\n",
 mode: null,
 theme: "monokai",
 readOnly: true
 });
 
 const resetTestOutput =
-  () => testOutput.setValue("\n");
+  () => testOutput.setValue("\n\n\n");
 const appendToTestOutput =
   text => testOutput.replaceRange(text, CodeMirror.Pos(testOutput.lastLine()));
 const appendToTestOutputLn =
   text => appendToTestOutput(`${text}\n`);
 const setTestOutputFirstLine =
-  text => testOutput.replaceRange(`${text}\n`, { line: 0 });
+  text => testOutput.replaceRange(`${text}`, { line: 0, ch: 0 }, { line: 0 });
 const setTestOutputSecondLine =
-  text => testOutput.replaceRange(`${text}\n`, { line: 1 });
+  text => testOutput.replaceRange(`${text}`, { line: 1, ch: 0 }, { line: 1 });

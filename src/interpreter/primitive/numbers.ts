@@ -105,7 +105,7 @@ class RPFLess extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().value < (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().val < (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
         return R_FALSE;
       }
     }
@@ -120,7 +120,7 @@ class RPFLessThan extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().value <= (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().val <= (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
         return R_FALSE;
       }
     }
@@ -135,7 +135,7 @@ class RPFEqual extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().value === (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().val === (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
         return R_FALSE;
       }
     }
@@ -150,7 +150,7 @@ class RPFGreater extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().value > (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().val > (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
         return R_FALSE;
       }
     }
@@ -165,7 +165,7 @@ class RPFGreaterThan extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().value >= (<RNumber>args[idx + 1]).toInexactDecimal().value)) {
+      if (!((<RNumber>args[idx]).toInexactDecimal().val >= (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
         return R_FALSE;
       }
     }
@@ -180,7 +180,7 @@ class RPFAbs extends RPrimFun {
 
   call(args: RValue[]): RValue {
     const number = <RNumber>args[0];
-    if (number.toInexactDecimal().value < 0) {
+    if (number.toInexactDecimal().val < 0) {
       return number.negate();
     } else {
       return number;

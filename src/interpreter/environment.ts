@@ -19,6 +19,11 @@ import {
   R_NULL
 } from "./primitive/lists.js";
 import {
+  RPFAreEq,
+  RPFAreEqual,
+  RPFAreEqv
+} from "./primitive/misc.js";
+import {
   RPFDivide,
   RPFIsZero,
   RPFMinus,
@@ -191,3 +196,8 @@ addFnToPrimEnv(new RPFList());
 
 // posns
 addStructToPrimEnv("posn", ["x", "y"]);
+
+// misc
+addFnToPrimEnv(new RPFAreEq());
+addFnToPrimEnv(new RPFAreEqual());
+addFnToPrimEnv(new RPFAreEqv());

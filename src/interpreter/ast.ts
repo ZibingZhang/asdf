@@ -421,7 +421,7 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
   visitRMakeStructFun(rval: RMakeStructFun): RValue {
     if (rval.arity !== this.args.length) {
       throw new StageError(
-        FA_ARITY_ERR(rval.name, rval.arity, this.args.length),
+        FA_ARITY_ERR(`make-${rval.name}`, rval.arity, this.args.length),
         NO_SOURCE_SPAN
       );
     }

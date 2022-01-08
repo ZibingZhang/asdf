@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   ASTNode
 } from "./ast.js";
@@ -36,6 +35,8 @@ export {
   RValue,
   isRBoolean,
   isRCallable,
+  isRData,
+  isRInexact,
   isRList,
   isRPrimFun,
   isRSymbol,
@@ -52,29 +53,36 @@ function gcd(a: bigint, b: bigint): bigint {
 }
 
 type RValue =
-  | RData
   | RCallable
-  | RTestResult
-  | RVoid;
+  | RData
+  | RTestResult;
 type RCallable =
+  | RIsStructFun
   | RMakeStructFun
   | RLambda
   | RPrimFun
-  | RPrimTestFun;
-
+  | RPrimTestFun
+  | RStructGetFun;
+type RData =
+  | RAtomic
+  | RList
+  | RStruct;
+type RAtomic =
+  | RBoolean
+  | RNumber
+  | RString
+  | RStructType
+  | RSymbol
+  | RVoid;
 type RNumber =
   | RExactReal
+  | RInexact;
+type RInexact =
   | RInexactDecimal
   | RInexactRational;
 
 interface RValBase {
   stringify(): string;
-}
-
-class RVoid implements RValBase {
-  stringify(): string {
-    return "(void)";
-  }
 }
 
 class RTestResult implements RValBase {
@@ -88,38 +96,163 @@ class RTestResult implements RValBase {
   }
 }
 
-interface RData extends RValBase {}
+abstract class RDataBase implements RValBase {
+  abstract stringify(): string;
 
-interface RAtomic extends RData {}
+  abstract equals(rval: RValue): boolean;
 
-class RBoolean implements RAtomic {
-  constructor(readonly val: boolean) {}
+  eqv(rval: RValue): boolean {
+    return this.equals(rval);
+  }
+
+  eq(rval: RValue): boolean {
+    return rval === this;
+  }
+}
+
+class RBoolean extends RDataBase {
+  constructor(readonly val: boolean) {
+    super();
+  }
 
   stringify(): string {
     return this.val ? "#true" : "#false";
   }
+
+  equals(rval: RValue): boolean {
+    return isRBoolean(rval)
+      && rval.val === this.val;
+  }
 }
 
-class RString implements RAtomic {
-  constructor(readonly val: string) {}
+class RList extends RDataBase {
+  constructor(readonly vals: RValue[]) {
+    super();
+  }
+
+  stringify(): string {
+    if (this.vals.length === 0) {
+      return "'()";
+    } else {
+      let output = `(cons ${this.vals[0].stringify()}`;
+      for (const val of this.vals.slice(1)) {
+        output += ` (cons ${val.stringify()}`;
+      }
+      output += " '()" + ")".repeat(this.vals.length);
+      return output;
+    }
+  }
+
+  equals(rval: RValue): boolean {
+    return isRList(rval)
+      && rval.vals.length === this.vals.length
+      && rval.vals.every((rval, idx) => {
+        const val = this.vals[idx];
+        return isRData(rval)
+          && isRData(val)
+          && rval.equals(val)
+      });
+  }
+
+  eqv(rval: RValue): boolean {
+    return rval === this;
+  }
+}
+
+class RString extends RDataBase {
+  constructor(readonly val: string) {
+    super();
+  }
 
   stringify(): string {
     return `"${this.val}"`;
   }
+
+  equals(rval: RValue): boolean {
+    return isRString(rval)
+      && rval.val === this.val;
+  }
 }
 
-class RSymbol implements RAtomic {
-  constructor(readonly val: string) {}
+class RStruct extends RDataBase {
+  constructor(
+    readonly name: string,
+    readonly vals: RValue[]
+  ) {
+    super();
+  }
+
+  stringify(): string {
+    if (this.vals.length === 0) {
+      return `(make-${this.name})`;
+    } else {
+      return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
+    }
+  }
+
+  equals(rval: RValue): boolean {
+    return isRStruct(rval)
+      && rval.name === this.name
+      && rval.vals.every((rval, idx) => {
+        const val = this.vals[idx];
+        return isRData(rval)
+          && isRData(val)
+          && rval.equals(val)
+      });
+  }
+
+  eqv(rval: RValue): boolean {
+    return rval === this;
+  }
+}
+
+class RStructType extends RDataBase {
+  constructor(readonly name: string) {
+    super();
+  }
+
+  stringify(): string {
+    throw `illegal state: cannot stringify a structure type`;
+  }
+
+  equals(rval: RValue): boolean {
+    return isRStructType(rval)
+      && rval.name === this.name;
+  }
+}
+
+class RSymbol extends RDataBase {
+  constructor(readonly val: string) {
+    super();
+  }
 
   stringify(): string {
     return "'" + this.val;
   }
+
+  equals(rval: RValue): boolean {
+    return isRSymbol(rval)
+      && rval.val === this.val;
+  }
 }
 
-abstract class RNumberBase implements RAtomic {
+class RVoid extends RDataBase {
+  stringify(): string {
+    return "(void)";
+  }
+
+  equals(rval: RValue): boolean {
+    return isRVoid(rval);
+  }
+}
+
+abstract class RNumberBase extends RDataBase {
   abstract negate(): RNumber;
+
   abstract isZero(): boolean;
+
   abstract toInexactDecimal(): RInexactDecimal;
+
   abstract stringify(): string;
 }
 
@@ -139,6 +272,21 @@ class RExactReal extends RNumberBase {
     this.denominator = denominator / divisor;
   }
 
+  stringify(): string {
+    if (this.denominator === 1n) {
+      return this.numerator.toString();
+    } else {
+      const flooredValue = this.numerator / this.denominator;
+      return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+    }
+  }
+
+  equals(rval: RValue): boolean {
+    return isRExactReal(rval)
+      && rval.numerator === this.numerator
+      && rval.denominator === this.denominator;
+  }
+
   negate(): RExactReal {
     return new RExactReal(-1n * this.numerator, this.denominator);
   }
@@ -150,36 +298,32 @@ class RExactReal extends RNumberBase {
   toInexactDecimal(): RInexactDecimal {
     return new RInexactDecimal(Number(this.numerator) / Number(this.denominator));
   }
-
-  stringify(): string {
-    if (this.denominator === 1n) {
-      return this.numerator.toString();
-    } else {
-      const flooredValue = this.numerator / this.denominator;
-      return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
-    }
-  }
 }
 
 class RInexactDecimal extends RNumberBase {
-  constructor(readonly value: number) {
+  constructor(readonly val: number) {
     super();
   }
 
+  stringify(): string {
+    return `#i${this.val}`;
+  }
+
+  equals(rval: RValue): boolean {
+    return isRInexactDecimal(rval)
+      && rval.val === this.val;
+  }
+
   negate(): RInexactDecimal {
-    return new RInexactDecimal(-1 * this.value);
+    return new RInexactDecimal(-1 * this.val);
   }
 
   isZero(): boolean {
-    return this.value === 0;
+    return this.val === 0;
   }
 
   toInexactDecimal(): RInexactDecimal {
     return this;
-  }
-
-  stringify(): string {
-    return `#i${this.value}`;
   }
 }
 
@@ -199,6 +343,21 @@ class RInexactRational extends RNumberBase {
     this.denominator = denominator / divisor;
   }
 
+  stringify(): string {
+    if (this.denominator === 1n) {
+      return `#i${this.numerator.toString()}`;
+    } else {
+      const flooredValue = this.numerator / this.denominator;
+      return `#i${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+    }
+  }
+
+  equals(rval: RValue): boolean {
+    return isRInexactRational(rval)
+      && rval.numerator === this.numerator
+      && rval.denominator === this.denominator;
+  }
+
   negate(): RInexactRational {
     return new RInexactRational(-1n * this.numerator, this.denominator);
   }
@@ -209,55 +368,6 @@ class RInexactRational extends RNumberBase {
 
   toInexactDecimal(): RInexactDecimal {
     return new RInexactDecimal(Number(this.numerator) / Number(this.denominator));
-  }
-
-  stringify(): string {
-    if (this.denominator === 1n) {
-      return `#i${this.numerator.toString()}`;
-    } else {
-      const flooredValue = this.numerator / this.denominator;
-      return `#i${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
-    }
-  }
-}
-
-class RList implements RData {
-  constructor(readonly vals: RValue[]) {}
-
-  stringify(): string {
-    if (this.vals.length === 0) {
-      return "'()";
-    } else {
-      let output = `(cons ${this.vals[0].stringify()}`;
-      for (const val of this.vals.slice(1)) {
-        output += ` (cons ${val.stringify()}`;
-      }
-      output += " '()" + ")".repeat(this.vals.length);
-      return output;
-    }
-  }
-}
-
-class RStruct implements RData {
-  constructor(
-    readonly name: string,
-    readonly vals: RValue[]
-  ) {}
-
-  stringify(): string {
-    if (this.vals.length === 0) {
-      return `(make-${this.name})`;
-    } else {
-      return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
-    }
-  }
-}
-
-class RStructType implements RData {
-  constructor(readonly name: string) {}
-
-  stringify(): string {
-    throw `illegal state: cannot stringify a structure type`;
   }
 }
 
@@ -385,15 +495,36 @@ function isRCallable(rval: RValue): rval is RCallable {
   return rval instanceof RCallableBase;
 }
 
+function isRData(rval: RValue): rval is RDataBase {
+  return rval instanceof RDataBase;
+}
+
 function isRDecimal(rval: RNumber): rval is RInexactDecimal {
   return rval instanceof RInexactDecimal;
+}
+
+function isRExactReal(rval: RValue): rval is RExactReal {
+  return rval instanceof RExactReal;
+}
+
+function isRInexact(rval: RValue): rval is RInexact {
+  return isRInexactDecimal(rval)
+    || isRInexactRational(rval);
+}
+
+function isRInexactDecimal(rval: RValue): rval is RInexactDecimal {
+  return rval instanceof RInexactDecimal;
+}
+
+function isRInexactRational(rval: RValue): rval is RInexactRational {
+  return rval instanceof RInexactRational;
 }
 
 function isRList(rval: RValue): rval is RList {
   return rval instanceof RList;
 }
 
-function isRNumber(rval: RValue): rval is RNumber {
+function isRNumber(rval: RValue): rval is RNumberBase {
   return rval instanceof RNumberBase;
 }
 
@@ -401,19 +532,36 @@ function isRPrimFun(rval: RCallable): rval is RPrimFun {
   return rval instanceof RPrimFun;
 }
 
+function isRString(rval: RValue): rval is RString {
+  return rval instanceof RString;
+}
+
+function isRStruct(rval: RValue): rval is RStruct {
+  return rval instanceof RStruct;
+}
+
+function isRStructType(rval: RValue): rval is RStructType {
+  return rval instanceof RStructType;
+}
+
 function isRSymbol(rval: RValue): rval is RSymbol {
   return rval instanceof RSymbol;
 }
 
 function isRTrue(rval: RBoolean): boolean {
-  return rval === R_TRUE;
+  return isRBoolean(rval)
+    && rval.val;
+}
+
+function isRVoid(rval: RValue): rval is RVoid {
+  return rval instanceof RVoid;
 }
 
 abstract class RMath {
   static add(rnum1: RNumber, rnum2: RNumber): RNumber {
     const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
     if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
-      return new RInexactDecimal(rnum1.toInexactDecimal().value + rnum2.toInexactDecimal().value);
+      return new RInexactDecimal(rnum1.toInexactDecimal().val + rnum2.toInexactDecimal().val);
     } else {
       const numerator = rnum1.numerator * rnum2.denominator + rnum1.denominator * rnum2.numerator;
       const denominator = rnum1.denominator * rnum2.denominator;
@@ -428,7 +576,7 @@ abstract class RMath {
   static div(rnum1: RNumber, rnum2: RNumber): RNumber {
     const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
     if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
-      return new RInexactDecimal(rnum1.toInexactDecimal().value / rnum2.toInexactDecimal().value);
+      return new RInexactDecimal(rnum1.toInexactDecimal().val / rnum2.toInexactDecimal().val);
     } else {
       const numerator = rnum1.numerator * rnum2.denominator;
       const denominator = rnum1.denominator * rnum2.numerator;
@@ -443,7 +591,7 @@ abstract class RMath {
   static mul(rnum1: RNumber, rnum2: RNumber): RNumber {
     const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
     if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
-      return new RInexactDecimal(rnum1.toInexactDecimal().value * rnum2.toInexactDecimal().value);
+      return new RInexactDecimal(rnum1.toInexactDecimal().val * rnum2.toInexactDecimal().val);
     } else {
       const numerator = rnum1.numerator * rnum2.numerator;
       const denominator = rnum1.denominator * rnum2.denominator;
@@ -458,7 +606,7 @@ abstract class RMath {
   static sub(rnum1: RNumber, rnum2: RNumber): RNumber {
     const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
     if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
-      return new RInexactDecimal(rnum1.toInexactDecimal().value - rnum2.toInexactDecimal().value);
+      return new RInexactDecimal(rnum1.toInexactDecimal().val - rnum2.toInexactDecimal().val);
     } else {
       const numerator = rnum1.numerator * rnum2.denominator - rnum1.denominator * rnum2.numerator;
       const denominator = rnum1.denominator * rnum2.denominator;
