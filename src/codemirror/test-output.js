@@ -1,9 +1,6 @@
 export {
   resetTestOutput,
-  appendToTestOutput,
-  appendToTestOutputLn,
-  setTestOutputFirstLine,
-  setTestOutputSecondLine
+  handleTestResults
 };
 
 const testOutputTextArea = document.getElementById("test-output");
@@ -19,13 +16,51 @@ theme: "monokai",
 readOnly: true
 });
 
-const resetTestOutput =
-  () => testOutput.setValue("\n\n\n");
 const appendToTestOutput =
   text => testOutput.replaceRange(text, CodeMirror.Pos(testOutput.lastLine()));
 const appendToTestOutputLn =
   text => appendToTestOutput(`${text}\n`);
-const setTestOutputFirstLine =
-  text => testOutput.replaceRange(`${text}`, { line: 0, ch: 0 }, { line: 0 });
-const setTestOutputSecondLine =
-  text => testOutput.replaceRange(`${text}`, { line: 1, ch: 0 }, { line: 1 });
+
+let failedTests = 0;
+let totalTests = 0;
+
+function resetTestOutput() {
+  testOutput.setValue("\n\n\n");
+  failedTests = 0;
+  totalTests = 0;
+}
+
+function handleTestResults(tests) {
+  const newFailures = [];
+  for (const test of tests) {
+    totalTests++;
+    if (!test.passed) {
+      failedTests++;
+      newFailures.push(test.errMsg);
+    }
+  }
+  if (totalTests > 0) {
+    testOutput.replaceRange(
+      `Ran ${totalTests} test${totalTests > 1 ? "s" : ""}.`,
+      { line: 0, ch: 0 },
+      { line: 0 }
+    );
+    let testsPassedOrFailed;
+    if (failedTests === 0) {
+      testsPassedOrFailed = "All tests passed!";
+    } else if (failedTests === totalTests) {
+      testsPassedOrFailed = "0 tests passed.";
+    } else {
+      testsPassedOrFailed = `${failedTests} of the ${totalTests} tests failed.`;
+    }
+    testOutput.replaceRange(
+      testsPassedOrFailed,
+      { line: 1, ch: 0 },
+      { line: 1 }
+    );
+  }
+  if (failedTests > 0 && failedTests === newFailures.length) {
+    appendToTestOutputLn("Check failures:");
+  }
+  newFailures.forEach(errMsg => appendToTestOutputLn(`                    ${errMsg}`));
+}
