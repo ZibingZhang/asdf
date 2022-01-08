@@ -94,13 +94,13 @@ const CN_ELSE_NOT_LAST_CLAUSE_ERR = "cond: found an else clause that isn't the l
 const CN_EXPECTED_TWO_PART_CLAUSE_ERR = (found : SExpr | null = null) => {
   if (found) {
     if (isListSExpr(found)) {
-      switch (found.tokens.length) {
+      switch (found.subExprs.length) {
         case 0:
           return "cond: expected a clause with a question and an answer, but found an empty part";
         case 1:
           return "cond: expected a clause with a question and an answer, but found a clause with only one part";
         default:
-          return `cond: expected a clause with a question and an answer, but found a clause with ${found.tokens.length} parts`;
+          return `cond: expected a clause with a question and an answer, but found a clause with ${found.subExprs.length} parts`;
       }
     } else {
       return `cond: expected a clause with a question and an answer, but found a ${foundStr(found)}`;

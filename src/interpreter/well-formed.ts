@@ -180,7 +180,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           throw "something?";
       }
     } else {
-      const leadingSExpr = sexpr.tokens[0];
+      const leadingSExpr = sexpr.subExprs[0];
       if (!leadingSExpr) {
         throw new StageError(
           FC_EXPECTED_FUNCTION_ERR(),
@@ -191,25 +191,25 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           return new EllipsisFunAppNode(sexpr.sourceSpan);
         } else if (leadingSExpr.token.type === TokenType.NAME) {
           if (leadingSExpr.token.text === "quote") {
-            return this.toQuoteNode(sexpr, sexpr.tokens[1]);
+            return this.toQuoteNode(sexpr, sexpr.subExprs[1]);
           } else {
             return new FunAppNode(
               new VarNode(leadingSExpr.token.text, leadingSExpr.sourceSpan),
-              sexpr.tokens.slice(1).map(token => this.toNode(token)),
+              sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
               sexpr.sourceSpan
             );
           }
         } else if (leadingSExpr.token.type === TokenType.KEYWORD) {
           switch (leadingSExpr.token.text) {
             case "and": {
-              if (sexpr.tokens.length - 1 < 2) {
+              if (sexpr.subExprs.length - 1 < 2) {
                 throw new StageError(
-                  FA_MIN_ARITY_ERR("and", 2, sexpr.tokens.length - 1),
+                  FA_MIN_ARITY_ERR("and", 2, sexpr.subExprs.length - 1),
                   leadingSExpr.sourceSpan
                 );
               }
               return new AndNode(
-                sexpr.tokens.slice(1).map(token => this.toNode(token)),
+                sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
                 sexpr.sourceSpan
               );
             }
@@ -241,28 +241,28 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
               )
             }
             case "if": {
-              if (sexpr.tokens.length - 1 !== 3) {
+              if (sexpr.subExprs.length - 1 !== 3) {
                 throw new StageError(
-                  IF_EXPECTED_THREE_PARTS_ERR(sexpr.tokens.length - 1),
+                  IF_EXPECTED_THREE_PARTS_ERR(sexpr.subExprs.length - 1),
                   sexpr.sourceSpan
                 );
               }
               return new IfNode(
-                this.toNode(sexpr.tokens[1]),
-                this.toNode(sexpr.tokens[2]),
-                this.toNode(sexpr.tokens[3]),
+                this.toNode(sexpr.subExprs[1]),
+                this.toNode(sexpr.subExprs[2]),
+                this.toNode(sexpr.subExprs[3]),
                 sexpr.sourceSpan
               );
             }
             case "or": {
-              if (sexpr.tokens.length - 1 < 2) {
+              if (sexpr.subExprs.length - 1 < 2) {
                 throw new StageError(
-                  FA_MIN_ARITY_ERR("or", 2, sexpr.tokens.length - 1),
+                  FA_MIN_ARITY_ERR("or", 2, sexpr.subExprs.length - 1),
                   leadingSExpr.sourceSpan
                 );
               }
               return new OrNode(
-                sexpr.tokens.slice(1).map(token => this.toNode(token)),
+                sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
                 sexpr.sourceSpan
               );
             }
@@ -286,46 +286,46 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
 
   private toCondNode(sexpr: ListSExpr): CondNode {
     const questionAnswerClauses: [ASTNode, ASTNode][] = [];
-    if (sexpr.tokens.length - 1 === 0) {
+    if (sexpr.subExprs.length - 1 === 0) {
       throw new StageError(
         CN_EXPECTED_TWO_PART_CLAUSE_ERR(),
         sexpr.sourceSpan
       );
     }
-    for (const [idx, token] of sexpr.tokens.slice(1).entries()) {
-      if (!isListSExpr(token) || token.tokens.length !== 2) {
+    for (const [idx, token] of sexpr.subExprs.slice(1).entries()) {
+      if (!isListSExpr(token) || token.subExprs.length !== 2) {
         throw new StageError(
           CN_EXPECTED_TWO_PART_CLAUSE_ERR(token),
           token.sourceSpan
         );
       }
-      const questionSExpr = token.tokens[0];
+      const questionSExpr = token.subExprs[0];
       if (isAtomSExpr(questionSExpr)
         && questionSExpr.token.type === TokenType.KEYWORD
         && questionSExpr.token.text === "else"
       ) {
-        if (idx < sexpr.tokens.length - 2) {
+        if (idx < sexpr.subExprs.length - 2) {
           throw new StageError(
             CN_ELSE_NOT_LAST_CLAUSE_ERR,
             token.sourceSpan
           )
         }
-        questionAnswerClauses.push([new AtomNode(R_TRUE, questionSExpr.sourceSpan), this.toNode(token.tokens[1])]);
+        questionAnswerClauses.push([new AtomNode(R_TRUE, questionSExpr.sourceSpan), this.toNode(token.subExprs[1])]);
       } else {
-        questionAnswerClauses.push([this.toNode(questionSExpr), this.toNode(token.tokens[1])]);
+        questionAnswerClauses.push([this.toNode(questionSExpr), this.toNode(token.subExprs[1])]);
       }
     }
     return new CondNode(questionAnswerClauses, sexpr.sourceSpan);
   }
 
   private toDefnNode(sexpr: ListSExpr): DefnNode {
-    if (sexpr.tokens.length - 1 === 0) {
+    if (sexpr.subExprs.length - 1 === 0) {
       throw new StageError(
         DF_EXPECTED_VAR_OR_FUN_NAME_ERR(),
         sexpr.sourceSpan
       );
     }
-    let name = sexpr.tokens[1];
+    let name = sexpr.subExprs[1];
     if (isAtomSExpr(name)) {
       if (name.token.type !== TokenType.NAME) {
         throw new StageError(
@@ -333,47 +333,47 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           name.sourceSpan
         );
       }
-      if (sexpr.tokens.length - 1 === 1) {
+      if (sexpr.subExprs.length - 1 === 1) {
         throw new StageError(
           DF_EXPECTED_EXPR_ERR(name.token.text),
           sexpr.sourceSpan
         );
       }
-      if (sexpr.tokens.length - 1 > 2) {
+      if (sexpr.subExprs.length - 1 > 2) {
         throw new StageError(
-          DF_TOO_MANY_EXPRS_ERR(name.token.text, sexpr.tokens.length - 3),
-          sexpr.tokens[3].sourceSpan
+          DF_TOO_MANY_EXPRS_ERR(name.token.text, sexpr.subExprs.length - 3),
+          sexpr.subExprs[3].sourceSpan
         );
       }
       return new DefnVarNode(
         name.token.text,
         name.sourceSpan,
-        this.toNode(sexpr.tokens[2]),
+        this.toNode(sexpr.subExprs[2]),
         sexpr.sourceSpan
       );
     } else {
       const nameAndArgs = name;
-      if (nameAndArgs.tokens.length === 0) {
+      if (nameAndArgs.subExprs.length === 0) {
         throw new StageError(
           DF_EXPECTED_FUNCTION_NAME_ERR(),
           sexpr.sourceSpan
         );
       }
-      name = nameAndArgs.tokens[0];
+      name = nameAndArgs.subExprs[0];
       if (!isAtomSExpr(name) || name.token.type !== TokenType.NAME) {
         throw new StageError(
           DF_EXPECTED_FUNCTION_NAME_ERR(name),
           sexpr.sourceSpan
         );
       }
-      if (nameAndArgs.tokens.length - 1 === 0) {
+      if (nameAndArgs.subExprs.length - 1 === 0) {
         throw new StageError(
           DF_EXPECTED_AT_LEAST_ONE_PARAM_ERR,
           nameAndArgs.sourceSpan
         );
       }
       const params: string[] = [];
-      for (const arg of nameAndArgs.tokens.slice(1)) {
+      for (const arg of nameAndArgs.subExprs.slice(1)) {
         if (!isAtomSExpr(arg) || arg.token.type !== TokenType.NAME) {
           throw new StageError(
             DF_EXPECTED_VARIABLE_ERR(arg),
@@ -388,16 +388,16 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
         }
         params.push(arg.token.text);
       }
-      if (sexpr.tokens.length - 1 === 1) {
+      if (sexpr.subExprs.length - 1 === 1) {
         throw new StageError(
           DF_EXPECTED_FUNCTION_BODY_ERR,
           sexpr.sourceSpan
         );
       }
-      if (sexpr.tokens.length - 1 > 2) {
+      if (sexpr.subExprs.length - 1 > 2) {
         throw new StageError(
-          DF_TOO_MANY_FUNCTION_BODIES_ERR(sexpr.tokens.length - 3),
-          sexpr.tokens[3].sourceSpan
+          DF_TOO_MANY_FUNCTION_BODIES_ERR(sexpr.subExprs.length - 3),
+          sexpr.subExprs[3].sourceSpan
         );
       }
       return new DefnVarNode(
@@ -405,8 +405,8 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
         name.sourceSpan,
         new LambdaNode(
           params,
-          this.toNode(sexpr.tokens[2]),
-          sexpr.tokens[2].sourceSpan
+          this.toNode(sexpr.subExprs[2]),
+          sexpr.subExprs[2].sourceSpan
         ),
         sexpr.sourceSpan
       );
@@ -414,26 +414,26 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
   }
 
   private toDefnStructNode(sexpr: ListSExpr): DefnStructNode {
-    if (sexpr.tokens.length - 1 === 0) {
+    if (sexpr.subExprs.length - 1 === 0) {
       throw new StageError(
         DS_EXPECTED_STRUCT_NAME_ERR(),
         sexpr.sourceSpan
       );
     }
-    const name = sexpr.tokens[1];
+    const name = sexpr.subExprs[1];
     if (!isAtomSExpr(name) || name.token.type !== TokenType.NAME) {
       throw new StageError(
         DS_EXPECTED_STRUCT_NAME_ERR(name),
         name.sourceSpan
       );
     }
-    if (sexpr.tokens.length - 1 === 1) {
+    if (sexpr.subExprs.length - 1 === 1) {
       throw new StageError(
         DS_EXPECTED_FIELD_NAMES_ERR(),
         sexpr.sourceSpan
       );
     }
-    const fieldNamesSExpr = sexpr.tokens[2];
+    const fieldNamesSExpr = sexpr.subExprs[2];
     if (!isListSExpr(fieldNamesSExpr)) {
       throw new StageError(
         DS_EXPECTED_FIELD_NAMES_ERR(fieldNamesSExpr),
@@ -441,7 +441,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
       );
     }
     const fieldNames: string[] = [];
-    for (const fieldNameSExpr of fieldNamesSExpr.tokens) {
+    for (const fieldNameSExpr of fieldNamesSExpr.subExprs) {
       if (!isAtomSExpr(fieldNameSExpr) || fieldNameSExpr.token.type !== TokenType.NAME) {
         throw new StageError(
           DS_EXPECTED_FIELD_NAME_ERR(fieldNameSExpr),
@@ -450,10 +450,10 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
       }
       fieldNames.push(fieldNameSExpr.token.text);
     }
-    if (sexpr.tokens.length - 1 > 2) {
+    if (sexpr.subExprs.length - 1 > 2) {
       throw new StageError(
-        DS_EXTRA_PARTS_ERR(sexpr.tokens.length - 3),
-        sexpr.tokens[3].sourceSpan
+        DS_EXTRA_PARTS_ERR(sexpr.subExprs.length - 3),
+        sexpr.subExprs[3].sourceSpan
       );
     }
     return new DefnStructNode(
@@ -477,7 +477,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
         );
       }
     } else {
-      if (quotedSexpr.tokens.length > 0) {
+      if (quotedSexpr.subExprs.length > 0) {
         throw new StageError(
           QU_EXPECTED_POST_QUOTE_ERR(sexpr),
           sexpr.sourceSpan
