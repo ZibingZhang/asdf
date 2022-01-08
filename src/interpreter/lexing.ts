@@ -38,6 +38,7 @@ export {
 const KEYWORDS = new Set(
   [
     "and",
+    "check-expect",
     "cond",
     "define",
     "define-struct",

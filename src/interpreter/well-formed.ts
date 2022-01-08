@@ -3,6 +3,7 @@ import {
   ASTNodeVisitor,
   AndNode,
   AtomNode,
+  CheckNode,
   CondNode,
   DefnNode,
   DefnStructNode,
@@ -164,32 +165,21 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           );
         }
         case TokenType.NAME: {
-          if (PRIMITIVE_TEST_FUNCTIONS.has(sexpr.token.text)) {
-            if (this.atTopLevel()) {
+          return new VarNode(sexpr.token.text, sexpr.sourceSpan);
+        }
+        case TokenType.KEYWORD: {
+          switch (sexpr.token.text) {
+            case "else":
+              throw new StageError(
+                ES_NOT_IN_COND_ERR,
+                sexpr.sourceSpan
+              );
+            default:
               throw new StageError(
                 SX_EXPECTED_OPEN_PAREN_ERR(sexpr.token.text),
                 sexpr.sourceSpan
               );
-            } else {
-              throw new StageError(
-                CE_TEST_NOT_TOP_LEVEL_ERR(sexpr.token.text),
-                sexpr.sourceSpan
-              );
-            }
           }
-          return new VarNode(sexpr.token.text, sexpr.sourceSpan);
-        }
-        case TokenType.KEYWORD: {
-          if (sexpr.token.text === "else") {
-            throw new StageError(
-              ES_NOT_IN_COND_ERR,
-              sexpr.sourceSpan
-            );
-          }
-          throw new StageError(
-            SX_EXPECTED_OPEN_PAREN_ERR(sexpr.token.text),
-            sexpr.sourceSpan
-          );
         }
         case TokenType.PLACEHOLDER: {
           return new EllipsisNode(sexpr.sourceSpan);
@@ -211,21 +201,6 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           if (leadingSExpr.token.text === "quote") {
             return this.toQuoteNode(sexpr, sexpr.subExprs[1]);
           } else {
-            let testFun: RPrimTestFun | undefined;
-            if ((testFun = PRIMITIVE_TEST_FUNCTIONS.get(leadingSExpr.token.text))) {
-              if (!this.atTopLevel())  {
-                throw new StageError(
-                  CE_TEST_NOT_TOP_LEVEL_ERR(leadingSExpr.token.text),
-                  sexpr.sourceSpan
-                );
-              }
-              if (testFun.config.arity && sexpr.subExprs.length - 1 !== testFun.config.arity) {
-                throw new StageError(
-                  FA_ARITY_ERR(testFun.name, testFun.config.arity, sexpr.subExprs.length - 1),
-                  sexpr.sourceSpan
-                );
-              }
-            }
             return new FunAppNode(
               new VarNode(leadingSExpr.token.text, leadingSExpr.sourceSpan),
               sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
@@ -245,6 +220,9 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
                 sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
                 sexpr.sourceSpan
               );
+            }
+            case "check-expect": {
+              return this.toCheckNode(leadingSExpr.token.text, sexpr);
             }
             case "cond": {
               return this.toCondNode(sexpr);
@@ -315,6 +293,27 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
         );
       }
     }
+  }
+
+  private toCheckNode(checkName: string, sexpr: ListSExpr): CheckNode {
+    if (!this.atTopLevel()) {
+      throw new StageError(
+        CE_TEST_NOT_TOP_LEVEL_ERR(checkName),
+        sexpr.sourceSpan
+      );
+    }
+    const testFun = <RPrimTestFun>PRIMITIVE_TEST_FUNCTIONS.get(checkName);
+    if (testFun.config.arity && sexpr.subExprs.length - 1 !== testFun.config.arity) {
+      throw new StageError(
+        FA_ARITY_ERR(testFun.name, testFun.config.arity, sexpr.subExprs.length - 1),
+        sexpr.sourceSpan
+      );
+    }
+    return new CheckNode(
+      checkName,
+      sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
+      sexpr.sourceSpan
+    );
   }
 
   private toCondNode(sexpr: ListSExpr): CondNode {
@@ -555,6 +554,10 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   visitAtomNode(_: AtomNode): void {
     // always well-formed
+  }
+
+  visitCheckNode(node: CheckNode): void {
+    node.args.forEach(arg => arg.accept(this));
   }
 
   visitCondNode(node: CondNode): void {

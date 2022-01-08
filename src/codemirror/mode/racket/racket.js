@@ -13,7 +13,7 @@ CodeMirror.defineMode("racket", function (config) {
   let openBrackets = "([{";
   let closeBrackets = ")]}";
   let booleanLiteral = /^(T|t|true|F|f|false)$/;
-  let specialForm = /^(and|cond|define|define-struct|else|if|lambda|or|quote|require)$/;
+  let specialForm = /^(and|check-expect|cond|define|define-struct|else|if|lambda|or|quote|require)$/;
   let numLiteral = /^[+\-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
 
   // unclosed block comments should be "error", but aren't

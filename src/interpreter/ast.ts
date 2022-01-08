@@ -22,12 +22,15 @@ import {
   RStruct,
   RStructGetFun,
   RStructType,
+  RTestResult,
   RValue,
   R_FALSE,
   R_TRUE,
   R_VOID,
   isRBoolean,
   isRCallable,
+  isRData,
+  isRInexact,
   isRTrue
 } from "./rvalue.js";
 import {
@@ -41,6 +44,7 @@ export {
   ASTNode,
   AndNode,
   AtomNode,
+  CheckNode,
   CondNode,
   DefnNode,
   DefnStructNode,
@@ -59,6 +63,7 @@ export {
 };
 
 type ASTNode =
+  | CheckNode
   | DefnNode
   | ExprNode;
 
@@ -132,6 +137,45 @@ class AtomNode extends ASTNodeBase {
 
   eval(_: Environment) {
     return this.rval;
+  }
+}
+
+class CheckNode extends ASTNodeBase {
+  constructor(
+    readonly name: string,
+    readonly args: ASTNode[],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCheckNode(this);
+  }
+
+  eval(env: Environment): RValue {
+    switch (this.name) {
+      case "check-expect": {
+        const actualVal = this.args[0].eval(env);
+        const expectedVal = this.args[1].eval(env);
+        if (isRInexact(actualVal) || isRInexact(expectedVal)) {
+          return new RTestResult(
+            false,
+            `check-expect cannot compare inexact numbers. Try (check-within ${actualVal.stringify()} ${actualVal.stringify()} range).`
+          );
+        } else if (isRData(actualVal) && actualVal.equals(expectedVal)) {
+          return new RTestResult(true);
+        } else {
+          return new RTestResult(
+            false,
+            `Actual value ${actualVal.stringify()} differs from ${expectedVal.stringify()}, the expected value.`
+          );
+        }
+      }
+      default: {
+        throw "illegal state: not implemented test function";
+      }
+    }
   }
 }
 
@@ -384,6 +428,7 @@ function isDefnNode(node: ASTNode): node is DefnNode {
 interface ASTNodeVisitor<T> {
   visitAndNode(node: AndNode): T;
   visitAtomNode(node: AtomNode): T;
+  visitCheckNode(node: CheckNode): T;
   visitCondNode(node: CondNode): T;
   visitDefnVarNode(node: DefnVarNode): T;
   visitDefnStructNode(node: DefnStructNode): T;
