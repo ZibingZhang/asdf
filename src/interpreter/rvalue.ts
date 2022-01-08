@@ -13,8 +13,8 @@ import {
 export {
   R_EMPTY_LIST,
   R_FALSE,
-  R_NONE,
   R_TRUE,
+  R_VOID,
   RData,
   RExactReal,
   RInexactRational,
@@ -26,6 +26,7 @@ export {
   RNumber,
   RPrimFun,
   RPrimFunConfig,
+  RPrimTestFun,
   RString,
   RStruct,
   RStructGetFun,
@@ -52,11 +53,12 @@ function gcd(a: bigint, b: bigint): bigint {
 type RValue =
   | RData
   | RCallable
-  | RNone;
+  | RVoid;
 type RCallable =
   | RMakeStructFun
   | RLambda
-  | RPrimFun;
+  | RPrimFun
+  | RPrimTestFun;
 
 type RNumber =
   | RExactReal
@@ -70,9 +72,9 @@ interface RValBase {
   stringify(): string;
 }
 
-class RNone implements RValBase {
+class RVoid implements RValBase {
   stringify(): string {
-    throw "illegal state: trying to stringify RNone";
+    throw "(void)";
   }
 }
 
@@ -338,6 +340,19 @@ class RPrimFun extends RCallableBase {
   }
 }
 
+class RPrimTestFun extends RPrimFun {
+  constructor(
+    readonly name: string,
+    readonly config: RPrimFunConfig
+  ) {
+    super(name, config);
+  }
+
+  accept<T>(visitor: RCallableVisitor<T>): T {
+    return visitor.visitRPrimTestFun(this);
+  }
+}
+
 class RStructGetFun extends RCallableBase {
   constructor(
     readonly name: string,
@@ -446,7 +461,7 @@ abstract class RMath {
   }
 }
 
-const R_NONE = new RNone();
+const R_VOID = new RVoid();
 const R_TRUE = new RBoolean(true);
 const R_FALSE = new RBoolean(false);
 const R_EMPTY_LIST = new RList([]);
@@ -456,5 +471,6 @@ interface RCallableVisitor<T> {
   visitRMakeStructFun(rval: RMakeStructFun): T;
   visitRLambda(rval: RLambda): T;
   visitRPrimFun(rval: RPrimFun): T;
+  visitRPrimTestFun(rval: RPrimTestFun): T;
   visitRStructGetFun(rval: RStructGetFun): T;
 }

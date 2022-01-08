@@ -2,7 +2,6 @@ import {
   evaluate
 } from "./common.js";
 import {
-  appendToRepl,
   resetRepl
 } from "./repl.js";
 
@@ -23,10 +22,10 @@ theme: "monokai",
 extraKeys: {
   "Alt-Enter": () => {
     resetRepl();
-    const result = evaluate(
+    evaluate(
       window.pipelines.evaluateProgram,
-      editor.getValue()
+      editor.getValue(),
+      true
     );
-    appendToRepl(result);
   }
 }});

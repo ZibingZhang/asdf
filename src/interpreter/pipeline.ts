@@ -8,7 +8,10 @@ import {
 import {
   SourceSpan
 } from "./sourcespan.js";
-import { WellFormedProgram, WellFormedSyntax } from "./well-formed.js";
+import {
+  WellFormedProgram,
+  WellFormedSyntax
+} from "./well-formed.js";
 
 export {
   EVALUATE_CODE_STAGE,
@@ -18,7 +21,8 @@ export {
   Pipeline,
   Stage,
   StageError,
-  StageOutput
+  StageOutput,
+  StageTest
 };
 
 class StageError extends Error {
@@ -30,10 +34,18 @@ class StageError extends Error {
   }
 }
 
+class StageTest {
+  constructor(
+    readonly passed: boolean,
+    readonly errorMsg: string | null = null
+  ) {}
+}
+
 class StageOutput<T> {
   constructor(
     readonly output: T,
-    readonly errors: StageError[] = []
+    readonly errors: StageError[] = [],
+    readonly tests: StageTest[] = []
   ) {}
 }
 

@@ -23,13 +23,14 @@ import {
   RLambda,
   RMakeStructFun,
   RPrimFun,
+  RPrimTestFun,
   RStruct,
   RStructGetFun,
   RStructType,
   RValue,
   R_FALSE,
-  R_NONE,
-  R_TRUE
+  R_TRUE,
+  R_VOID
 } from "./rvalue.js";
 import {
   NO_SOURCE_SPAN,
@@ -184,7 +185,7 @@ class DefnStructNode extends ASTNodeBase {
     this.fields.forEach((field, idx) => {
       env.set(`${this.name}-${field}`, new RStructGetFun(this.name, field, idx));
     });
-    return R_NONE;
+    return R_VOID;
   }
 }
 
@@ -204,7 +205,7 @@ class DefnVarNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     env.set(this.name, this.value.eval(env));
-    return R_NONE;
+    return R_VOID;
   }
 }
 
@@ -484,6 +485,10 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
       }
     }
     return rval.call(argVals, this.sourceSpan);
+  }
+
+  visitRPrimTestFun(rval: RPrimTestFun): RValue {
+    return R_VOID;
   }
 
   visitRStructGetFun(rval: RStructGetFun): RValue {

@@ -45,6 +45,7 @@ import {
   RIsStructFun,
   RMakeStructFun,
   RPrimFun,
+  RPrimTestFun,
   RStructGetFun,
   RValue,
   R_EMPTY_LIST,
@@ -59,6 +60,7 @@ export {
   PRIMITIVE_DATA_NAMES,
   PRIMITIVE_ENVIRONMENT,
   PRIMITIVE_FUNCTION_NAMES,
+  PRIMITIVE_TEST_FUNCTIONS,
   Environment
 };
 
@@ -113,6 +115,9 @@ class Environment {
 const PRIMITIVE_ENVIRONMENT = new Environment();
 const PRIMITIVE_DATA_NAMES: Set<string> = new Set();
 const PRIMITIVE_FUNCTION_NAMES: Set<string> = new Set();
+const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimTestFun> = new Map();
+
+PRIMITIVE_TEST_FUNCTIONS.set("check-expect", new RPrimTestFun("check-expect", { "arity": 2 }));
 
 function addDataToPrimEnv(name: string, val: RData) {
   PRIMITIVE_DATA_NAMES.add(name);

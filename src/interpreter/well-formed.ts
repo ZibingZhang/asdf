@@ -36,6 +36,7 @@ import {
 import {
   RExactReal,
   RNumber,
+  RPrimTestFun,
   RString,
   RSymbol,
   R_EMPTY_LIST,
@@ -62,7 +63,7 @@ import {
   SC_UNDEFINED_VARIABLE_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
-  WF_EXPECTED_OPEN_PARENTHESIS_ERR,
+  WF_EXPECTED_OPEN_PAREN_ERR,
   DS_EXPECTED_STRUCT_NAME_ERR,
   DS_EXPECTED_FIELD_NAMES_ERR,
   DS_EXPECTED_FIELD_NAME_ERR,
@@ -70,11 +71,13 @@ import {
   WF_STRUCTURE_TYPE_ERR,
   ES_NOT_IN_COND_ERR,
   CN_EXPECTED_TWO_PART_CLAUSE_ERR,
-  CN_ELSE_NOT_LAST_CLAUSE_ERR
+  CN_ELSE_NOT_LAST_CLAUSE_ERR,
+  CE_TEST_NOT_TOP_LEVEL_ERR
 } from "./error.js";
 import {
   PRIMITIVE_DATA_NAMES,
-  PRIMITIVE_FUNCTION_NAMES
+  PRIMITIVE_FUNCTION_NAMES,
+  PRIMITIVE_TEST_FUNCTIONS
 } from "./environment.js";
 import {
   SourceSpan
@@ -162,6 +165,19 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           );
         }
         case TokenType.NAME: {
+          if (PRIMITIVE_TEST_FUNCTIONS.has(sexpr.token.text)) {
+            if (this.atTopLevel()) {
+              throw new StageError(
+                SX_EXPECTED_OPEN_PAREN_ERR(sexpr.token.text),
+                sexpr.sourceSpan
+              );
+            } else {
+              throw new StageError(
+                CE_TEST_NOT_TOP_LEVEL_ERR(sexpr.token.text),
+                sexpr.sourceSpan
+              );
+            }
+          }
           return new VarNode(sexpr.token.text, sexpr.sourceSpan);
         }
         case TokenType.KEYWORD: {
@@ -196,6 +212,21 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           if (leadingSExpr.token.text === "quote") {
             return this.toQuoteNode(sexpr, sexpr.subExprs[1]);
           } else {
+            let testFun: RPrimTestFun | undefined;
+            if ((testFun = PRIMITIVE_TEST_FUNCTIONS.get(leadingSExpr.token.text))) {
+              if (!this.atTopLevel())  {
+                throw new StageError(
+                  CE_TEST_NOT_TOP_LEVEL_ERR(leadingSExpr.token.text),
+                  sexpr.sourceSpan
+                );
+              }
+              if (testFun.config.arity && sexpr.subExprs.length - 1 !== testFun.config.arity) {
+                throw new StageError(
+                  FA_ARITY_ERR(testFun.name, testFun.config.arity, sexpr.subExprs.length - 1),
+                  sexpr.sourceSpan
+                );
+              }
+            }
             return new FunAppNode(
               new VarNode(leadingSExpr.token.text, leadingSExpr.sourceSpan),
               sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
@@ -589,7 +620,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     }
     if (meta.type !== VariableType.DATA) {
       throw new StageError(
-        WF_EXPECTED_OPEN_PARENTHESIS_ERR(node.name),
+        WF_EXPECTED_OPEN_PAREN_ERR(node.name),
         node.sourceSpan
       );
     }
@@ -669,9 +700,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         });
       }
     }
-    for (const node of program.nodes) {
-      node.accept(this);
-    }
+    program.nodes.forEach(node => node.accept(this));
   }
 }
 
@@ -710,6 +739,7 @@ class Scope {
 enum VariableType {
   DATA = "DATA",
   PRIMITIVE_FUNCTION = "PRIMITIVE_FUNCTION",
+  PRIMITIVE_TEST_FUNCTION = "PRIMITIVE_TEST_FUNCTION",
   STRUCTURE_TYPE = "STRUCTURE_TYPE",
   USER_DEFINED_FUNCTION = "USER_DEFINED_FUNCTION"
 }
@@ -728,3 +758,4 @@ const STRUCTURE_TYPE_VARIABLE_META = new VariableMeta(VariableType.STRUCTURE_TYP
 const PRIMITIVE_SCOPE = new Scope();
 PRIMITIVE_DATA_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, DATA_VARIABLE_META));
 PRIMITIVE_FUNCTION_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, PRIMITIVE_FUNCTION_VARIABLE_META));
+PRIMITIVE_TEST_FUNCTIONS.forEach((_, name) => PRIMITIVE_SCOPE.add(name, PRIMITIVE_FUNCTION_VARIABLE_META));

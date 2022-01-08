@@ -13,7 +13,7 @@ import {
   Program
 } from "./program.js";
 import {
-  R_NONE
+  R_VOID
 } from "./rvalue.js";
 import {
   NO_SOURCE_SPAN
@@ -56,7 +56,7 @@ class EvaluateCode implements Stage<Program, string[]> {
     const output: string[] = [];
     for (const node of program.nodes) {
       const result = node.eval(this.env);
-      if (result !== R_NONE) {
+      if (result !== R_VOID) {
         output.push(result.stringify());
       }
     }

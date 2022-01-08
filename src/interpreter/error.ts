@@ -11,6 +11,7 @@ import {
 } from "./utils.js";
 
 export {
+  CE_TEST_NOT_TOP_LEVEL_ERR,
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
   CN_ELSE_NOT_LAST_CLAUSE_ERR,
   CN_EXPECTED_TWO_PART_CLAUSE_ERR,
@@ -56,7 +57,7 @@ export {
   SC_USED_BEFORE_DEFINITION_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
-  WF_EXPECTED_OPEN_PARENTHESIS_ERR,
+  WF_EXPECTED_OPEN_PAREN_ERR,
   WF_QUESTION_NOT_BOOL_ERR,
   WF_STRUCTURE_TYPE_ERR
 };
@@ -88,6 +89,10 @@ function foundStr(found: SExpr | string): string {
     }
   }
 }
+
+const CE_TEST_NOT_TOP_LEVEL_ERR = (name: string) => {
+  return `${name}: found a test that is not at the top level`;
+};
 
 const CN_ALL_QUESTION_RESULTS_FALSE_ERR = "cond: all question results were false";
 const CN_ELSE_NOT_LAST_CLAUSE_ERR = "cond: found an else clause that isn't the last clause in its cond expression";
@@ -252,7 +257,7 @@ const SX_NOT_TOP_LEVEL_DEFN_ERR = (name: string) => {
   return `${name}: found a definition that is not at the top level`;
 };
 
-const WF_EXPECTED_OPEN_PARENTHESIS_ERR = (name: string) => {
+const WF_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
   return `${name}: expected a function call, but there is no open parenthesis before this function`;
 };
 const WF_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {

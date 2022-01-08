@@ -29,16 +29,30 @@
 
     #site {
       display: flex;
+      flex-direction: column;
+    }
+
+    #top {
+      height: 75%;
+      display: flex;
       flex-direction: row;
     }
 
-    .CodeMirror:nth-child(1) {
+    #top .CodeMirror:nth-child(1) {
       width: 65%;
       border-right: 1px solid white;
     }
 
-    .CodeMirror:nth-child(2) {
+    #top .CodeMirror:nth-child(2) {
       width: 35%;
+    }
+
+    #bottom {
+      height: 25%;
+    }
+
+    #bottom .CodeMirror.CodeMirror:nth-child(1) {
+      border-top: 1px solid white;
     }
   </style>
 
@@ -51,14 +65,20 @@
 
   <script type="module" src="./codemirror/editor.js" defer></script>
   <script type="module" src="./codemirror/repl.js" defer></script>
+  <script type="module" src="./codemirror/test-output.js" defer></script>
 
   <!-- Interpreter -->
   <script type="module" src="./interpreter/main.js"></script>
 </head>
 
 <body>
-  <div id=site>
-    <textarea id="editor"></textarea>
-    <textarea id="repl"></textarea>
+  <div id="site">
+    <div id="top">
+      <textarea id="editor"></textarea>
+      <textarea id="repl"></textarea>
+    </div>
+    <div id="bottom">
+      <textarea id="test-output"></textarea>
+    </div>
   </div>
 </body>
