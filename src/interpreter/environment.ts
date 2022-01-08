@@ -52,9 +52,6 @@ import {
   RPFSymbolToString
 } from "./primitive/symbols.js";
 import {
-  RPFCheckExpect
-} from "./primitive/tests.js";
-import {
   SC_USED_BEFORE_DEFINITION_ERR
 } from "./error.js";
 import {
@@ -147,9 +144,6 @@ function addStructToPrimEnv(name: string, fields: string[]) {
     PRIMITIVE_ENVIRONMENT.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
   });
 }
-
-// tests
-addFnToPrimEnv(new RPFCheckExpect());
 
 // predefined variables
 addDataToPrimEnv("empty", R_EMPTY_LIST);
