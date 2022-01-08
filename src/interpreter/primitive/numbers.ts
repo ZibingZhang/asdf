@@ -6,6 +6,7 @@ import {
 } from "../pipeline.js";
 import {
   RExactReal,
+  RInexactRational,
   RMath,
   RNumber,
   RPrimFun,
@@ -27,8 +28,8 @@ export {
   R_PI
 };
 
-const R_E = new RExactReal(6121026514868073n, 2251799813685248n);
-const R_PI = new RExactReal(884279719003555n, 281474976710656n);
+const R_E = new RInexactRational(6121026514868073n, 2251799813685248n);
+const R_PI = new RInexactRational(884279719003555n, 281474976710656n);
 
 class RPFMultiply extends RPrimFun {
   constructor() {
@@ -61,7 +62,7 @@ class RPFMinus extends RPrimFun {
 
   call(args: RValue[]): RValue {
     if (args.length === 1) {
-      return RMath.negate(<RNumber>args[0]);
+      return (<RNumber>args[0]).negate();
     }
     return args.slice(1).reduce(
       (prev, curr) => RMath.sub(<RNumber>prev, <RNumber>curr), args[0]
@@ -77,7 +78,7 @@ class RPFDivide extends RPrimFun {
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
     return args.slice(1).reduce(
       (prev, curr) => {
-        if ((<RNumber>curr).numerator === 0n) {
+        if ((<RNumber>curr).isZero()) {
           throw new StageError(
             FA_DIV_BY_ZERO_ERR, sourceSpan
           );
@@ -95,6 +96,6 @@ class RPFIsZero extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return (<RNumber>args[0]).numerator === 0n ? R_TRUE : R_FALSE;
+    return (<RNumber>args[0]).isZero() ? R_TRUE : R_FALSE;
   }
 }

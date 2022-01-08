@@ -17,6 +17,7 @@ export {
   R_TRUE,
   RData,
   RExactReal,
+  RInexactRational,
   RIsStructFun,
   RLambda,
   RList,
@@ -58,7 +59,12 @@ type RCallable =
   | RPrimFun;
 
 type RNumber =
-  | RExactReal;
+  | RExactReal
+  | RInexactDecimal
+  | RInexactRational;
+type RRational =
+  | RExactReal
+  | RInexactRational;
 
 interface RValBase {
   stringify(): string;
@@ -82,26 +88,6 @@ class RBoolean implements RAtomic {
   }
 }
 
-class RExactReal implements RAtomic {
-  constructor(
-    readonly numerator: bigint,
-    readonly denominator: bigint
-  ) {
-    const divisor = gcd(
-      numerator >= 0
-        ? numerator
-        : -1n * numerator,
-      denominator
-    );
-    this.numerator = numerator / divisor;
-    this.denominator = denominator / divisor;
-  }
-
-  stringify(): string {
-    return (Number(this.numerator) / Number(this.denominator)).toString();
-  }
-}
-
 class RString implements RAtomic {
   constructor(readonly val: string) {}
 
@@ -115,6 +101,101 @@ class RSymbol implements RAtomic {
 
   stringify(): string {
     return "'" + this.val;
+  }
+}
+
+abstract class RNumberBase implements RAtomic {
+  abstract negate(): RNumber;
+  abstract isZero(): boolean;
+  abstract toInexactDecimal(): RInexactDecimal;
+  abstract stringify(): string;
+}
+
+class RExactReal extends RNumberBase {
+  constructor(
+    readonly numerator: bigint,
+    readonly denominator: bigint
+  ) {
+    super();
+    const divisor = gcd(
+      numerator >= 0
+        ? numerator
+        : -1n * numerator,
+      denominator
+    );
+    this.numerator = numerator / divisor;
+    this.denominator = denominator / divisor;
+  }
+
+  negate(): RExactReal {
+    return new RExactReal(-1n * this.numerator, this.denominator);
+  }
+
+  isZero(): boolean {
+    return this.numerator === 0n;
+  }
+
+  toInexactDecimal(): RInexactDecimal {
+    return new RInexactDecimal(Number(this.numerator) / Number(this.denominator));
+  }
+
+  stringify(): string {
+    return (Number(this.numerator) / Number(this.denominator)).toString();
+  }
+}
+
+class RInexactDecimal extends RNumberBase {
+  constructor(readonly value: number) {
+    super();
+  }
+
+  negate(): RInexactDecimal {
+    return new RInexactDecimal(-1 * this.value);
+  }
+
+  isZero(): boolean {
+    return this.value === 0;
+  }
+
+  toInexactDecimal(): RInexactDecimal {
+    return this;
+  }
+
+  stringify(): string {
+    return `#i${this.value}`;
+  }
+}
+
+class RInexactRational extends RNumberBase {
+  constructor(
+    readonly numerator: bigint,
+    readonly denominator: bigint
+  ) {
+    super();
+    const divisor = gcd(
+      numerator >= 0
+        ? numerator
+        : -1n * numerator,
+      denominator
+    );
+    this.numerator = numerator / divisor;
+    this.denominator = denominator / divisor;
+  }
+
+  negate(): RInexactRational {
+    return new RInexactRational(-1n * this.numerator, this.denominator);
+  }
+
+  isZero(): boolean {
+    return this.numerator === 0n;
+  }
+
+  toInexactDecimal(): RInexactDecimal {
+    return new RInexactDecimal(Number(this.numerator) / Number(this.denominator));
+  }
+
+  stringify(): string {
+    return `#i${(Number(this.numerator) / Number(this.denominator)).toString()}`;
   }
 }
 
@@ -268,12 +349,16 @@ function isRCallable(rval: RValue): rval is RCallable {
   return rval instanceof RCallableBase;
 }
 
+function isRDecimal(rval: RNumber): rval is RInexactDecimal {
+  return rval instanceof RInexactDecimal;
+}
+
 function isRList(rval: RValue): rval is RList {
   return rval instanceof RList;
 }
 
 function isRNumber(rval: RValue): rval is RNumber {
-  return rval instanceof RExactReal;
+  return rval instanceof RNumberBase;
 }
 
 function isRPrimFun(rval: RCallable): rval is RPrimFun {
@@ -290,45 +375,63 @@ function isRTrue(rval: RBoolean): boolean {
 
 abstract class RMath {
   static add(rnum1: RNumber, rnum2: RNumber): RNumber {
-    return new RExactReal(
-      rnum1.numerator * rnum2.denominator + rnum1.denominator * rnum2.numerator,
-      rnum1.denominator * rnum2.denominator
-    );
+    const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
+    if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
+      return new RInexactDecimal(rnum1.toInexactDecimal().value + rnum2.toInexactDecimal().value);
+    } else {
+      const numerator = rnum1.numerator * rnum2.denominator + rnum1.denominator * rnum2.numerator;
+      const denominator = rnum1.denominator * rnum2.denominator;
+      if (isExact) {
+        return new RExactReal(numerator, denominator);
+      } else {
+        return new RInexactRational(numerator, denominator);
+      }
+    }
   }
 
   static div(rnum1: RNumber, rnum2: RNumber): RNumber {
-    return new RExactReal(
-      rnum1.numerator * rnum2.denominator,
-      rnum1.denominator * rnum2.numerator
-    );
+    const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
+    if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
+      return new RInexactDecimal(rnum1.toInexactDecimal().value / rnum2.toInexactDecimal().value);
+    } else {
+      const numerator = rnum1.numerator * rnum2.denominator;
+      const denominator = rnum1.denominator * rnum2.numerator;
+      if (isExact) {
+        return new RExactReal(numerator, denominator);
+      } else {
+        return new RInexactRational(numerator, denominator);
+      }
+    }
   }
 
   static mul(rnum1: RNumber, rnum2: RNumber): RNumber {
-    return new RExactReal(
-      rnum1.numerator * rnum2.numerator,
-      rnum1.denominator * rnum2.denominator
-    );
+    const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
+    if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
+      return new RInexactDecimal(rnum1.toInexactDecimal().value * rnum2.toInexactDecimal().value);
+    } else {
+      const numerator = rnum1.numerator * rnum2.numerator;
+      const denominator = rnum1.denominator * rnum2.denominator;
+      if (isExact) {
+        return new RExactReal(numerator, denominator);
+      } else {
+        return new RInexactRational(numerator, denominator);
+      }
+    }
   }
 
   static sub(rnum1: RNumber, rnum2: RNumber): RNumber {
-    return new RExactReal(
-      rnum1.numerator * rnum2.denominator - rnum1.denominator * rnum2.numerator,
-      rnum1.denominator * rnum2.denominator
-    );
-  }
-
-  static invert(rnum: RNumber) {
-    return new RExactReal(
-      rnum.denominator,
-      rnum.numerator
-    );
-  }
-
-  static negate(rnum: RNumber) {
-    return new RExactReal(
-      -1n * rnum.numerator,
-      rnum.denominator
-    );
+    const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
+    if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
+      return new RInexactDecimal(rnum1.toInexactDecimal().value - rnum2.toInexactDecimal().value);
+    } else {
+      const numerator = rnum1.numerator * rnum2.denominator - rnum1.denominator * rnum2.numerator;
+      const denominator = rnum1.denominator * rnum2.denominator;
+      if (isExact) {
+        return new RExactReal(numerator, denominator);
+      } else {
+        return new RInexactRational(numerator, denominator);
+      }
+    }
   }
 }
 
