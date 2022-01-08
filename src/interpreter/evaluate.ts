@@ -7,12 +7,14 @@ import {
 import {
   Stage,
   StageError,
-  StageOutput
+  StageOutput,
+  StageTestResult
 } from "./pipeline.js";
 import {
   Program
 } from "./program.js";
 import {
+  RTestResult,
   R_VOID
 } from "./rvalue.js";
 import {
@@ -32,7 +34,7 @@ class EvaluateCode implements Stage<Program, string[]> {
 
   run(input: StageOutput<Program>): StageOutput<string[]> {
     try {
-      return new StageOutput(this.runHelper(input.output));
+      return this.runHelper(input.output);
     } catch (e) {
       if (e instanceof StageError) {
         return new StageOutput([], [e]);
@@ -52,14 +54,17 @@ class EvaluateCode implements Stage<Program, string[]> {
     }
   }
 
-  private runHelper(program: Program): string[] {
+  private runHelper(program: Program): StageOutput<string[]> {
     const output: string[] = [];
+    const testResults: StageTestResult[] = [];
     for (const node of program.nodes) {
       const result = node.eval(this.env);
-      if (result !== R_VOID) {
+      if (result instanceof RTestResult) {
+        testResults.push(new StageTestResult(result.passed, result.msg));
+      } else if (result !== R_VOID) {
         output.push(result.stringify());
       }
     }
-    return output;
+    return new StageOutput(output, [], testResults);
   }
 }

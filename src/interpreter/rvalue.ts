@@ -32,6 +32,7 @@ export {
   RStructGetFun,
   RStructType,
   RSymbol,
+  RTestResult,
   RValue,
   isRBoolean,
   isRCallable,
@@ -53,6 +54,7 @@ function gcd(a: bigint, b: bigint): bigint {
 type RValue =
   | RData
   | RCallable
+  | RTestResult
   | RVoid;
 type RCallable =
   | RMakeStructFun
@@ -64,9 +66,6 @@ type RNumber =
   | RExactReal
   | RInexactDecimal
   | RInexactRational;
-type RRational =
-  | RExactReal
-  | RInexactRational;
 
 interface RValBase {
   stringify(): string;
@@ -74,7 +73,18 @@ interface RValBase {
 
 class RVoid implements RValBase {
   stringify(): string {
-    throw "(void)";
+    return "(void)";
+  }
+}
+
+class RTestResult implements RValBase {
+  constructor(
+    readonly passed: boolean,
+    readonly msg: string = ""
+  ) {}
+
+  stringify(): string {
+    throw "illegal state: cannot stringify a test result";
   }
 }
 

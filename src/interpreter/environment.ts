@@ -41,6 +41,9 @@ import {
   RPFSymbolToString
 } from "./primitive/symbols.js";
 import {
+  RPFCheckExpect
+} from "./primitive/tests.js";
+import {
   RData,
   RIsStructFun,
   RMakeStructFun,
@@ -117,8 +120,6 @@ const PRIMITIVE_DATA_NAMES: Set<string> = new Set();
 const PRIMITIVE_FUNCTION_NAMES: Set<string> = new Set();
 const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimTestFun> = new Map();
 
-PRIMITIVE_TEST_FUNCTIONS.set("check-expect", new RPrimTestFun("check-expect", { "arity": 2 }));
-
 function addDataToPrimEnv(name: string, val: RData) {
   PRIMITIVE_DATA_NAMES.add(name);
   PRIMITIVE_ENVIRONMENT.set(name, val);
@@ -141,6 +142,9 @@ function addStructToPrimEnv(name: string, fields: string[]) {
     PRIMITIVE_ENVIRONMENT.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
   });
 }
+
+// tests
+addFnToPrimEnv(new RPFCheckExpect());
 
 // predefined variables
 addDataToPrimEnv("empty", R_EMPTY_LIST);

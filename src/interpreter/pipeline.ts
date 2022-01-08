@@ -22,7 +22,7 @@ export {
   Stage,
   StageError,
   StageOutput,
-  StageTest
+  StageTestResult
 };
 
 class StageError extends Error {
@@ -34,10 +34,10 @@ class StageError extends Error {
   }
 }
 
-class StageTest {
+class StageTestResult {
   constructor(
     readonly passed: boolean,
-    readonly errorMsg: string | null = null
+    readonly errMsg: string | null = null
   ) {}
 }
 
@@ -45,7 +45,7 @@ class StageOutput<T> {
   constructor(
     readonly output: T,
     readonly errors: StageError[] = [],
-    readonly tests: StageTest[] = []
+    readonly tests: StageTestResult[] = []
   ) {}
 }
 

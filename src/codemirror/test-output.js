@@ -1,7 +1,9 @@
 export {
   resetTestOutput,
   appendToTestOutput,
-  appendToTestOutputLn
+  appendToTestOutputLn,
+  setTestOutputFirstLine,
+  setTestOutputSecondLine
 };
 
 const testOutputTextArea = document.getElementById("test-output");
@@ -18,8 +20,12 @@ readOnly: true
 });
 
 const resetTestOutput =
-  () => testOutput.setValue("");
+  () => testOutput.setValue("\n");
 const appendToTestOutput =
   text => testOutput.replaceRange(text, CodeMirror.Pos(testOutput.lastLine()));
 const appendToTestOutputLn =
   text => appendToTestOutput(`${text}\n`);
+const setTestOutputFirstLine =
+  text => testOutput.replaceRange(`${text}\n`, { line: 0 });
+const setTestOutputSecondLine =
+  text => testOutput.replaceRange(`${text}\n`, { line: 1 });
