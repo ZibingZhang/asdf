@@ -33,6 +33,7 @@ import {
   TokenType
 } from "./token.js";
 import {
+  RExactReal,
   RNumber,
   RString,
   RSymbol,
@@ -128,14 +129,14 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
         }
         case TokenType.INTEGER: {
           return new AtomNode(
-            new RNumber(BigInt(parseInt(sexpr.token.text)), 1n),
+            new RExactReal(BigInt(parseInt(sexpr.token.text)), 1n),
             sexpr.sourceSpan
           );
         }
         case TokenType.RATIONAL: {
           const parts = sexpr.token.text.split("/");
           return new AtomNode(
-            new RNumber(BigInt(parseInt(parts[0])), BigInt(parseInt(parts[1]))),
+            new RExactReal(BigInt(parseInt(parts[0])), BigInt(parseInt(parts[1]))),
             sexpr.sourceSpan
           );
         }
@@ -143,7 +144,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           const parts = sexpr.token.text.split(".");
           const scalar = 10n ** BigInt(parts[1].length);
           return new AtomNode(
-            new RNumber(BigInt(parseInt(parts[0])) * scalar + BigInt(parseInt(parts[1])), scalar),
+            new RExactReal(BigInt(parseInt(parts[0])) * scalar + BigInt(parseInt(parts[1])), scalar),
             sexpr.sourceSpan
           );
         }

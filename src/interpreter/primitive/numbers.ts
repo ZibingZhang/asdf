@@ -5,6 +5,7 @@ import {
   StageError
 } from "../pipeline.js";
 import {
+  RExactReal,
   RMath,
   RNumber,
   RPrimFun,
@@ -26,8 +27,8 @@ export {
   R_PI
 };
 
-const R_E = new RNumber(6121026514868073n, 2251799813685248n);
-const R_PI = new RNumber(884279719003555n, 281474976710656n);
+const R_E = new RExactReal(6121026514868073n, 2251799813685248n);
+const R_PI = new RExactReal(884279719003555n, 281474976710656n);
 
 class RPFMultiply extends RPrimFun {
   constructor() {
@@ -36,7 +37,7 @@ class RPFMultiply extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return args.reduce(
-      (prev, curr) => RMath.mul(<RNumber>prev, <RNumber>curr), new RNumber(1n, 1n)
+      (prev, curr) => RMath.mul(<RNumber>prev, <RNumber>curr), new RExactReal(1n, 1n)
     );
   }
 }
@@ -48,7 +49,7 @@ class RPFPlus extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return args.reduce(
-      (prev, curr) => RMath.add(<RNumber>prev, <RNumber>curr), new RNumber(0n, 1n)
+      (prev, curr) => RMath.add(<RNumber>prev, <RNumber>curr), new RExactReal(0n, 1n)
     );
   }
 }

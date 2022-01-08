@@ -16,6 +16,7 @@ export {
   R_NONE,
   R_TRUE,
   RData,
+  RExactReal,
   RIsStructFun,
   RLambda,
   RList,
@@ -56,6 +57,9 @@ type RCallable =
   | RLambda
   | RPrimFun;
 
+type RNumber =
+  | RExactReal;
+
 interface RValBase {
   stringify(): string;
 }
@@ -78,7 +82,7 @@ class RBoolean implements RAtomic {
   }
 }
 
-class RNumber implements RAtomic {
+class RExactReal implements RAtomic {
   constructor(
     readonly numerator: bigint,
     readonly denominator: bigint
@@ -269,7 +273,7 @@ function isRList(rval: RValue): rval is RList {
 }
 
 function isRNumber(rval: RValue): rval is RNumber {
-  return rval instanceof RNumber;
+  return rval instanceof RExactReal;
 }
 
 function isRPrimFun(rval: RCallable): rval is RPrimFun {
@@ -286,42 +290,42 @@ function isRTrue(rval: RBoolean): boolean {
 
 abstract class RMath {
   static add(rnum1: RNumber, rnum2: RNumber): RNumber {
-    return new RNumber(
+    return new RExactReal(
       rnum1.numerator * rnum2.denominator + rnum1.denominator * rnum2.numerator,
       rnum1.denominator * rnum2.denominator
     );
   }
 
   static div(rnum1: RNumber, rnum2: RNumber): RNumber {
-    return new RNumber(
+    return new RExactReal(
       rnum1.numerator * rnum2.denominator,
       rnum1.denominator * rnum2.numerator
     );
   }
 
   static mul(rnum1: RNumber, rnum2: RNumber): RNumber {
-    return new RNumber(
+    return new RExactReal(
       rnum1.numerator * rnum2.numerator,
       rnum1.denominator * rnum2.denominator
     );
   }
 
   static sub(rnum1: RNumber, rnum2: RNumber): RNumber {
-    return new RNumber(
+    return new RExactReal(
       rnum1.numerator * rnum2.denominator - rnum1.denominator * rnum2.numerator,
       rnum1.denominator * rnum2.denominator
     );
   }
 
   static invert(rnum: RNumber) {
-    return new RNumber(
+    return new RExactReal(
       rnum.denominator,
       rnum.numerator
     );
   }
 
   static negate(rnum: RNumber) {
-    return new RNumber(
+    return new RExactReal(
       -1n * rnum.numerator,
       rnum.denominator
     );
