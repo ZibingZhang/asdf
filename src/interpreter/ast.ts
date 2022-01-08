@@ -9,7 +9,7 @@ import {
   FA_NTH_WRONG_TYPE_ERR,
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
-  WF_QUESTION_NOT_BOOL_ERR,
+  WF_QUESTION_NOT_BOOL_ERR
 } from "./error.js";
 import {
   StageError
@@ -487,7 +487,7 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
     return rval.call(argVals, this.sourceSpan);
   }
 
-  visitRPrimTestFun(rval: RPrimTestFun): RValue {
+  visitRPrimTestFun(_: RPrimTestFun): RValue {
     return R_VOID;
   }
 

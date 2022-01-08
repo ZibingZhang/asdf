@@ -35,7 +35,6 @@ import {
 } from "./token.js";
 import {
   RExactReal,
-  RNumber,
   RPrimTestFun,
   RString,
   RSymbol,
@@ -272,7 +271,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
               throw new StageError(
                 ES_NOT_IN_COND_ERR,
                 leadingSExpr.sourceSpan
-              )
+              );
             }
             case "if": {
               if (sexpr.subExprs.length - 1 !== 3) {
@@ -342,7 +341,7 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           throw new StageError(
             CN_ELSE_NOT_LAST_CLAUSE_ERR,
             token.sourceSpan
-          )
+          );
         }
         questionAnswerClauses.push([new AtomNode(R_TRUE, questionSExpr.sourceSpan), this.toNode(token.subExprs[1])]);
       } else {

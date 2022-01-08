@@ -113,7 +113,7 @@ const CN_EXPECTED_TWO_PART_CLAUSE_ERR = (found : SExpr | null = null) => {
   } else {
     return "cond: expected a clause after cond, but nothing's there";
   }
-}
+};
 
 const DF_DUPLICATE_VARIABLE_ERR = (name: string) => {
   return `define: found a variable that is used more than once: ${name}`;

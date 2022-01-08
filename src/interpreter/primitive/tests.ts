@@ -3,11 +3,11 @@ import {
   isRInexact,
   RPrimFun,
   RTestResult,
-  RValue,
+  RValue
 } from "../rvalue.js";
 
 export {
-  RPFCheckExpect,
+  RPFCheckExpect
 };
 
 class RPFCheckExpect extends RPrimFun {

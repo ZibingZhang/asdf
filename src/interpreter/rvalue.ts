@@ -150,7 +150,7 @@ class RList extends RDataBase {
         const val = this.vals[idx];
         return isRData(rval)
           && isRData(val)
-          && rval.equals(val)
+          && rval.equals(val);
       });
   }
 
@@ -197,7 +197,7 @@ class RStruct extends RDataBase {
         const val = this.vals[idx];
         return isRData(rval)
           && isRData(val)
-          && rval.equals(val)
+          && rval.equals(val);
       });
   }
 
@@ -212,7 +212,7 @@ class RStructType extends RDataBase {
   }
 
   stringify(): string {
-    throw `illegal state: cannot stringify a structure type`;
+    throw "illegal state: cannot stringify a structure type";
   }
 
   equals(rval: RValue): boolean {
@@ -375,7 +375,6 @@ abstract class RCallableBase implements RValBase {
   abstract accept<T>(visitor: RCallableVisitor<T>): T;
 
   stringify(): string {
-    console.trace()
     throw "illegal state: cannot stringify a callable";
   }
 }
@@ -449,7 +448,7 @@ class RPrimFun extends RCallableBase {
       default:
         throw "illegal state: unsupported allArgsTypeName";
     }
-  };
+  }
 
   accept<T>(visitor: RCallableVisitor<T>): T {
     return visitor.visitRPrimFun(this);
