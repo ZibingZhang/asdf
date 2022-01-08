@@ -1,5 +1,4 @@
 import {
-  DESUGAR_STAGE,
   EVALUATE_CODE_STAGE,
   LEXING_STAGE,
   Pipeline,
@@ -21,7 +20,6 @@ window.pipelines = {
     [
       LEXING_STAGE,
       WELL_FORMED_SYNTAX_STAGE,
-      DESUGAR_STAGE,
       WELL_FORMED_PROGRAM_STAGE,
       EVALUATE_CODE_STAGE
     ],
@@ -31,7 +29,6 @@ window.pipelines = {
     [
       LEXING_STAGE,
       WELL_FORMED_SYNTAX_STAGE,
-      DESUGAR_STAGE,
       WELL_FORMED_PROGRAM_STAGE,
       EVALUATE_CODE_STAGE
     ],

@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { Desugar } from "./desugar.js";
-import { EvaluateCode } from "./evaluate.js";
-import { Lexer } from "./lexing.js";
+import {
+  EvaluateCode
+} from "./evaluate.js";
+import {
+  Lexer
+} from "./lexing.js";
 import {
   SourceSpan
 } from "./sourcespan.js";
 import { WellFormedProgram, WellFormedSyntax } from "./well-formed.js";
 
 export {
-  DESUGAR_STAGE,
   EVALUATE_CODE_STAGE,
   LEXING_STAGE,
   WELL_FORMED_SYNTAX_STAGE,
@@ -62,7 +63,6 @@ class Pipeline {
 
 const LEXING_STAGE = new Lexer();
 const WELL_FORMED_SYNTAX_STAGE = new WellFormedSyntax();
-const DESUGAR_STAGE = new Desugar();
 const WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
 const EVALUATE_CODE_STAGE = new EvaluateCode();
 

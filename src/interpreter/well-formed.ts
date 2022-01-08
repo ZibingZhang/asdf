@@ -11,6 +11,7 @@ import {
   EllipsisNode,
   FunAppNode,
   IfNode,
+  isDefnNode,
   LambdaNode,
   OrNode,
   VarNode
@@ -21,7 +22,6 @@ import {
   StageOutput
 } from "./pipeline.js";
 import {
-  DProgram,
   Program
 } from "./program.js";
 import {
@@ -102,11 +102,14 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
   }
 
   private processSExprs(sexprs: SExpr[]): Program {
+    const defns: DefnNode[] = [];
     const nodes: ASTNode[] = [];
     for (const sexpr of sexprs) {
-      nodes.push(this.toNode(sexpr));
+      const node = this.toNode(sexpr);
+      if (isDefnNode(node)) { defns.push(node); }
+      nodes.push(node);
     }
-    return new Program(nodes);
+    return new Program(defns, nodes);
   }
 
   private toNode(sexpr: SExpr): ASTNode {
@@ -496,20 +499,20 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
   }
 }
 
-class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgram> {
+class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
   scope: Scope = new Scope(PRIMITIVE_SCOPE);
 
   reset() {
     this.scope = new Scope(PRIMITIVE_SCOPE);
   }
 
-  run(input: StageOutput<DProgram>): StageOutput<DProgram> {
+  run(input: StageOutput<Program>): StageOutput<Program> {
     try {
       this.assertWellFormedProgram(input.output);
       return input;
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput(<DProgram><unknown>null, [e]);
+        return new StageOutput(<Program><unknown>null, [e]);
       } else {
         throw e;
       }
@@ -598,7 +601,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgra
     }
   }
 
-  private assertWellFormedProgram(program: DProgram) {
+  private assertWellFormedProgram(program: Program) {
     for (const defn of program.defns) {
       if (defn instanceof DefnVarNode) {
         if (defn.value instanceof LambdaNode) {

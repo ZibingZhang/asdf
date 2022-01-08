@@ -10,10 +10,11 @@ import {
   StageOutput
 } from "./pipeline.js";
 import {
-  DProgram,
   Program
 } from "./program.js";
-import { R_NONE } from "./rvalue.js";
+import {
+  R_NONE
+} from "./rvalue.js";
 import {
   NO_SOURCE_SPAN
 } from "./sourcespan.js";
@@ -22,14 +23,14 @@ export {
   EvaluateCode
 };
 
-class EvaluateCode implements Stage<DProgram, string[]> {
+class EvaluateCode implements Stage<Program, string[]> {
   private env: Environment = new Environment();
 
   reset() {
     this.env = new Environment();
   }
 
-  run(input: StageOutput<DProgram>): StageOutput<string[]> {
+  run(input: StageOutput<Program>): StageOutput<string[]> {
     try {
       return new StageOutput(this.runHelper(input.output));
     } catch (e) {
