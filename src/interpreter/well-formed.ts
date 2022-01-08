@@ -3,6 +3,7 @@ import {
   ASTNode,
   ASTNodeVisitor,
   AtomNode,
+  CondNode,
   DefnNode,
   DefnStructNode,
   DefnVarNode,
@@ -66,7 +67,10 @@ import {
   DS_EXPECTED_FIELD_NAMES_ERR,
   DS_EXPECTED_FIELD_NAME_ERR,
   DS_EXTRA_PARTS_ERR,
-  WF_STRUCTURE_TYPE_ERR
+  WF_STRUCTURE_TYPE_ERR,
+  ES_NOT_IN_COND_ERR,
+  CN_EXPECTED_TWO_PART_CLAUSE_ERR,
+  CN_ELSE_NOT_LAST_CLAUSE_ERR
 } from "./error.js";
 import {
   PRIMITIVE_DATA_NAMES,
@@ -158,6 +162,12 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
           return new VarNode(sexpr.token.text, sexpr.sourceSpan);
         }
         case TokenType.KEYWORD: {
+          if (sexpr.token.text === "else") {
+            throw new StageError(
+              ES_NOT_IN_COND_ERR,
+              sexpr.sourceSpan
+            );
+          }
           throw new StageError(
             SX_EXPECTED_OPEN_PAREN_ERR(sexpr.token.text),
             sexpr.sourceSpan
@@ -203,6 +213,9 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
                 sexpr.sourceSpan
               );
             }
+            case "cond": {
+              return this.toCondNode(sexpr);
+            }
             case "define": {
               if (!this.atTopLevel()) {
                 throw new StageError(
@@ -220,6 +233,12 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
                 );
               }
               return this.toDefnStructNode(sexpr);
+            }
+            case "else": {
+              throw new StageError(
+                ES_NOT_IN_COND_ERR,
+                leadingSExpr.sourceSpan
+              )
             }
             case "if": {
               if (sexpr.tokens.length - 1 !== 3) {
@@ -263,6 +282,40 @@ class WellFormedSyntax implements Stage<SExpr[], Program> {
         );
       }
     }
+  }
+
+  private toCondNode(sexpr: ListSExpr): CondNode {
+    const questionAnswerClauses: [ASTNode, ASTNode][] = [];
+    if (sexpr.tokens.length - 1 === 0) {
+      throw new StageError(
+        CN_EXPECTED_TWO_PART_CLAUSE_ERR(),
+        sexpr.sourceSpan
+      );
+    }
+    for (const [idx, token] of sexpr.tokens.slice(1).entries()) {
+      if (!isListSExpr(token) || token.tokens.length !== 2) {
+        throw new StageError(
+          CN_EXPECTED_TWO_PART_CLAUSE_ERR(token),
+          token.sourceSpan
+        );
+      }
+      const questionSExpr = token.tokens[0];
+      if (isAtomSExpr(questionSExpr)
+        && questionSExpr.token.type === TokenType.KEYWORD
+        && questionSExpr.token.text === "else"
+      ) {
+        if (idx < sexpr.tokens.length - 2) {
+          throw new StageError(
+            CN_ELSE_NOT_LAST_CLAUSE_ERR,
+            token.sourceSpan
+          )
+        }
+        questionAnswerClauses.push([new AtomNode(R_TRUE, questionSExpr.sourceSpan), this.toNode(token.tokens[1])]);
+      } else {
+        questionAnswerClauses.push([this.toNode(questionSExpr), this.toNode(token.tokens[1])]);
+      }
+    }
+    return new CondNode(questionAnswerClauses, sexpr.sourceSpan);
   }
 
   private toDefnNode(sexpr: ListSExpr): DefnNode {
@@ -469,6 +522,13 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<DProgram, DProgra
 
   visitAtomNode(_: AtomNode): void {
     // always well-formed
+  }
+
+  visitCondNode(node: CondNode): void {
+    node.questionAnswerClauses.forEach(([question, answer]) => {
+      question.accept(this);
+      answer.accept(this);
+    });
   }
 
   visitDefnVarNode(node: DefnVarNode): void {

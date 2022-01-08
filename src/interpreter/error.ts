@@ -1,5 +1,6 @@
 import {
   isAtomSExpr,
+  isListSExpr,
   SExpr
 } from "./sexpr.js";
 import {
@@ -10,6 +11,9 @@ import {
 } from "./utils.js";
 
 export {
+  CN_ALL_QUESTION_RESULTS_FALSE_ERR,
+  CN_ELSE_NOT_LAST_CLAUSE_ERR,
+  CN_EXPECTED_TWO_PART_CLAUSE_ERR,
   DF_DUPLICATE_VARIABLE_ERR,
   DF_EXPECTED_AT_LEAST_ONE_PARAM_ERR,
   DF_EXPECTED_EXPR_ERR,
@@ -25,11 +29,11 @@ export {
   DS_EXPECTED_STRUCT_NAME_ERR,
   DS_EXTRA_PARTS_ERR,
   EL_EXPECTED_FINISHED_EXPR_ERR,
+  ES_NOT_IN_COND_ERR,
   FA_ARITY_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
-  FA_QUESTION_NOT_BOOL_ERR,
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
@@ -53,6 +57,7 @@ export {
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
   WF_EXPECTED_OPEN_PARENTHESIS_ERR,
+  WF_QUESTION_NOT_BOOL_ERR,
   WF_STRUCTURE_TYPE_ERR
 };
 
@@ -76,11 +81,32 @@ function foundStr(found: SExpr | string): string {
         case TokenType.PLACEHOLDER:
           return "template";
         default:
-          throw "illegal state: unsupported token type";
+          throw "something else";
       }
     } else {
       return "part";
     }
+  }
+}
+
+const CN_ALL_QUESTION_RESULTS_FALSE_ERR = "cond: all question results were false";
+const CN_ELSE_NOT_LAST_CLAUSE_ERR = "cond: found an else clause that isn't the last clause in its cond expression";
+const CN_EXPECTED_TWO_PART_CLAUSE_ERR = (found : SExpr | null = null) => {
+  if (found) {
+    if (isListSExpr(found)) {
+      switch (found.tokens.length) {
+        case 0:
+          return "cond: expected a clause with a question and an answer, but found an empty part";
+        case 1:
+          return "cond: expected a clause with a question and an answer, but found a clause with only one part";
+        default:
+          return `cond: expected a clause with a question and an answer, but found a clause with ${found.tokens.length} parts`;
+      }
+    } else {
+      return `cond: expected a clause with a question and an answer, but found a ${foundStr(found)}`;
+    }
+  } else {
+    return "cond: expected a clause after cond, but nothing's there";
   }
 }
 
@@ -126,6 +152,8 @@ const DS_EXTRA_PARTS_ERR = (parts: number) => {
 
 const EL_EXPECTED_FINISHED_EXPR_ERR = "...: expected a finished expression, but found a template";
 
+const ES_NOT_IN_COND_ERR = "else: not allowed here, because this is not a question in a clause";
+
 const FA_ARITY_ERR = (name: string, expected: number, actual: number) => {
   if (expected < actual) {
     if (expected === 0) {
@@ -143,9 +171,6 @@ const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
 };
 const FA_NTH_WRONG_TYPE_ERR = (name: string, expected: string, n: number, actual: string) => {
   return `${name}: expects a ${expected} as ${ordinalSuffixOf(n + 1)} argument, given ${actual}`;
-};
-const FA_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {
-  return `${name}: question result is not true or false: ${found}`;
 };
 const FA_WRONG_TYPE_ERR = (name: string, expected: string, actual: string) => {
   return `${name}: expects a ${expected}, given ${actual}`;
@@ -229,6 +254,9 @@ const SX_NOT_TOP_LEVEL_DEFN_ERR = (name: string) => {
 
 const WF_EXPECTED_OPEN_PARENTHESIS_ERR = (name: string) => {
   return `${name}: expected a function call, but there is no open parenthesis before this function`;
+};
+const WF_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {
+  return `${name}: question result is not true or false: ${found}`;
 };
 const WF_STRUCTURE_TYPE_ERR = (name: string) => {
   return `${name}: structure type; do you mean make-${name}`;

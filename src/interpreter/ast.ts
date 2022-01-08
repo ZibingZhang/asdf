@@ -2,13 +2,14 @@ import {
   Environment
 } from "./environment.js";
 import {
+  CN_ALL_QUESTION_RESULTS_FALSE_ERR,
   EL_EXPECTED_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
-  FA_QUESTION_NOT_BOOL_ERR,
   FA_WRONG_TYPE_ERR,
-  FC_EXPECTED_FUNCTION_ERR
+  FC_EXPECTED_FUNCTION_ERR,
+  WF_QUESTION_NOT_BOOL_ERR,
 } from "./error.js";
 import {
   StageError
@@ -31,9 +32,6 @@ import {
   R_TRUE
 } from "./rvalue.js";
 import {
-  AtomSExpr
-} from "./sexpr.js";
-import {
   NO_SOURCE_SPAN,
   SourceSpan
 } from "./sourcespan.js";
@@ -42,6 +40,7 @@ export {
   ASTNode,
   AndNode,
   AtomNode,
+  CondNode,
   DefnNode,
   DefnStructNode,
   DefnVarNode,
@@ -68,6 +67,7 @@ type DefnNode =
 type ExprNode =
   | AndNode
   | AtomNode
+  | CondNode
   | EllipsisFunAppNode
   | EllipsisNode
   | FunAppNode
@@ -109,7 +109,7 @@ class AndNode extends ASTNodeBase {
     }
     if (!isRBoolean(result)) {
       throw new StageError(
-        FA_QUESTION_NOT_BOOL_ERR("and", result.stringify()),
+        WF_QUESTION_NOT_BOOL_ERR("and", result.stringify()),
         this.sourceSpan
       );
     }
@@ -131,6 +131,36 @@ class AtomNode extends ASTNodeBase {
 
   eval(_: Environment) {
     return this.rval;
+  }
+}
+
+class CondNode extends ASTNodeBase {
+  constructor(
+    readonly questionAnswerClauses: [ASTNode, ASTNode][],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCondNode(this);
+  }
+
+  eval(env: Environment): RValue {
+    for (const [question, answer] of this.questionAnswerClauses) {
+      const questionResult = question.eval(env);
+      if (!isRBoolean(questionResult)) {
+        throw new StageError(
+          WF_QUESTION_NOT_BOOL_ERR("cond", questionResult.stringify()),
+          this.sourceSpan
+        );
+      }
+      if (questionResult === R_TRUE) { return answer.eval(env); }
+    }
+    throw new StageError(
+      CN_ALL_QUESTION_RESULTS_FALSE_ERR,
+      this.sourceSpan
+    );
   }
 }
 
@@ -267,7 +297,7 @@ class IfNode extends ASTNodeBase {
     const questionResult = this.question.eval(env);
     if (!isRBoolean(questionResult)) {
       throw new StageError(
-        FA_QUESTION_NOT_BOOL_ERR("if", questionResult.stringify()),
+        WF_QUESTION_NOT_BOOL_ERR("if", questionResult.stringify()),
         this.sourceSpan
       );
     }
@@ -317,7 +347,7 @@ class OrNode extends ASTNodeBase {
     }
     if (!isRBoolean(result)) {
       throw new StageError(
-        FA_QUESTION_NOT_BOOL_ERR("or", result.stringify()),
+        WF_QUESTION_NOT_BOOL_ERR("or", result.stringify()),
         this.sourceSpan
       );
     }
@@ -353,6 +383,7 @@ function isDefnNode(node: ASTNode): node is DefnNode {
 interface ASTNodeVisitor<T> {
   visitAndNode(node: AndNode): T;
   visitAtomNode(node: AtomNode): T;
+  visitCondNode(node: CondNode): T;
   visitDefnVarNode(node: DefnVarNode): T;
   visitDefnStructNode(node: DefnStructNode): T;
   visitEllipsisFunAllNode(node: EllipsisFunAppNode): T;
