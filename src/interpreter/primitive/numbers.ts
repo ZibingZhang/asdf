@@ -52,7 +52,7 @@ class RPFMultiply extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return args.reduce(
-      (prev, curr) => RMath.mul(<RNumber>prev, <RNumber>curr), new RExactReal(1n, 1n)
+      (prev, curr) => RMath.mul(<RNumber>prev, <RNumber>curr), new RExactReal(1n)
     );
   }
 }
@@ -64,7 +64,7 @@ class RPFPlus extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return args.reduce(
-      (prev, curr) => RMath.add(<RNumber>prev, <RNumber>curr), new RExactReal(0n, 1n)
+      (prev, curr) => RMath.add(<RNumber>prev, <RNumber>curr), new RExactReal(0n)
     );
   }
 }
@@ -200,7 +200,7 @@ class RPFAdd1 extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return RMath.add(<RNumber>args[0], new RExactReal(1n, 1n));
+    return RMath.add(<RNumber>args[0], new RExactReal(1n));
   }
 }
 
@@ -210,7 +210,7 @@ class RPFRandom extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return new RExactReal(BigInt(Math.floor(RNG.next() * Number((<RExactReal>args[0]).numerator))), 1n);
+    return new RExactReal(BigInt(Math.floor(RNG.next() * Number((<RExactReal>args[0]).numerator))));
   }
 }
 
@@ -220,7 +220,7 @@ class RPFSub1 extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return RMath.sub(<RNumber>args[0], new RExactReal(1n, 1n));
+    return RMath.sub(<RNumber>args[0], new RExactReal(1n));
   }
 }
 

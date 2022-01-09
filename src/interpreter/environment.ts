@@ -31,9 +31,12 @@ import {
 import {
   RPFAppend,
   RPFCons,
+  RPFFirst,
+  RPFIsCons,
   RPFIsEmpty,
   RPFList,
   RPFMember,
+  RPFRest,
   R_NULL
 } from "./primitive/lists.js";
 import {
@@ -56,6 +59,9 @@ import {
   RPFIsSymbol,
   RPFSymbolToString
 } from "./primitive/symbols.js";
+import {
+  RPFIsString, RPFIsStringLessEqualThan, RPFStringDowncase, RPFStringLength
+} from "./primitive/string.js";
 import {
   SC_USED_BEFORE_DEFINITION_ERR
 } from "./error.js";
@@ -198,14 +204,24 @@ addFnToPrimEnv(new RPFIsSymbol());
 // lists
 addFnToPrimEnv(new RPFAppend());
 addFnToPrimEnv(new RPFCons());
+addFnToPrimEnv(new RPFIsCons());
 addFnToPrimEnv(new RPFIsEmpty());
+addFnToPrimEnv(new RPFFirst());
 addFnToPrimEnv(new RPFList());
+addFnToPrimEnv(new RPFIsCons("list?"));
 addFnToPrimEnv(new RPFMember());
 addFnToPrimEnv(new RPFMember("member?"));
 addFnToPrimEnv(new RPFIsEmpty("null?"));
+addFnToPrimEnv(new RPFRest());
 
 // posns
 addStructToPrimEnv("posn", ["x", "y"]);
+
+// strings
+addFnToPrimEnv(new RPFStringDowncase());
+addFnToPrimEnv(new RPFStringLength());
+addFnToPrimEnv(new RPFIsStringLessEqualThan());
+addFnToPrimEnv(new RPFIsString());
 
 // misc
 addFnToPrimEnv(new RPFAreEq());

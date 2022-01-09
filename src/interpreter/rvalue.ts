@@ -37,6 +37,7 @@ export {
   isRBoolean,
   isRCallable,
   isRData,
+  isREmptyList,
   isRExactPositiveInteger,
   isRFalse,
   isRInexact,
@@ -277,7 +278,7 @@ abstract class RNumberBase extends RDataBase {
 class RExactReal extends RNumberBase {
   constructor(
     readonly numerator: bigint,
-    readonly denominator: bigint
+    readonly denominator: bigint = 1n
   ) {
     super();
     const divisor = gcd(
@@ -439,6 +440,7 @@ enum TypeName {
   BOOLEAN = "boolean",
   EXACT_POSITIVE_INTEGER = "exact positive integer",
   LIST = "list",
+  NON_EMPTY_LIST = "non-empty list",
   NON_NEGATIVE_REAL = "non-negative real",
   NUMBER = "number",
   REAL = "real",
@@ -473,15 +475,19 @@ class RPrimFun extends RCallableBase {
         return isRExactPositiveInteger;
       case TypeName.LIST:
         return isRList;
+      case TypeName.NON_EMPTY_LIST:
+        return isRNonEmptyList;
       case TypeName.NON_NEGATIVE_REAL:
         return isRNonNegativeReal;
       case TypeName.NUMBER:
       case TypeName.REAL:
         return isRNumber;
+      case TypeName.STRING:
+        return isRString;
       case TypeName.SYMBOL:
         return isRSymbol;
       default:
-        throw "illegal state: unsupported allArgsTypeName";
+        throw `illegal state: unsupported type name ${typeName}`;
     }
   }
 
@@ -524,6 +530,10 @@ function isRDecimal(rval: RNumber): rval is RInexactDecimal {
   return rval instanceof RInexactDecimal;
 }
 
+function isREmptyList(rval: RValue): rval is RList {
+  return isRList(rval) && rval.vals.length === 0;
+}
+
 function isRExactPositiveInteger(rval: RValue): rval is RExactReal {
   return isRExactReal(rval) && rval.denominator === 1n && rval.numerator > 0n;
 }
@@ -552,6 +562,10 @@ function isRInexactRational(rval: RValue): rval is RInexactRational {
 
 function isRList(rval: RValue): rval is RList {
   return rval instanceof RList;
+}
+
+function isRNonEmptyList(rval: RValue): rval is RList {
+  return isRList(rval) && rval.vals.length > 0;
 }
 
 function isRNonNegativeReal(rval: RValue): rval is RNumberBase {

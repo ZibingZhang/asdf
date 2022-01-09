@@ -134,7 +134,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         }
         case TokenType.INTEGER: {
           return new AtomNode(
-            new RExactReal(BigInt(sexpr.token.text), 1n),
+            new RExactReal(BigInt(sexpr.token.text)),
             sexpr.sourceSpan
           );
         }

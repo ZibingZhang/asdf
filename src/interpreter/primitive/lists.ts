@@ -5,15 +5,20 @@ import {
   R_EMPTY_LIST,
   TypeName,
   toRBoolean,
-  isRData
+  isRData,
+  isREmptyList,
+  isRList
 } from "../rvalue.js";
 
 export {
   RPFAppend,
   RPFCons,
+  RPFIsCons,
   RPFIsEmpty,
+  RPFFirst,
   RPFList,
   RPFMember,
+  RPFRest,
   R_NULL
 };
 
@@ -39,13 +44,33 @@ class RPFCons extends RPrimFun {
   }
 }
 
+class RPFIsCons extends RPrimFun {
+  constructor(alias: string | null = null) {
+    super(alias || "cons?", { arity: 1 });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean(isRList(args[0]));
+  }
+}
+
 class RPFIsEmpty extends RPrimFun {
   constructor(alias: string | null = null) {
     super(alias || "empty?", { arity: 1 });
   }
 
   call(args: RValue[]): RValue {
-    return toRBoolean(args[0] === R_EMPTY_LIST);
+    return toRBoolean(isREmptyList(args[0]));
+  }
+}
+
+class RPFFirst extends RPrimFun {
+  constructor() {
+    super("first", { arity: 1, onlyArgTypeName: TypeName.NON_EMPTY_LIST });
+  }
+
+  call(args: RValue[]): RValue {
+    return (<RList>args[0]).vals[0];
   }
 }
 
@@ -67,5 +92,15 @@ class RPFMember extends RPrimFun {
   call(args: RValue[]): RValue {
     const testVal = args[0];
     return toRBoolean(isRData(testVal) && (<RList>args[1]).vals.some((val) => testVal.equal(val)));
+  }
+}
+
+class RPFRest extends RPrimFun {
+  constructor() {
+    super("rest", { arity: 1, onlyArgTypeName: TypeName.NON_EMPTY_LIST });
+  }
+
+  call(args: RValue[]): RValue {
+    return new RList((<RList>args[0]).vals.slice(1));
   }
 }
