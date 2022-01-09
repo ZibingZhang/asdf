@@ -81,10 +81,10 @@ export {
 };
 
 class Environment {
-  parentEnv: Environment | null;
+  parentEnv: Environment | undefined;
   private map: Map<string, RValue>;
 
-  constructor(parentEnv: Environment | null = null) {
+  constructor(parentEnv?: Environment) {
     this.parentEnv = parentEnv;
     this.map = new Map();
   }

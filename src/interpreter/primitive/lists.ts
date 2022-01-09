@@ -45,7 +45,7 @@ class RPFCons extends RPrimFun {
 }
 
 class RPFIsCons extends RPrimFun {
-  constructor(alias: string | null = null) {
+  constructor(alias?: string) {
     super(alias || "cons?", { arity: 1 });
   }
 
@@ -55,7 +55,7 @@ class RPFIsCons extends RPrimFun {
 }
 
 class RPFIsEmpty extends RPrimFun {
-  constructor(alias: string | null = null) {
+  constructor(alias?: string) {
     super(alias || "empty?", { arity: 1 });
   }
 
@@ -85,7 +85,7 @@ class RPFList extends RPrimFun {
 }
 
 class RPFMember extends RPrimFun {
-  constructor(alias: string | null = null) {
+  constructor(alias?: string) {
     super(alias || "member", { argsTypeNames: [TypeName.ANY, TypeName.LIST] });
   }
 

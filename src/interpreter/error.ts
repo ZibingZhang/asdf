@@ -132,7 +132,7 @@ const CE_WRONG_ERROR_ERR = (expected: string, actual: string) => {
 
 const CN_ALL_QUESTION_RESULTS_FALSE_ERR = "cond: all question results were false";
 const CN_ELSE_NOT_LAST_CLAUSE_ERR = "cond: found an else clause that isn't the last clause in its cond expression";
-const CN_EXPECTED_TWO_PART_CLAUSE_ERR = (found : SExpr | null = null) => {
+const CN_EXPECTED_TWO_PART_CLAUSE_ERR = (found?: SExpr) => {
   if (found) {
     if (isListSExpr(found)) {
       switch (found.subExprs.length) {
@@ -159,10 +159,10 @@ const DF_EXPECTED_EXPR_ERR = (name: string) => {
   return `define: expected an expression after the variable name ${name}, but nothing's there`;
 };
 const DF_EXPECTED_FUNCTION_BODY_ERR = "define: expected an expression for the function body, but nothing's there";
-const DF_EXPECTED_FUNCTION_NAME_ERR = (found: SExpr | null = null) => {
+const DF_EXPECTED_FUNCTION_NAME_ERR = (found?: SExpr) => {
   return `define: expected the name of the function, but ${found ? `found a ${foundStr(found)}` : "nothing's there" }`;
 };
-const DF_EXPECTED_VAR_OR_FUN_NAME_ERR = (found: SExpr | null = null) => {
+const DF_EXPECTED_VAR_OR_FUN_NAME_ERR = (found?: SExpr) => {
   return `define: expected a variable name, or a function name and its variables (in parentheses), but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
 };
 const DF_EXPECTED_VARIABLE_ERR = (found: SExpr) => {
@@ -181,10 +181,10 @@ const DF_PREVIOUSLY_DEFINED_NAME_ERR = (name: string) => {
 const DS_EXPECTED_FIELD_NAME_ERR = (found: SExpr) => {
   return `define-struct: expected a field name, but found a ${foundStr(found)}`;
 };
-const DS_EXPECTED_FIELD_NAMES_ERR = (found: SExpr | null = null) => {
+const DS_EXPECTED_FIELD_NAMES_ERR = (found?: SExpr) => {
   return `define-struct: expected at least one field name (in parentheses) after the structure name, but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
 };
-const DS_EXPECTED_STRUCT_NAME_ERR = (found: SExpr | null = null) => {
+const DS_EXPECTED_STRUCT_NAME_ERR = (found?: SExpr) => {
   return `define-struct: expected the structure name after define-struct, but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
 };
 const DS_EXTRA_PARTS_ERR = (parts: number) => {
@@ -217,7 +217,7 @@ const FA_WRONG_TYPE_ERR = (name: string, expected: string, actual: string) => {
   return `${name}: expects a${expected.match(/^[aeiou]/) ? "n" : ""} ${expected}, given ${actual}`;
 };
 
-const FC_EXPECTED_FUNCTION_ERR = (found: SExpr | string | null = null) => {
+const FC_EXPECTED_FUNCTION_ERR = (found?: SExpr | string) => {
   return `function call: expected a function after the open parenthesis, but ${found ? `found a ${foundStr(found)}`: "nothing's there"}`;
 };
 

@@ -42,7 +42,7 @@ class StageError extends Error {
 class StageTestResult {
   constructor(
     readonly passed: boolean,
-    readonly errMsg: string | null = null
+    readonly errMsg?: string
   ) {}
 }
 
