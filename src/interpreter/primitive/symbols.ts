@@ -3,9 +3,9 @@ import {
   RString,
   RSymbol,
   RValue,
+  TypeName,
   isRSymbol,
-  toRBoolean,
-  TypeName
+  toRBoolean
 } from "../rvalue.js";
 
 export {

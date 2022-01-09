@@ -67,7 +67,7 @@ import {
 export {
   PRIMITIVE_DATA_NAMES,
   PRIMITIVE_ENVIRONMENT,
-  PRIMITIVE_FUNCTION_NAMES,
+  PRIMITIVE_FUNCTIONS,
   PRIMITIVE_TEST_FUNCTIONS,
   Environment
 };
@@ -122,7 +122,7 @@ class Environment {
 
 const PRIMITIVE_ENVIRONMENT = new Environment();
 const PRIMITIVE_DATA_NAMES: Set<string> = new Set();
-const PRIMITIVE_FUNCTION_NAMES: Set<string> = new Set();
+const PRIMITIVE_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 
 PRIMITIVE_TEST_FUNCTIONS.set("check-expect", { arity: 2 });
@@ -134,15 +134,15 @@ function addDataToPrimEnv(name: string, val: RData) {
 }
 
 function addFnToPrimEnv(val: RPrimFun) {
-  PRIMITIVE_FUNCTION_NAMES.add(val.name);
+  PRIMITIVE_FUNCTIONS.set(val.name, val.config);
   PRIMITIVE_ENVIRONMENT.set(val.name, val);
 }
 
 function addStructToPrimEnv(name: string, fields: string[]) {
-  PRIMITIVE_FUNCTION_NAMES.add(`make-${name}`);
-  PRIMITIVE_FUNCTION_NAMES.add(`${name}?`);
+  PRIMITIVE_FUNCTIONS.set(`make-${name}`, { arity: fields.length });
+  PRIMITIVE_FUNCTIONS.set(`${name}?`, { arity: 1 });
   fields.forEach((field) => {
-    PRIMITIVE_FUNCTION_NAMES.add(`${name}-${field}`);
+    PRIMITIVE_FUNCTIONS.set(`${name}-${field}`, { arity: 1 });
   });
   PRIMITIVE_ENVIRONMENT.set(`make-${name}`, new RMakeStructFun(name, fields.length));
   PRIMITIVE_ENVIRONMENT.set(`${name}?`, new RIsStructFun(name));

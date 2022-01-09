@@ -7,8 +7,8 @@ import {
   RValue,
   R_FALSE,
   R_TRUE,
-  toRBoolean,
-  TypeName
+  TypeName,
+  toRBoolean
 } from "../rvalue.js";
 import {
   FA_DIV_BY_ZERO_ERR

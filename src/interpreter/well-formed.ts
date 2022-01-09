@@ -25,8 +25,7 @@ import {
 } from "./error.js";
 import {
   PRIMITIVE_DATA_NAMES,
-  PRIMITIVE_FUNCTION_NAMES,
-  PRIMITIVE_TEST_FUNCTIONS
+  PRIMITIVE_FUNCTIONS
 } from "./environment.js";
 import {
   Stage,
@@ -276,10 +275,8 @@ class VariableMeta {
 }
 
 const DATA_VARIABLE_META = new VariableMeta(VariableType.DATA);
-const PRIMITIVE_FUNCTION_VARIABLE_META = new VariableMeta(VariableType.PRIMITIVE_FUNCTION);
 const STRUCTURE_TYPE_VARIABLE_META = new VariableMeta(VariableType.STRUCTURE_TYPE);
 
 const PRIMITIVE_SCOPE = new Scope();
 PRIMITIVE_DATA_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, DATA_VARIABLE_META));
-PRIMITIVE_FUNCTION_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, PRIMITIVE_FUNCTION_VARIABLE_META));
-PRIMITIVE_TEST_FUNCTIONS.forEach((_, name) => PRIMITIVE_SCOPE.add(name, PRIMITIVE_FUNCTION_VARIABLE_META));
+PRIMITIVE_FUNCTIONS.forEach((config, name) => PRIMITIVE_SCOPE.add(name, new VariableMeta(VariableType.PRIMITIVE_FUNCTION, config.arity || config.minArity || -1)));

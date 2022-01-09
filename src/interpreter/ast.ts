@@ -36,9 +36,11 @@ import {
   Environment
 } from "./environment.js";
 import {
+  RNG
+} from "./random.js";
+import {
   StageError
 } from "./pipeline.js";
-import { RNG } from "./random.js";
 
 export {
   ASTNode,

@@ -21,7 +21,7 @@ import {
 export {
   EVALUATE_CODE_STAGE,
   LEXING_STAGE,
-  PARSE_SEXPR_STAGE,
+  PARSING_SEXPRS_STAGE,
   WELL_FORMED_PROGRAM_STAGE,
   Pipeline,
   Stage,
@@ -79,7 +79,7 @@ class Pipeline {
 }
 
 const LEXING_STAGE = new Lexer();
-const PARSE_SEXPR_STAGE = new ParseSExpr();
+const PARSING_SEXPRS_STAGE = new ParseSExpr();
 const WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
 const EVALUATE_CODE_STAGE = new EvaluateCode();
 

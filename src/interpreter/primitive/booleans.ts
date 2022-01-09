@@ -3,9 +3,9 @@ import {
   RPrimFun,
   RString,
   RValue,
+  TypeName,
   isRBoolean,
-  toRBoolean,
-  TypeName
+  toRBoolean
 } from "../rvalue.js";
 
 export {

@@ -1,7 +1,7 @@
 import {
   EVALUATE_CODE_STAGE,
   LEXING_STAGE,
-  PARSE_SEXPR_STAGE,
+  PARSING_SEXPRS_STAGE,
   Pipeline,
   WELL_FORMED_PROGRAM_STAGE
 } from "./pipeline.js";
@@ -19,7 +19,7 @@ window.pipelines = {
   evaluateProgram: new Pipeline(
     [
       LEXING_STAGE,
-      PARSE_SEXPR_STAGE,
+      PARSING_SEXPRS_STAGE,
       WELL_FORMED_PROGRAM_STAGE,
       EVALUATE_CODE_STAGE
     ],
@@ -28,7 +28,7 @@ window.pipelines = {
   evaluateRepl: new Pipeline(
     [
       LEXING_STAGE,
-      PARSE_SEXPR_STAGE,
+      PARSING_SEXPRS_STAGE,
       WELL_FORMED_PROGRAM_STAGE,
       EVALUATE_CODE_STAGE
     ],

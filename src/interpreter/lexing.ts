@@ -40,6 +40,7 @@ const KEYWORDS = new Set(
     "and",
     "check-expect",
     "check-random",
+    "check-satisfied",
     "cond",
     "define",
     "define-struct",

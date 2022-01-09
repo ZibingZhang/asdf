@@ -3,8 +3,8 @@ import {
   RPrimFun,
   RValue,
   R_EMPTY_LIST,
-  toRBoolean,
-  TypeName
+  TypeName,
+  toRBoolean
 } from "../rvalue.js";
 
 export {
