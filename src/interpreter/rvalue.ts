@@ -741,6 +741,7 @@ abstract class RMath {
   private static perfectPower(base: bigint, root: bigint): boolean {
     return (RMath.iroot(base, root) ** root) === base;}
 
+  // https://stackoverflow.com/a/64190462
   private static iroot(base: bigint, root: bigint): bigint {
     let s = base + 1n;
     const k1 = root - 1n;
