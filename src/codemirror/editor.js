@@ -54,18 +54,6 @@ const initValue =
 (check-expect (add-up-all PLON5) 19.5)
 (check-expect (add-up-all PLON6) 19.5)
 
-; EXERCISE 3 -----------------------------------------------------------------------------------------
-
-; The function add-up-all expects a PseudoLON. The program will break because at some point a Number
-; will be passed to add-up-all, which is not a PseudoLON. A Number is neither a string nor a plist, so
-; none of the conditions in the cond function will be met thus throwing an error.
-
-; The reason this occurs is because each PseudoLON is either a String or a
-; (make-plist Number PseudoLON). If we examine the given PseudoLON, we can clearly see it it not
-; actually a PseudoLON. The nested "rst" part of the nested make-plist is 19 which is not a
-; PseudoLON. At some point when (plist-rst plon) gets passed to add-up-all it will not be a PseudoLON
-; thus throwing error as explained above.
-
 ; EXERCISE 4 -----------------------------------------------------------------------------------------
 
 ; A LON is one of :
@@ -102,20 +90,6 @@ const initValue =
 (check-expect (add-lon LON4) 22.5)
 (check-expect (add-lon LON5) 19.5)
 (check-expect (add-lon LON6) 19.5)
-
-; EXERCISE 6 -----------------------------------------------------------------------------------------
-
-; The program will break because the second argument in the cons function must be a list but is
-; instead a number for the nested cons function. The compiler will throw an error. Let us assume
-; though that it doesn't throw an error and somehow the argument (cons 17 (cons 18 19)) is passed
-; to the function. add-lon takes in a LON, but at some point a Number will be passed to LON. A Number
-; is neither an empty list nor a list which means that none of the conditional statements in the cond
-; function will be met therefore throwing an error.
-
-; The first reason why this will break is because the second argument passed to the cons function is
-; not a list. Assuming that the complier ignores this error, another error will occur when add-lon
-; is called on the rest of (cons 18 19). 19 is not a list so it will not return true for (empty? lon)
-; or (cons? lon). It will not satisfy any case in the cons statement which will throw an error.
 
 ; EXERCISE 7 -----------------------------------------------------------------------------------------
 
@@ -177,10 +151,6 @@ const initValue =
 (check-expect (in-order? "zebra"     LOS2.1) #f)
 (check-expect (in-order? "surprise"  LOS3.3) #t)
 (check-expect (in-order? "yoyo"      LOS3.3) #f)
-
-; EXERCISE 8 -----------------------------------------------------------------------------------------
-
-;; Removed exercise that dealt with images
 
 ; EXERCISE 9 -----------------------------------------------------------------------------------------
 
