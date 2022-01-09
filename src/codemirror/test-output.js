@@ -5,16 +5,17 @@ export {
 
 const testOutputTextArea = document.getElementById("test-output");
 const testOutput = CodeMirror(
-(elt) => {
-  testOutputTextArea.parentNode.replaceChild(elt, testOutputTextArea);
-}, {
-lineNumbers: false,
-tabSize: 2,
-value: "\n\n\n",
-mode: null,
-theme: "monokai",
-readOnly: true
-});
+  (elt) => {
+    testOutputTextArea.parentNode.replaceChild(elt, testOutputTextArea);
+  }, {
+    lineNumbers: false,
+    tabSize: 2,
+    value: "\n\n\n",
+    mode: null,
+    theme: "monokai",
+    readOnly: true
+  }
+);
 
 const appendToTestOutput =
   text => testOutput.replaceRange(text, CodeMirror.Pos(testOutput.lastLine()));

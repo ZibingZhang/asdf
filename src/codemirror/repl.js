@@ -9,16 +9,17 @@ export {
 
 const replTextArea = document.getElementById("repl");
 const repl = CodeMirror(
-(elt) => {
-  replTextArea.parentNode.replaceChild(elt, replTextArea);
-}, {
-  tabSize: 2,
-  value: "> ",
-  mode: null,
-  theme: "monokai",
-  lineWrapping: true,
-  smartIndent: false
-});
+  (elt) => {
+    replTextArea.parentNode.replaceChild(elt, replTextArea);
+  }, {
+    tabSize: 2,
+    value: "> ",
+    mode: null,
+    theme: "monokai",
+    lineWrapping: true,
+    smartIndent: false
+  }
+);
 const replDoc = repl.getDoc();
 
 const resetRepl =

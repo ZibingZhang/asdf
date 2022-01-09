@@ -268,21 +268,23 @@ const initValue =
 `;
 const editorTextArea = document.getElementById("editor");
 const editor = CodeMirror(
-(elt) => {
-  editorTextArea.parentNode.replaceChild(elt, editorTextArea);
-}, {
-lineNumbers: true,
-tabSize: 2,
-value: initValue,
-mode: "racket",
-theme: "monokai",
-extraKeys: {
-  "Alt-Enter": () => {
-    resetRepl();
-    evaluate(
-      window.pipelines.evaluateProgram,
-      editor.getValue(),
-      true
-    );
+  (elt) => {
+    editorTextArea.parentNode.replaceChild(elt, editorTextArea);
+  }, {
+    lineNumbers: true,
+    tabSize: 2,
+    value: initValue,
+    mode: "racket",
+    theme: "monokai",
+    extraKeys: {
+      "Alt-Enter": () => {
+        resetRepl();
+        evaluate(
+          window.pipelines.evaluateProgram,
+          editor.getValue(),
+          true
+        );
+      }
+    }
   }
-}});
+);

@@ -7,6 +7,9 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended"
   ],
+  "globals": {
+    "CodeMirror": "readonly"
+  },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 13,

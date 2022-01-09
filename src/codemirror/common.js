@@ -1,10 +1,10 @@
 import {
+  handleTestResults,
+  resetTestOutput
+} from "./test-output.js";
+import {
   appendToRepl
 } from "./repl.js";
-import {
-  resetTestOutput,
-  handleTestResults
-} from "./test-output.js";
 
 export {
   evaluate
