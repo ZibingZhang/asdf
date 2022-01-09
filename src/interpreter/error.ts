@@ -208,7 +208,7 @@ const FA_ARITY_ERR = (name: string, expected: number, actual: number) => {
   }
 };
 const FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR = (name: string) => {
-  return `${name}: complex numbers are not supported;`;
+  return `${name}: complex numbers are not supported`;
 };
 const FA_DIV_BY_ZERO_ERR = "/: division by zero";
 const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
