@@ -38,6 +38,7 @@ export {
   isRCallable,
   isRData,
   isRExactPositiveInteger,
+  isRFalse,
   isRInexact,
   isRList,
   isRPrimFun,
@@ -515,6 +516,11 @@ function isRExactReal(rval: RValue): rval is RExactReal {
   return rval instanceof RExactReal;
 }
 
+function isRFalse(rval: RValue): boolean {
+  return isRBoolean(rval)
+    && !rval.val;
+}
+
 function isRInexact(rval: RValue): rval is RInexact {
   return isRInexactDecimal(rval)
     || isRInexactRational(rval);
@@ -556,7 +562,7 @@ function isRSymbol(rval: RValue): rval is RSymbol {
   return rval instanceof RSymbol;
 }
 
-function isRTrue(rval: RBoolean): boolean {
+function isRTrue(rval: RValue): boolean {
   return isRBoolean(rval)
     && rval.val;
 }

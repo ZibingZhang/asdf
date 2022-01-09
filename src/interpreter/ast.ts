@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  CE_ACTUAL_VALUE_NOT_EXPECTED_ERR,
+  CE_CANT_COMPARE_INEXACT_ERR,
   CE_EXPECTED_AN_ERROR_ERR,
   CE_EXPECTED_ERROR_MESSAGE_ERR,
+  CE_NOT_SATISFIED_ERR,
+  CE_SATISFIED_NOT_BOOLEAN_ERR,
   CE_WRONG_ERROR_ERR,
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
   EL_EXPECTED_FINISHED_EXPR_ERR,
@@ -32,9 +37,10 @@ import {
   isRBoolean,
   isRCallable,
   isRData,
+  isRFalse,
   isRInexact,
-  isRTrue,
-  isRString
+  isRString,
+  isRTrue
 } from "./rvalue.js";
 import {
   Environment
@@ -117,7 +123,7 @@ class AndNode extends ASTNodeBase {
     let result: RValue = R_FALSE;
     for (const arg of this.args) {
       result = arg.eval(env);
-      if (result === R_FALSE) { return result; }
+      if (isRFalse(result)) { return result; }
     }
     if (!isRBoolean(result)) {
       throw new StageError(
@@ -150,7 +156,8 @@ class CheckNode extends ASTNodeBase {
   constructor(
     readonly name: string,
     readonly args: ASTNode[],
-    readonly sourceSpan: SourceSpan
+    readonly sourceSpan: SourceSpan,
+    readonly meta: any[] = []
   ) {
     super(sourceSpan);
   }
@@ -208,16 +215,32 @@ class CheckNode extends ASTNodeBase {
         if (isRInexact(actualVal) || isRInexact(expectedVal)) {
           return new RTestResult(
             false,
-            `${this.name} cannot compare inexact numbers. Try (check-within ${actualVal.stringify()} ${actualVal.stringify()} range).`
+            CE_CANT_COMPARE_INEXACT_ERR(this.name, actualVal.stringify(), expectedVal.stringify())
           );
         } else if (isRData(actualVal) && actualVal.equals(expectedVal)) {
           return new RTestResult(true);
         } else {
           return new RTestResult(
             false,
-            `Actual value ${actualVal.stringify()} differs from ${expectedVal.stringify()}, the expected value.`
+            CE_ACTUAL_VALUE_NOT_EXPECTED_ERR(actualVal.stringify(), expectedVal.stringify())
           );
         }
+      }
+      case "check-satisfied": {
+        const val = this.args[0].eval(env);
+        if (!isRBoolean(val)) {
+          return new RTestResult(
+            false,
+            CE_SATISFIED_NOT_BOOLEAN_ERR(<string>this.meta[1], val.stringify())
+          );
+        }
+        if (isRFalse(val)) {
+          return new RTestResult(
+            false,
+            CE_NOT_SATISFIED_ERR(<string>this.meta[1], (<ASTNode>this.meta[0]).eval(env).stringify())
+          );
+        }
+        return new RTestResult(true);
       }
       default: {
         throw "illegal state: non-implemented test function";

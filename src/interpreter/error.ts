@@ -11,8 +11,12 @@ import {
 } from "./utils.js";
 
 export {
+  CE_ACTUAL_VALUE_NOT_EXPECTED_ERR,
+  CE_CANT_COMPARE_INEXACT_ERR,
   CE_EXPECTED_AN_ERROR_ERR,
   CE_EXPECTED_ERROR_MESSAGE_ERR,
+  CE_NOT_SATISFIED_ERR,
+  CE_SATISFIED_NOT_BOOLEAN_ERR,
   CE_TEST_NOT_TOP_LEVEL_ERR,
   CE_WRONG_ERROR_ERR,
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
@@ -60,7 +64,7 @@ export {
   SC_USED_BEFORE_DEFINITION_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
-  WF_EXPECTED_OPEN_PAREN_ERR,
+  WF_EXPECTED_FUNCTION_CALL_ERR,
   WF_QUESTION_NOT_BOOL_ERR,
   WF_STRUCTURE_TYPE_ERR
 };
@@ -93,18 +97,30 @@ function foundStr(found: SExpr | string): string {
   }
 }
 
-const CE_EXPECTED_AN_ERROR_ERR = (found: string) => {
-  return `check-error expected an error, but instead received the value ${found}`;
+const CE_ACTUAL_VALUE_NOT_EXPECTED_ERR = (actual: string, expected: string) => {
+  return `Actual value ${actual} differs from ${expected}, the expected value.`;
 };
-const CE_EXPECTED_ERROR_MESSAGE_ERR = (found: string) => {
-  return `check-error: expects a string (the expected error message) for the second argument. Given ${found}`;
+const CE_CANT_COMPARE_INEXACT_ERR = (name: string, actual: string, expected: string) => {
+  return `${name} cannot compare inexact numbers. Try (check-within ${actual} ${expected} range).`;
+};
+const CE_EXPECTED_AN_ERROR_ERR = (value: string) => {
+  return `check-error expected an error, but instead received the value ${value}`;
+};
+const CE_EXPECTED_ERROR_MESSAGE_ERR = (value: string) => {
+  return `check-error: expects a string (the expected error message) for the second argument. Given ${value}`;
+};
+const CE_NOT_SATISFIED_ERR = (name: string, value: string) => {
+  return `Actual value ${value} does not satisfy ${name}.`;
+};
+const CE_SATISFIED_NOT_BOOLEAN_ERR = (name: string, value: string) => {
+  return `check-satisfied encountered an error instead of the expected kind of value, "${name}".\n  :: ${name} [as predicate in check-satisfied]: is expected to return a boolean, but it returned ${value}`;
 };
 const CE_TEST_NOT_TOP_LEVEL_ERR = (name: string) => {
   return `${name}: found a test that is not at the top level`;
 };
 const CE_WRONG_ERROR_ERR = (expected: string, actual: string) => {
   return `check-error encountered the following error instead of the expected ${expected}\n  :: ${actual}`;
-}
+};
 
 const CN_ALL_QUESTION_RESULTS_FALSE_ERR = "cond: all question results were false";
 const CN_ELSE_NOT_LAST_CLAUSE_ERR = "cond: found an else clause that isn't the last clause in its cond expression";
@@ -269,7 +285,8 @@ const SX_NOT_TOP_LEVEL_DEFN_ERR = (name: string) => {
   return `${name}: found a definition that is not at the top level`;
 };
 
-const WF_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
+const WF_EXPECTED_FUNCTION_CALL_ERR = (name: string) => {
+  console.trace();
   return `${name}: expected a function call, but there is no open parenthesis before this function`;
 };
 const WF_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {

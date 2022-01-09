@@ -20,7 +20,7 @@ import {
   FA_ARITY_ERR,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
-  WF_EXPECTED_OPEN_PAREN_ERR,
+  WF_EXPECTED_FUNCTION_CALL_ERR,
   WF_STRUCTURE_TYPE_ERR
 } from "./error.js";
 import {
@@ -137,7 +137,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     }
     if (meta.type !== VariableType.DATA) {
       throw new StageError(
-        WF_EXPECTED_OPEN_PAREN_ERR(node.name),
+        WF_EXPECTED_FUNCTION_CALL_ERR(node.name),
         node.sourceSpan
       );
     }

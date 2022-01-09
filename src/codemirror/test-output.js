@@ -47,7 +47,13 @@ function handleTestResults(tests) {
     );
     let testsPassedOrFailed;
     if (failedTests === 0) {
-      testsPassedOrFailed = "All tests passed!";
+      if (totalTests === 1) {
+        testsPassedOrFailed = "The test passed!";
+      } else if (totalTests === 2) {
+        testsPassedOrFailed = "Both test passed!";
+      } else {
+        testsPassedOrFailed = `All ${totalTests} tests passed!`;
+      }
     } else if (failedTests === totalTests) {
       testsPassedOrFailed = "0 tests passed.";
     } else {
@@ -62,5 +68,5 @@ function handleTestResults(tests) {
   if (failedTests > 0 && failedTests === newFailures.length) {
     appendToTestOutputLn("Check failures:");
   }
-  newFailures.forEach(errMsg => appendToTestOutputLn(`                    ${errMsg.replace("\n", "\n                    ")}`));
+  newFailures.forEach(errMsg => appendToTestOutputLn(`  ${errMsg.replace("\n", "\n  ")}`));
 }

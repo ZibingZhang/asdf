@@ -173,7 +173,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           return new EllipsisNode(sexpr.sourceSpan);
         }
         default:
-          throw "something?";
+          throw "illegal state: unhandled token type";
       }
     } else {
       const leadingSExpr = sexpr.subExprs[0];
@@ -321,14 +321,22 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     switch (checkName) {
       case "check-satisfied": {
         return new CheckNode(
-          "check-expect",
+          checkName,
           [
             this.toNode(
-              new ListSExpr([sexpr.subExprs[2], sexpr.subExprs[1]], sexpr.sourceSpan)
+              new ListSExpr(
+                [
+                  sexpr.subExprs[2],
+                  sexpr.subExprs[1]
+                ],
+                sexpr.sourceSpan)
             ),
-            new AtomNode(R_TRUE, sexpr.sourceSpan)
           ],
-          sexpr.sourceSpan
+          sexpr.sourceSpan,
+          [
+            this.toNode(sexpr.subExprs[1]),
+            sexpr.subExprs[2].stringify()
+          ]
         );
       }
       default: {
