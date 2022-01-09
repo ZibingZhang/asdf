@@ -41,6 +41,7 @@ export {
   isRInexact,
   isRList,
   isRPrimFun,
+  isRString,
   isRStruct,
   isRSymbol,
   isRTrue,
@@ -432,6 +433,7 @@ enum TypeName {
 
 interface RPrimFunConfig {
   minArity?: number,
+  maxArity?: number,
   arity?: number,
   onlyArgTypeName?: TypeName,
   allArgsTypeName?: TypeName,

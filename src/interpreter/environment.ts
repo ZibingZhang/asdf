@@ -125,6 +125,7 @@ const PRIMITIVE_DATA_NAMES: Set<string> = new Set();
 const PRIMITIVE_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 
+PRIMITIVE_TEST_FUNCTIONS.set("check-error", { minArity: 1, maxArity: 2 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-expect", { arity: 2 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-random", { arity: 2 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-satisfied", { arity: 2 });

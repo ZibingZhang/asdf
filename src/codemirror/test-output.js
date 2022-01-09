@@ -62,5 +62,5 @@ function handleTestResults(tests) {
   if (failedTests > 0 && failedTests === newFailures.length) {
     appendToTestOutputLn("Check failures:");
   }
-  newFailures.forEach(errMsg => appendToTestOutputLn(`                    ${errMsg}`));
+  newFailures.forEach(errMsg => appendToTestOutputLn(`                    ${errMsg.replace("\n", "\n                    ")}`));
 }

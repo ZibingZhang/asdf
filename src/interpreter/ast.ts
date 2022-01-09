@@ -1,4 +1,7 @@
 import {
+  CE_EXPECTED_AN_ERROR_ERR,
+  CE_EXPECTED_ERROR_MESSAGE_ERR,
+  CE_WRONG_ERROR_ERR,
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
   EL_EXPECTED_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
@@ -30,7 +33,8 @@ import {
   isRCallable,
   isRData,
   isRInexact,
-  isRTrue
+  isRTrue,
+  isRString
 } from "./rvalue.js";
 import {
   Environment
@@ -157,6 +161,36 @@ class CheckNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     switch (this.name) {
+      case "check-error": {
+        let expectedErrMsg: RValue | null = null;
+        if (this.args[1]) {
+          expectedErrMsg = this.args[1].eval(env);
+          if (!isRString(expectedErrMsg)) {
+            throw new StageError(
+              CE_EXPECTED_ERROR_MESSAGE_ERR(expectedErrMsg.stringify()),
+              this.args[1].sourceSpan
+            );
+          }
+        }
+        try {
+          return new RTestResult(
+            false,
+            CE_EXPECTED_AN_ERROR_ERR(this.args[0].eval(env).stringify())
+          );
+        } catch (e) {
+          if (e instanceof StageError) {
+            if (expectedErrMsg && expectedErrMsg.val !== e.msg) {
+              return new RTestResult(
+                false,
+                CE_WRONG_ERROR_ERR(expectedErrMsg.val, e.msg)
+              );
+            }
+            return new RTestResult(true);
+          } else {
+            throw e;
+          }
+        }
+      }
       case "check-expect":
       case "check-random": {
         let actualVal;

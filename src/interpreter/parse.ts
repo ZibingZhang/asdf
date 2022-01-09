@@ -218,6 +218,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 sexpr.sourceSpan
               );
             }
+            case "check-error":
             case "check-expect":
             case "check-random":
             case "check-satisfied": {
@@ -302,6 +303,18 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     if (config.arity && sexpr.subExprs.length - 1 !== config.arity) {
       throw new StageError(
         FA_ARITY_ERR(checkName, config.arity, sexpr.subExprs.length - 1),
+        sexpr.sourceSpan
+      );
+    }
+    if (config.minArity && sexpr.subExprs.length - 1 < config.minArity) {
+      throw new StageError(
+        FA_MIN_ARITY_ERR(checkName, config.minArity, sexpr.subExprs.length - 1),
+        sexpr.sourceSpan
+      );
+    }
+    if (config.maxArity && sexpr.subExprs.length - 1 > config.maxArity) {
+      throw new StageError(
+        FA_ARITY_ERR(checkName, config.maxArity, sexpr.subExprs.length - 1),
         sexpr.sourceSpan
       );
     }

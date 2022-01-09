@@ -11,7 +11,10 @@ import {
 } from "./utils.js";
 
 export {
+  CE_EXPECTED_AN_ERROR_ERR,
+  CE_EXPECTED_ERROR_MESSAGE_ERR,
   CE_TEST_NOT_TOP_LEVEL_ERR,
+  CE_WRONG_ERROR_ERR,
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
   CN_ELSE_NOT_LAST_CLAUSE_ERR,
   CN_EXPECTED_TWO_PART_CLAUSE_ERR,
@@ -90,9 +93,18 @@ function foundStr(found: SExpr | string): string {
   }
 }
 
+const CE_EXPECTED_AN_ERROR_ERR = (found: string) => {
+  return `check-error expected an error, but instead received the value ${found}`;
+};
+const CE_EXPECTED_ERROR_MESSAGE_ERR = (found: string) => {
+  return `check-error: expects a string (the expected error message) for the second argument. Given ${found}`;
+};
 const CE_TEST_NOT_TOP_LEVEL_ERR = (name: string) => {
   return `${name}: found a test that is not at the top level`;
 };
+const CE_WRONG_ERROR_ERR = (expected: string, actual: string) => {
+  return `check-error encountered the following error instead of the expected ${expected}\n  :: ${actual}`;
+}
 
 const CN_ALL_QUESTION_RESULTS_FALSE_ERR = "cond: all question results were false";
 const CN_ELSE_NOT_LAST_CLAUSE_ERR = "cond: found an else clause that isn't the last clause in its cond expression";

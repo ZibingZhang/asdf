@@ -24,8 +24,8 @@ function evaluate(pipeline, text, clearTestOutput) {
     for (const text of stageOutput.output) {
       output += text + "\n";
     }
-    handleTestResults(stageOutput.tests);
   }
   output += "> ";
   appendToRepl(output);
+  handleTestResults(stageOutput.tests);
 }

@@ -27,17 +27,19 @@ export {
 
 class EvaluateCode implements Stage<Program, string[]> {
   private env: Environment = new Environment();
+  private testResults: StageTestResult[] = [];
 
   reset() {
     this.env = new Environment();
   }
 
   run(input: StageOutput<Program>): StageOutput<string[]> {
+    this.testResults = [];
     try {
-      return this.runHelper(input.output);
+      return new StageOutput(this.runHelper(input.output), [], this.testResults);
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput([], [e]);
+        return new StageOutput([], [e], this.testResults);
       } else if (e instanceof Error && e.message === "too much recursion") {
         return new StageOutput(
           [],
@@ -46,7 +48,8 @@ class EvaluateCode implements Stage<Program, string[]> {
               RT_MAX_CALL_STACK_SIZE_ERR,
               NO_SOURCE_SPAN
             )
-          ]
+          ],
+          this.testResults
         );
       } else {
         throw e;
@@ -54,17 +57,16 @@ class EvaluateCode implements Stage<Program, string[]> {
     }
   }
 
-  private runHelper(program: Program): StageOutput<string[]> {
+  private runHelper(program: Program): string[] {
     const output: string[] = [];
-    const testResults: StageTestResult[] = [];
     for (const node of program.nodes) {
       const result = node.eval(this.env);
       if (result instanceof RTestResult) {
-        testResults.push(new StageTestResult(result.passed, result.msg));
+        this.testResults.push(new StageTestResult(result.passed, result.msg));
       } else if (result !== R_VOID) {
         output.push(result.stringify());
       }
     }
-    return new StageOutput(output, [], testResults);
+    return output;
   }
 }

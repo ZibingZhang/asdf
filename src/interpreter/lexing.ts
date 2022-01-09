@@ -38,6 +38,7 @@ export {
 const KEYWORDS = new Set(
   [
     "and",
+    "check-error",
     "check-expect",
     "check-random",
     "check-satisfied",
