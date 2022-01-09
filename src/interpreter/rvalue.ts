@@ -26,7 +26,6 @@ export {
   RNumber,
   RPrimFun,
   RPrimFunConfig,
-  RPrimTestFun,
   RString,
   RStruct,
   RStructGetFun,
@@ -34,9 +33,11 @@ export {
   RSymbol,
   RTestResult,
   RValue,
+  TypeName,
   isRBoolean,
   isRCallable,
   isRData,
+  isRExactPositiveInteger,
   isRInexact,
   isRList,
   isRPrimFun,
@@ -64,7 +65,6 @@ type RCallable =
   | RMakeStructFun
   | RLambda
   | RPrimFun
-  | RPrimTestFun
   | RStructGetFun;
 type RData =
   | RAtomic
@@ -419,12 +419,23 @@ class RLambda extends RCallableBase {
   }
 }
 
+enum TypeName {
+  ANY = "any",
+  BOOLEAN = "boolean",
+  EXACT_POSITIVE_INTEGER = "exact positive integer",
+  LIST = "list",
+  NUMBER = "number",
+  REAL = "real",
+  STRING = "string",
+  SYMBOL = "symbol"
+}
+
 interface RPrimFunConfig {
   minArity?: number,
   arity?: number,
-  onlyArgTypeName?: string,
-  allArgsTypeName?: string,
-  argsTypeNames?: string[]
+  onlyArgTypeName?: TypeName,
+  allArgsTypeName?: TypeName,
+  argsTypeNames?: TypeName[]
 }
 
 class RPrimFun extends RCallableBase {
@@ -446,6 +457,8 @@ class RPrimFun extends RCallableBase {
       case "number":
       case "real":
         return isRNumber;
+      case "exact positive integer":
+        return isRExactPositiveInteger;
       case "symbol":
         return isRSymbol;
       default:
@@ -459,19 +472,6 @@ class RPrimFun extends RCallableBase {
 
   call(_: RValue[], __: SourceSpan): RValue {
     throw "illegal state: not implemented";
-  }
-}
-
-class RPrimTestFun extends RPrimFun {
-  constructor(
-    readonly name: string,
-    readonly config: RPrimFunConfig
-  ) {
-    super(name, config);
-  }
-
-  accept<T>(visitor: RCallableVisitor<T>): T {
-    return visitor.visitRPrimTestFun(this);
   }
 }
 
@@ -503,6 +503,10 @@ function isRData(rval: RValue): rval is RDataBase {
 
 function isRDecimal(rval: RNumber): rval is RInexactDecimal {
   return rval instanceof RInexactDecimal;
+}
+
+function isRExactPositiveInteger(rval: RValue): rval is RExactReal {
+  return isRExactReal(rval) && rval.denominator === 1n && rval.numerator > 0n;
 }
 
 function isRExactReal(rval: RValue): rval is RExactReal {
@@ -635,6 +639,5 @@ interface RCallableVisitor<T> {
   visitRMakeStructFun(rval: RMakeStructFun): T;
   visitRLambda(rval: RLambda): T;
   visitRPrimFun(rval: RPrimFun): T;
-  visitRPrimTestFun(rval: RPrimTestFun): T;
   visitRStructGetFun(rval: RStructGetFun): T;
 }

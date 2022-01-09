@@ -175,10 +175,10 @@ const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
   return `${name}: expects at least ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual >= 2 ? actual : actual === 1 ? "only 1" : "none"}`;
 };
 const FA_NTH_WRONG_TYPE_ERR = (name: string, expected: string, n: number, actual: string) => {
-  return `${name}: expects a ${expected} as ${ordinalSuffixOf(n + 1)} argument, given ${actual}`;
+  return `${name}: expects a${expected.match(/^[aeiou]/) ? "n" : ""} ${expected} as ${ordinalSuffixOf(n + 1)} argument, given ${actual}`;
 };
 const FA_WRONG_TYPE_ERR = (name: string, expected: string, actual: string) => {
-  return `${name}: expects a ${expected}, given ${actual}`;
+  return `${name}: expects a${expected.match(/^[aeiou]/) ? "n" : ""} ${expected}, given ${actual}`;
 };
 
 const FC_EXPECTED_FUNCTION_ERR = (found: SExpr | string | null = null) => {

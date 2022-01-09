@@ -3,7 +3,8 @@ import {
   RPrimFun,
   RValue,
   R_EMPTY_LIST,
-  toRBoolean
+  toRBoolean,
+  TypeName
 } from "../rvalue.js";
 
 export {
@@ -18,7 +19,7 @@ const R_NULL = R_EMPTY_LIST;
 
 class RPFAppend extends RPrimFun {
   constructor() {
-    super("append", { minArity: 2, allArgsTypeName: "list" });
+    super("append", { minArity: 2, allArgsTypeName: TypeName.LIST });
   }
 
   call(args: RValue[]): RValue {
@@ -28,7 +29,7 @@ class RPFAppend extends RPrimFun {
 
 class RPFCons extends RPrimFun {
   constructor() {
-    super("cons", { arity: 2, argsTypeNames: ["any", "list"] });
+    super("cons", { arity: 2, argsTypeNames: [TypeName.ANY, TypeName.LIST] });
   }
 
   call(args: RValue[]): RValue {
@@ -48,7 +49,7 @@ class RPFIsEmpty extends RPrimFun {
 
 class RPFList extends RPrimFun {
   constructor() {
-    super("list", {});
+    super(TypeName.LIST, {});
   }
 
   call(args: RValue[]): RValue {

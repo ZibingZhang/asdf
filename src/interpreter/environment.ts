@@ -3,7 +3,7 @@ import {
   RIsStructFun,
   RMakeStructFun,
   RPrimFun,
-  RPrimTestFun,
+  RPrimFunConfig,
   RStructGetFun,
   RValue,
   R_EMPTY_LIST,
@@ -25,6 +25,7 @@ import {
   RPFMinus,
   RPFMultiply,
   RPFPlus,
+  RPFRandom,
   RPFSub1
 } from "./primitive/numbers.js";
 import {
@@ -122,7 +123,10 @@ class Environment {
 const PRIMITIVE_ENVIRONMENT = new Environment();
 const PRIMITIVE_DATA_NAMES: Set<string> = new Set();
 const PRIMITIVE_FUNCTION_NAMES: Set<string> = new Set();
-const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimTestFun> = new Map();
+const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
+
+PRIMITIVE_TEST_FUNCTIONS.set("check-expect", { arity: 2 });
+PRIMITIVE_TEST_FUNCTIONS.set("check-random", { arity: 2 });
 
 function addDataToPrimEnv(name: string, val: RData) {
   PRIMITIVE_DATA_NAMES.add(name);
@@ -169,6 +173,7 @@ addFnToPrimEnv(new RPFGreater());
 addFnToPrimEnv(new RPFGreaterThan());
 addFnToPrimEnv(new RPFAbs());
 addFnToPrimEnv(new RPFAdd1());
+addFnToPrimEnv(new RPFRandom());
 addFnToPrimEnv(new RPFSub1());
 addFnToPrimEnv(new RPFIsZero());
 

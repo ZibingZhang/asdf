@@ -4,7 +4,8 @@ import {
   RString,
   RValue,
   isRBoolean,
-  toRBoolean
+  toRBoolean,
+  TypeName
 } from "../rvalue.js";
 
 export {
@@ -17,7 +18,7 @@ export {
 
 class RPFBooleanToString extends RPrimFun {
   constructor() {
-    super("boolean->string", { arity: 1, onlyArgTypeName: "boolean" });
+    super("boolean->string", { arity: 1, onlyArgTypeName: TypeName.BOOLEAN });
   }
 
   call(args: RValue[]): RValue {
@@ -27,7 +28,7 @@ class RPFBooleanToString extends RPrimFun {
 
 class RPFAreBooleansEqual extends RPrimFun {
   constructor() {
-    super("boolean=?", { arity: 2, allArgsTypeName: "boolean" });
+    super("boolean=?", { arity: 2, allArgsTypeName: TypeName.BOOLEAN });
   }
 
   call(args: RValue[]): RValue {
@@ -57,7 +58,7 @@ class RPFIsFalse extends RPrimFun {
 
 class RPFNot extends RPrimFun {
   constructor() {
-    super("not", { arity: 1, onlyArgTypeName: "boolean" });
+    super("not", { arity: 1, onlyArgTypeName: TypeName.BOOLEAN });
   }
 
   call(args: RValue[]): RValue {

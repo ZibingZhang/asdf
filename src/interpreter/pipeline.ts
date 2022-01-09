@@ -9,6 +9,9 @@ import {
   ParseSExpr
 } from "./parse.js";
 import {
+  RNG
+} from "./random.js";
+import {
   SourceSpan
 } from "./sourcespan.js";
 import {
@@ -81,6 +84,7 @@ const WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
 const EVALUATE_CODE_STAGE = new EvaluateCode();
 
 function resetStages() {
+  RNG.reset();
   WELL_FORMED_PROGRAM_STAGE.reset();
   EVALUATE_CODE_STAGE.reset();
 }

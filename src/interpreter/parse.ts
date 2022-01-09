@@ -50,7 +50,7 @@ import {
 } from "./sexpr.js";
 import {
   RExactReal,
-  RPrimTestFun,
+  RPrimFunConfig,
   RString,
   RSymbol,
   R_EMPTY_LIST,
@@ -218,7 +218,8 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 sexpr.sourceSpan
               );
             }
-            case "check-expect": {
+            case "check-expect":
+            case "check-random": {
               return this.toCheckNode(leadingSExpr.token.text, sexpr);
             }
             case "cond": {
@@ -296,10 +297,10 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         sexpr.sourceSpan
       );
     }
-    const testFun = <RPrimTestFun>PRIMITIVE_TEST_FUNCTIONS.get(checkName);
-    if (testFun.config.arity && sexpr.subExprs.length - 1 !== testFun.config.arity) {
+    const config = <RPrimFunConfig>PRIMITIVE_TEST_FUNCTIONS.get(checkName);
+    if (config.arity && sexpr.subExprs.length - 1 !== config.arity) {
       throw new StageError(
-        FA_ARITY_ERR(testFun.name, testFun.config.arity, sexpr.subExprs.length - 1),
+        FA_ARITY_ERR(checkName, config.arity, sexpr.subExprs.length - 1),
         sexpr.sourceSpan
       );
     }

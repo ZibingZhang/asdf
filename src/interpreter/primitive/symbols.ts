@@ -4,7 +4,8 @@ import {
   RSymbol,
   RValue,
   isRSymbol,
-  toRBoolean
+  toRBoolean,
+  TypeName
 } from "../rvalue.js";
 
 export {
@@ -15,7 +16,7 @@ export {
 
 class RPFSymbolToString extends RPrimFun {
   constructor() {
-    super("symbol->string", { arity: 1, onlyArgTypeName: "symbol" });
+    super("symbol->string", { arity: 1, onlyArgTypeName: TypeName.SYMBOL });
   }
 
   call(args: RValue[]): RValue {
@@ -25,7 +26,7 @@ class RPFSymbolToString extends RPrimFun {
 
 class RPFAreSymbolsEqual extends RPrimFun {
   constructor() {
-    super("symbol=?", { arity: 2, allArgsTypeName: "symbol" });
+    super("symbol=?", { arity: 2, allArgsTypeName: TypeName.SYMBOL });
   }
 
   call(args: RValue[]): RValue {

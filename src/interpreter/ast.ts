@@ -18,7 +18,6 @@ import {
   RLambda,
   RMakeStructFun,
   RPrimFun,
-  RPrimTestFun,
   RStruct,
   RStructGetFun,
   RStructType,
@@ -39,6 +38,7 @@ import {
 import {
   StageError
 } from "./pipeline.js";
+import { RNG } from "./random.js";
 
 export {
   ASTNode,
@@ -155,13 +155,24 @@ class CheckNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     switch (this.name) {
-      case "check-expect": {
-        const actualVal = this.args[0].eval(env);
-        const expectedVal = this.args[1].eval(env);
+      case "check-expect":
+      case "check-random": {
+        let actualVal;
+        let expectedVal;
+        if (this.name === "check-expect") {
+          actualVal = this.args[0].eval(env);
+          expectedVal = this.args[1].eval(env);
+        } else {
+          const seed = "0";
+          RNG.reset(seed);
+          actualVal = this.args[0].eval(env);
+          RNG.reset(seed);
+          expectedVal = this.args[1].eval(env);
+        }
         if (isRInexact(actualVal) || isRInexact(expectedVal)) {
           return new RTestResult(
             false,
-            `check-expect cannot compare inexact numbers. Try (check-within ${actualVal.stringify()} ${actualVal.stringify()} range).`
+            `${this.name} cannot compare inexact numbers. Try (check-within ${actualVal.stringify()} ${actualVal.stringify()} range).`
           );
         } else if (isRData(actualVal) && actualVal.equals(expectedVal)) {
           return new RTestResult(true);
@@ -173,7 +184,7 @@ class CheckNode extends ASTNodeBase {
         }
       }
       default: {
-        throw "illegal state: not implemented test function";
+        throw "illegal state: non-implemented test function";
       }
     }
   }
@@ -530,10 +541,6 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
       }
     }
     return rval.call(argVals, this.sourceSpan);
-  }
-
-  visitRPrimTestFun(_: RPrimTestFun): RValue {
-    return R_VOID;
   }
 
   visitRStructGetFun(rval: RStructGetFun): RValue {
