@@ -5,10 +5,8 @@
     "compile": "tsc",
     "copy": "cp ./src/index.html ./build/index.html"
   },
-  "dependencies": {
-    "typescript": "^4.5.4"
-  },
   "devDependencies": {
+    "typescript": "^4.5.4",
     "@typescript-eslint/eslint-plugin": "^5.8.1",
     "@typescript-eslint/parser": "^5.8.1",
     "eslint": "^8.6.0"
