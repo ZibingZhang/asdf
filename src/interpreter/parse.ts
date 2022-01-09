@@ -16,7 +16,9 @@ import {
   VarNode,
   isDefnNode,
   CheckErrorNode,
-  CheckSatisfiedNode
+  CheckSatisfiedNode,
+  CheckMemberOfNode,
+  CheckWithinNode
 } from "./ast.js";
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
@@ -48,7 +50,8 @@ import {
   ListSExpr,
   SExpr,
   isAtomSExpr,
-  isListSExpr
+  isListSExpr,
+  AtomSExpr
 } from "./sexpr.js";
 import {
   RExactReal,
@@ -71,8 +74,10 @@ import {
   Program
 } from "./program.js";
 import {
+  Token,
   TokenType
 } from "./token.js";
+import { NO_SOURCE_SPAN } from "./sourcespan.js";
 
 export {
   ParseSExpr
@@ -222,8 +227,10 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             }
             case "check-error":
             case "check-expect":
+            case "check-member-of":
             case "check-random":
-            case "check-satisfied": {
+            case "check-satisfied":
+            case "check-within": {
               return this.toCheckNode(leadingSExpr.token.text, sexpr);
             }
             case "cond": {
@@ -327,21 +334,71 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           sexpr.sourceSpan
         );
       }
+      case "check-member-of": {
+        return new CheckMemberOfNode(
+          this.toNode(
+            new ListSExpr(
+              [
+                new AtomSExpr(
+                  new Token(TokenType.NAME, "member", sexpr.sourceSpan),
+                  sexpr.sourceSpan
+                ),
+                sexpr.subExprs[1],
+                new ListSExpr(
+                  [
+                    new AtomSExpr(
+                      new Token(TokenType.NAME, "list", sexpr.sourceSpan),
+                      sexpr.sourceSpan
+                    ),
+                    ...sexpr.subExprs.slice(2)
+                  ],
+                  sexpr.sourceSpan
+                )
+              ],
+              sexpr.sourceSpan
+            )
+          ),
+          this.toNode(sexpr.subExprs[1]),
+          sexpr.subExprs.slice(2).map(sexpr => this.toNode(sexpr)),
+          sexpr.sourceSpan,
+        );
+      }
       case "check-satisfied": {
         return new CheckSatisfiedNode(
-          [
-            this.toNode(
-              new ListSExpr(
-                [
-                  sexpr.subExprs[2],
-                  sexpr.subExprs[1]
-                ],
-                sexpr.sourceSpan)
-            ),
-          ],
+          this.toNode(
+            new ListSExpr(
+              [
+                sexpr.subExprs[2],
+                sexpr.subExprs[1]
+              ],
+              sexpr.sourceSpan
+            )
+          ),
           this.toNode(sexpr.subExprs[1]),
           sexpr.subExprs[2].stringify(),
           sexpr.sourceSpan
+        );
+      }
+      case "check-within": {
+        return new CheckWithinNode(
+          this.toNode(
+            new ListSExpr(
+              [
+                new AtomSExpr(
+                  new Token(TokenType.NAME, "equal~?", sexpr.sourceSpan),
+                  sexpr.sourceSpan
+                ),
+                sexpr.subExprs[1],
+                sexpr.subExprs[2],
+                sexpr.subExprs[3]
+              ],
+              sexpr.sourceSpan
+            )
+          ),
+          this.toNode(sexpr.subExprs[1]),
+          this.toNode(sexpr.subExprs[2]),
+          this.toNode(sexpr.subExprs[3]),
+          sexpr.sourceSpan,
         );
       }
       default: {

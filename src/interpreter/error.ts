@@ -15,7 +15,9 @@ export {
   CE_CANT_COMPARE_INEXACT_ERR,
   CE_EXPECTED_AN_ERROR_ERR,
   CE_EXPECTED_ERROR_MESSAGE_ERR,
+  CE_NOT_MEMBER_OF_ERR,
   CE_NOT_SATISFIED_ERR,
+  CE_NOT_WITHIN_ERR,
   CE_SATISFIED_NOT_BOOLEAN_ERR,
   CE_TEST_NOT_TOP_LEVEL_ERR,
   CE_WRONG_ERROR_ERR,
@@ -109,9 +111,15 @@ const CE_EXPECTED_AN_ERROR_ERR = (value: string) => {
 const CE_EXPECTED_ERROR_MESSAGE_ERR = (value: string) => {
   return `check-error: expects a string (the expected error message) for the second argument. Given ${value}`;
 };
-const CE_NOT_SATISFIED_ERR = (name: string, value: string) => {
-  return `Actual value ${value} does not satisfy ${name}.`;
+const CE_NOT_MEMBER_OF_ERR = (actual: string, against: string[]) => {
+  return `Actual value ${actual} differs from all given members in ${against.join(" ")}`;
 };
+const CE_NOT_SATISFIED_ERR = (name: string, actual: string) => {
+  return `Actual value ${actual} does not satisfy ${name}.`;
+};
+const CE_NOT_WITHIN_ERR = (actual: string, expected: string, within: string) => {
+  return `Actual value ${actual} is not within ${within} of expected value ${expected}`;
+}
 const CE_SATISFIED_NOT_BOOLEAN_ERR = (name: string, value: string) => {
   return `check-satisfied encountered an error instead of the expected kind of value, "${name}".\n  :: ${name} [as predicate in check-satisfied]: is expected to return a boolean, but it returned ${value}`;
 };

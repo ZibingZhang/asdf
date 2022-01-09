@@ -4,7 +4,9 @@ import {
   CE_CANT_COMPARE_INEXACT_ERR,
   CE_EXPECTED_AN_ERROR_ERR,
   CE_EXPECTED_ERROR_MESSAGE_ERR,
+  CE_NOT_MEMBER_OF_ERR,
   CE_NOT_SATISFIED_ERR,
+  CE_NOT_WITHIN_ERR,
   CE_SATISFIED_NOT_BOOLEAN_ERR,
   CE_WRONG_ERROR_ERR,
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
@@ -57,8 +59,10 @@ export {
   AndNode,
   AtomNode,
   CheckErrorNode,
+  CheckMemberOfNode,
   CheckNode,
   CheckSatisfiedNode,
+  CheckWithinNode,
   CondNode,
   DefnNode,
   DefnStructNode,
@@ -245,18 +249,39 @@ class CheckErrorNode extends CheckNode {
   }
 }
 
+class CheckMemberOfNode extends CheckNode {
+  constructor(
+    readonly arg: ASTNode,
+    readonly testValNode: ASTNode,
+    readonly testAgainstValNodes: ASTNode[],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super("check-member-of", [arg], sourceSpan);
+  }
+
+  eval(env: Environment): RValue {
+    if (isRFalse(this.arg.eval(env))) {
+      return new RTestResult(
+        false,
+        CE_NOT_MEMBER_OF_ERR(this.testValNode.eval(env).stringify(), this.testAgainstValNodes.map(node => node.eval(env).stringify()))
+      );
+    }
+    return new RTestResult(true);
+  }
+}
+
 class CheckSatisfiedNode extends CheckNode {
   constructor(
-    readonly args: ASTNode[],
+    readonly arg: ASTNode,
     readonly testValNode: ASTNode,
     readonly testFnName: string,
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-satisfied", args, sourceSpan);
+    super("check-satisfied", [arg], sourceSpan);
   }
 
   eval(env: Environment): RValue {
-    const val = this.args[0].eval(env);
+    const val = this.arg.eval(env);
     if (!isRBoolean(val)) {
       return new RTestResult(
         false,
@@ -267,6 +292,28 @@ class CheckSatisfiedNode extends CheckNode {
       return new RTestResult(
         false,
         CE_NOT_SATISFIED_ERR(this.testFnName, this.testValNode.eval(env).stringify())
+      );
+    }
+    return new RTestResult(true);
+  }
+}
+
+class CheckWithinNode extends CheckNode {
+  constructor(
+    readonly arg: ASTNode,
+    readonly actualNode: ASTNode,
+    readonly expectedNode: ASTNode,
+    readonly withinNode: ASTNode,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super("check-within", [arg], sourceSpan);
+  }
+
+  eval(env: Environment): RValue {
+    if (isRFalse(this.arg.eval(env))) {
+      return new RTestResult(
+        false,
+        CE_NOT_WITHIN_ERR(this.actualNode.eval(env).stringify(), this.expectedNode.eval(env).stringify(), this.withinNode.eval(env).stringify())
       );
     }
     return new RTestResult(true);
