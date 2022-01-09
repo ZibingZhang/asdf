@@ -127,6 +127,7 @@ const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 
 PRIMITIVE_TEST_FUNCTIONS.set("check-expect", { arity: 2 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-random", { arity: 2 });
+PRIMITIVE_TEST_FUNCTIONS.set("check-satisfied", { arity: 2 });
 
 function addDataToPrimEnv(name: string, val: RData) {
   PRIMITIVE_DATA_NAMES.add(name);

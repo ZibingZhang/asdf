@@ -219,7 +219,8 @@ class ParseSExpr implements Stage<SExpr[], Program> {
               );
             }
             case "check-expect":
-            case "check-random": {
+            case "check-random":
+            case "check-satisfied": {
               return this.toCheckNode(leadingSExpr.token.text, sexpr);
             }
             case "cond": {
@@ -304,11 +305,27 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         sexpr.sourceSpan
       );
     }
-    return new CheckNode(
-      checkName,
-      sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
-      sexpr.sourceSpan
-    );
+    switch (checkName) {
+      case "check-satisfied": {
+        return new CheckNode(
+          "check-expect",
+          [
+            this.toNode(
+              new ListSExpr([sexpr.subExprs[2], sexpr.subExprs[1]], sexpr.sourceSpan)
+            ),
+            new AtomNode(R_TRUE, sexpr.sourceSpan)
+          ],
+          sexpr.sourceSpan
+        );
+      }
+      default: {
+        return new CheckNode(
+          checkName,
+          sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
+          sexpr.sourceSpan
+        );
+      }
+    }
   }
 
   private toCondNode(sexpr: ListSExpr): CondNode {
