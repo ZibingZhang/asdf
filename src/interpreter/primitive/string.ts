@@ -1,11 +1,11 @@
 import {
-  RPrimFun,
-  RValue,
-  toRBoolean,
-  isRString,
   RExactReal,
+  RPrimFun,
+  RString,
+  RValue,
   TypeName,
-  RString
+  isRString,
+  toRBoolean
 } from "../rvalue.js";
 
 export {
@@ -41,7 +41,7 @@ class RPFIsStringLessEqualThan extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return toRBoolean((<RString>args[0]).val <= (<RString>args[1]).val)
+    return toRBoolean((<RString>args[0]).val <= (<RString>args[1]).val);
   }
 }
 

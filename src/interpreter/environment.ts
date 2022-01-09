@@ -17,8 +17,11 @@ import {
   RPFAdd1,
   RPFDivide,
   RPFEqual,
+  RPFExp,
+  RPFExpt,
   RPFGreater,
   RPFGreaterThan,
+  RPFIsInteger,
   RPFIsZero,
   RPFLess,
   RPFLessThan,
@@ -26,6 +29,8 @@ import {
   RPFMultiply,
   RPFPlus,
   RPFRandom,
+  RPFSqr,
+  RPFSqrt,
   RPFSub1
 } from "./primitive/numbers.js";
 import {
@@ -185,7 +190,12 @@ addFnToPrimEnv(new RPFGreater());
 addFnToPrimEnv(new RPFGreaterThan());
 addFnToPrimEnv(new RPFAbs());
 addFnToPrimEnv(new RPFAdd1());
+addFnToPrimEnv(new RPFExp());
+addFnToPrimEnv(new RPFExpt());
+addFnToPrimEnv(new RPFIsInteger());
 addFnToPrimEnv(new RPFRandom());
+addFnToPrimEnv(new RPFSqr());
+addFnToPrimEnv(new RPFSqrt());
 addFnToPrimEnv(new RPFSub1());
 addFnToPrimEnv(new RPFIsZero());
 

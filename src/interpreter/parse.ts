@@ -2,7 +2,11 @@ import {
   ASTNode,
   AndNode,
   AtomNode,
+  CheckErrorNode,
+  CheckMemberOfNode,
   CheckNode,
+  CheckSatisfiedNode,
+  CheckWithinNode,
   CondNode,
   DefnNode,
   DefnStructNode,
@@ -14,12 +18,15 @@ import {
   LambdaNode,
   OrNode,
   VarNode,
-  isDefnNode,
-  CheckErrorNode,
-  CheckSatisfiedNode,
-  CheckMemberOfNode,
-  CheckWithinNode
+  isDefnNode
 } from "./ast.js";
+import {
+  AtomSExpr,
+  ListSExpr,
+  SExpr,
+  isAtomSExpr,
+  isListSExpr
+} from "./sexpr.js";
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
   CN_ELSE_NOT_LAST_CLAUSE_ERR,
@@ -47,13 +54,6 @@ import {
   SX_NOT_TOP_LEVEL_DEFN_ERR
 } from "./error.js";
 import {
-  ListSExpr,
-  SExpr,
-  isAtomSExpr,
-  isListSExpr,
-  AtomSExpr
-} from "./sexpr.js";
-import {
   RExactReal,
   RPrimFunConfig,
   RString,
@@ -68,16 +68,15 @@ import {
   StageOutput
 } from "./pipeline.js";
 import {
+  Token,
+  TokenType
+} from "./token.js";
+import {
   PRIMITIVE_TEST_FUNCTIONS
 } from "./environment.js";
 import {
   Program
 } from "./program.js";
-import {
-  Token,
-  TokenType
-} from "./token.js";
-import { NO_SOURCE_SPAN } from "./sourcespan.js";
 
 export {
   ParseSExpr
@@ -360,7 +359,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           ),
           this.toNode(sexpr.subExprs[1]),
           sexpr.subExprs.slice(2).map(sexpr => this.toNode(sexpr)),
-          sexpr.sourceSpan,
+          sexpr.sourceSpan
         );
       }
       case "check-satisfied": {
@@ -398,7 +397,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           this.toNode(sexpr.subExprs[1]),
           this.toNode(sexpr.subExprs[2]),
           this.toNode(sexpr.subExprs[3]),
-          sexpr.sourceSpan,
+          sexpr.sourceSpan
         );
       }
       default: {

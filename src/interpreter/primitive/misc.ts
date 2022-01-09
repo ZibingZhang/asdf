@@ -1,11 +1,11 @@
 import {
+  RNumber,
   RPrimFun,
   RValue,
+  TypeName,
   isRData,
   isRStruct,
-  toRBoolean,
-  RNumber,
-  TypeName
+  toRBoolean
 } from "../rvalue.js";
 
 export {

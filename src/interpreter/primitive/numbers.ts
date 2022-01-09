@@ -1,4 +1,12 @@
 import {
+  FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR,
+  FA_DIV_BY_ZERO_ERR
+} from "../error.js";
+import {
+  NO_SOURCE_SPAN,
+  SourceSpan
+} from "../sourcespan.js";
+import {
   RExactReal,
   RInexactRational,
   RMath,
@@ -8,17 +16,13 @@ import {
   R_FALSE,
   R_TRUE,
   TypeName,
+  isRDecimal,
+  isRInteger,
   toRBoolean
 } from "../rvalue.js";
 import {
-  FA_DIV_BY_ZERO_ERR
-} from "../error.js";
-import {
   RNG
 } from "../random.js";
-import {
-  SourceSpan
-} from "../sourcespan.js";
 import {
   StageError
 } from "../pipeline.js";
@@ -36,8 +40,13 @@ export {
   RPFAbs,
   RPFAdd1,
   RPC_E,
+  RPFExp,
+  RPFExpt,
+  RPFIsInteger,
   RPC_PI,
   RPFRandom,
+  RPFSqr,
+  RPFSqrt,
   RPFSub1,
   RPFIsZero
 };
@@ -186,7 +195,7 @@ class RPFAbs extends RPrimFun {
 
   call(args: RValue[]): RValue {
     const number = <RNumber>args[0];
-    if (number.toInexactDecimal().val < 0) {
+    if (number.isNegative()) {
       return number.negate();
     } else {
       return number;
@@ -204,6 +213,47 @@ class RPFAdd1 extends RPrimFun {
   }
 }
 
+class RPFExp extends RPrimFun {
+  constructor() {
+    super("exp", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+  }
+
+  call(args: RValue[]): RValue {
+    return RMath.pow(RPC_E, <RNumber>args[0]);
+  }
+}
+
+class RPFExpt extends RPrimFun {
+  constructor() {
+    super("expt", { arity: 2, allArgsTypeName: TypeName.NUMBER });
+  }
+
+  call(args: RValue[]): RValue {
+    const base = <RNumber>args[0];
+    const expt = <RNumber>args[1];
+    if (
+      base.isNegative()
+      && (isRDecimal(expt) || expt.denominator !== 1n)
+    ) {
+      throw new StageError(
+        FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR(this.name),
+        NO_SOURCE_SPAN
+      );
+    }
+    return RMath.pow(base, expt);
+  }
+}
+
+class RPFIsInteger extends RPrimFun {
+  constructor() {
+    super("integer?", { arity: 1 });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean(isRInteger(args[0]));
+  }
+}
+
 class RPFRandom extends RPrimFun {
   constructor() {
     super("random", { arity: 1, onlyArgTypeName: TypeName.EXACT_POSITIVE_INTEGER });
@@ -211,6 +261,37 @@ class RPFRandom extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return new RExactReal(BigInt(Math.floor(RNG.next() * Number((<RExactReal>args[0]).numerator))));
+  }
+}
+
+class RPFSqr extends RPrimFun {
+  expt = new RExactReal(2n);
+
+  constructor() {
+    super("sqr", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+  }
+
+  call(args: RValue[]): RValue {
+    return RMath.pow(<RNumber>args[0], this.expt);
+  }
+}
+
+class RPFSqrt extends RPrimFun {
+  expt = new RExactReal(1n, 2n);
+
+  constructor() {
+    super("sqrt", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+  }
+
+  call(args: RValue[]): RValue {
+    const base = <RNumber>args[0];
+    if (base.isNegative()) {
+      throw new StageError(
+        FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR(this.name),
+        NO_SOURCE_SPAN
+      );
+    }
+    return RMath.pow(base, this.expt);
   }
 }
 

@@ -37,10 +37,12 @@ export {
   isRBoolean,
   isRCallable,
   isRData,
+  isRDecimal,
   isREmptyList,
   isRExactPositiveInteger,
   isRFalse,
   isRInexact,
+  isRInteger,
   isRList,
   isRPrimFun,
   isRString,
@@ -87,6 +89,10 @@ type RInexact =
   | RInexactDecimal
   | RInexactRational;
 
+type RRational =
+  | RExactReal
+  | RInexactRational;
+
 interface RValBase {
   stringify(): string;
 }
@@ -108,7 +114,7 @@ abstract class RDataBase implements RValBase {
   abstract equalWithin(rval: RValue, ep: number): boolean;
 
   equal(rval: RValue): boolean {
-    return this.equalWithin(rval, 0)
+    return this.equalWithin(rval, 0);
   }
 
   eqv(rval: RValue): boolean {
@@ -270,6 +276,8 @@ abstract class RNumberBase extends RDataBase {
 
   abstract isZero(): boolean;
 
+  abstract isNegative(): boolean;
+
   abstract toInexactDecimal(): RInexactDecimal;
 
   abstract stringify(): string;
@@ -281,14 +289,15 @@ class RExactReal extends RNumberBase {
     readonly denominator: bigint = 1n
   ) {
     super();
-    const divisor = gcd(
-      numerator >= 0
-        ? numerator
-        : -1n * numerator,
-      denominator
-    );
-    this.numerator = numerator / divisor;
-    this.denominator = denominator / divisor;
+    if ((numerator < 0 && denominator < 0) || (numerator > 0 && denominator > 0)) {
+      const divisor = gcd(numerator, denominator);
+      this.numerator = numerator / divisor;
+      this.denominator = denominator / divisor;
+    } else {
+      const divisor = gcd(-1n * numerator, denominator);
+      this.numerator = numerator / divisor;
+      this.denominator = denominator / divisor;
+    }
   }
 
   stringify(): string {
@@ -312,6 +321,10 @@ class RExactReal extends RNumberBase {
 
   isZero(): boolean {
     return this.numerator === 0n;
+  }
+
+  isNegative(): boolean {
+    return this.numerator < 0;
   }
 
   toInexactDecimal(): RInexactDecimal {
@@ -341,6 +354,10 @@ class RInexactDecimal extends RNumberBase {
     return this.val === 0;
   }
 
+  isNegative(): boolean {
+    return this.val < 0;
+  }
+
   toInexactDecimal(): RInexactDecimal {
     return this;
   }
@@ -352,14 +369,15 @@ class RInexactRational extends RNumberBase {
     readonly denominator: bigint
   ) {
     super();
-    const divisor = gcd(
-      numerator >= 0
-        ? numerator
-        : -1n * numerator,
-      denominator
-    );
-    this.numerator = numerator / divisor;
-    this.denominator = denominator / divisor;
+    if ((numerator < 0 && denominator < 0) || (numerator > 0 && denominator > 0)) {
+      const divisor = gcd(numerator, denominator);
+      this.numerator = numerator / divisor;
+      this.denominator = denominator / divisor;
+    } else {
+      const divisor = gcd(-1n * numerator, denominator);
+      this.numerator = numerator / divisor;
+      this.denominator = denominator / divisor;
+    }
   }
 
   stringify(): string {
@@ -383,6 +401,10 @@ class RInexactRational extends RNumberBase {
 
   isZero(): boolean {
     return this.numerator === 0n;
+  }
+
+  isNegative(): boolean {
+    return this.numerator < 0;
   }
 
   toInexactDecimal(): RInexactDecimal {
@@ -560,6 +582,10 @@ function isRInexactRational(rval: RValue): rval is RInexactRational {
   return rval instanceof RInexactRational;
 }
 
+function isRInteger(rval: RValue): rval is RInexact {
+  return isRRational(rval) && rval.denominator === 1n;
+}
+
 function isRList(rval: RValue): rval is RList {
   return rval instanceof RList;
 }
@@ -578,6 +604,11 @@ function isRNumber(rval: RValue): rval is RNumberBase {
 
 function isRPrimFun(rval: RCallable): rval is RPrimFun {
   return rval instanceof RPrimFun;
+}
+
+function isRRational(rval: RValue): rval is RRational {
+  return rval instanceof RExactReal
+    || rval instanceof RInexactRational;
 }
 
 function isRString(rval: RValue): rval is RString {
@@ -655,6 +686,43 @@ abstract class RMath {
     }
   }
 
+  static pow(base: RNumber, expt: RNumber): RNumber {
+    if (isRDecimal(base) || isRDecimal(expt)) {
+      if (base.isNegative()) {
+        throw "illegal state: complex numbers not supported";
+      }
+      return new RInexactDecimal(Math.pow(base.toInexactDecimal().val, base.toInexactDecimal().val));
+    } else if (expt.isZero()) {
+      return new RExactReal(1n);
+    } else if (base.isZero()) {
+      return new RExactReal(0n);
+    } else if (base.isNegative() && expt.denominator !== 1n) {
+      throw "illegal state: complex numbers not supported";
+    } else {
+      let pow;
+      let numerator;
+      let denominator;
+      if (expt.isNegative()) {
+        pow = expt.negate();
+        numerator = base.denominator ** pow.numerator;
+        denominator = base.numerator ** pow.numerator;
+      } else {
+        pow = expt;
+        numerator = base.numerator ** pow.numerator;
+        denominator = base.denominator ** pow.numerator;
+      }
+      if (RMath.perfectPower(numerator, expt.denominator) && RMath.perfectPower(denominator, expt.denominator)) {
+        if (isRExactReal(base) && isRExactReal(expt)) {
+          return new RExactReal(RMath.iroot(numerator, expt.denominator), RMath.iroot(denominator, expt.denominator));
+        } else {
+          return new RInexactRational(RMath.iroot(numerator, expt.denominator), RMath.iroot(denominator, expt.denominator));
+        }
+      } else {
+        return new RInexactDecimal((Number(numerator) ** (1 / Number(pow.denominator))) / (Number(denominator) ** (1 / Number(pow.denominator))));
+      }
+    }
+  }
+
   static sub(rnum1: RNumber, rnum2: RNumber): RNumber {
     const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
     if (isRDecimal(rnum1) || isRDecimal(rnum2)) {
@@ -668,6 +736,20 @@ abstract class RMath {
         return new RInexactRational(numerator, denominator);
       }
     }
+  }
+
+  private static perfectPower(base: bigint, root: bigint): boolean {
+    return (RMath.iroot(base, root) ** root) === base;}
+
+  private static iroot(base: bigint, root: bigint): bigint {
+    let s = base + 1n;
+    const k1 = root - 1n;
+    let u = base;
+    while (u < s) {
+      s = u;
+      u = ((u*k1) + base / (u ** k1)) / root;
+    }
+    return s;
   }
 }
 

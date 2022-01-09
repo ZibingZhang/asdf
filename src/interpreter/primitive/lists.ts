@@ -4,10 +4,10 @@ import {
   RValue,
   R_EMPTY_LIST,
   TypeName,
-  toRBoolean,
   isRData,
   isREmptyList,
-  isRList
+  isRList,
+  toRBoolean
 } from "../rvalue.js";
 
 export {

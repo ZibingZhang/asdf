@@ -41,6 +41,7 @@ export {
   EL_EXPECTED_FINISHED_EXPR_ERR,
   ES_NOT_IN_COND_ERR,
   FA_ARITY_ERR,
+  FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
@@ -119,7 +120,7 @@ const CE_NOT_SATISFIED_ERR = (name: string, actual: string) => {
 };
 const CE_NOT_WITHIN_ERR = (actual: string, expected: string, within: string) => {
   return `Actual value ${actual} is not within ${within} of expected value ${expected}`;
-}
+};
 const CE_SATISFIED_NOT_BOOLEAN_ERR = (name: string, value: string) => {
   return `check-satisfied encountered an error instead of the expected kind of value, "${name}".\n  :: ${name} [as predicate in check-satisfied]: is expected to return a boolean, but it returned ${value}`;
 };
@@ -205,6 +206,9 @@ const FA_ARITY_ERR = (name: string, expected: number, actual: number) => {
   } else {
     return `${name}: expects ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual === 0 ? "none" : `only ${actual}`}`;
   }
+};
+const FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR = (name: string) => {
+  return `${name}: complex numbers are not supported;`;
 };
 const FA_DIV_BY_ZERO_ERR = "/: division by zero";
 const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {

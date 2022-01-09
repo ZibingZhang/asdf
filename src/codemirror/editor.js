@@ -180,38 +180,10 @@ const initValue =
 
 ; EXERCISE 8 -----------------------------------------------------------------------------------------
 
-#|
-; A LOI is one of :
-; - '()
-; - (cons Image LOI)
-; and represents a list of images
-(define LOI1 '())
-(define LOI2 (cons (circle 20 "solid" "blue") LOI1))
-(define LOI3 (cons (rectangle 50 75 "solid" "red") LOI2))
-(define LOI4 (cons (triangle 45 "solid" "pink") LOI3))
-
-; smoosh : LOI -> Image
-; Places the Images next to each other in order (so that Images that appear closer to the front of
-; the list will appear further to the left)
-(define (smoosh loi)
-  (cond
-    [(empty? loi)
-     empty-image]
-    [(cons? loi)
-     (beside (first loi)
-             (smoosh (rest loi)))]))
-(check-expect (smoosh LOI1) empty-image)
-(check-expect (smoosh LOI2) (circle 20 "solid" "blue"))
-(check-expect (smoosh LOI3) (beside (rectangle 50 75 "solid" "red")
-                                    (circle 20 "solid" "blue")))
-(check-expect (smoosh LOI4) (beside (triangle 45 "solid" "pink")
-                                    (beside (rectangle 50 75 "solid" "red")
-                                            (circle 20 "solid" "blue"))))
-|#
+;; Removed exercise that dealt with images
 
 ; EXERCISE 9 -----------------------------------------------------------------------------------------
 
-#|
 (define LON7 (cons 4 LON1))
 (define LON8 (cons 9 LON7))
 (define LON9 (cons 0.2 LON8))
@@ -240,8 +212,8 @@ const initValue =
 (check-expect (cond-sqrt   0) 0)
 (check-expect (cond-sqrt 8/2) 2)
 (check-expect (cond-sqrt 9.0) 3)
-(check-expect (cond-sqrt  -9) -9)
-|#
+;; Complex numbers are not supported
+;; (check-expect (cond-sqrt  -9) -9)
 
 ; EXERCISE 10 ----------------------------------------------------------------------------------------
 
