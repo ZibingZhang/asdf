@@ -3,12 +3,15 @@ import {
   RValue,
   isRData,
   isRStruct,
-  toRBoolean
+  toRBoolean,
+  RNumber,
+  TypeName
 } from "../rvalue.js";
 
 export {
   RPFAreEq,
   RPFAreEqual,
+  RPFAreEqualWithin,
   RPFAreEqv,
   RPFIdentity,
   RPFIsStruct
@@ -16,7 +19,7 @@ export {
 
 class RPFAreEq extends RPrimFun {
   constructor() {
-    super("eq?", { minArity: 2 });
+    super("eq?", { arity: 2 });
   }
 
   call(args: RValue[]): RValue {
@@ -26,17 +29,28 @@ class RPFAreEq extends RPrimFun {
 
 class RPFAreEqual extends RPrimFun {
   constructor() {
-    super("equal?", { minArity: 2 });
+    super("equal?", { arity: 2 });
   }
 
   call(args: RValue[]): RValue {
-    return toRBoolean(isRData(args[0]) && args[0].equals(args[1]));
+    return toRBoolean(isRData(args[0]) && args[0].equal(args[1]));
+  }
+}
+
+class RPFAreEqualWithin extends RPrimFun {
+  constructor() {
+    super("equal~?", { arity: 3, argsTypeNames: [TypeName.ANY, TypeName.ANY, TypeName.NON_NEGATIVE_REAL] });
+  }
+
+  call(args: RValue[]): RValue {
+    const ep = (<RNumber>args[2]).toInexactDecimal().val;
+    return toRBoolean(isRData(args[0]) && args[0].equalWithin(args[1], ep));
   }
 }
 
 class RPFAreEqv extends RPrimFun {
   constructor() {
-    super("eqv?", { minArity: 2 });
+    super("eqv?", { arity: 2 });
   }
 
   call(args: RValue[]): RValue {

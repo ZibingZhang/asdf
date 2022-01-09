@@ -33,6 +33,7 @@ import {
   RPFCons,
   RPFIsEmpty,
   RPFList,
+  RPFMember,
   R_NULL
 } from "./primitive/lists.js";
 import {
@@ -45,6 +46,7 @@ import {
 import {
   RPFAreEq,
   RPFAreEqual,
+  RPFAreEqualWithin,
   RPFAreEqv,
   RPFIdentity,
   RPFIsStruct
@@ -196,6 +198,9 @@ addFnToPrimEnv(new RPFAppend());
 addFnToPrimEnv(new RPFCons());
 addFnToPrimEnv(new RPFIsEmpty());
 addFnToPrimEnv(new RPFList());
+addFnToPrimEnv(new RPFMember());
+addFnToPrimEnv(new RPFMember("member?"));
+addFnToPrimEnv(new RPFIsEmpty("null?"));
 
 // posns
 addStructToPrimEnv("posn", ["x", "y"]);
@@ -203,6 +208,7 @@ addStructToPrimEnv("posn", ["x", "y"]);
 // misc
 addFnToPrimEnv(new RPFAreEq());
 addFnToPrimEnv(new RPFAreEqual());
+addFnToPrimEnv(new RPFAreEqualWithin());
 addFnToPrimEnv(new RPFAreEqv());
 addFnToPrimEnv(new RPFIdentity());
 addFnToPrimEnv(new RPFIsStruct());

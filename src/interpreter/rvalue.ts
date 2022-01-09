@@ -104,10 +104,14 @@ class RTestResult implements RValBase {
 abstract class RDataBase implements RValBase {
   abstract stringify(): string;
 
-  abstract equals(rval: RValue): boolean;
+  abstract equalWithin(rval: RValue, ep: number): boolean;
+
+  equal(rval: RValue): boolean {
+    return this.equalWithin(rval, 0)
+  }
 
   eqv(rval: RValue): boolean {
-    return this.equals(rval);
+    return this.equal(rval);
   }
 
   eq(rval: RValue): boolean {
@@ -124,7 +128,7 @@ class RBoolean extends RDataBase {
     return this.val ? "#true" : "#false";
   }
 
-  equals(rval: RValue): boolean {
+  equalWithin(rval: RValue, _: number): boolean {
     return isRBoolean(rval)
       && rval.val === this.val;
   }
@@ -148,14 +152,14 @@ class RList extends RDataBase {
     }
   }
 
-  equals(rval: RValue): boolean {
+  equalWithin(rval: RValue, ep: number): boolean {
     return isRList(rval)
       && rval.vals.length === this.vals.length
       && rval.vals.every((rval, idx) => {
         const val = this.vals[idx];
         return isRData(rval)
           && isRData(val)
-          && rval.equals(val);
+          && rval.equalWithin(val, ep);
       });
   }
 
@@ -173,7 +177,7 @@ class RString extends RDataBase {
     return `"${this.val}"`;
   }
 
-  equals(rval: RValue): boolean {
+  equalWithin(rval: RValue, _: number): boolean {
     return isRString(rval)
       && rval.val === this.val;
   }
@@ -195,14 +199,14 @@ class RStruct extends RDataBase {
     }
   }
 
-  equals(rval: RValue): boolean {
+  equalWithin(rval: RValue, ep: number): boolean {
     return isRStruct(rval)
       && rval.name === this.name
       && rval.vals.every((rval, idx) => {
         const val = this.vals[idx];
         return isRData(rval)
           && isRData(val)
-          && rval.equals(val);
+          && rval.equalWithin(val, ep);
       });
   }
 
@@ -220,7 +224,7 @@ class RStructType extends RDataBase {
     throw "illegal state: cannot stringify a structure type";
   }
 
-  equals(rval: RValue): boolean {
+  equalWithin(rval: RValue, _: number): boolean {
     return isRStructType(rval)
       && rval.name === this.name;
   }
@@ -235,7 +239,7 @@ class RSymbol extends RDataBase {
     return "'" + this.val;
   }
 
-  equals(rval: RValue): boolean {
+  equalWithin(rval: RValue, _: number): boolean {
     return isRSymbol(rval)
       && rval.val === this.val;
   }
@@ -246,12 +250,21 @@ class RVoid extends RDataBase {
     return "(void)";
   }
 
-  equals(rval: RValue): boolean {
+  equalWithin(rval: RValue, _: number): boolean {
     return isRVoid(rval);
   }
 }
 
 abstract class RNumberBase extends RDataBase {
+  equalWithin(rval: RValue, ep: number): boolean {
+    return isRNumber(rval)
+      && this.within(rval, ep);
+  }
+
+  within(that: RNumber, ep: number): boolean {
+    return Math.abs(this.toInexactDecimal().val - that.toInexactDecimal().val) <= ep;
+  }
+
   abstract negate(): RNumber;
 
   abstract isZero(): boolean;
@@ -286,7 +299,7 @@ class RExactReal extends RNumberBase {
     }
   }
 
-  equals(rval: RValue): boolean {
+  equal(rval: RValue): boolean {
     return isRExactReal(rval)
       && rval.numerator === this.numerator
       && rval.denominator === this.denominator;
@@ -314,7 +327,7 @@ class RInexactDecimal extends RNumberBase {
     return `#i${this.val}`;
   }
 
-  equals(rval: RValue): boolean {
+  equal(rval: RValue): boolean {
     return isRInexactDecimal(rval)
       && rval.val === this.val;
   }
@@ -357,7 +370,7 @@ class RInexactRational extends RNumberBase {
     }
   }
 
-  equals(rval: RValue): boolean {
+  equal(rval: RValue): boolean {
     return isRInexactRational(rval)
       && rval.numerator === this.numerator
       && rval.denominator === this.denominator;
@@ -426,6 +439,7 @@ enum TypeName {
   BOOLEAN = "boolean",
   EXACT_POSITIVE_INTEGER = "exact positive integer",
   LIST = "list",
+  NON_NEGATIVE_REAL = "non-negative real",
   NUMBER = "number",
   REAL = "real",
   STRING = "string",
@@ -449,20 +463,22 @@ class RPrimFun extends RCallableBase {
     super();
   }
 
-  typeGuardOf(typeName: string): (rval: RValue) => boolean {
+  typeGuardOf(typeName: TypeName): (rval: RValue) => boolean {
     switch(typeName) {
-      case "any":
+      case TypeName.ANY:
         return () => true;
-      case "boolean":
+      case TypeName.BOOLEAN:
         return isRBoolean;
-      case "list":
-        return isRList;
-      case "number":
-      case "real":
-        return isRNumber;
-      case "exact positive integer":
+      case TypeName.EXACT_POSITIVE_INTEGER:
         return isRExactPositiveInteger;
-      case "symbol":
+      case TypeName.LIST:
+        return isRList;
+      case TypeName.NON_NEGATIVE_REAL:
+        return isRNonNegativeReal;
+      case TypeName.NUMBER:
+      case TypeName.REAL:
+        return isRNumber;
+      case TypeName.SYMBOL:
         return isRSymbol;
       default:
         throw "illegal state: unsupported allArgsTypeName";
@@ -536,6 +552,10 @@ function isRInexactRational(rval: RValue): rval is RInexactRational {
 
 function isRList(rval: RValue): rval is RList {
   return rval instanceof RList;
+}
+
+function isRNonNegativeReal(rval: RValue): rval is RNumberBase {
+  return isRNumber(rval) && rval.toInexactDecimal().val >= 0;
 }
 
 function isRNumber(rval: RValue): rval is RNumberBase {

@@ -4,7 +4,8 @@ import {
   RValue,
   R_EMPTY_LIST,
   TypeName,
-  toRBoolean
+  toRBoolean,
+  isRData
 } from "../rvalue.js";
 
 export {
@@ -12,6 +13,7 @@ export {
   RPFCons,
   RPFIsEmpty,
   RPFList,
+  RPFMember,
   R_NULL
 };
 
@@ -38,8 +40,8 @@ class RPFCons extends RPrimFun {
 }
 
 class RPFIsEmpty extends RPrimFun {
-  constructor() {
-    super("empty?", { arity: 1 });
+  constructor(alias: string | null = null) {
+    super(alias || "empty?", { arity: 1 });
   }
 
   call(args: RValue[]): RValue {
@@ -49,10 +51,21 @@ class RPFIsEmpty extends RPrimFun {
 
 class RPFList extends RPrimFun {
   constructor() {
-    super(TypeName.LIST, {});
+    super("list", {});
   }
 
   call(args: RValue[]): RValue {
     return new RList(args);
+  }
+}
+
+class RPFMember extends RPrimFun {
+  constructor(alias: string | null = null) {
+    super(alias || "member", { argsTypeNames: [TypeName.ANY, TypeName.LIST] });
+  }
+
+  call(args: RValue[]): RValue {
+    const testVal = args[0];
+    return toRBoolean(isRData(testVal) && (<RList>args[1]).vals.some((val) => testVal.equal(val)));
   }
 }

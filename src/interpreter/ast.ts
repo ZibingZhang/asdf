@@ -189,7 +189,7 @@ class CheckNode extends ASTNodeBase {
             false,
             CE_CANT_COMPARE_INEXACT_ERR(this.name, actualVal.stringify(), expectedVal.stringify())
           );
-        } else if (isRData(actualVal) && actualVal.equals(expectedVal)) {
+        } else if (isRData(actualVal) && actualVal.equal(expectedVal)) {
           return new RTestResult(true);
         } else {
           return new RTestResult(
