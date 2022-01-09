@@ -56,7 +56,9 @@ export {
   ASTNode,
   AndNode,
   AtomNode,
+  CheckErrorNode,
   CheckNode,
+  CheckSatisfiedNode,
   CondNode,
   DefnNode,
   DefnStructNode,
@@ -168,36 +170,6 @@ class CheckNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     switch (this.name) {
-      case "check-error": {
-        let expectedErrMsg: RValue | null = null;
-        if (this.args[1]) {
-          expectedErrMsg = this.args[1].eval(env);
-          if (!isRString(expectedErrMsg)) {
-            throw new StageError(
-              CE_EXPECTED_ERROR_MESSAGE_ERR(expectedErrMsg.stringify()),
-              this.args[1].sourceSpan
-            );
-          }
-        }
-        try {
-          return new RTestResult(
-            false,
-            CE_EXPECTED_AN_ERROR_ERR(this.args[0].eval(env).stringify())
-          );
-        } catch (e) {
-          if (e instanceof StageError) {
-            if (expectedErrMsg && expectedErrMsg.val !== e.msg) {
-              return new RTestResult(
-                false,
-                CE_WRONG_ERROR_ERR(expectedErrMsg.val, e.msg)
-              );
-            }
-            return new RTestResult(true);
-          } else {
-            throw e;
-          }
-        }
-      }
       case "check-expect":
       case "check-random": {
         let actualVal;
@@ -226,26 +198,78 @@ class CheckNode extends ASTNodeBase {
           );
         }
       }
-      case "check-satisfied": {
-        const val = this.args[0].eval(env);
-        if (!isRBoolean(val)) {
-          return new RTestResult(
-            false,
-            CE_SATISFIED_NOT_BOOLEAN_ERR(<string>this.meta[1], val.stringify())
-          );
-        }
-        if (isRFalse(val)) {
-          return new RTestResult(
-            false,
-            CE_NOT_SATISFIED_ERR(<string>this.meta[1], (<ASTNode>this.meta[0]).eval(env).stringify())
-          );
-        }
-        return new RTestResult(true);
-      }
       default: {
         throw "illegal state: non-implemented test function";
       }
     }
+  }
+}
+
+class CheckErrorNode extends CheckNode {
+  constructor(
+    readonly args: ASTNode[],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super("check-error", args, sourceSpan);
+  }
+
+  eval(env: Environment): RValue {
+    let expectedErrMsg: RValue | null = null;
+    if (this.args[1]) {
+      expectedErrMsg = this.args[1].eval(env);
+      if (!isRString(expectedErrMsg)) {
+        throw new StageError(
+          CE_EXPECTED_ERROR_MESSAGE_ERR(expectedErrMsg.stringify()),
+          this.args[1].sourceSpan
+        );
+      }
+    }
+    try {
+      return new RTestResult(
+        false,
+        CE_EXPECTED_AN_ERROR_ERR(this.args[0].eval(env).stringify())
+      );
+    } catch (e) {
+      if (e instanceof StageError) {
+        if (expectedErrMsg && expectedErrMsg.val !== e.msg) {
+          return new RTestResult(
+            false,
+            CE_WRONG_ERROR_ERR(expectedErrMsg.val, e.msg)
+          );
+        }
+        return new RTestResult(true);
+      } else {
+        throw e;
+      }
+    }
+  }
+}
+
+class CheckSatisfiedNode extends CheckNode {
+  constructor(
+    readonly args: ASTNode[],
+    readonly testValNode: ASTNode,
+    readonly testFnName: string,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super("check-satisfied", args, sourceSpan);
+  }
+
+  eval(env: Environment): RValue {
+    const val = this.args[0].eval(env);
+    if (!isRBoolean(val)) {
+      return new RTestResult(
+        false,
+        CE_SATISFIED_NOT_BOOLEAN_ERR(this.testFnName, val.stringify())
+      );
+    }
+    if (isRFalse(val)) {
+      return new RTestResult(
+        false,
+        CE_NOT_SATISFIED_ERR(this.testFnName, this.testValNode.eval(env).stringify())
+      );
+    }
+    return new RTestResult(true);
   }
 }
 

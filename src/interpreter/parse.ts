@@ -14,7 +14,9 @@ import {
   LambdaNode,
   OrNode,
   VarNode,
-  isDefnNode
+  isDefnNode,
+  CheckErrorNode,
+  CheckSatisfiedNode
 } from "./ast.js";
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
@@ -319,9 +321,14 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       );
     }
     switch (checkName) {
+      case "check-error": {
+        return new CheckErrorNode(
+          sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
+          sexpr.sourceSpan
+        );
+      }
       case "check-satisfied": {
-        return new CheckNode(
-          checkName,
+        return new CheckSatisfiedNode(
           [
             this.toNode(
               new ListSExpr(
@@ -332,11 +339,9 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 sexpr.sourceSpan)
             ),
           ],
-          sexpr.sourceSpan,
-          [
-            this.toNode(sexpr.subExprs[1]),
-            sexpr.subExprs[2].stringify()
-          ]
+          this.toNode(sexpr.subExprs[1]),
+          sexpr.subExprs[2].stringify(),
+          sexpr.sourceSpan
         );
       }
       default: {
