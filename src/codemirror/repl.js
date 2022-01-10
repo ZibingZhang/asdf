@@ -7,7 +7,7 @@ export {
   appendToRepl
 };
 
-const replTextArea = document.getElementById("repl");
+const replTextArea = document.getElementById("repl-textarea");
 const repl = CodeMirror(
   (elt) => {
     replTextArea.parentNode.replaceChild(elt, replTextArea);
@@ -15,7 +15,6 @@ const repl = CodeMirror(
     tabSize: 2,
     value: "> ",
     mode: null,
-    theme: "monokai",
     lineWrapping: true,
     smartIndent: false
   }

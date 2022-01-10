@@ -16,49 +16,12 @@
   <!-- Site Title -->
   <title>Racket IDE</title>
 
-  <!-- CSS -->
-  <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-    }
-
-    #site, body .CodeMirror {
-      height: 100%;
-    }
-
-    #site {
-      display: flex;
-      flex-direction: column;
-    }
-
-    #top {
-      height: 75%;
-      display: flex;
-      flex-direction: row;
-    }
-
-    #top .CodeMirror:nth-child(1) {
-      width: 65%;
-      border-right: 1px solid white;
-    }
-
-    #top .CodeMirror:nth-child(2) {
-      width: 35%;
-    }
-
-    #bottom {
-      height: 25%;
-    }
-
-    #bottom .CodeMirror.CodeMirror:nth-child(1) {
-      border-top: 1px solid white;
-    }
-  </style>
+  <!-- CSS & JS -->
+  <link rel="stylesheet" href="./assets/css/index.css"></link>
+  <script type="text/javascript" src="./assets/js/index.js"></script>
 
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css"></link>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/monokai.min.css"></link>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
 
   <script type="text/javascript" src="./codemirror/mode/racket/racket.js"></script>
@@ -74,11 +37,17 @@
 <body>
   <div id="site">
     <div id="top">
-      <textarea id="editor"></textarea>
-      <textarea id="repl"></textarea>
+      <div id="editor">
+        <textarea id="editor-textarea"></textarea>
+      </div>
+      <div class="resizer" data-direction="horizontal"></div>
+      <div id="repl">
+        <textarea id="repl-textarea"></textarea>
+      </div>
     </div>
+    <div class="resizer" data-direction="vertical"></div>
     <div id="bottom">
-      <textarea id="test-output"></textarea>
+      <textarea id="test-output-textarea"></textarea>
     </div>
   </div>
 </body>

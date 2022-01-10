@@ -236,7 +236,7 @@ const initValue =
 (check-expect (in? 3 S2) #t)
 (check-expect (in? 4 S2) #f)
 `;
-const editorTextArea = document.getElementById("editor");
+const editorTextArea = document.getElementById("editor-textarea");
 const editor = CodeMirror(
   (elt) => {
     editorTextArea.parentNode.replaceChild(elt, editorTextArea);
@@ -245,7 +245,6 @@ const editor = CodeMirror(
     tabSize: 2,
     value: initValue,
     mode: "racket",
-    theme: "monokai",
     extraKeys: {
       "Alt-Enter": () => {
         resetRepl();

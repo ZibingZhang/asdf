@@ -3,7 +3,7 @@ export {
   handleTestResults
 };
 
-const testOutputTextArea = document.getElementById("test-output");
+const testOutputTextArea = document.getElementById("test-output-textarea");
 const testOutput = CodeMirror(
   (elt) => {
     testOutputTextArea.parentNode.replaceChild(elt, testOutputTextArea);
@@ -12,7 +12,6 @@ const testOutput = CodeMirror(
     tabSize: 2,
     value: "\n\n\n",
     mode: null,
-    theme: "monokai",
     readOnly: true
   }
 );

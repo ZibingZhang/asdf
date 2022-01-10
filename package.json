@@ -3,7 +3,7 @@
     "lint": "npx eslint ./src --fix",
     "build": "npm run compile && npm run copy",
     "compile": "tsc",
-    "copy": "cp ./src/index.html ./build/index.html"
+    "copy": "cp ./src/index.html ./build/index.html && cp -TR ./src/assets/ ./build/assets/"
   },
   "devDependencies": {
     "typescript": "^4.5.4",

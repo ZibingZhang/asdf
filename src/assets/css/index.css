@@ -1,0 +1,46 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#site, body .CodeMirror {
+  height: 100%;
+}
+
+#site {
+  display: flex;
+  flex-direction: column;
+}
+
+#top {
+  display: flex;
+  flex-direction: row;
+  height: 90%;
+  min-height: 25%;
+}
+
+#editor {
+  min-width: 25%;
+  width: 70%;
+}
+
+#repl {
+  flex: 1 1 0%;
+}
+
+#bottom {
+  flex: 1 1 0%;
+}
+
+.resizer[data-direction='horizontal'] {
+  background-color: #cbd5e0;
+  cursor: ew-resize;
+  height: 100%;
+  width: 5px;
+}
+.resizer[data-direction='vertical'] {
+  background-color: #cbd5e0;
+  cursor: ns-resize;
+  height: 5px;
+  width: 100%;
+}
