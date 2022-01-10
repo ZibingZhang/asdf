@@ -50,6 +50,8 @@ body {
   width: 100%;
 }
 
+/* CodeMirror */
+
 body .CodeMirror {
   height: 100%;
 }
@@ -60,6 +62,21 @@ body .CodeMirror {
 
 .CodeMirror-vscrollbar {
   scrollbar-width: none;
+}
+
+/* Material Design */
+
+:root {
+  --mdc-theme-primary: #FEDBD0;
+  --mdc-theme-secondary: #FEEAE6;
+}
+
+.mdc-top-app-bar {
+  color: #442C2E;
+}
+
+.mdc-icon-button {
+  color: #442C2E !important;
 }
 
 .mdc-top-app-bar__row {
