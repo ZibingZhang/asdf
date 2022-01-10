@@ -17,8 +17,12 @@
   <title>Racket IDE</title>
 
   <!-- CSS & JS -->
+  <link href="https://unpkg.com/material-components-web@13.0.0/dist/material-components-web.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/material-components-web@13.0.0/dist/material-components-web.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
   <link rel="stylesheet" href="./assets/css/index.css"></link>
-  <script type="text/javascript" src="./assets/js/index.js"></script>
+  <script type="text/javascript" src="./assets/js/index.js" defer></script>
 
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css"></link>
@@ -26,28 +30,37 @@
 
   <script type="text/javascript" src="./codemirror/mode/racket/racket.js"></script>
 
-  <script type="module" src="./codemirror/editor.js" defer></script>
-  <script type="module" src="./codemirror/repl.js" defer></script>
-  <script type="module" src="./codemirror/test-output.js" defer></script>
+  <script type="module" src="./codemirror/main.js" defer></script>
 
   <!-- Interpreter -->
   <script type="module" src="./interpreter/main.js"></script>
 </head>
 
 <body>
-  <div id="ide">
-    <div id="top">
-      <div id="editor">
+  <header class="mdc-top-app-bar mdc-top-app-bar--relative">
+    <div class="mdc-top-app-bar__row">
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+        <button id="settings" class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button mdc-ripple-surface" aria-label="Settings">settings</button>
+        <span class="mdc-top-app-bar__title">JSRacket</span>
+      </section>
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
+        <button id="run" class="material-icons mdc-top-app-bar__action-item mdc-icon-button mdc-ripple-surface" aria-label="Run">play_arrow</button>
+      </section>
+    </div>
+  </header>
+  <main class="content mdc-top-app-bar--fixed-adjust">
+    <div class="top">
+      <div class="editor">
         <textarea id="editor-textarea"></textarea>
       </div>
       <div class="resizer" data-direction="horizontal"></div>
-      <div id="repl">
+      <div class="repl">
         <textarea id="repl-textarea"></textarea>
       </div>
     </div>
     <div class="resizer" data-direction="vertical"></div>
-    <div id="test-output">
+    <div class="test-output">
       <textarea id="test-output-textarea"></textarea>
     </div>
-  </div>
+  </main>
 </body>

@@ -3,33 +3,36 @@ html, body {
   margin: 0;
 }
 
-#ide, body .CodeMirror {
-  height: 100%;
-}
-
-#ide {
+body {
   display: flex;
   flex-direction: column;
 }
 
-#top {
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.top {
   display: flex;
   flex-direction: row;
   height: 90%;
   min-height: 25%;
 }
 
-#editor {
+.editor {
   min-width: 25%;
   width: 70%;
 }
 
-#repl {
+.repl {
   flex: 1 1 0%;
   max-width: 30%;
 }
 
-#test-output {
+.test-output {
   flex: 1 1 0%;
   max-height: 10%;
 }
@@ -47,10 +50,22 @@ html, body {
   width: 100%;
 }
 
+body .CodeMirror {
+  height: 100%;
+}
+
 .CodeMirror-hscrollbar {
   scrollbar-width: none;
 }
 
 .CodeMirror-vscrollbar {
   scrollbar-width: none;
+}
+
+.mdc-top-app-bar__row {
+  height: 35px;
+}
+
+.mdc-top-app-bar--fixed-adjust {
+  padding-top: 35px;
 }

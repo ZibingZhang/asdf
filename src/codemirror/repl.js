@@ -3,12 +3,12 @@ import {
 } from "./common.js";
 
 export {
-  resetRepl,
-  appendToRepl
+  appendToRepl,
+  resetRepl
 };
 
 const replTextArea = document.getElementById("repl-textarea");
-const repl = CodeMirror(
+const REPL = CodeMirror(
   (elt) => {
     replTextArea.parentNode.replaceChild(elt, replTextArea);
   }, {
@@ -19,19 +19,19 @@ const repl = CodeMirror(
     smartIndent: false
   }
 );
-const replDoc = repl.getDoc();
+const replDoc = REPL.getDoc();
 
 const resetRepl =
-  () => repl.setValue("");
+  () => REPL.setValue("");
 const appendToRepl =
-  text => repl.replaceRange(text, CodeMirror.Pos(repl.lastLine()));
+  text => REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()));
 const appendToReplLn =
   text => appendToRepl(`${text}\n`);
 
-repl.on("cursorActivity",
-  repl => repl.setCursor(repl.lineCount(), 0)
+REPL.on("cursorActivity",
+  REPL => REPL.setCursor(REPL.lineCount(), 0)
 );
-repl.on("keydown",
+REPL.on("keydown",
   (_, event) => {
     switch (event.key) {
       case "Backspace": {

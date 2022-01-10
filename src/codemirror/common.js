@@ -3,12 +3,26 @@ import {
   resetTestOutput
 } from "./test-output.js";
 import {
-  appendToRepl
+  appendToRepl,
+  resetRepl
 } from "./repl.js";
+import {
+  EDITOR
+} from "./editor.js";
 
 export {
-  evaluate
+  evaluate,
+  runEditorCode
 };
+
+function runEditorCode() {
+  resetRepl();
+  evaluate(
+    window.pipelines.evaluateProgram,
+    EDITOR.getValue(),
+    true
+  );
+}
 
 function evaluate(pipeline, text, clearTestOutput) {
   if (clearTestOutput) {

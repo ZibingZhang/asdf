@@ -1,9 +1,10 @@
 import {
-  evaluate
+  runEditorCode
 } from "./common.js";
-import {
-  resetRepl
-} from "./repl.js";
+
+export {
+  EDITOR
+};
 
 const initValue =
 `;; Source code at https://github.com/ZibingZhang/racket-online-ide
@@ -237,7 +238,7 @@ const initValue =
 (check-expect (in? 4 S2) #f)
 `;
 const editorTextArea = document.getElementById("editor-textarea");
-const editor = CodeMirror(
+const EDITOR = CodeMirror(
   (elt) => {
     editorTextArea.parentNode.replaceChild(elt, editorTextArea);
   }, {
@@ -246,14 +247,7 @@ const editor = CodeMirror(
     value: initValue,
     mode: "racket",
     extraKeys: {
-      "Alt-Enter": () => {
-        resetRepl();
-        evaluate(
-          window.pipelines.evaluateProgram,
-          editor.getValue(),
-          true
-        );
-      }
+      "Alt-Enter": () => runEditorCode()
     }
   }
 );

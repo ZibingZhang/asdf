@@ -1,10 +1,10 @@
 export {
-  resetTestOutput,
-  handleTestResults
+  handleTestResults,
+  resetTestOutput
 };
 
 const testOutputTextArea = document.getElementById("test-output-textarea");
-const testOutput = CodeMirror(
+const TEST_OUTPUT = CodeMirror(
   (elt) => {
     testOutputTextArea.parentNode.replaceChild(elt, testOutputTextArea);
   }, {
@@ -17,7 +17,7 @@ const testOutput = CodeMirror(
 );
 
 const appendToTestOutput =
-  text => testOutput.replaceRange(text, CodeMirror.Pos(testOutput.lastLine()));
+  text => TEST_OUTPUT.replaceRange(text, CodeMirror.Pos(TEST_OUTPUT.lastLine()));
 const appendToTestOutputLn =
   text => appendToTestOutput(`${text}\n`);
 
@@ -25,7 +25,7 @@ let failedTests = 0;
 let totalTests = 0;
 
 function resetTestOutput() {
-  testOutput.setValue("\n\n\n");
+  TEST_OUTPUT.setValue("\n\n\n");
   failedTests = 0;
   totalTests = 0;
 }
@@ -40,7 +40,7 @@ function handleTestResults(tests) {
     }
   }
   if (totalTests > 0) {
-    testOutput.replaceRange(
+    TEST_OUTPUT.replaceRange(
       `Ran ${totalTests} test${totalTests > 1 ? "s" : ""}.`,
       { line: 0, ch: 0 },
       { line: 0 }
@@ -59,7 +59,7 @@ function handleTestResults(tests) {
     } else {
       testsPassedOrFailed = `${failedTests} of the ${totalTests} tests failed.`;
     }
-    testOutput.replaceRange(
+    TEST_OUTPUT.replaceRange(
       testsPassedOrFailed,
       { line: 1, ch: 0 },
       { line: 1 }
