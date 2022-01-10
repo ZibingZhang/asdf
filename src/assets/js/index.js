@@ -36,11 +36,13 @@ document.addEventListener("DOMContentLoaded", function () {
         case "vertical": {
           const h = ((prevSiblingHeight + dy) * 100) / resizer.parentNode.getBoundingClientRect().height;
           prevSibling.style.height = `${h}%`;
+          nextSibling.style.maxHeight = `${100 - h}%`;
           break;
         }
         case "horizontal": {
           const w = ((prevSiblingWidth + dx) * 100) / resizer.parentNode.getBoundingClientRect().width;
           prevSibling.style.width = `${w}%`;
+          nextSibling.style.maxWidth = `${100 - w}%`;
           break;
         }
       }

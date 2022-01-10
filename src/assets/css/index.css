@@ -3,11 +3,11 @@ html, body {
   margin: 0;
 }
 
-#site, body .CodeMirror {
+#ide, body .CodeMirror {
   height: 100%;
 }
 
-#site {
+#ide {
   display: flex;
   flex-direction: column;
 }
@@ -26,10 +26,12 @@ html, body {
 
 #repl {
   flex: 1 1 0%;
+  max-width: 30%;
 }
 
-#bottom {
+#test-output {
   flex: 1 1 0%;
+  max-height: 10%;
 }
 
 .resizer[data-direction='horizontal'] {
@@ -43,4 +45,12 @@ html, body {
   cursor: ns-resize;
   height: 5px;
   width: 100%;
+}
+
+.CodeMirror-hscrollbar {
+  scrollbar-width: none;
+}
+
+.CodeMirror-vscrollbar {
+  scrollbar-width: none;
 }
