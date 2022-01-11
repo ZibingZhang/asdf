@@ -16,6 +16,7 @@ import {
   RPFAbs,
   RPFAdd1,
   RPFCeiling,
+  RPFDenominator,
   RPFDivide,
   RPFEqual,
   RPFExp,
@@ -37,6 +38,7 @@ import {
   RPFModulo,
   RPFMultiply,
   RPFNumberToString,
+  RPFNumerator,
   RPFPlus,
   RPFRandom,
   RPFSqr,
@@ -201,6 +203,7 @@ addFnToPrimEnv(new RPFGreaterThan());
 addFnToPrimEnv(new RPFAbs());
 addFnToPrimEnv(new RPFAdd1());
 addFnToPrimEnv(new RPFCeiling());
+addFnToPrimEnv(new RPFDenominator());
 addFnToPrimEnv(new RPFFloor());
 addFnToPrimEnv(new RPFExp());
 addFnToPrimEnv(new RPFExpt());
@@ -213,6 +216,7 @@ addFnToPrimEnv(new RPFModulo());
 addFnToPrimEnv(new RPFIsNegative());
 addFnToPrimEnv(new RPFNumberToString());
 addFnToPrimEnv(new RPFIsNumber());
+addFnToPrimEnv(new RPFNumerator());
 addFnToPrimEnv(new RPFRandom());
 addFnToPrimEnv(new RPFSqr());
 addFnToPrimEnv(new RPFSqrt());

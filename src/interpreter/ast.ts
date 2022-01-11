@@ -36,7 +36,7 @@ import {
   isRCallable,
   isRData,
   isRFalse,
-  isRInexact,
+  isRInexactReal,
   isRString,
   isRTrue
 } from "./rvalue.js";
@@ -190,7 +190,7 @@ class CheckNode extends ASTNodeBase {
           RNG.reset(seed);
           expectedVal = this.args[1].eval(env);
         }
-        if (isRInexact(actualVal) || isRInexact(expectedVal)) {
+        if (isRInexactReal(actualVal) || isRInexactReal(expectedVal)) {
           return new RTestResult(
             false,
             CE_CANT_COMPARE_INEXACT_ERR(this.name, actualVal.stringify(), expectedVal.stringify()),

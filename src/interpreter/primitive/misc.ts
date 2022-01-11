@@ -43,7 +43,7 @@ class RPFAreEqualWithin extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    const ep = (<RNumber>args[2]).toInexactDecimal().val;
+    const ep = (<RNumber>args[2]).toDecimal();
     return toRBoolean(isRData(args[0]) && args[0].equalWithin(args[1], ep));
   }
 }

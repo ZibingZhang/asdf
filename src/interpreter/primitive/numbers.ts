@@ -4,7 +4,7 @@ import {
 } from "../error.js";
 import {
   RExactReal,
-  RInexactRational,
+  RInexactReal,
   RMath,
   RNumber,
   RPrimFun,
@@ -12,15 +12,11 @@ import {
   R_FALSE,
   R_TRUE,
   TypeName,
-  isRDecimal,
   isRInteger,
   toRBoolean,
-  RInexactDecimal,
-  isRInexact,
+  isRInexactReal,
   isRExactReal,
   isRNumber,
-  isRRational,
-  RRational,
   RString
 } from "../rvalue.js";
 import {
@@ -46,6 +42,7 @@ export {
   RPFAbs,
   RPFAdd1,
   RPFCeiling,
+  RPFDenominator,
   RPC_E,
   RPFExp,
   RPFExpt,
@@ -68,8 +65,8 @@ export {
   RPFIsZero
 };
 
-const RPC_E = new RInexactRational(6121026514868073n, 2251799813685248n);
-const RPC_PI = new RInexactRational(884279719003555n, 281474976710656n);
+const RPC_E = new RInexactReal(6121026514868073n, 2251799813685248n);
+const RPC_PI = new RInexactReal(884279719003555n, 281474976710656n);
 
 class RPFMultiply extends RPrimFun {
   constructor() {
@@ -137,7 +134,7 @@ class RPFLess extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().val < (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
+      if (!((<RNumber>args[idx]).toDecimal() < (<RNumber>args[idx + 1]).toDecimal())) {
         return R_FALSE;
       }
     }
@@ -152,7 +149,7 @@ class RPFLessThan extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().val <= (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
+      if (!((<RNumber>args[idx]).toDecimal() <= (<RNumber>args[idx + 1]).toDecimal())) {
         return R_FALSE;
       }
     }
@@ -167,7 +164,7 @@ class RPFEqual extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().val === (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
+      if (!((<RNumber>args[idx]).toDecimal() === (<RNumber>args[idx + 1]).toDecimal())) {
         return R_FALSE;
       }
     }
@@ -182,7 +179,7 @@ class RPFGreater extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().val > (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
+      if (!((<RNumber>args[idx]).toDecimal() > (<RNumber>args[idx + 1]).toDecimal())) {
         return R_FALSE;
       }
     }
@@ -197,7 +194,7 @@ class RPFGreaterThan extends RPrimFun {
 
   call(args: RValue[]): RValue {
     for (let idx = 0; idx < args.length - 1; idx++) {
-      if (!((<RNumber>args[idx]).toInexactDecimal().val >= (<RNumber>args[idx + 1]).toInexactDecimal().val)) {
+      if (!((<RNumber>args[idx]).toDecimal() >= (<RNumber>args[idx + 1]).toDecimal())) {
         return R_FALSE;
       }
     }
@@ -240,6 +237,17 @@ class RPFCeiling extends RPrimFun {
   }
 }
 
+class RPFDenominator extends RPrimFun {
+  constructor() {
+    super("denominator", { arity: 1, onlyArgTypeName: TypeName.RATIONAL });
+  }
+
+  call(args: RValue[]): RValue {
+    const number = <RNumber>args[0];
+    return RMath.make(isRExactReal(number), number.denominator);
+  }
+}
+
 class RPFExp extends RPrimFun {
   constructor() {
     super("exp", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
@@ -258,10 +266,7 @@ class RPFExpt extends RPrimFun {
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
     const base = <RNumber>args[0];
     const expt = <RNumber>args[1];
-    if (
-      base.isNegative()
-      && (isRDecimal(expt) || expt.denominator !== 1n)
-    ) {
+    if (base.isNegative() && expt.denominator !== 1n) {
       throw new StageError(
         FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR(this.name),
         sourceSpan
@@ -297,7 +302,7 @@ class RPFIsInexact extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    return toRBoolean(isRInexact(args[0]));
+    return toRBoolean(isRInexactReal(args[0]));
   }
 }
 
@@ -318,7 +323,7 @@ class RPFMax extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return args.slice(1).reduce(
-      (prev, curr) => (<RNumber>prev).toInexactDecimal().val > (<RNumber>curr).toInexactDecimal().val ? prev : curr, args[0]
+      (prev, curr) => (<RNumber>prev).toDecimal() > (<RNumber>curr).toDecimal() ? prev : curr, args[0]
     );
   }
 }
@@ -330,7 +335,7 @@ class RPFMin extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return args.slice(1).reduce(
-      (prev, curr) => (<RNumber>prev).toInexactDecimal().val < (<RNumber>curr).toInexactDecimal().val ? prev : curr, args[0]
+      (prev, curr) => (<RNumber>prev).toDecimal() < (<RNumber>curr).toDecimal() ? prev : curr, args[0]
     );
   }
 }
@@ -341,8 +346,8 @@ class RPFModulo extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    const dividend = (<RRational>args[0]).numerator;
-    const divisor = (<RRational>args[1]).numerator;
+    const dividend = (<RNumber>args[0]).numerator;
+    const divisor = (<RNumber>args[1]).numerator;
     if (dividend > 0 && divisor < 0) {
       return new RExactReal(dividend % divisor + divisor);
     } else {
@@ -387,8 +392,8 @@ class RPFNumerator extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    const rational = <RRational>args[0];
-    return RMath.makeRational(isRExactReal(rational), rational.numerator);
+    const number = <RNumber>args[0];
+    return RMath.make(isRExactReal(number), number.numerator);
   }
 }
 
