@@ -1,11 +1,11 @@
 import {
-  handleTestResults,
-  resetTestOutput
-} from "./test-output.js";
-import {
   appendToRepl,
   resetRepl
 } from "./repl.js";
+import {
+  handleTestResults,
+  resetTestOutput
+} from "./test-output.js";
 import {
   EDITOR
 } from "./editor.js";
@@ -32,7 +32,7 @@ function evaluate(pipeline, text, clearTestOutput) {
   let output = "";
   if (stageOutput.errors.length > 0) {
     for (const error of stageOutput.errors) {
-      output += error.msg + "\n";
+      output += `${error.sourceSpan.stringify()} ${error.msg}\n`;
     }
   } else {
     for (const text of stageOutput.output) {

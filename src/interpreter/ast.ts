@@ -19,10 +19,6 @@ import {
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error.js";
 import {
-  NO_SOURCE_SPAN,
-  SourceSpan
-} from "./sourcespan.js";
-import {
   RCallableVisitor,
   RIsStructFun,
   RLambda,
@@ -45,15 +41,20 @@ import {
   isRTrue
 } from "./rvalue.js";
 import {
+  AtomSExpr
+} from "./sexpr.js";
+import {
   Environment
 } from "./environment.js";
 import {
   RNG
 } from "./random.js";
 import {
+  SourceSpan
+} from "./sourcespan.js";
+import {
   StageError
 } from "./pipeline.js";
-import { AtomSExpr, SExpr } from "./sexpr.js";
 
 export {
   ASTNode,
@@ -466,7 +467,7 @@ class FunAppNode extends ASTNodeBase {
             ? `structure type (do you mean make-${rval.name})`
             : "variable"
         ),
-        NO_SOURCE_SPAN
+        this.fn.sourceSpan
       );
     }
   }
@@ -599,8 +600,8 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
   visitRIsStructFun(rval: RIsStructFun): RValue {
     if (this.args.length !== 1) {
       throw new StageError(
-        FA_ARITY_ERR(rval.name, 1, this.args.length),
-        NO_SOURCE_SPAN
+        FA_ARITY_ERR(`${rval.name}?`, 1, this.args.length),
+        this.sourceSpan
       );
     }
     const argVal = this.args[0].eval(this.env);
@@ -615,7 +616,7 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
     if (rval.arity !== this.args.length) {
       throw new StageError(
         FA_ARITY_ERR(`make-${rval.name}`, rval.arity, this.args.length),
-        NO_SOURCE_SPAN
+        this.sourceSpan
       );
     }
     return new RStruct(rval.name, this.args.map(node => node.eval(this.env)));
@@ -683,15 +684,15 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
   visitRStructGetFun(rval: RStructGetFun): RValue {
     if (this.args.length !== 1) {
       throw new StageError(
-        FA_ARITY_ERR(rval.name, 1, this.args.length),
-        NO_SOURCE_SPAN
+        FA_ARITY_ERR(`${rval.name}-${rval.fieldName}`, 1, this.args.length),
+        this.sourceSpan
       );
     }
     const argVal = this.args[0].eval(this.env);
     if (!(argVal instanceof RStruct) || argVal.name != rval.name) {
       throw new StageError(
         FA_WRONG_TYPE_ERR(`${rval.name}-${rval.fieldName}`, rval.name, argVal.stringify()),
-        NO_SOURCE_SPAN
+        this.sourceSpan
       );
     }
     return argVal.vals[rval.idx];

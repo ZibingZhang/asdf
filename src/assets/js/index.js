@@ -84,5 +84,5 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // https://material.io/components/
-const topAppBarElement = document.querySelector('.mdc-top-app-bar');
+const topAppBarElement = document.querySelector(".mdc-top-app-bar");
 mdc.topAppBar.MDCTopAppBar.attachTo(topAppBarElement);

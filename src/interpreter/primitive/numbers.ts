@@ -3,10 +3,6 @@ import {
   FA_DIV_BY_ZERO_ERR
 } from "../error.js";
 import {
-  NO_SOURCE_SPAN,
-  SourceSpan
-} from "../sourcespan.js";
-import {
   RExactReal,
   RInexactRational,
   RMath,
@@ -23,6 +19,9 @@ import {
 import {
   RNG
 } from "../random.js";
+import {
+  SourceSpan
+} from "../sourcespan.js";
 import {
   StageError
 } from "../pipeline.js";
@@ -228,7 +227,7 @@ class RPFExpt extends RPrimFun {
     super("expt", { arity: 2, allArgsTypeName: TypeName.NUMBER });
   }
 
-  call(args: RValue[]): RValue {
+  call(args: RValue[], sourceSpan: SourceSpan): RValue {
     const base = <RNumber>args[0];
     const expt = <RNumber>args[1];
     if (
@@ -237,7 +236,7 @@ class RPFExpt extends RPrimFun {
     ) {
       throw new StageError(
         FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR(this.name),
-        NO_SOURCE_SPAN
+        sourceSpan
       );
     }
     return RMath.pow(base, expt);
@@ -283,12 +282,12 @@ class RPFSqrt extends RPrimFun {
     super("sqrt", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
   }
 
-  call(args: RValue[]): RValue {
+  call(args: RValue[], sourceSpan: SourceSpan): RValue {
     const base = <RNumber>args[0];
     if (base.isNegative()) {
       throw new StageError(
         FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR(this.name),
-        NO_SOURCE_SPAN
+        sourceSpan
       );
     }
     return RMath.pow(base, this.expt);

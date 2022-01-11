@@ -78,7 +78,6 @@ import {
 import {
   Program
 } from "./program.js";
-import { NO_SOURCE_SPAN } from "./sourcespan.js";
 
 export {
   ParseSExpr

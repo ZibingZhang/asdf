@@ -195,7 +195,7 @@ const DS_EXTRA_PARTS_ERR = (parts: number) => {
 
 const EL_EXPECTED_FINISHED_EXPR_ERR = (name: string) => {
   return `${name}: expected a finished expression, but found a template`;
-}
+};
 
 const ES_NOT_IN_COND_ERR = "else: not allowed here, because this is not a question in a clause";
 
@@ -240,7 +240,7 @@ const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {
   }
 };
 
-const QU_EXPECTED_EXPRESSION = `quote: expected an expression after quote, but nothing's there`;
+const QU_EXPECTED_EXPRESSION = "quote: expected an expression after quote, but nothing's there";
 const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
   return `quote: expected the name of a symbol or () after the quote, but found a ${foundStr(found)}`;
 };

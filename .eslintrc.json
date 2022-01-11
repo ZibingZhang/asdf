@@ -8,7 +8,8 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "globals": {
-    "CodeMirror": "readonly"
+    "CodeMirror": "readonly",
+    "mdc": "readonly"
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {

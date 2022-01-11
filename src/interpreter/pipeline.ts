@@ -33,7 +33,7 @@ export {
 class StageError extends Error {
   constructor(
     readonly msg: string,
-    readonly sourcespan: SourceSpan
+    readonly sourceSpan: SourceSpan
   ) {
     super(msg);
   }

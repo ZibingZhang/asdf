@@ -63,7 +63,7 @@ const INTEGER_RE = /^[+-]?\d+\.?$/;
 const RATIONAL_RE = /^[+-]?\d+\/\d+$/;
 const DECIMAL_RE = /^[+-]?\d*\.\d+$/;
 const DIV_BY_ZERO_RE = /^[+-]?\d+\/0+$/;
-const PLACEHOLDER_RE = /^\.{2,6}$/
+const PLACEHOLDER_RE = /^\.{2,6}$/;
 
 enum State {
   INIT,
@@ -130,9 +130,9 @@ class Lexer implements Stage<string, SExpr[]> {
                 new Token(
                   TokenType.NAME,
                   "quote",
-                  NO_SOURCE_SPAN
+                  quoteSourceSpan
                 ),
-                NO_SOURCE_SPAN
+                quoteSourceSpan
               ),
               sexpr
             ],
@@ -224,9 +224,9 @@ class Lexer implements Stage<string, SExpr[]> {
                 new Token(
                   TokenType.NAME,
                   "quote",
-                  NO_SOURCE_SPAN
+                  quoteSourceSpan
                 ),
-                NO_SOURCE_SPAN
+                quoteSourceSpan
               ),
               sexpr
             ],
