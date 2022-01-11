@@ -7,12 +7,13 @@ import {
   resetTestOutput
 } from "./test-output.js";
 import {
-  EDITOR
+  EDITOR, markEditor
 } from "./editor.js";
 
 export {
   evaluate,
-  runEditorCode
+  runEditorCode,
+  runReplCode
 };
 
 function runEditorCode() {
@@ -20,11 +21,21 @@ function runEditorCode() {
   evaluate(
     window.pipelines.evaluateProgram,
     EDITOR.getValue(),
+    true,
     true
   );
 }
 
-function evaluate(pipeline, text, clearTestOutput) {
+function runReplCode(code) {
+  evaluate(
+    window.pipelines.evaluateRepl,
+    code,
+    false,
+    false
+  );
+}
+
+function evaluate(pipeline, text, clearTestOutput, highlight) {
   if (clearTestOutput) {
     resetTestOutput();
   }
@@ -32,7 +43,10 @@ function evaluate(pipeline, text, clearTestOutput) {
   let output = "";
   if (stageOutput.errors.length > 0) {
     for (const error of stageOutput.errors) {
-      output += `${error.sourceSpan.stringify()} ${error.msg}\n`;
+      if (highlight) {
+        markEditor(error.sourceSpan);
+      }
+      output += error.msg + "\n";
     }
   } else {
     for (const text of stageOutput.output) {

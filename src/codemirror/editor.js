@@ -3,7 +3,8 @@ import {
 } from "./common.js";
 
 export {
-  EDITOR
+  EDITOR,
+  markEditor
 };
 
 const initValue =
@@ -237,6 +238,7 @@ const initValue =
 (check-expect (in? 3 S2) #t)
 (check-expect (in? 4 S2) #f)
 `;
+
 const editorTextArea = document.getElementById("editor-textarea");
 const EDITOR = CodeMirror(
   (elt) => {
@@ -251,4 +253,23 @@ const EDITOR = CodeMirror(
     }
   }
 );
+
+let editorMarked = false;
+function markEditor(sourceSpan) {
+  editorMarked = true;
+  EDITOR.markText(
+    { line: sourceSpan.startLineno - 1, ch: sourceSpan.startColno },
+    { line: sourceSpan.endLineno - 1, ch: sourceSpan.endColno },
+    { className: "cm-highlight-error" }
+  );
+}
+
+EDITOR.on("changes",
+  cm => {
+    if (editorMarked) {
+      cm.doc.getAllMarks().forEach(marker => marker.clear());
+    }
+  }
+);
+
 EDITOR.focus();

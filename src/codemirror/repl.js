@@ -1,5 +1,5 @@
 import {
-  evaluate
+  evaluate, runReplCode
 } from "./common.js";
 
 export {
@@ -24,15 +24,14 @@ const REPL = CodeMirror(
     //     ctx.fillStyle = 'green';
     //     ctx.fillRect(10, 10, 150, 100);
 
-    //     replDoc.addLineWidget(
-    //       replDoc.lastLine(),
+    //     REPL_DOC.addLineWidget(
+    //       REPL_DOC.lastLine(),
     //       element
     //     )
     //   }
     // }
   }
 );
-const replDoc = REPL.getDoc();
 
 function resetRepl() {
   REPL.setValue("");
@@ -45,13 +44,13 @@ function appendToReplLn(text) {
 }
 
 REPL.on("cursorActivity",
-  REPL => REPL.setCursor(REPL.lineCount(), 0)
+  cm => cm.setCursor(cm.lineCount(), 0)
 );
 REPL.on("keydown",
-  (_, event) => {
+  (cm, event) => {
     switch (event.key) {
       case "Backspace": {
-        const lastLine = replDoc.getLine(replDoc.lastLine());
+        const lastLine = cm.doc.getLine(cm.doc.lastLine());
         if (lastLine === "> ") {
           event.preventDefault();
         }
@@ -60,12 +59,8 @@ REPL.on("keydown",
       case "Enter": {
         event.preventDefault();
         appendToReplLn("");
-        const text = replDoc.getLine(replDoc.lastLine() - 1).slice(2);
-        evaluate(
-          window.pipelines.evaluateRepl,
-          text,
-          false
-        );
+        const text = cm.doc.getLine(cm.doc.lastLine() - 1).slice(2);
+        runReplCode(text);
         break;
       }
     }

@@ -64,6 +64,10 @@ body .CodeMirror {
   scrollbar-width: none;
 }
 
+.cm-highlight-error {
+  background-color: #FFC0CB;
+}
+
 /* Material Design */
 
 :root {
