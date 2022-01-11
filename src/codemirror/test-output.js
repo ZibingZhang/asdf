@@ -16,10 +16,9 @@ const TEST_OUTPUT = CodeMirror(
   }
 );
 
-const appendToTestOutput =
-  text => TEST_OUTPUT.replaceRange(text, CodeMirror.Pos(TEST_OUTPUT.lastLine()));
-const appendToTestOutputLn =
-  text => appendToTestOutput(`${text}\n`);
+function appendToTestOutputLn(text) {
+  TEST_OUTPUT.replaceRange(`${text}\n`, CodeMirror.Pos(TEST_OUTPUT.lastLine()));
+}
 
 let failedTests = 0;
 let totalTests = 0;

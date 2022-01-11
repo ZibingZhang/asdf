@@ -251,3 +251,4 @@ const EDITOR = CodeMirror(
     }
   }
 );
+EDITOR.focus();

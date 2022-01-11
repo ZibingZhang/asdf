@@ -17,16 +17,32 @@ const REPL = CodeMirror(
     mode: null,
     lineWrapping: true,
     smartIndent: false
+    // extraKeys: {
+    //   "Alt-I": () => {
+    //     let element = document.createElement("canvas");
+    //     const ctx = element.getContext('2d');
+    //     ctx.fillStyle = 'green';
+    //     ctx.fillRect(10, 10, 150, 100);
+
+    //     replDoc.addLineWidget(
+    //       replDoc.lastLine(),
+    //       element
+    //     )
+    //   }
+    // }
   }
 );
 const replDoc = REPL.getDoc();
 
-const resetRepl =
-  () => REPL.setValue("");
-const appendToRepl =
-  text => REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()));
-const appendToReplLn =
-  text => appendToRepl(`${text}\n`);
+function resetRepl() {
+  REPL.setValue("");
+}
+function appendToRepl(text) {
+  REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()));
+}
+function appendToReplLn(text) {
+  appendToRepl(`${text}\n`);
+}
 
 REPL.on("cursorActivity",
   REPL => REPL.setCursor(REPL.lineCount(), 0)
