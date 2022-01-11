@@ -18,6 +18,7 @@ export {
   RBoolean,
   RData,
   RExactReal,
+  RInexactDecimal,
   RInexactRational,
   RIsStructFun,
   RLambda,
@@ -41,10 +42,12 @@ export {
   isRDecimal,
   isREmptyList,
   isRExactPositiveInteger,
+  isRExactReal,
   isRFalse,
   isRInexact,
   isRInteger,
   isRList,
+  isRNumber,
   isRPrimFun,
   isRString,
   isRStruct,
@@ -306,8 +309,13 @@ class RExactReal extends RNumberBase {
     if (this.denominator === 1n) {
       return this.numerator.toString();
     } else {
-      const flooredValue = this.numerator / this.denominator;
-      return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+      if (this.isNegative()) {
+        const flooredValue = this.numerator / this.denominator;
+        return `${flooredValue}${(Number(-this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+      } else {
+        const flooredValue = this.numerator / this.denominator;
+        return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+      }
     }
   }
 
@@ -384,10 +392,15 @@ class RInexactRational extends RNumberBase {
 
   stringify(): string {
     if (this.denominator === 1n) {
-      return `#i${this.numerator.toString()}`;
+      return this.numerator.toString();
     } else {
-      const flooredValue = this.numerator / this.denominator;
-      return `#i${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+      if (this.isNegative()) {
+        const flooredValue = this.numerator / this.denominator;
+        return `${flooredValue}${(Number(-this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+      } else {
+        const flooredValue = this.numerator / this.denominator;
+        return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+      }
     }
   }
 
@@ -643,6 +656,14 @@ function toRBoolean(val: boolean): RBoolean {
 }
 
 abstract class RMath {
+  static makeRational(isExact: boolean, numerator: bigint, denominator: bigint = 1n): RRational {
+    if (isExact) {
+      return new RExactReal(numerator, denominator);
+    } else {
+      return new RInexactRational(numerator, denominator);
+    }
+  }
+
   static add(rnum1: RNumber, rnum2: RNumber): RNumber {
     const isExact = rnum1 instanceof RExactReal && rnum2 instanceof RExactReal;
     if (isRDecimal(rnum1) || isRDecimal(rnum2)) {

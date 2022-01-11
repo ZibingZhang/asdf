@@ -15,16 +15,23 @@ import {
   RPC_PI,
   RPFAbs,
   RPFAdd1,
+  RPFCeiling,
   RPFDivide,
   RPFEqual,
   RPFExp,
   RPFExpt,
+  RPFFloor,
   RPFGreater,
   RPFGreaterThan,
+  RPFIsInexact,
   RPFIsInteger,
+  RPFIsNegative,
+  RPFIsNumber,
   RPFIsZero,
   RPFLess,
   RPFLessThan,
+  RPFMax,
+  RPFMin,
   RPFMinus,
   RPFMultiply,
   RPFPlus,
@@ -190,9 +197,16 @@ addFnToPrimEnv(new RPFGreater());
 addFnToPrimEnv(new RPFGreaterThan());
 addFnToPrimEnv(new RPFAbs());
 addFnToPrimEnv(new RPFAdd1());
+addFnToPrimEnv(new RPFCeiling());
+addFnToPrimEnv(new RPFFloor());
 addFnToPrimEnv(new RPFExp());
 addFnToPrimEnv(new RPFExpt());
+addFnToPrimEnv(new RPFIsInexact());
 addFnToPrimEnv(new RPFIsInteger());
+addFnToPrimEnv(new RPFMax());
+addFnToPrimEnv(new RPFMin());
+addFnToPrimEnv(new RPFIsNegative());
+addFnToPrimEnv(new RPFIsNumber());
 addFnToPrimEnv(new RPFRandom());
 addFnToPrimEnv(new RPFSqr());
 addFnToPrimEnv(new RPFSqrt());

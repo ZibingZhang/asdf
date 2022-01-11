@@ -14,7 +14,11 @@ import {
   TypeName,
   isRDecimal,
   isRInteger,
-  toRBoolean
+  toRBoolean,
+  RInexactDecimal,
+  isRInexact,
+  isRExactReal,
+  isRNumber
 } from "../rvalue.js";
 import {
   RNG
@@ -38,10 +42,17 @@ export {
   RPFGreaterThan,
   RPFAbs,
   RPFAdd1,
+  RPFCeiling,
   RPC_E,
   RPFExp,
   RPFExpt,
+  RPFFloor,
+  RPFIsInexact,
   RPFIsInteger,
+  RPFMax,
+  RPFMin,
+  RPFIsNegative,
+  RPFIsNumber,
   RPC_PI,
   RPFRandom,
   RPFSqr,
@@ -212,6 +223,29 @@ class RPFAdd1 extends RPrimFun {
   }
 }
 
+class RPFCeiling extends RPrimFun {
+  constructor() {
+    super("ceiling", { arity: 1, onlyArgTypeName: TypeName.REAL });
+  }
+
+  call(args: RValue[]): RValue {
+    const number = <RNumber>args[0];
+    if (isRDecimal(number)) {
+      return new RInexactDecimal(Math.ceil(number.val));
+    } else {
+      if (number.denominator === 1n) {
+        return number;
+      } else {
+        if (number.isNegative()) {
+          return RMath.makeRational(isRExactReal(number), number.numerator / number.denominator);
+        } else {
+          return RMath.makeRational(isRExactReal(number), number.numerator / number.denominator + 1n);
+        }
+      }
+    }
+  }
+}
+
 class RPFExp extends RPrimFun {
   constructor() {
     super("exp", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
@@ -243,6 +277,39 @@ class RPFExpt extends RPrimFun {
   }
 }
 
+class RPFFloor extends RPrimFun {
+  constructor() {
+    super("floor", { arity: 1, onlyArgTypeName: TypeName.REAL });
+  }
+
+  call(args: RValue[]): RValue {
+    const number = <RNumber>args[0];
+    if (isRDecimal(number)) {
+      return new RInexactDecimal(Math.ceil(number.val));
+    } else {
+      if (number.denominator === 1n) {
+        return number;
+      } else {
+        if (number.isNegative()) {
+          return RMath.makeRational(isRExactReal(number), number.numerator / number.denominator - 1n);
+        } else {
+          return RMath.makeRational(isRExactReal(number), number.numerator / number.denominator);
+        }
+      }
+    }
+  }
+}
+
+class RPFIsInexact extends RPrimFun {
+  constructor() {
+    super("inexact?", { arity: 1 });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean(isRInexact(args[0]));
+  }
+}
+
 class RPFIsInteger extends RPrimFun {
   constructor() {
     super("integer?", { arity: 1 });
@@ -250,6 +317,50 @@ class RPFIsInteger extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return toRBoolean(isRInteger(args[0]));
+  }
+}
+
+class RPFMax extends RPrimFun {
+  constructor() {
+    super("max", { minArity: 1, allArgsTypeName: TypeName.REAL });
+  }
+
+  call(args: RValue[]): RValue {
+    return args.slice(1).reduce(
+      (prev, curr) => (<RNumber>prev).toInexactDecimal().val > (<RNumber>curr).toInexactDecimal().val ? prev : curr, args[0]
+    );
+  }
+}
+
+class RPFMin extends RPrimFun {
+  constructor() {
+    super("min", { minArity: 1, allArgsTypeName: TypeName.REAL });
+  }
+
+  call(args: RValue[]): RValue {
+    return args.slice(1).reduce(
+      (prev, curr) => (<RNumber>prev).toInexactDecimal().val < (<RNumber>curr).toInexactDecimal().val ? prev : curr, args[0]
+    );
+  }
+}
+
+class RPFIsNegative extends RPrimFun {
+  constructor() {
+    super("negative?", { arity: 1, onlyArgTypeName: TypeName.REAL });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean((<RNumber>args[0]).isNegative());
+  }
+}
+
+class RPFIsNumber extends RPrimFun {
+  constructor() {
+    super("number?", { arity: 1 });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean(isRNumber(args[0]));
   }
 }
 

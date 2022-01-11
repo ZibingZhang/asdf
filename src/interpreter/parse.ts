@@ -146,12 +146,25 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           );
         }
         case TokenType.DECIMAL: {
-          const parts = sexpr.token.text.split(".");
-          const scalar = 10n ** BigInt(parts[1].length);
-          return new AtomNode(
-            new RExactReal(BigInt(parts[0]) * scalar + BigInt(parts[1]), scalar),
-            sexpr.sourceSpan
-          );
+          const [whole, decimal] = sexpr.token.text.split(".");
+          let scalar;
+          if (sexpr.token.text.match(/[+-]/)) {
+            scalar = 10n ** BigInt(whole.length - 1);
+          } else {
+            scalar = 10n ** BigInt(whole.length);
+          }
+          const wholeBigInt = BigInt(whole);
+          if (wholeBigInt < 0) {
+            return new AtomNode(
+              new RExactReal(wholeBigInt * scalar - BigInt(decimal), scalar),
+              sexpr.sourceSpan
+            );
+          } else {
+            return new AtomNode(
+              new RExactReal(wholeBigInt * scalar + BigInt(decimal), scalar),
+              sexpr.sourceSpan
+            );
+          }
         }
         case TokenType.STRING: {
           return new AtomNode(
