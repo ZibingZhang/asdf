@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  NO_SOURCE_SPAN,
+  SourceSpan
+} from "./sourcespan.js";
+import {
   ASTNode
 } from "./ast.js";
 import {
   Environment
 } from "./environment.js";
 import {
-  NO_SOURCE_SPAN,
-  SourceSpan
-} from "./sourcespan.js";
+  SETTINGS
+} from "./settings.js";
 
 export {
   R_EMPTY_LIST,
@@ -145,6 +148,8 @@ class RList extends RDataBase {
   stringify(): string {
     if (this.vals.length === 0) {
       return "'()";
+    } else if (SETTINGS.stringify?.abbreviatedList) {
+      return `(list ${this.vals.map(val => val.stringify()).join(" ")})`;
     } else {
       let output = `(cons ${this.vals[0].stringify()}`;
       for (const val of this.vals.slice(1)) {
@@ -582,7 +587,7 @@ abstract class RMath {
     return new RInexactReal(rnum.numerator, rnum.denominator);
   }
 
-  static make(isExact: boolean, numerator: bigint, denominator: bigint = 1n): RNumber {
+  static make(isExact: boolean, numerator: bigint, denominator = 1n): RNumber {
     if (isExact) {
       return new RExactReal(numerator, denominator);
     } else {

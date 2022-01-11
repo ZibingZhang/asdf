@@ -24,33 +24,41 @@
   <link rel="stylesheet" href="./assets/css/index.css"></link>
   <script type="text/javascript" src="./assets/js/index.js" defer></script>
 
+  <!-- Interpreter -->
+  <script type="module" src="./interpreter/main.js"></script>
+
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css"></link>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/javascript/javascript.min.js"></script>
 
   <script type="text/javascript" src="./codemirror/mode/racket/racket.js"></script>
 
-  <script type="module" src="./codemirror/main.js" defer></script>
-
-  <!-- Interpreter -->
-  <script type="module" src="./interpreter/main.js"></script>
+  <script type="module" src="./codemirror/main.js"></script>
 </head>
 
 <body>
   <header class="mdc-top-app-bar mdc-top-app-bar--relative">
     <div class="mdc-top-app-bar__row">
       <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+        <button id="editor-button" title="Editor" class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button mdc-ripple-surface" aria-label="Editor">code</button>
+        <button id="settings-button" title="Settings" class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button mdc-ripple-surface" aria-label="Settings">settings</button>
         <span class="mdc-top-app-bar__title">JSRacket</span>
       </section>
       <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
-        <button id="run" class="material-icons mdc-top-app-bar__action-item mdc-icon-button mdc-ripple-surface" aria-label="Run">play_arrow</button>
+        <button id="run-button" title="Run" class="material-icons mdc-top-app-bar__action-item mdc-icon-button mdc-ripple-surface" aria-label="Run">play_arrow</button>
       </section>
     </div>
   </header>
   <main class="content mdc-top-app-bar--fixed-adjust">
     <div class="top">
-      <div class="editor">
-        <textarea id="editor-textarea"></textarea>
+      <div class="main">
+        <div id="editor-tab" class="editor">
+          <textarea id="editor-textarea"></textarea>
+        </div>
+        <div id="settings-tab" class="settings" style="display: none;">
+          <textarea id="settings-textarea"></textarea>
+        </div>
       </div>
       <div class="resizer" data-direction="horizontal"></div>
       <div class="repl">

@@ -8,16 +8,16 @@ import {
   RMath,
   RNumber,
   RPrimFun,
+  RString,
   RValue,
   R_FALSE,
   R_TRUE,
   TypeName,
-  isRInteger,
-  toRBoolean,
-  isRInexactReal,
   isRExactReal,
+  isRInexactReal,
+  isRInteger,
   isRNumber,
-  RString
+  toRBoolean
 } from "../rvalue.js";
 import {
   RNG
@@ -451,7 +451,7 @@ class RPFQuotient extends RPrimFun {
     const dividend = <RNumber>args[0];
     const divisor = <RNumber>args[1];
     const isExact = isRExactReal(dividend) && isRExactReal(divisor);
-    return RMath.make(isExact, dividend.numerator / divisor.numerator)
+    return RMath.make(isExact, dividend.numerator / divisor.numerator);
   }
 }
 

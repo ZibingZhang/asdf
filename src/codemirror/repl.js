@@ -1,5 +1,5 @@
 import {
-  evaluate, runReplCode
+  runReplCode
 } from "./common.js";
 
 export {

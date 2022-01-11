@@ -183,7 +183,7 @@ const DF_PREVIOUSLY_DEFINED_NAME_ERR = (name: string) => {
 
 const DS_DUPLICATE_FIELD_NAME = (name: string) => {
   return `define-struct: found a field name that is used more than once: ${name}`;
-}
+};
 const DS_EXPECTED_FIELD_NAME_ERR = (found: SExpr) => {
   return `define-struct: expected a field name, but found a ${foundStr(found)}`;
 };
@@ -306,7 +306,6 @@ const SX_NOT_TOP_LEVEL_DEFN_ERR = (name: string) => {
 };
 
 const WF_EXPECTED_FUNCTION_CALL_ERR = (name: string) => {
-  console.trace();
   return `${name}: expected a function call, but there is no open parenthesis before this function`;
 };
 const WF_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {

@@ -5,33 +5,43 @@ import {
   Pipeline,
   WELL_FORMED_PROGRAM_STAGE
 } from "./pipeline.js";
+import {
+  Settings,
+  updateSettings
+} from "./settings.js";
 
 declare global {
   interface Window {
-    pipelines: {
-      evaluateProgram: Pipeline,
-      evaluateRepl: Pipeline
+    racket: {
+      updateSettings: (settings: JSON) => void,
+      pipelines: {
+        evaluateProgram: Pipeline,
+        evaluateRepl: Pipeline
+      }
     }
   }
 }
 
-window.pipelines = {
-  evaluateProgram: new Pipeline(
-    [
-      LEXING_STAGE,
-      PARSING_SEXPRS_STAGE,
-      WELL_FORMED_PROGRAM_STAGE,
-      EVALUATE_CODE_STAGE
-    ],
-    true
-  ),
-  evaluateRepl: new Pipeline(
-    [
-      LEXING_STAGE,
-      PARSING_SEXPRS_STAGE,
-      WELL_FORMED_PROGRAM_STAGE,
-      EVALUATE_CODE_STAGE
-    ],
-    false
-  )
+window.racket = {
+  updateSettings: settings => updateSettings(<Settings>settings),
+  pipelines: {
+    evaluateProgram: new Pipeline(
+      [
+        LEXING_STAGE,
+        PARSING_SEXPRS_STAGE,
+        WELL_FORMED_PROGRAM_STAGE,
+        EVALUATE_CODE_STAGE
+      ],
+      true
+    ),
+    evaluateRepl: new Pipeline(
+      [
+        LEXING_STAGE,
+        PARSING_SEXPRS_STAGE,
+        WELL_FORMED_PROGRAM_STAGE,
+        EVALUATE_CODE_STAGE
+      ],
+      false
+    )
+  }
 };

@@ -1,4 +1,8 @@
 import {
+  EDITOR,
+  markEditor
+} from "./editor.js";
+import {
   appendToRepl,
   resetRepl
 } from "./repl.js";
@@ -7,19 +11,21 @@ import {
   resetTestOutput
 } from "./test-output.js";
 import {
-  EDITOR, markEditor
-} from "./editor.js";
+  SETTINGS,
+  updateSettings
+} from "./settings.js";
 
 export {
-  evaluate,
   runEditorCode,
-  runReplCode
+  runReplCode,
+  switchToEditor,
+  switchToSettings
 };
 
 function runEditorCode() {
   resetRepl();
   evaluate(
-    window.pipelines.evaluateProgram,
+    window.racket.pipelines.evaluateProgram,
     EDITOR.getValue(),
     true,
     true
@@ -28,7 +34,7 @@ function runEditorCode() {
 
 function runReplCode(code) {
   evaluate(
-    window.pipelines.evaluateRepl,
+    window.racket.pipelines.evaluateRepl,
     code,
     false,
     false
@@ -56,4 +62,24 @@ function evaluate(pipeline, text, clearTestOutput, highlight) {
   output += "> ";
   appendToRepl(output);
   handleTestResults(stageOutput.tests);
+}
+
+const editorTab = document.getElementById("editor-tab");
+const settingsTab = document.getElementById("settings-tab");
+
+function switchToEditor() {
+  try {
+    updateSettings();
+    settingsTab.style.display = "none";
+    editorTab.style.removeProperty("display");
+    EDITOR.refresh();
+  } catch (e) {
+    alert("The settings are not a valid JSON object.");
+  }
+}
+
+function switchToSettings() {
+  editorTab.style.display = "none";
+  settingsTab.style.removeProperty("display");
+  SETTINGS.refresh();
 }
