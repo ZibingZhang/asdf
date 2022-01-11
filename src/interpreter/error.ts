@@ -48,6 +48,7 @@ export {
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
+  QU_EXPECTED_EXPRESSION,
   QU_EXPECTED_POST_QUOTE_ERR,
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
@@ -239,6 +240,7 @@ const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {
   }
 };
 
+const QU_EXPECTED_EXPRESSION = `quote: expected an expression after quote, but nothing's there`;
 const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
   return `quote: expected the name of a symbol or () after the quote, but found a ${foundStr(found)}`;
 };

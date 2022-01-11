@@ -49,6 +49,7 @@ import {
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
+  QU_EXPECTED_EXPRESSION,
   QU_EXPECTED_POST_QUOTE_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR
@@ -77,6 +78,7 @@ import {
 import {
   Program
 } from "./program.js";
+import { NO_SOURCE_SPAN } from "./sourcespan.js";
 
 export {
   ParseSExpr
@@ -201,6 +203,12 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         }
         case TokenType.NAME: {
           if (leadingSExpr.token.text === "quote") {
+            if (!sexpr.subExprs[1]) {
+              throw new StageError(
+                QU_EXPECTED_EXPRESSION,
+                sexpr.sourceSpan
+              );
+            }
             return this.toQuoteNode(sexpr, sexpr.subExprs[1]);
           } else {
             return new FunAppNode(
@@ -597,21 +605,24 @@ class ParseSExpr implements Stage<SExpr[], Program> {
   private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): AtomNode {
     // '...
     if (isAtomSExpr(quotedSexpr)) {
-      if (quotedSexpr.token.type === TokenType.NAME) {
+      if (
+        quotedSexpr.token.type === TokenType.NAME
+        || quotedSexpr.token.type === TokenType.KEYWORD
+      ) {
         return new AtomNode(
           new RSymbol(quotedSexpr.token.text),
           quotedSexpr.sourceSpan
         );
       } else {
         throw new StageError(
-          QU_EXPECTED_POST_QUOTE_ERR(sexpr),
+          QU_EXPECTED_POST_QUOTE_ERR(quotedSexpr),
           sexpr.sourceSpan
         );
       }
     } else {
       if (quotedSexpr.subExprs.length > 0) {
         throw new StageError(
-          QU_EXPECTED_POST_QUOTE_ERR(sexpr),
+          QU_EXPECTED_POST_QUOTE_ERR(quotedSexpr),
           sexpr.sourceSpan
         );
       } else {
