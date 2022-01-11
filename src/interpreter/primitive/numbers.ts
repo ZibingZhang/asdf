@@ -229,20 +229,7 @@ class RPFCeiling extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    const number = <RNumber>args[0];
-    if (isRDecimal(number)) {
-      return new RInexactDecimal(Math.ceil(number.val));
-    } else {
-      if (number.denominator === 1n) {
-        return number;
-      } else {
-        if (number.isNegative()) {
-          return RMath.makeRational(isRExactReal(number), number.numerator / number.denominator);
-        } else {
-          return RMath.makeRational(isRExactReal(number), number.numerator / number.denominator + 1n);
-        }
-      }
-    }
+    return RMath.ceil(<RNumber>args[0]);
   }
 }
 
@@ -283,20 +270,7 @@ class RPFFloor extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    const number = <RNumber>args[0];
-    if (isRDecimal(number)) {
-      return new RInexactDecimal(Math.ceil(number.val));
-    } else {
-      if (number.denominator === 1n) {
-        return number;
-      } else {
-        if (number.isNegative()) {
-          return RMath.makeRational(isRExactReal(number), number.numerator / number.denominator - 1n);
-        } else {
-          return RMath.makeRational(isRExactReal(number), number.numerator / number.denominator);
-        }
-      }
-    }
+    return RMath.floor(<RNumber>args[0]);
   }
 }
 

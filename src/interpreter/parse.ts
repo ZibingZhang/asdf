@@ -147,12 +147,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         }
         case TokenType.DECIMAL: {
           const [whole, decimal] = sexpr.token.text.split(".");
-          let scalar;
-          if (sexpr.token.text.match(/[+-]/)) {
-            scalar = 10n ** BigInt(whole.length - 1);
-          } else {
-            scalar = 10n ** BigInt(whole.length);
-          }
+          const scalar = 10n ** BigInt(decimal.length);
           const wholeBigInt = BigInt(whole);
           if (wholeBigInt < 0) {
             return new AtomNode(
