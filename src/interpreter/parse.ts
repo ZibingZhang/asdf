@@ -40,6 +40,7 @@ import {
   DF_EXPECTED_VAR_OR_FUN_NAME_ERR,
   DF_TOO_MANY_EXPRS_ERR,
   DF_TOO_MANY_FUNCTION_BODIES_ERR,
+  DS_DUPLICATE_FIELD_NAME,
   DS_EXPECTED_FIELD_NAMES_ERR,
   DS_EXPECTED_FIELD_NAME_ERR,
   DS_EXPECTED_STRUCT_NAME_ERR,
@@ -588,9 +589,18 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     }
     const fieldNames: string[] = [];
     for (const fieldNameSExpr of fieldNamesSExpr.subExprs) {
-      if (!isAtomSExpr(fieldNameSExpr) || fieldNameSExpr.token.type !== TokenType.NAME) {
+      if (
+        !isAtomSExpr(fieldNameSExpr)
+        || (fieldNameSExpr.token.type !== TokenType.NAME && fieldNameSExpr.token.type !== TokenType.KEYWORD)
+      ) {
         throw new StageError(
           DS_EXPECTED_FIELD_NAME_ERR(fieldNameSExpr),
+          fieldNameSExpr.sourceSpan
+        );
+      }
+      if (fieldNames.includes(fieldNameSExpr.token.text)) {
+        throw new StageError(
+          DS_DUPLICATE_FIELD_NAME(fieldNameSExpr.token.text),
           fieldNameSExpr.sourceSpan
         );
       }

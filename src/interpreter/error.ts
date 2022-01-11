@@ -34,6 +34,7 @@ export {
   DF_TOO_MANY_EXPRS_ERR,
   DF_TOO_MANY_FUNCTION_BODIES_ERR,
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
+  DS_DUPLICATE_FIELD_NAME,
   DS_EXPECTED_FIELD_NAME_ERR,
   DS_EXPECTED_FIELD_NAMES_ERR,
   DS_EXPECTED_STRUCT_NAME_ERR,
@@ -180,6 +181,9 @@ const DF_PREVIOUSLY_DEFINED_NAME_ERR = (name: string) => {
   return `${name}: this name was defined previously and cannot be re-defined`;
 };
 
+const DS_DUPLICATE_FIELD_NAME = (name: string) => {
+  return `define-struct: found a field name that is used more than once: ${name}`;
+}
 const DS_EXPECTED_FIELD_NAME_ERR = (found: SExpr) => {
   return `define-struct: expected a field name, but found a ${foundStr(found)}`;
 };
