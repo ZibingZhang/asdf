@@ -18,7 +18,10 @@ import {
   RInexactDecimal,
   isRInexact,
   isRExactReal,
-  isRNumber
+  isRNumber,
+  isRRational,
+  RRational,
+  RString
 } from "../rvalue.js";
 import {
   RNG
@@ -47,11 +50,15 @@ export {
   RPFExp,
   RPFExpt,
   RPFFloor,
+  RPFInexactToExact,
   RPFIsInexact,
   RPFIsInteger,
   RPFMax,
   RPFMin,
+  RPFModulo,
   RPFIsNegative,
+  RPFNumberToString,
+  RPFNumerator,
   RPFIsNumber,
   RPC_PI,
   RPFRandom,
@@ -274,6 +281,16 @@ class RPFFloor extends RPrimFun {
   }
 }
 
+class RPFInexactToExact extends RPrimFun {
+  constructor() {
+    super("inexact->exact", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+  }
+
+  call(args: RValue[]): RValue {
+    return RMath.toExact(<RNumber>args[0]);
+  }
+}
+
 class RPFIsInexact extends RPrimFun {
   constructor() {
     super("inexact?", { arity: 1 });
@@ -318,6 +335,22 @@ class RPFMin extends RPrimFun {
   }
 }
 
+class RPFModulo extends RPrimFun {
+  constructor() {
+    super("modulo", { arity: 2, allArgsTypeName: TypeName.INTEGER });
+  }
+
+  call(args: RValue[]): RValue {
+    const dividend = (<RRational>args[0]).numerator;
+    const divisor = (<RRational>args[1]).numerator;
+    if (dividend > 0 && divisor < 0) {
+      return new RExactReal(dividend % divisor + divisor);
+    } else {
+      return new RExactReal(dividend % divisor);
+    }
+  }
+}
+
 class RPFIsNegative extends RPrimFun {
   constructor() {
     super("negative?", { arity: 1, onlyArgTypeName: TypeName.REAL });
@@ -328,6 +361,16 @@ class RPFIsNegative extends RPrimFun {
   }
 }
 
+class RPFNumberToString extends RPrimFun {
+  constructor() {
+    super("number->string", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+  }
+
+  call(args: RValue[]): RValue {
+    return new RString(RMath.toExact(<RNumber>args[0]).stringify());
+  }
+}
+
 class RPFIsNumber extends RPrimFun {
   constructor() {
     super("number?", { arity: 1 });
@@ -335,6 +378,17 @@ class RPFIsNumber extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return toRBoolean(isRNumber(args[0]));
+  }
+}
+
+class RPFNumerator extends RPrimFun {
+  constructor() {
+    super("numerator", { arity: 1, onlyArgTypeName: TypeName.RATIONAL });
+  }
+
+  call(args: RValue[]): RValue {
+    const rational = <RRational>args[0];
+    return RMath.makeRational(isRExactReal(rational), rational.numerator);
   }
 }
 

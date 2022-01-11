@@ -23,6 +23,7 @@ import {
   RPFFloor,
   RPFGreater,
   RPFGreaterThan,
+  RPFInexactToExact,
   RPFIsInexact,
   RPFIsInteger,
   RPFIsNegative,
@@ -33,7 +34,9 @@ import {
   RPFMax,
   RPFMin,
   RPFMinus,
+  RPFModulo,
   RPFMultiply,
+  RPFNumberToString,
   RPFPlus,
   RPFRandom,
   RPFSqr,
@@ -201,11 +204,14 @@ addFnToPrimEnv(new RPFCeiling());
 addFnToPrimEnv(new RPFFloor());
 addFnToPrimEnv(new RPFExp());
 addFnToPrimEnv(new RPFExpt());
+addFnToPrimEnv(new RPFInexactToExact());
 addFnToPrimEnv(new RPFIsInexact());
 addFnToPrimEnv(new RPFIsInteger());
 addFnToPrimEnv(new RPFMax());
 addFnToPrimEnv(new RPFMin());
+addFnToPrimEnv(new RPFModulo());
 addFnToPrimEnv(new RPFIsNegative());
+addFnToPrimEnv(new RPFNumberToString());
 addFnToPrimEnv(new RPFIsNumber());
 addFnToPrimEnv(new RPFRandom());
 addFnToPrimEnv(new RPFSqr());

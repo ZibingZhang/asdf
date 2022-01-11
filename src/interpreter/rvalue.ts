@@ -28,6 +28,7 @@ export {
   RNumber,
   RPrimFun,
   RPrimFunConfig,
+  RRational,
   RString,
   RStruct,
   RStructGetFun,
@@ -49,6 +50,7 @@ export {
   isRList,
   isRNumber,
   isRPrimFun,
+  isRRational,
   isRString,
   isRStruct,
   isRSymbol,
@@ -311,7 +313,7 @@ abstract class RRationalBase extends RNumberBase {
     } else {
       if (this.isNegative()) {
         const flooredValue = this.numerator / this.denominator;
-        return `${flooredValue}${(Number(-this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
+        return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(2)}`;
       } else {
         const flooredValue = this.numerator / this.denominator;
         return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
@@ -445,10 +447,12 @@ enum TypeName {
   ANY = "any",
   BOOLEAN = "boolean",
   EXACT_POSITIVE_INTEGER = "exact positive integer",
+  INTEGER = "integer",
   LIST = "list",
   NON_EMPTY_LIST = "non-empty list",
   NON_NEGATIVE_REAL = "non-negative real",
   NUMBER = "number",
+  RATIONAL = "rational",
   REAL = "real",
   STRING = "string",
   SYMBOL = "symbol"
@@ -479,6 +483,8 @@ class RPrimFun extends RCallableBase {
         return isRBoolean;
       case TypeName.EXACT_POSITIVE_INTEGER:
         return isRExactPositiveInteger;
+      case TypeName.INTEGER:
+        return isRInteger;
       case TypeName.LIST:
         return isRList;
       case TypeName.NON_EMPTY_LIST:
@@ -488,6 +494,8 @@ class RPrimFun extends RCallableBase {
       case TypeName.NUMBER:
       case TypeName.REAL:
         return isRNumber;
+      case TypeName.RATIONAL:
+        return isRRational;
       case TypeName.STRING:
         return isRString;
       case TypeName.SYMBOL:
@@ -625,6 +633,20 @@ function toRBoolean(val: boolean): RBoolean {
 }
 
 abstract class RMath {
+  static toExact(rnum: RNumber): RExactReal {
+    if (isRRational(rnum)) {
+      return new RExactReal(rnum.numerator, rnum.denominator);
+    } else {
+      let scalar = rnum.isNegative()
+        ? 10 ** rnum.stringify().length - 1
+        : 10 ** rnum.stringify().length;
+      return new RExactReal(
+        BigInt(rnum.val * scalar),
+        BigInt(scalar)
+      );
+    }
+  }
+
   static makeRational(isExact: boolean, numerator: bigint, denominator: bigint = 1n): RRational {
     if (isExact) {
       return new RExactReal(numerator, denominator);
