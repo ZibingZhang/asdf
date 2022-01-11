@@ -52,10 +52,12 @@ import {
 } from "./primitive/numbers.js";
 import {
   RPFAppend,
+  RPFCar,
+  RPFCdr,
   RPFCons,
   RPFFirst,
-  RPFIsCons,
   RPFIsEmpty,
+  RPFIsList,
   RPFList,
   RPFMember,
   RPFRest,
@@ -82,7 +84,10 @@ import {
   RPFSymbolToString
 } from "./primitive/symbols.js";
 import {
-  RPFIsString, RPFIsStringLessEqualThan, RPFStringDowncase, RPFStringLength
+  RPFIsString,
+  RPFIsStringLessEqualThan,
+  RPFStringDowncase,
+  RPFStringLength
 } from "./primitive/string.js";
 import {
   SC_USED_BEFORE_DEFINITION_ERR
@@ -249,12 +254,14 @@ addFnToPrimEnv(new RPFIsSymbol());
 
 // lists
 addFnToPrimEnv(new RPFAppend());
+addFnToPrimEnv(new RPFCar());
+addFnToPrimEnv(new RPFCdr());
 addFnToPrimEnv(new RPFCons());
-addFnToPrimEnv(new RPFIsCons());
+addFnToPrimEnv(new RPFIsList("cons?"));
 addFnToPrimEnv(new RPFIsEmpty());
 addFnToPrimEnv(new RPFFirst());
 addFnToPrimEnv(new RPFList());
-addFnToPrimEnv(new RPFIsCons("list?"));
+addFnToPrimEnv(new RPFIsList());
 addFnToPrimEnv(new RPFMember());
 addFnToPrimEnv(new RPFMember("member?"));
 addFnToPrimEnv(new RPFIsEmpty("null?"));

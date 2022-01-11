@@ -12,11 +12,13 @@ import {
 
 export {
   RPFAppend,
+  RPFCar,
+  RPFCdr,
   RPFCons,
-  RPFIsCons,
   RPFIsEmpty,
   RPFFirst,
   RPFList,
+  RPFIsList,
   RPFMember,
   RPFRest,
   R_NULL
@@ -34,6 +36,26 @@ class RPFAppend extends RPrimFun {
   }
 }
 
+class RPFCar extends RPrimFun {
+  constructor() {
+    super("car", { arity: 1, onlyArgTypeName: TypeName.PAIR });
+  }
+
+  call(args: RValue[]): RValue {
+    return (<RList>args[0]).vals[0];
+  }
+}
+
+class RPFCdr extends RPrimFun {
+  constructor() {
+    super("cdr", { arity: 1, onlyArgTypeName: TypeName.PAIR });
+  }
+
+  call(args: RValue[]): RValue {
+    return new RList((<RList>args[0]).vals.slice(1));
+  }
+}
+
 class RPFCons extends RPrimFun {
   constructor() {
     super("cons", { arity: 2, argsTypeNames: [TypeName.ANY, TypeName.LIST] });
@@ -41,16 +63,6 @@ class RPFCons extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return new RList([args[0], ...(<RList>args[1]).vals]);
-  }
-}
-
-class RPFIsCons extends RPrimFun {
-  constructor(alias?: string) {
-    super(alias || "cons?", { arity: 1 });
-  }
-
-  call(args: RValue[]): RValue {
-    return toRBoolean(isRList(args[0]));
   }
 }
 
@@ -81,6 +93,16 @@ class RPFList extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return new RList(args);
+  }
+}
+
+class RPFIsList extends RPrimFun {
+  constructor(alias?: string) {
+    super(alias || "list?", { arity: 1 });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean(isRList(args[0]));
   }
 }
 

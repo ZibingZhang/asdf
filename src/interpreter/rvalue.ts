@@ -402,6 +402,7 @@ enum TypeName {
   NON_EMPTY_LIST = "non-empty list",
   NON_NEGATIVE_REAL = "non-negative real",
   NUMBER = "number",
+  PAIR = "pair",
   RATIONAL = "rational",
   REAL = "real",
   STRING = "string",
@@ -438,6 +439,7 @@ class RPrimFun extends RCallableBase {
       case TypeName.LIST:
         return isRList;
       case TypeName.NON_EMPTY_LIST:
+      case TypeName.PAIR:
         return isRNonEmptyList;
       case TypeName.NON_NEGATIVE_REAL:
         return isRNonNegativeReal;
