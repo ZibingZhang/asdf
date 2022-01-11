@@ -288,7 +288,7 @@ abstract class RNumberBase extends RDataBase {
   abstract stringify(): string;
 }
 
-class RExactReal extends RNumberBase {
+abstract class RRationalBase extends RNumberBase {
   constructor(
     readonly numerator: bigint,
     readonly denominator: bigint = 1n
@@ -319,16 +319,6 @@ class RExactReal extends RNumberBase {
     }
   }
 
-  equal(rval: RValue): boolean {
-    return isRExactReal(rval)
-      && rval.numerator === this.numerator
-      && rval.denominator === this.denominator;
-  }
-
-  negate(): RExactReal {
-    return new RExactReal(-1n * this.numerator, this.denominator);
-  }
-
   isZero(): boolean {
     return this.numerator === 0n;
   }
@@ -338,7 +328,40 @@ class RExactReal extends RNumberBase {
   }
 
   toInexactDecimal(): RInexactDecimal {
-    return new RInexactDecimal(Number(this.numerator) / Number(this.denominator));
+    const flooredVal = this.numerator / this.denominator;
+    return new RInexactDecimal(
+      Number(flooredVal)
+      + Number(this.numerator - flooredVal * this.denominator)
+      / Number(this.denominator)
+    );
+  }
+}
+
+class RExactReal extends RRationalBase {
+  equal(rval: RValue): boolean {
+    return isRExactReal(rval)
+      && rval.numerator === this.numerator
+      && rval.denominator === this.denominator;
+  }
+
+  negate(): RExactReal {
+    return new RExactReal(-1n * this.numerator, this.denominator);
+  }
+}
+
+class RInexactRational extends RRationalBase {
+  stringify(): string {
+    return `#i${super.stringify()}`;
+  }
+
+  equal(rval: RValue): boolean {
+    return isRInexactRational(rval)
+      && rval.numerator === this.numerator
+      && rval.denominator === this.denominator;
+  }
+
+  negate(): RInexactRational {
+    return new RInexactRational(-1n * this.numerator, this.denominator);
   }
 }
 
@@ -370,60 +393,6 @@ class RInexactDecimal extends RNumberBase {
 
   toInexactDecimal(): RInexactDecimal {
     return this;
-  }
-}
-
-class RInexactRational extends RNumberBase {
-  constructor(
-    readonly numerator: bigint,
-    readonly denominator: bigint
-  ) {
-    super();
-    if ((numerator < 0 && denominator < 0) || (numerator > 0 && denominator > 0)) {
-      const divisor = gcd(numerator, denominator);
-      this.numerator = numerator / divisor;
-      this.denominator = denominator / divisor;
-    } else {
-      const divisor = gcd(-1n * numerator, denominator);
-      this.numerator = numerator / divisor;
-      this.denominator = denominator / divisor;
-    }
-  }
-
-  stringify(): string {
-    if (this.denominator === 1n) {
-      return this.numerator.toString();
-    } else {
-      if (this.isNegative()) {
-        const flooredValue = this.numerator / this.denominator;
-        return `${flooredValue}${(Number(-this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
-      } else {
-        const flooredValue = this.numerator / this.denominator;
-        return `${flooredValue}${(Number(this.numerator - flooredValue * this.denominator) / Number(this.denominator)).toString().slice(1)}`;
-      }
-    }
-  }
-
-  equal(rval: RValue): boolean {
-    return isRInexactRational(rval)
-      && rval.numerator === this.numerator
-      && rval.denominator === this.denominator;
-  }
-
-  negate(): RInexactRational {
-    return new RInexactRational(-1n * this.numerator, this.denominator);
-  }
-
-  isZero(): boolean {
-    return this.numerator === 0n;
-  }
-
-  isNegative(): boolean {
-    return this.numerator < 0;
-  }
-
-  toInexactDecimal(): RInexactDecimal {
-    return new RInexactDecimal(Number(this.numerator) / Number(this.denominator));
   }
 }
 
