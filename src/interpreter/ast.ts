@@ -193,14 +193,16 @@ class CheckNode extends ASTNodeBase {
         if (isRInexact(actualVal) || isRInexact(expectedVal)) {
           return new RTestResult(
             false,
-            CE_CANT_COMPARE_INEXACT_ERR(this.name, actualVal.stringify(), expectedVal.stringify())
+            CE_CANT_COMPARE_INEXACT_ERR(this.name, actualVal.stringify(), expectedVal.stringify()),
+            this.sourceSpan
           );
         } else if (isRData(actualVal) && actualVal.equal(expectedVal)) {
           return new RTestResult(true);
         } else {
           return new RTestResult(
             false,
-            CE_ACTUAL_VALUE_NOT_EXPECTED_ERR(actualVal.stringify(), expectedVal.stringify())
+            CE_ACTUAL_VALUE_NOT_EXPECTED_ERR(actualVal.stringify(), expectedVal.stringify()),
+            this.sourceSpan
           );
         }
       }
@@ -233,14 +235,16 @@ class CheckErrorNode extends CheckNode {
     try {
       return new RTestResult(
         false,
-        CE_EXPECTED_AN_ERROR_ERR(this.args[0].eval(env).stringify())
+        CE_EXPECTED_AN_ERROR_ERR(this.args[0].eval(env).stringify()),
+        this.sourceSpan
       );
     } catch (e) {
       if (e instanceof StageError) {
         if (expectedErrMsg && expectedErrMsg.val !== e.msg) {
           return new RTestResult(
             false,
-            CE_WRONG_ERROR_ERR(expectedErrMsg.val, e.msg)
+            CE_WRONG_ERROR_ERR(expectedErrMsg.val, e.msg),
+            this.sourceSpan
           );
         }
         return new RTestResult(true);
@@ -265,7 +269,8 @@ class CheckMemberOfNode extends CheckNode {
     if (isRFalse(this.arg.eval(env))) {
       return new RTestResult(
         false,
-        CE_NOT_MEMBER_OF_ERR(this.testValNode.eval(env).stringify(), this.testAgainstValNodes.map(node => node.eval(env).stringify()))
+        CE_NOT_MEMBER_OF_ERR(this.testValNode.eval(env).stringify(), this.testAgainstValNodes.map(node => node.eval(env).stringify())),
+        this.sourceSpan
       );
     }
     return new RTestResult(true);
@@ -287,13 +292,15 @@ class CheckSatisfiedNode extends CheckNode {
     if (!isRBoolean(val)) {
       return new RTestResult(
         false,
-        CE_SATISFIED_NOT_BOOLEAN_ERR(this.testFnName, val.stringify())
+        CE_SATISFIED_NOT_BOOLEAN_ERR(this.testFnName, val.stringify()),
+        this.sourceSpan
       );
     }
     if (isRFalse(val)) {
       return new RTestResult(
         false,
-        CE_NOT_SATISFIED_ERR(this.testFnName, this.testValNode.eval(env).stringify())
+        CE_NOT_SATISFIED_ERR(this.testFnName, this.testValNode.eval(env).stringify()),
+        this.sourceSpan
       );
     }
     return new RTestResult(true);
@@ -315,7 +322,8 @@ class CheckWithinNode extends CheckNode {
     if (isRFalse(this.arg.eval(env))) {
       return new RTestResult(
         false,
-        CE_NOT_WITHIN_ERR(this.actualNode.eval(env).stringify(), this.expectedNode.eval(env).stringify(), this.withinNode.eval(env).stringify())
+        CE_NOT_WITHIN_ERR(this.actualNode.eval(env).stringify(), this.expectedNode.eval(env).stringify(), this.withinNode.eval(env).stringify()),
+        this.sourceSpan
       );
     }
     return new RTestResult(true);

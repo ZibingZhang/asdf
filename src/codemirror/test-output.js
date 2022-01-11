@@ -35,7 +35,7 @@ function handleTestResults(tests) {
     totalTests++;
     if (!test.passed) {
       failedTests++;
-      newFailures.push(test.errMsg);
+      newFailures.push(test);
     }
   }
   if (totalTests > 0) {
@@ -67,5 +67,5 @@ function handleTestResults(tests) {
   if (failedTests > 0 && failedTests === newFailures.length) {
     appendToTestOutputLn("Check failures:");
   }
-  newFailures.forEach(errMsg => appendToTestOutputLn(`  ${errMsg.replace("\n", "\n  ")}`));
+  newFailures.forEach(test => appendToTestOutputLn(`  ${test.errMsg.replace("\n", "\n  ")}\n    at line ${test.sourceSpan.startLineno}, column ${test.sourceSpan.startColno}`));
 }

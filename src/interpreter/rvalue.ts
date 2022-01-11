@@ -6,6 +6,7 @@ import {
   Environment
 } from "./environment.js";
 import {
+  NO_SOURCE_SPAN,
   SourceSpan
 } from "./sourcespan.js";
 
@@ -100,7 +101,8 @@ interface RValBase {
 class RTestResult implements RValBase {
   constructor(
     readonly passed: boolean,
-    readonly msg: string = ""
+    readonly msg: string = "",
+    readonly sourceSpan: SourceSpan = NO_SOURCE_SPAN
   ) {}
 
   stringify(): string {

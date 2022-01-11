@@ -63,7 +63,11 @@ class EvaluateCode implements Stage<Program, string[]> {
     for (const node of program.nodes) {
       const result = node.eval(this.env);
       if (result instanceof RTestResult) {
-        this.testResults.push(new StageTestResult(result.passed, result.msg));
+        this.testResults.push(new StageTestResult(
+          result.passed,
+          result.msg,
+          result.sourceSpan
+        ));
       } else if (result !== R_VOID) {
         output.push(result.stringify());
       }
