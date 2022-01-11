@@ -176,7 +176,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           }
         }
         case TokenType.PLACEHOLDER: {
-          return new EllipsisNode(sexpr.sourceSpan);
+          return new EllipsisNode(sexpr, sexpr.sourceSpan);
         }
         default:
           throw "illegal state: unhandled token type";
@@ -197,7 +197,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       }
       switch (leadingSExpr.token.type) {
         case TokenType.PLACEHOLDER: {
-          return new EllipsisFunAppNode(sexpr.sourceSpan);
+          return new EllipsisFunAppNode(leadingSExpr, sexpr.sourceSpan);
         }
         case TokenType.NAME: {
           if (leadingSExpr.token.text === "quote") {

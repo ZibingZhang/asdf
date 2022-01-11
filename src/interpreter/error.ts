@@ -192,7 +192,9 @@ const DS_EXTRA_PARTS_ERR = (parts: number) => {
   return `define-struct: expected nothing after the field names, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
 
-const EL_EXPECTED_FINISHED_EXPR_ERR = "...: expected a finished expression, but found a template";
+const EL_EXPECTED_FINISHED_EXPR_ERR = (name: string) => {
+  return `${name}: expected a finished expression, but found a template`;
+}
 
 const ES_NOT_IN_COND_ERR = "else: not allowed here, because this is not a question in a clause";
 

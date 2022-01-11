@@ -63,6 +63,7 @@ const INTEGER_RE = /^[+-]?\d+\.?$/;
 const RATIONAL_RE = /^[+-]?\d+\/\d+$/;
 const DECIMAL_RE = /^[+-]?\d*\.\d+$/;
 const DIV_BY_ZERO_RE = /^[+-]?\d+\/0+$/;
+const PLACEHOLDER_RE = /^\.{2,6}$/
 
 enum State {
   INIT,
@@ -157,7 +158,7 @@ class Lexer implements Stage<string, SExpr[]> {
           RS_ILLEGAL_USE_OF_DOT_ERR,
           new SourceSpan(lineno, colno, lineno, colno + 1)
         );
-      } else if (text === "...") {
+      } else if (text.match(PLACEHOLDER_RE)) {
         addToken(lineno, colno, TokenType.PLACEHOLDER, text);
       } else if (text.match(INTEGER_RE)) {
         addToken(lineno, colno, TokenType.INTEGER, text);

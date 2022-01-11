@@ -53,6 +53,7 @@ import {
 import {
   StageError
 } from "./pipeline.js";
+import { AtomSExpr, SExpr } from "./sexpr.js";
 
 export {
   ASTNode,
@@ -395,7 +396,10 @@ class DefnVarNode extends ASTNodeBase {
 }
 
 class EllipsisFunAppNode extends ASTNodeBase {
-  constructor(readonly sourceSpan: SourceSpan) {
+  constructor(
+    readonly placeholder: AtomSExpr,
+    readonly sourceSpan: SourceSpan
+  ) {
     super(sourceSpan);
   }
 
@@ -405,14 +409,17 @@ class EllipsisFunAppNode extends ASTNodeBase {
 
   eval(_: Environment): RValue {
     throw new StageError(
-      EL_EXPECTED_FINISHED_EXPR_ERR,
+      EL_EXPECTED_FINISHED_EXPR_ERR(this.placeholder.token.text),
       this.sourceSpan
     );
   }
 }
 
 class EllipsisNode extends ASTNodeBase {
-  constructor(readonly sourceSpan: SourceSpan) {
+  constructor(
+    readonly placeholder: AtomSExpr,
+    readonly sourceSpan: SourceSpan
+  ) {
     super(sourceSpan);
   }
 
@@ -422,7 +429,7 @@ class EllipsisNode extends ASTNodeBase {
 
   eval(_: Environment): RValue {
     throw new StageError(
-      EL_EXPECTED_FINISHED_EXPR_ERR,
+      EL_EXPECTED_FINISHED_EXPR_ERR(this.placeholder.token.text),
       this.sourceSpan
     );
   }
