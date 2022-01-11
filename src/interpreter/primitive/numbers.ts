@@ -44,6 +44,8 @@ export {
   RPFCeiling,
   RPFDenominator,
   RPC_E,
+  RPFIsEven,
+  RPFExactToInexact,
   RPFExp,
   RPFExpt,
   RPFFloor,
@@ -57,7 +59,10 @@ export {
   RPFNumberToString,
   RPFNumerator,
   RPFIsNumber,
+  RPFIsOdd,
   RPC_PI,
+  RPFIsPositive,
+  RPFQuotient,
   RPFRandom,
   RPFSqr,
   RPFSqrt,
@@ -248,6 +253,26 @@ class RPFDenominator extends RPrimFun {
   }
 }
 
+class RPFIsEven extends RPrimFun {
+  constructor() {
+    super("even?", { arity: 1, onlyArgTypeName: TypeName.INTEGER });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean((<RNumber>args[0]).numerator % 2n === 0n);
+  }
+}
+
+class RPFExactToInexact extends RPrimFun {
+  constructor() {
+    super("exact->inexact", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+  }
+
+  call(args: RValue[]): RValue {
+    return RMath.toInexact(<RNumber>args[0]);
+  }
+}
+
 class RPFExp extends RPrimFun {
   constructor() {
     super("exp", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
@@ -377,8 +402,8 @@ class RPFNumberToString extends RPrimFun {
 }
 
 class RPFIsNumber extends RPrimFun {
-  constructor() {
-    super("number?", { arity: 1 });
+  constructor(alias?: string) {
+    super(alias || "number?", { arity: 1 });
   }
 
   call(args: RValue[]): RValue {
@@ -394,6 +419,39 @@ class RPFNumerator extends RPrimFun {
   call(args: RValue[]): RValue {
     const number = <RNumber>args[0];
     return RMath.make(isRExactReal(number), number.numerator);
+  }
+}
+
+class RPFIsOdd extends RPrimFun {
+  constructor() {
+    super("odd?", { arity: 1, onlyArgTypeName: TypeName.INTEGER });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean((<RNumber>args[0]).numerator % 2n === 1n);
+  }
+}
+
+class RPFIsPositive extends RPrimFun {
+  constructor() {
+    super("positive?", { arity: 1, onlyArgTypeName: TypeName.REAL });
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean((<RNumber>args[0]).isPositive());
+  }
+}
+
+class RPFQuotient extends RPrimFun {
+  constructor() {
+    super("quotient", { arity: 2, allArgsTypeName: TypeName.INTEGER });
+  }
+
+  call(args: RValue[]): RValue {
+    const dividend = <RNumber>args[0];
+    const divisor = <RNumber>args[1];
+    const isExact = isRExactReal(dividend) && isRExactReal(divisor);
+    return RMath.make(isExact, dividend.numerator / divisor.numerator)
   }
 }
 

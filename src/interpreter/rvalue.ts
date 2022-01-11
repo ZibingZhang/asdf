@@ -298,6 +298,10 @@ abstract class RNumberBase extends RDataBase {
     return Math.abs(this.toDecimal() - that.toDecimal()) <= ep;
   }
 
+  isPositive(): boolean {
+    return this.numerator > 0;
+  }
+
   isZero(): boolean {
     return this.numerator === 0n;
   }
@@ -570,6 +574,10 @@ abstract class RMath {
 
   static toExact(rnum: RNumber): RExactReal {
     return new RExactReal(rnum.numerator, rnum.denominator);
+  }
+
+  static toInexact(rnum: RNumber): RInexactReal {
+    return new RInexactReal(rnum.numerator, rnum.denominator);
   }
 
   static make(isExact: boolean, numerator: bigint, denominator: bigint = 1n): RNumber {

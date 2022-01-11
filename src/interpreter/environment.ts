@@ -19,16 +19,20 @@ import {
   RPFDenominator,
   RPFDivide,
   RPFEqual,
+  RPFExactToInexact,
   RPFExp,
   RPFExpt,
   RPFFloor,
   RPFGreater,
   RPFGreaterThan,
   RPFInexactToExact,
+  RPFIsEven,
   RPFIsInexact,
   RPFIsInteger,
   RPFIsNegative,
   RPFIsNumber,
+  RPFIsOdd,
+  RPFIsPositive,
   RPFIsZero,
   RPFLess,
   RPFLessThan,
@@ -40,6 +44,7 @@ import {
   RPFNumberToString,
   RPFNumerator,
   RPFPlus,
+  RPFQuotient,
   RPFRandom,
   RPFSqr,
   RPFSqrt,
@@ -204,6 +209,8 @@ addFnToPrimEnv(new RPFAbs());
 addFnToPrimEnv(new RPFAdd1());
 addFnToPrimEnv(new RPFCeiling());
 addFnToPrimEnv(new RPFDenominator());
+addFnToPrimEnv(new RPFIsEven());
+addFnToPrimEnv(new RPFExactToInexact());
 addFnToPrimEnv(new RPFFloor());
 addFnToPrimEnv(new RPFExp());
 addFnToPrimEnv(new RPFExpt());
@@ -217,7 +224,12 @@ addFnToPrimEnv(new RPFIsNegative());
 addFnToPrimEnv(new RPFNumberToString());
 addFnToPrimEnv(new RPFIsNumber());
 addFnToPrimEnv(new RPFNumerator());
+addFnToPrimEnv(new RPFIsOdd());
+addFnToPrimEnv(new RPFIsPositive());
+addFnToPrimEnv(new RPFQuotient());
 addFnToPrimEnv(new RPFRandom());
+addFnToPrimEnv(new RPFIsNumber("rational?"));
+addFnToPrimEnv(new RPFIsNumber("real?"));
 addFnToPrimEnv(new RPFSqr());
 addFnToPrimEnv(new RPFSqrt());
 addFnToPrimEnv(new RPFSub1());
