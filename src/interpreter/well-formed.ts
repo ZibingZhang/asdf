@@ -25,7 +25,8 @@ import {
 } from "./error.js";
 import {
   PRIMITIVE_DATA_NAMES,
-  PRIMITIVE_FUNCTIONS
+  PRIMITIVE_FUNCTIONS,
+  PRIMITIVE_STRUCT_NAMES
 } from "./environment.js";
 import {
   Stage,
@@ -86,8 +87,13 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     node.value.accept(this);
   }
 
-  visitDefnStructNode(_: DefnStructNode): void {
-    // always well-formed
+  visitDefnStructNode(node: DefnStructNode): void {
+    if (this.scope.has(node.name)) {
+      throw new StageError(
+        DF_PREVIOUSLY_DEFINED_NAME_ERR(node.name),
+        node.nameSourceSpan
+      );
+    }
   }
 
   visitEllipsisFunAllNode(_: EllipsisFunAppNode): void {
@@ -280,3 +286,4 @@ const STRUCTURE_TYPE_VARIABLE_META = new VariableMeta(VariableType.STRUCTURE_TYP
 const PRIMITIVE_SCOPE = new Scope();
 PRIMITIVE_DATA_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, DATA_VARIABLE_META));
 PRIMITIVE_FUNCTIONS.forEach((config, name) => PRIMITIVE_SCOPE.add(name, new VariableMeta(VariableType.PRIMITIVE_FUNCTION, config.arity || config.minArity || -1)));
+PRIMITIVE_STRUCT_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, STRUCTURE_TYPE_VARIABLE_META));

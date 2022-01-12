@@ -614,6 +614,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     }
     return new DefnStructNode(
       name.token.text,
+      name.sourceSpan,
       fieldNames,
       sexpr.sourceSpan
     );

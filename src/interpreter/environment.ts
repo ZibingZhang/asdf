@@ -5,6 +5,7 @@ import {
   RPrimFun,
   RPrimFunConfig,
   RStructGetFun,
+  RStructType,
   RValue,
   R_EMPTY_LIST,
   R_FALSE,
@@ -103,6 +104,7 @@ export {
   PRIMITIVE_DATA_NAMES,
   PRIMITIVE_ENVIRONMENT,
   PRIMITIVE_FUNCTIONS,
+  PRIMITIVE_STRUCT_NAMES,
   PRIMITIVE_TEST_FUNCTIONS,
   Environment
 };
@@ -157,6 +159,7 @@ class Environment {
 
 const PRIMITIVE_ENVIRONMENT = new Environment();
 const PRIMITIVE_DATA_NAMES: Set<string> = new Set();
+const PRIMITIVE_STRUCT_NAMES: Set<string> = new Set();
 const PRIMITIVE_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 
@@ -178,11 +181,13 @@ function addFnToPrimEnv(val: RPrimFun) {
 }
 
 function addStructToPrimEnv(name: string, fields: string[]) {
+  PRIMITIVE_STRUCT_NAMES.add(name);
   PRIMITIVE_FUNCTIONS.set(`make-${name}`, { arity: fields.length });
   PRIMITIVE_FUNCTIONS.set(`${name}?`, { arity: 1 });
   fields.forEach((field) => {
     PRIMITIVE_FUNCTIONS.set(`${name}-${field}`, { arity: 1 });
   });
+  PRIMITIVE_ENVIRONMENT.set(name, new RStructType(name));
   PRIMITIVE_ENVIRONMENT.set(`make-${name}`, new RMakeStructFun(name, fields.length));
   PRIMITIVE_ENVIRONMENT.set(`${name}?`, new RIsStructFun(name));
   fields.forEach((field, idx) => {

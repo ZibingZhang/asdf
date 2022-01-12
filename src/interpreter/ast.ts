@@ -55,6 +55,7 @@ import {
 import {
   StageError
 } from "./pipeline.js";
+import { Token } from "./token.js";
 
 export {
   ASTNode,
@@ -363,6 +364,7 @@ class CondNode extends ASTNodeBase {
 class DefnStructNode extends ASTNodeBase {
   constructor(
     readonly name: string,
+    readonly nameSourceSpan: SourceSpan,
     readonly fields: string[],
     readonly sourceSpan: SourceSpan
   ) {
