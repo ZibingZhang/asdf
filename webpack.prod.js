@@ -4,9 +4,9 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   mode: 'production',
   entry: {
-    assets: "./src/assets/main.ts",
     interpreter: "./src/interpreter/main.ts",
-    codemirror: "./src/codemirror/main.js"
+    codemirror: "./src/codemirror/main.js",
+    assets: "./src/assets/main.js"
   },
   module: {
     rules: [

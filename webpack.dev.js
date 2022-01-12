@@ -12,9 +12,9 @@ module.exports = {
     runtimeChunk: 'single'
   },
   entry: {
-    assets: "./src/assets/main.ts",
     interpreter: "./src/interpreter/main.ts",
-    codemirror: "./src/codemirror/main.js"
+    codemirror: "./src/codemirror/main.js",
+    assets: "./src/assets/main.js"
   },
   module: {
     rules: [

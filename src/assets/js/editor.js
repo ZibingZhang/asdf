@@ -38,5 +38,3 @@ EDITOR.on("changes",
     }
   }
 );
-
-EDITOR.focus();

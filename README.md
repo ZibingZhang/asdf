@@ -6,7 +6,7 @@
 $ npm start
 ```
 
-Go to [http://localhost:8080/dist](http://localhost:8080/dist).
+Go to [http://localhost:8080/](http://localhost:8080/).
 
 ## Production Build
 
@@ -15,4 +15,4 @@ $ npm run build
 $ npm run serve
 ```
 
-Go to [http://localhost:9000/dist](http://localhost:9000/dist).
+Go to [http://localhost:9000/dist](http://localhost:9000/).

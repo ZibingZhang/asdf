@@ -1,7 +1,3 @@
-import {
-  switchToEditor
-} from "./common";
-
 export {
   SETTINGS,
   updateSettings
@@ -24,12 +20,16 @@ const SETTINGS = CodeMirror(
     value: initValue,
     mode: "application/json",
     extraKeys: {
-      "Ctrl-S": () => switchToEditor()
+      "Ctrl-S": () => updateSettings()
     }
   }
 );
 
 function updateSettings() {
-  const settings = JSON.parse(SETTINGS.getValue());
-  window.racket.updateSettings(settings);
+  try {
+    const settings = JSON.parse(SETTINGS.getValue());
+    window.racket.updateSettings(settings);
+  } catch (e) {
+    alert("The settings are not a valid JSON object.");
+  }
 }

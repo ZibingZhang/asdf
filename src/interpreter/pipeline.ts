@@ -19,10 +19,6 @@ import {
 } from "./well-formed";
 
 export {
-  EVALUATE_CODE_STAGE,
-  LEXING_STAGE,
-  PARSING_SEXPRS_STAGE,
-  WELL_FORMED_PROGRAM_STAGE,
   Pipeline,
   Stage,
   StageError,
@@ -59,33 +55,33 @@ interface Stage<S, T> {
   run(input: StageOutput<S>): StageOutput<T>;
 }
 
-class Pipeline {
-  constructor(
-    readonly stages: Stage<any, any>[],
-    readonly reset: boolean
-  ) {}
-
-  run(program: string): StageOutput<any> {
-    if (this.reset) { resetStages(); }
-    let nextInput = new StageOutput(program);
-    for (const stage of this.stages) {
-      nextInput = stage.run(nextInput);
-      if (nextInput.errors.length > 0) {
-        if (this.reset) { resetStages(); }
-        return nextInput;
-      }
-    }
-    return nextInput;
-  }
-}
-
 const LEXING_STAGE = new Lexer();
 const PARSING_SEXPRS_STAGE = new ParseSExpr();
 const WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
 const EVALUATE_CODE_STAGE = new EvaluateCode();
 
-function resetStages() {
-  RNG.reset();
-  WELL_FORMED_PROGRAM_STAGE.reset();
-  EVALUATE_CODE_STAGE.reset();
+class Pipeline {
+  stages: Stage<any, any>[] = [
+    LEXING_STAGE,
+    PARSING_SEXPRS_STAGE,
+    WELL_FORMED_PROGRAM_STAGE,
+    EVALUATE_CODE_STAGE
+  ];
+
+  evaluateCode(code: string): StageOutput<any> {
+    let nextInput = new StageOutput(code);
+    for (const stage of this.stages) {
+      nextInput = stage.run(nextInput);
+      if (nextInput.errors.length > 0) {
+        return nextInput;
+      }
+    }
+    return nextInput;
+  }
+
+  reset() {
+    RNG.reset();
+    WELL_FORMED_PROGRAM_STAGE.reset();
+    EVALUATE_CODE_STAGE.reset();
+  }
 }
