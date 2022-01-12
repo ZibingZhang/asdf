@@ -88,12 +88,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitDefnStructNode(node: DefnStructNode): void {
-    if (this.scope.has(node.name)) {
-      throw new StageError(
-        DF_PREVIOUSLY_DEFINED_NAME_ERR(node.name),
-        node.nameSourceSpan
-      );
-    }
+    // always well-formed
   }
 
   visitEllipsisFunAllNode(_: EllipsisFunAppNode): void {
@@ -162,14 +157,14 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   private addDefinitionsToScope(defns: DefnNode[]) {
     for (const defn of defns) {
+      if (this.scope.has(defn.name)) {
+        throw new StageError(
+          DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
+          defn.nameSourceSpan
+        );
+      }
       if (defn instanceof DefnVarNode) {
         if (defn.value instanceof LambdaNode) {
-          if (this.scope.has(defn.name)) {
-            throw new StageError(
-              DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
-              defn.nameSourceSpan
-            );
-          }
           this.scope.add(
             defn.name,
             new VariableMeta(
@@ -178,21 +173,9 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
             )
           );
         } else {
-          if (this.scope.has(defn.name)) {
-            throw new StageError(
-              DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
-              defn.nameSourceSpan
-            );
-          }
           this.scope.add(defn.name, DATA_VARIABLE_META);
         }
       } else {
-        if (this.scope.has(defn.name)) {
-          throw new StageError(
-            DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
-            defn.sourceSpan
-          );
-        }
         this.scope.add(defn.name, STRUCTURE_TYPE_VARIABLE_META);
         if (this.scope.has(`make-${defn.name}`)) {
           throw new StageError(
