@@ -14,7 +14,7 @@ Alt-Enter | Run code
 
 Settings
 -----------------------------------------
-Ctrl-s | Save settings; Return to editor`;
+Ctrl-s | Save settings`;
 
 const infoTextArea = document.getElementById("info-textarea");
 const INFO = CodeMirror(
