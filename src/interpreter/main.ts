@@ -2,7 +2,6 @@ import {
   Pipeline
 } from "./pipeline";
 import {
-  Settings,
   updateSettings
 } from "./settings";
 
@@ -16,6 +15,6 @@ declare global {
 }
 
 window.racket = {
-  updateSettings: settings => updateSettings(<Settings>settings),
+  updateSettings: settings => updateSettings(settings),
   pipeline: new Pipeline()
 };

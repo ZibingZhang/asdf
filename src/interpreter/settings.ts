@@ -4,18 +4,20 @@ export {
   updateSettings
 };
 
-let SETTINGS: Settings = {
+type Settings = {
+  stringify: {
+    abbreviatedList: boolean
+  }
+};
+
+const DEFAULT_SETTINGS: Settings = {
   stringify: {
     abbreviatedList: false
   }
 };
 
-type Settings = {
-  stringify?: {
-    abbreviatedList?: boolean
-  }
-};
+let SETTINGS: Settings = DEFAULT_SETTINGS;
 
-function updateSettings(settings: Settings) {
-  SETTINGS = settings;
+function updateSettings(settings = {}) {
+  SETTINGS = {...DEFAULT_SETTINGS, ...settings};
 }

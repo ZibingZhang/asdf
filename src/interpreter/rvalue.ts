@@ -148,7 +148,7 @@ class RList extends RDataBase {
   stringify(): string {
     if (this.vals.length === 0) {
       return "'()";
-    } else if (SETTINGS.stringify?.abbreviatedList) {
+    } else if (SETTINGS.stringify.abbreviatedList) {
       return `(list ${this.vals.map(val => val.stringify()).join(" ")})`;
     } else {
       let output = `(cons ${this.vals[0].stringify()}`;

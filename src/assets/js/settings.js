@@ -28,8 +28,11 @@ const SETTINGS = CodeMirror(
 function updateSettings() {
   try {
     const settings = JSON.parse(SETTINGS.getValue());
-    window.racket.updateSettings(settings);
-  } catch (e) {
-    alert("The settings are not a valid JSON object.");
-  }
+    if (!Array.isArray(settings) && typeof settings === "object") {
+      window.racket.updateSettings(settings);
+      return true;
+    }
+  } catch (e) {}
+  alert("The settings are not a valid JSON object.");
+  return false;
 }

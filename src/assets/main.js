@@ -38,7 +38,7 @@ const infoTab = document.getElementById("info-tab");
 let activeTab = "editor";
 
 function switchToEditor() {
-  if (activeTab === "settings") { updateSettings(); }
+  if (activeTab === "settings") { if (!updateSettings()) { return; } }
   settingsTab.style.display = "none";
   infoTab.style.display = "none";
   editorTab.style.removeProperty("display");
@@ -57,7 +57,7 @@ function switchToSettings() {
 }
 
 function switchToInfo() {
-  if (activeTab === "settings") { updateSettings(); }
+  if (activeTab === "settings") { if (!updateSettings()) { return; } }
   editorTab.style.display = "none";
   settingsTab.style.display = "none";
   infoTab.style.removeProperty("display");
