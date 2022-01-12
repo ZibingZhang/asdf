@@ -14,20 +14,24 @@ import {
   SETTINGS,
   updateSettings
 } from "./settings.js";
+import {
+  INFO
+} from "./info.js";
 
 export {
   runEditorCode,
   runReplCode,
   switchToEditor,
-  switchToSettings
+  switchToSettings,
+  switchToInfo
 };
 
 function runEditorCode() {
   resetRepl();
+  resetTestOutput();
   evaluate(
     window.racket.pipelines.evaluateProgram,
     EDITOR.getValue(),
-    true,
     true
   );
 }
@@ -36,15 +40,11 @@ function runReplCode(code) {
   evaluate(
     window.racket.pipelines.evaluateRepl,
     code,
-    false,
     false
   );
 }
 
-function evaluate(pipeline, text, clearTestOutput, highlight) {
-  if (clearTestOutput) {
-    resetTestOutput();
-  }
+function evaluate(pipeline, text, highlight) {
   const stageOutput = pipeline.run(text);
   let output = "";
   if (stageOutput.errors.length > 0) {
@@ -66,13 +66,18 @@ function evaluate(pipeline, text, clearTestOutput, highlight) {
 
 const editorTab = document.getElementById("editor-tab");
 const settingsTab = document.getElementById("settings-tab");
+const infoTab = document.getElementById("info-tab");
+let activeTab = "editor";
 
 function switchToEditor() {
   try {
-    updateSettings();
+    if (activeTab === "settings") { updateSettings(); }
     settingsTab.style.display = "none";
+    infoTab.style.display = "none";
     editorTab.style.removeProperty("display");
     EDITOR.refresh();
+    EDITOR.focus();
+    activeTab = "editor";
   } catch (e) {
     alert("The settings are not a valid JSON object.");
   }
@@ -80,6 +85,18 @@ function switchToEditor() {
 
 function switchToSettings() {
   editorTab.style.display = "none";
+  infoTab.style.display = "none";
   settingsTab.style.removeProperty("display");
   SETTINGS.refresh();
+  SETTINGS.focus();
+  activeTab = "settings";
+}
+
+function switchToInfo() {
+  if (activeTab === "settings") { updateSettings(); }
+  editorTab.style.display = "none";
+  settingsTab.style.display = "none";
+  infoTab.style.removeProperty("display");
+  INFO.refresh();
+  activeTab = "info";
 }

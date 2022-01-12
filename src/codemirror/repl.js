@@ -12,11 +12,11 @@ const REPL = CodeMirror(
   (elt) => {
     replTextArea.parentNode.replaceChild(elt, replTextArea);
   }, {
+    lineWrapping: true,
+    smartIndent: false,
     tabSize: 2,
     value: "> ",
-    mode: null,
-    lineWrapping: true,
-    smartIndent: false
+    mode: "text"
     // extraKeys: {
     //   "Alt-I": () => {
     //     let element = document.createElement("canvas");

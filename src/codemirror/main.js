@@ -1,6 +1,7 @@
 import {
   runEditorCode,
   switchToEditor,
+  switchToInfo,
   switchToSettings
 } from "./common.js";
 import {
@@ -10,6 +11,7 @@ import {
 document.getElementById("run-button").onclick = runEditorCode;
 document.getElementById("editor-button").onclick = switchToEditor;
 document.getElementById("settings-button").onclick = switchToSettings;
+document.getElementById("info-button").onclick = switchToInfo;
 
 updateSettings();
 

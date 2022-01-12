@@ -9,10 +9,10 @@ const TEST_OUTPUT = CodeMirror(
     testOutputTextArea.parentNode.replaceChild(elt, testOutputTextArea);
   }, {
     lineNumbers: false,
+    readOnly: true,
     tabSize: 2,
     value: "\n\n\n",
-    mode: null,
-    readOnly: true
+    mode: "text"
   }
 );
 

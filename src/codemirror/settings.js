@@ -22,7 +22,7 @@ const SETTINGS = CodeMirror(
     lineNumbers: true,
     tabSize: 2,
     value: initValue,
-    mode: "javascript",
+    mode: "application/json",
     extraKeys: {
       "Ctrl-S": () => switchToEditor()
     }
