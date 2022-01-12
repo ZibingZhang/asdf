@@ -4,11 +4,11 @@ import {
   PARSING_SEXPRS_STAGE,
   Pipeline,
   WELL_FORMED_PROGRAM_STAGE
-} from "./pipeline.js";
+} from "./pipeline";
 import {
   Settings,
   updateSettings
-} from "./settings.js";
+} from "./settings";
 
 declare global {
   interface Window {

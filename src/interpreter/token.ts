@@ -1,6 +1,6 @@
 import {
   SourceSpan
-} from "./sourcespan.js";
+} from "./sourcespan";
 
 export {
   Token,

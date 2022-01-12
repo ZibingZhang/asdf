@@ -6,7 +6,7 @@ import {
   TypeName,
   isRString,
   toRBoolean
-} from "../rvalue.js";
+} from "../rvalue";
 
 export {
   RPFStringDowncase,

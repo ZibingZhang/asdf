@@ -2,16 +2,16 @@
 import {
   NO_SOURCE_SPAN,
   SourceSpan
-} from "./sourcespan.js";
+} from "./sourcespan";
 import {
   ASTNode
-} from "./ast.js";
+} from "./ast";
 import {
   Environment
-} from "./environment.js";
+} from "./environment";
 import {
   SETTINGS
-} from "./settings.js";
+} from "./settings";
 
 export {
   R_EMPTY_LIST,

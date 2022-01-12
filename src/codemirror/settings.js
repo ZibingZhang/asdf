@@ -1,6 +1,6 @@
 import {
   switchToEditor
-} from "./common.js";
+} from "./common";
 
 export {
   SETTINGS,

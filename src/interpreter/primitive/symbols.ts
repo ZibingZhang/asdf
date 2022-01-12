@@ -6,7 +6,7 @@ import {
   TypeName,
   isRSymbol,
   toRBoolean
-} from "../rvalue.js";
+} from "../rvalue";
 
 export {
   RPFSymbolToString,

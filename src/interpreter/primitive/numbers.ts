@@ -1,7 +1,7 @@
 import {
   FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR,
   FA_DIV_BY_ZERO_ERR
-} from "../error.js";
+} from "../error";
 import {
   RExactReal,
   RInexactReal,
@@ -18,16 +18,16 @@ import {
   isRInteger,
   isRNumber,
   toRBoolean
-} from "../rvalue.js";
+} from "../rvalue";
 import {
   RNG
-} from "../random.js";
+} from "../random";
 import {
   SourceSpan
-} from "../sourcespan.js";
+} from "../sourcespan";
 import {
   StageError
-} from "../pipeline.js";
+} from "../pipeline";
 
 export {
   RPFMultiply,

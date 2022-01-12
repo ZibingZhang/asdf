@@ -8,7 +8,7 @@ import {
   isREmptyList,
   isRList,
   toRBoolean
-} from "../rvalue.js";
+} from "../rvalue";
 
 export {
   RPFAppend,

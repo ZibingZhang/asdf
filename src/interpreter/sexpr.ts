@@ -1,9 +1,9 @@
 import {
   SourceSpan
-} from "./sourcespan.js";
+} from "./sourcespan";
 import {
   Token
-} from "./token.js";
+} from "./token";
 
 export {
   AtomSExpr,

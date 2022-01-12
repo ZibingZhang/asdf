@@ -1,22 +1,22 @@
 import {
   EDITOR,
   markEditor
-} from "./editor.js";
+} from "./editor";
 import {
   appendToRepl,
   resetRepl
-} from "./repl.js";
+} from "./repl";
 import {
   handleTestResults,
   resetTestOutput
-} from "./test-output.js";
+} from "./test-output";
 import {
   SETTINGS,
   updateSettings
-} from "./settings.js";
+} from "./settings";
 import {
   INFO
-} from "./info.js";
+} from "./info";
 
 export {
   runEditorCode,

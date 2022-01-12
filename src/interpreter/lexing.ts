@@ -2,11 +2,11 @@ import {
   AtomSExpr,
   ListSExpr,
   SExpr
-} from "./sexpr.js";
+} from "./sexpr";
 import {
   NO_SOURCE_SPAN,
   SourceSpan
-} from "./sourcespan.js";
+} from "./sourcespan";
 import {
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
@@ -20,16 +20,16 @@ import {
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
   RS_UNCLOSED_STRING_ERR,
   RS_UNEXPECTED_ERR
-} from "./error.js";
+} from "./error";
 import {
   Stage,
   StageError,
   StageOutput
-} from "./pipeline.js";
+} from "./pipeline";
 import {
   Token,
   TokenType
-} from "./token.js";
+} from "./token";
 
 export {
   Lexer

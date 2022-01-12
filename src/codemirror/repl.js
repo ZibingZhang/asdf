@@ -1,6 +1,6 @@
 import {
   runReplCode
-} from "./common.js";
+} from "./common";
 
 export {
   appendToRepl,

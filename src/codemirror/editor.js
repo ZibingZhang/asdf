@@ -1,6 +1,6 @@
 import {
   runEditorCode
-} from "./common.js";
+} from "./common";
 
 export {
   EDITOR,

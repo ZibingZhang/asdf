@@ -6,7 +6,7 @@ import {
   TypeName,
   isRBoolean,
   toRBoolean
-} from "../rvalue.js";
+} from "../rvalue";
 
 export {
   RPFBooleanToString,

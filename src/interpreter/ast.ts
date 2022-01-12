@@ -17,7 +17,7 @@ import {
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   WF_QUESTION_NOT_BOOL_ERR
-} from "./error.js";
+} from "./error";
 import {
   RCallableVisitor,
   RIsStructFun,
@@ -39,23 +39,23 @@ import {
   isRInexactReal,
   isRString,
   isRTrue
-} from "./rvalue.js";
+} from "./rvalue";
 import {
   AtomSExpr
-} from "./sexpr.js";
+} from "./sexpr";
 import {
   Environment
-} from "./environment.js";
+} from "./environment";
 import {
   RNG
-} from "./random.js";
+} from "./random";
 import {
   SourceSpan
-} from "./sourcespan.js";
+} from "./sourcespan";
 import {
   StageError
-} from "./pipeline.js";
-import { Token } from "./token.js";
+} from "./pipeline";
+import { Token } from "./token";
 
 export {
   ASTNode,

@@ -10,7 +10,7 @@ import {
   R_EMPTY_LIST,
   R_FALSE,
   R_TRUE
-} from "./rvalue.js";
+} from "./rvalue";
 import {
   RPC_E,
   RPC_PI,
@@ -50,7 +50,7 @@ import {
   RPFSqr,
   RPFSqrt,
   RPFSub1
-} from "./primitive/numbers.js";
+} from "./primitive/numbers";
 import {
   RPFAppend,
   RPFCar,
@@ -63,14 +63,14 @@ import {
   RPFMember,
   RPFRest,
   R_NULL
-} from "./primitive/lists.js";
+} from "./primitive/lists";
 import {
   RPFAreBooleansEqual,
   RPFBooleanToString,
   RPFIsBoolean,
   RPFIsFalse,
   RPFNot
-} from "./primitive/booleans.js";
+} from "./primitive/booleans";
 import {
   RPFAreEq,
   RPFAreEqual,
@@ -78,27 +78,27 @@ import {
   RPFAreEqv,
   RPFIdentity,
   RPFIsStruct
-} from "./primitive/misc.js";
+} from "./primitive/misc";
 import {
   RPFAreSymbolsEqual,
   RPFIsSymbol,
   RPFSymbolToString
-} from "./primitive/symbols.js";
+} from "./primitive/symbols";
 import {
   RPFIsString,
   RPFIsStringLessEqualThan,
   RPFStringDowncase,
   RPFStringLength
-} from "./primitive/string.js";
+} from "./primitive/string";
 import {
   SC_USED_BEFORE_DEFINITION_ERR
-} from "./error.js";
+} from "./error";
 import {
   SourceSpan
-} from "./sourcespan.js";
+} from "./sourcespan";
 import {
   StageError
-} from "./pipeline.js";
+} from "./pipeline";
 
 export {
   PRIMITIVE_DATA_NAMES,

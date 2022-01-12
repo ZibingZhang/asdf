@@ -1,12 +1,13 @@
+import "./mode/racket/racket.js";
 import {
   runEditorCode,
   switchToEditor,
   switchToInfo,
   switchToSettings
-} from "./common.js";
+} from "./common";
 import {
   updateSettings
-} from "./settings.js";
+} from "./settings";
 
 document.getElementById("run-button").onclick = runEditorCode;
 document.getElementById("editor-button").onclick = switchToEditor;

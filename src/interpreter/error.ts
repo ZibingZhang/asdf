@@ -2,13 +2,13 @@ import {
   SExpr,
   isAtomSExpr,
   isListSExpr
-} from "./sexpr.js";
+} from "./sexpr";
 import {
   TokenType
-} from "./token.js";
+} from "./token";
 import {
   ordinalSuffixOf
-} from "./utils.js";
+} from "./utils";
 
 export {
   CE_ACTUAL_VALUE_NOT_EXPECTED_ERR,

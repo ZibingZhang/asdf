@@ -14,7 +14,7 @@ import {
   LambdaNode,
   OrNode,
   VarNode
-} from "./ast.js";
+} from "./ast";
 import {
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
   FA_ARITY_ERR,
@@ -22,23 +22,23 @@ import {
   SC_UNDEFINED_VARIABLE_ERR,
   WF_EXPECTED_FUNCTION_CALL_ERR,
   WF_STRUCTURE_TYPE_ERR
-} from "./error.js";
+} from "./error";
 import {
   PRIMITIVE_DATA_NAMES,
   PRIMITIVE_FUNCTIONS,
   PRIMITIVE_STRUCT_NAMES
-} from "./environment.js";
+} from "./environment";
 import {
   Stage,
   StageError,
   StageOutput
-} from "./pipeline.js";
+} from "./pipeline";
 import {
   Program
-} from "./program.js";
+} from "./program";
 import {
   SourceSpan
-} from "./sourcespan.js";
+} from "./sourcespan";
 
 export {
   WellFormedProgram

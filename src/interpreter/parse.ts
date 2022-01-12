@@ -19,14 +19,14 @@ import {
   OrNode,
   VarNode,
   isDefnNode
-} from "./ast.js";
+} from "./ast";
 import {
   AtomSExpr,
   ListSExpr,
   SExpr,
   isAtomSExpr,
   isListSExpr
-} from "./sexpr.js";
+} from "./sexpr";
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
   CN_ELSE_NOT_LAST_CLAUSE_ERR,
@@ -54,7 +54,7 @@ import {
   QU_EXPECTED_POST_QUOTE_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR
-} from "./error.js";
+} from "./error";
 import {
   RExactReal,
   RPrimFunConfig,
@@ -63,22 +63,22 @@ import {
   R_EMPTY_LIST,
   R_FALSE,
   R_TRUE
-} from "./rvalue.js";
+} from "./rvalue";
 import {
   Stage,
   StageError,
   StageOutput
-} from "./pipeline.js";
+} from "./pipeline";
 import {
   Token,
   TokenType
-} from "./token.js";
+} from "./token";
 import {
   PRIMITIVE_TEST_FUNCTIONS
-} from "./environment.js";
+} from "./environment";
 import {
   Program
-} from "./program.js";
+} from "./program";
 
 export {
   ParseSExpr

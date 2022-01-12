@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   EvaluateCode
-} from "./evaluate.js";
+} from "./evaluate";
 import {
   Lexer
-} from "./lexing.js";
+} from "./lexing";
 import {
   ParseSExpr
-} from "./parse.js";
+} from "./parse";
 import {
   RNG
-} from "./random.js";
+} from "./random";
 import {
   SourceSpan
-} from "./sourcespan.js";
+} from "./sourcespan";
 import {
   WellFormedProgram
-} from "./well-formed.js";
+} from "./well-formed";
 
 export {
   EVALUATE_CODE_STAGE,

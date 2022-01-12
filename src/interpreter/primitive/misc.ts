@@ -6,7 +6,7 @@ import {
   isRData,
   isRStruct,
   toRBoolean
-} from "../rvalue.js";
+} from "../rvalue";
 
 export {
   RPFAreEq,
