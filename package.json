@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "python3 -m http.server 9000 --directory ./dist",
-    "start": "npx webpack-dev-server",
-    "build": "npx webpack",
+    "start": "npx webpack-dev-server --config webpack.dev.js",
+    "build": "npx webpack --config webpack.prod.js",
     "lint": "npx eslint ./src --fix"
   },
   "devDependencies": {

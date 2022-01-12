@@ -2,22 +2,17 @@
 
 ## Developing Locally
 
-### Initial Setup
-
 ```shell
-npm install
+$ npm start
 ```
 
-### Build Site
+Go to [http://localhost:8080/dist](http://localhost:8080/dist).
+
+## Production Build
 
 ```shell
-npm run build
+$ npm run build
+$ npm run serve
 ```
 
-### View Site
-
-```shell
-python3 -m http.server 8080
-```
-
-Go to http://localhost:8080/build/.
+Go to [http://localhost:9000/dist](http://localhost:9000/dist).
