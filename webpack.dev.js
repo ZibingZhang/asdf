@@ -5,8 +5,7 @@ module.exports = {
   mode: "development",
   devtool: "eval",
   devServer: {
-    hot: true,
-    static: "dist"
+    hot: true
   },
   optimization: {
     runtimeChunk: 'single'
@@ -36,7 +35,9 @@ module.exports = {
     filename: "[name].bundle.js",
     path: path.resolve(__dirname, "dist/")
   },
-  plugins: [new HtmlWebpackPlugin({
-    template: "src/index.html"
-  })]
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "src/index.html"
+    })
+  ]
 };
