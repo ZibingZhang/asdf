@@ -401,11 +401,19 @@ class RLambda extends RCallableBase {
 enum TypeName {
   ANY = "any",
   BOOLEAN = "boolean",
-  EXACT_POSITIVE_INTEGER = "exact positive integer",
+  EXACT_NON_NEGATIVE_INTEGER = "exact-non-negative-integer",
+  EXACT_POSITIVE_INTEGER = "exact-positive-integer",
   INTEGER = "integer",
   LIST = "list",
+  N_LIST_2 = "list with 2 or more elements",
+  N_LIST_3 = "list with 3 or more elements",
+  N_LIST_4 = "list with 4 or more elements",
+  N_LIST_5 = "list with 5 or more elements",
+  N_LIST_6 = "list with 6 or more elements",
+  N_LIST_7 = "list with 7 or more elements",
+  N_LIST_8 = "list with 8 or more elements",
   NON_EMPTY_LIST = "non-empty list",
-  NON_NEGATIVE_REAL = "non-negative real",
+  NON_NEGATIVE_REAL = "non-negative-real",
   NUMBER = "number",
   PAIR = "pair",
   RATIONAL = "rational",
@@ -420,7 +428,8 @@ interface RPrimFunConfig {
   arity?: number,
   onlyArgTypeName?: TypeName,
   allArgsTypeName?: TypeName,
-  argsTypeNames?: TypeName[]
+  argsTypeNames?: TypeName[],
+  lastArgTypeName?: TypeName
 }
 
 class RPrimFun extends RCallableBase {
@@ -437,6 +446,8 @@ class RPrimFun extends RCallableBase {
         return () => true;
       case TypeName.BOOLEAN:
         return isRBoolean;
+      case TypeName.EXACT_NON_NEGATIVE_INTEGER:
+        return isRExactNonNegativeInteger;
       case TypeName.EXACT_POSITIVE_INTEGER:
         return isRExactPositiveInteger;
       case TypeName.INTEGER:
@@ -446,6 +457,20 @@ class RPrimFun extends RCallableBase {
       case TypeName.NON_EMPTY_LIST:
       case TypeName.PAIR:
         return isRNonEmptyList;
+      case TypeName.N_LIST_2:
+        return isRNList(2);
+      case TypeName.N_LIST_3:
+        return isRNList(3);
+      case TypeName.N_LIST_4:
+        return isRNList(4);
+      case TypeName.N_LIST_5:
+        return isRNList(5);
+      case TypeName.N_LIST_6:
+        return isRNList(6);
+      case TypeName.N_LIST_7:
+        return isRNList(7);
+      case TypeName.N_LIST_8:
+        return isRNList(8);
       case TypeName.NON_NEGATIVE_REAL:
         return isRNonNegativeReal;
       case TypeName.NUMBER:
@@ -500,6 +525,10 @@ function isREmptyList(rval: RValue): rval is RList {
   return isRList(rval) && rval.vals.length === 0;
 }
 
+function isRExactNonNegativeInteger(rval: RValue): rval is RExactReal {
+  return isRExactReal(rval) && rval.denominator === 1n && rval.numerator >= 0n;
+}
+
 function isRExactPositiveInteger(rval: RValue): rval is RExactReal {
   return isRExactReal(rval) && rval.denominator === 1n && rval.numerator > 0n;
 }
@@ -523,6 +552,12 @@ function isRInteger(rval: RValue): rval is RNumber {
 
 function isRList(rval: RValue): rval is RList {
   return rval instanceof RList;
+}
+
+function isRNList(n: number): (rval: RValue) => boolean {
+  return (rval: RValue) => {
+    return isRList(rval) && rval.vals.length >= n;
+  };
 }
 
 function isRNonEmptyList(rval: RValue): rval is RList {

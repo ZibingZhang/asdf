@@ -44,24 +44,24 @@ export {
   RPFCeiling,
   RPFDenominator,
   RPC_E,
-  RPFIsEven,
+  RPFEvenHuh,
   RPFExactToInexact,
   RPFExp,
   RPFExpt,
   RPFFloor,
   RPFInexactToExact,
-  RPFIsInexact,
-  RPFIsInteger,
+  RPFInexactHuh,
+  RPFIntegerHuh,
   RPFMax,
   RPFMin,
   RPFModulo,
-  RPFIsNegative,
+  RPFNegativeHuh,
   RPFNumberToString,
   RPFNumerator,
-  RPFIsNumber,
-  RPFIsOdd,
+  RPFNumberHuh,
+  RPFOddHuh,
   RPC_PI,
-  RPFIsPositive,
+  RPFPositiveHuh,
   RPFQuotient,
   RPFRandom,
   RPFRemainder,
@@ -69,7 +69,7 @@ export {
   RPFSqr,
   RPFSqrt,
   RPFSub1,
-  RPFIsZero
+  RPFZeroHuh
 };
 
 const RPC_E = new RInexactReal(6121026514868073n, 2251799813685248n);
@@ -255,7 +255,7 @@ class RPFDenominator extends RPrimFun {
   }
 }
 
-class RPFIsEven extends RPrimFun {
+class RPFEvenHuh extends RPrimFun {
   constructor() {
     super("even?", { arity: 1, onlyArgTypeName: TypeName.INTEGER });
   }
@@ -323,7 +323,7 @@ class RPFInexactToExact extends RPrimFun {
   }
 }
 
-class RPFIsInexact extends RPrimFun {
+class RPFInexactHuh extends RPrimFun {
   constructor() {
     super("inexact?", { arity: 1 });
   }
@@ -333,7 +333,7 @@ class RPFIsInexact extends RPrimFun {
   }
 }
 
-class RPFIsInteger extends RPrimFun {
+class RPFIntegerHuh extends RPrimFun {
   constructor() {
     super("integer?", { arity: 1 });
   }
@@ -383,7 +383,7 @@ class RPFModulo extends RPrimFun {
   }
 }
 
-class RPFIsNegative extends RPrimFun {
+class RPFNegativeHuh extends RPrimFun {
   constructor() {
     super("negative?", { arity: 1, onlyArgTypeName: TypeName.REAL });
   }
@@ -403,7 +403,7 @@ class RPFNumberToString extends RPrimFun {
   }
 }
 
-class RPFIsNumber extends RPrimFun {
+class RPFNumberHuh extends RPrimFun {
   constructor(alias?: string) {
     super(alias || "number?", { arity: 1 });
   }
@@ -424,7 +424,7 @@ class RPFNumerator extends RPrimFun {
   }
 }
 
-class RPFIsOdd extends RPrimFun {
+class RPFOddHuh extends RPrimFun {
   constructor() {
     super("odd?", { arity: 1, onlyArgTypeName: TypeName.INTEGER });
   }
@@ -434,7 +434,7 @@ class RPFIsOdd extends RPrimFun {
   }
 }
 
-class RPFIsPositive extends RPrimFun {
+class RPFPositiveHuh extends RPrimFun {
   constructor() {
     super("positive?", { arity: 1, onlyArgTypeName: TypeName.REAL });
   }
@@ -545,7 +545,7 @@ class RPFSub1 extends RPrimFun {
   }
 }
 
-class RPFIsZero extends RPrimFun {
+class RPFZeroHuh extends RPrimFun {
   constructor() {
     super("zero?", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
   }

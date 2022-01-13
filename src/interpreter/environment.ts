@@ -27,14 +27,14 @@ import {
   RPFGreater,
   RPFGreaterThan,
   RPFInexactToExact,
-  RPFIsEven,
-  RPFIsInexact,
-  RPFIsInteger,
-  RPFIsNegative,
-  RPFIsNumber,
-  RPFIsOdd,
-  RPFIsPositive,
-  RPFIsZero,
+  RPFEvenHuh,
+  RPFInexactHuh,
+  RPFIntegerHuh,
+  RPFNegativeHuh,
+  RPFNumberHuh,
+  RPFOddHuh,
+  RPFPositiveHuh,
+  RPFZeroHuh,
   RPFLess,
   RPFLessThan,
   RPFMax,
@@ -58,19 +58,32 @@ import {
   RPFCar,
   RPFCdr,
   RPFCons,
+  RPFEighth,
   RPFFirst,
-  RPFIsEmpty,
-  RPFIsList,
+  RPFEmptyHuh,
+  RPFListHuh,
   RPFList,
   RPFMember,
   RPFRest,
-  R_NULL
+  R_NULL,
+  RPFFifth,
+  RPFFourth,
+  RPFLength,
+  RPFListStar,
+  RPFMakeList,
+  RPFRemove,
+  RPFRemoveAll,
+  RPFReverse,
+  RPFSecond,
+  RPFSeventh,
+  RPFSixth,
+  RPFThird
 } from "./primitive/lists";
 import {
   RPFAreBooleansEqual,
   RPFBooleanToString,
-  RPFIsBoolean,
-  RPFIsFalse,
+  RPFBooleanHuh,
+  RPFFalseHuh,
   RPFNot
 } from "./primitive/booleans";
 import {
@@ -80,16 +93,16 @@ import {
   RPFAreEqv,
   RPFError,
   RPFIdentity,
-  RPFIsStruct
+  RPFStructHuh
 } from "./primitive/misc";
 import {
   RPFAreSymbolsEqual,
-  RPFIsSymbol,
+  RPFSymbolHuh,
   RPFSymbolToString
 } from "./primitive/symbols";
 import {
-  RPFIsString,
-  RPFIsStringLessEqualThan,
+  RPFStringHuh,
+  RPFStringLessEqualThanHuh,
   RPFStringDowncase,
   RPFStringLength
 } from "./primitive/string";
@@ -223,60 +236,73 @@ addFnToPrimEnv(new RPFAbs());
 addFnToPrimEnv(new RPFAdd1());
 addFnToPrimEnv(new RPFCeiling());
 addFnToPrimEnv(new RPFDenominator());
-addFnToPrimEnv(new RPFIsEven());
+addFnToPrimEnv(new RPFEvenHuh());
 addFnToPrimEnv(new RPFExactToInexact());
 addFnToPrimEnv(new RPFFloor());
 addFnToPrimEnv(new RPFExp());
 addFnToPrimEnv(new RPFExpt());
 addFnToPrimEnv(new RPFInexactToExact());
-addFnToPrimEnv(new RPFIsInexact());
-addFnToPrimEnv(new RPFIsInteger());
+addFnToPrimEnv(new RPFInexactHuh());
+addFnToPrimEnv(new RPFIntegerHuh());
 addFnToPrimEnv(new RPFMax());
 addFnToPrimEnv(new RPFMin());
 addFnToPrimEnv(new RPFModulo());
-addFnToPrimEnv(new RPFIsNegative());
+addFnToPrimEnv(new RPFNegativeHuh());
 addFnToPrimEnv(new RPFNumberToString());
-addFnToPrimEnv(new RPFIsNumber());
+addFnToPrimEnv(new RPFNumberHuh());
 addFnToPrimEnv(new RPFNumerator());
-addFnToPrimEnv(new RPFIsOdd());
-addFnToPrimEnv(new RPFIsPositive());
+addFnToPrimEnv(new RPFOddHuh());
+addFnToPrimEnv(new RPFPositiveHuh());
 addFnToPrimEnv(new RPFQuotient());
 addFnToPrimEnv(new RPFRandom());
 addFnToPrimEnv(new RPFRemainder());
 addFnToPrimEnv(new RPFRound());
-addFnToPrimEnv(new RPFIsNumber("rational?"));
-addFnToPrimEnv(new RPFIsNumber("real?"));
+addFnToPrimEnv(new RPFNumberHuh("rational?"));
+addFnToPrimEnv(new RPFNumberHuh("real?"));
 addFnToPrimEnv(new RPFSqr());
 addFnToPrimEnv(new RPFSqrt());
 addFnToPrimEnv(new RPFSub1());
-addFnToPrimEnv(new RPFIsZero());
+addFnToPrimEnv(new RPFZeroHuh());
 
 // booleans
 addFnToPrimEnv(new RPFBooleanToString());
 addFnToPrimEnv(new RPFAreBooleansEqual());
-addFnToPrimEnv(new RPFIsBoolean());
-addFnToPrimEnv(new RPFIsFalse());
+addFnToPrimEnv(new RPFBooleanHuh());
+addFnToPrimEnv(new RPFFalseHuh());
 addFnToPrimEnv(new RPFNot());
 
 // symbols
 addFnToPrimEnv(new RPFSymbolToString());
 addFnToPrimEnv(new RPFAreSymbolsEqual());
-addFnToPrimEnv(new RPFIsSymbol());
+addFnToPrimEnv(new RPFSymbolHuh());
 
 // lists
 addFnToPrimEnv(new RPFAppend());
 addFnToPrimEnv(new RPFCar());
 addFnToPrimEnv(new RPFCdr());
 addFnToPrimEnv(new RPFCons());
-addFnToPrimEnv(new RPFIsList("cons?"));
-addFnToPrimEnv(new RPFIsEmpty());
+addFnToPrimEnv(new RPFListHuh("cons?"));
+addFnToPrimEnv(new RPFEighth());
+addFnToPrimEnv(new RPFEmptyHuh());
+addFnToPrimEnv(new RPFFifth());
 addFnToPrimEnv(new RPFFirst());
+addFnToPrimEnv(new RPFFourth());
+addFnToPrimEnv(new RPFLength());
 addFnToPrimEnv(new RPFList());
-addFnToPrimEnv(new RPFIsList());
+addFnToPrimEnv(new RPFListStar());
+addFnToPrimEnv(new RPFListHuh());
+addFnToPrimEnv(new RPFMakeList());
 addFnToPrimEnv(new RPFMember());
 addFnToPrimEnv(new RPFMember("member?"));
-addFnToPrimEnv(new RPFIsEmpty("null?"));
+addFnToPrimEnv(new RPFEmptyHuh("null?"));
+addFnToPrimEnv(new RPFRemove());
+addFnToPrimEnv(new RPFRemoveAll());
 addFnToPrimEnv(new RPFRest());
+addFnToPrimEnv(new RPFReverse());
+addFnToPrimEnv(new RPFSecond());
+addFnToPrimEnv(new RPFSeventh());
+addFnToPrimEnv(new RPFSixth());
+addFnToPrimEnv(new RPFThird());
 
 // posns
 addStructToPrimEnv("posn", ["x", "y"]);
@@ -284,8 +310,8 @@ addStructToPrimEnv("posn", ["x", "y"]);
 // strings
 addFnToPrimEnv(new RPFStringDowncase());
 addFnToPrimEnv(new RPFStringLength());
-addFnToPrimEnv(new RPFIsStringLessEqualThan());
-addFnToPrimEnv(new RPFIsString());
+addFnToPrimEnv(new RPFStringLessEqualThanHuh());
+addFnToPrimEnv(new RPFStringHuh());
 
 // misc
 addFnToPrimEnv(new RPFAreEq());
@@ -294,4 +320,4 @@ addFnToPrimEnv(new RPFAreEqualWithin());
 addFnToPrimEnv(new RPFAreEqv());
 addFnToPrimEnv(new RPFError());
 addFnToPrimEnv(new RPFIdentity());
-addFnToPrimEnv(new RPFIsStruct());
+addFnToPrimEnv(new RPFStructHuh());

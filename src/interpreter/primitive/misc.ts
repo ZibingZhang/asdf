@@ -17,7 +17,7 @@ export {
   RPFAreEqv,
   RPFError,
   RPFIdentity,
-  RPFIsStruct,
+  RPFStructHuh,
   UserError
 };
 
@@ -94,7 +94,7 @@ class RPFIdentity extends RPrimFun {
   }
 }
 
-class RPFIsStruct extends RPrimFun {
+class RPFStructHuh extends RPrimFun {
   constructor() {
     super("struct?", { arity: 1 });
   }

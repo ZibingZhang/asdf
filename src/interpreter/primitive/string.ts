@@ -11,8 +11,8 @@ import {
 export {
   RPFStringDowncase,
   RPFStringLength,
-  RPFIsStringLessEqualThan,
-  RPFIsString
+  RPFStringLessEqualThanHuh,
+  RPFStringHuh
 };
 
 class RPFStringDowncase extends RPrimFun {
@@ -35,7 +35,7 @@ class RPFStringLength extends RPrimFun {
   }
 }
 
-class RPFIsStringLessEqualThan extends RPrimFun {
+class RPFStringLessEqualThanHuh extends RPrimFun {
   constructor() {
     super("string<=?", { arity: 2, allArgsTypeName: TypeName.STRING });
   }
@@ -45,7 +45,7 @@ class RPFIsStringLessEqualThan extends RPrimFun {
   }
 }
 
-class RPFIsString extends RPrimFun {
+class RPFStringHuh extends RPrimFun {
   constructor() {
     super("string?", { arity: 1 });
   }

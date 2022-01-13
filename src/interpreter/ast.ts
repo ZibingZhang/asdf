@@ -13,6 +13,7 @@ import {
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
   EL_EXPECTED_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
+  FA_LAST_WRONG_TYPE_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
   FA_WRONG_TYPE_ERR,
@@ -773,6 +774,15 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
             this.sourceSpan
           );
         }
+      }
+    }
+    if (rval.config.lastArgTypeName) {
+      const typeGuard = rval.typeGuardOf(rval.config.lastArgTypeName);
+      if (!typeGuard(argVals[argVals.length - 1])) {
+        throw new StageError(
+          FA_LAST_WRONG_TYPE_ERR(rval.name, rval.config.lastArgTypeName, argVals[argVals.length - 1].stringify()),
+          this.sourceSpan
+        );
       }
     }
     return rval.call(argVals, this.sourceSpan);

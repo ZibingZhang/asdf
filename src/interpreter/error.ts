@@ -46,6 +46,7 @@ export {
   FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR,
   FA_DIV_BY_ZERO_ERR,
   FA_MIN_ARITY_ERR,
+  FA_LAST_WRONG_TYPE_ERR,
   FA_NTH_WRONG_TYPE_ERR,
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
@@ -224,6 +225,9 @@ const FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR = (name: string) => {
 const FA_DIV_BY_ZERO_ERR = "/: division by zero";
 const FA_MIN_ARITY_ERR = (name: string, expected: number, actual: number) => {
   return `${name}: expects at least ${expected} argument${expected > 1 ? "s" : ""}, but found ${actual >= 2 ? actual : actual === 1 ? "only 1" : "none"}`;
+};
+const FA_LAST_WRONG_TYPE_ERR = (name: string, expected: string, actual: string) => {
+  return `${name}: last argument must be a ${expected}, but received ${actual}`;
 };
 const FA_NTH_WRONG_TYPE_ERR = (name: string, expected: string, n: number, actual: string) => {
   return `${name}: expects a${expected.match(/^[aeiou]/) ? "n" : ""} ${expected} as ${ordinalSuffixOf(n + 1)} argument, given ${actual}`;

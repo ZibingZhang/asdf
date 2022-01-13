@@ -11,8 +11,8 @@ import {
 export {
   RPFBooleanToString,
   RPFAreBooleansEqual,
-  RPFIsBoolean,
-  RPFIsFalse,
+  RPFBooleanHuh,
+  RPFFalseHuh,
   RPFNot
 };
 
@@ -36,7 +36,7 @@ class RPFAreBooleansEqual extends RPrimFun {
   }
 }
 
-class RPFIsBoolean extends RPrimFun {
+class RPFBooleanHuh extends RPrimFun {
   constructor() {
     super("boolean?", { arity: 1 });
   }
@@ -46,7 +46,7 @@ class RPFIsBoolean extends RPrimFun {
   }
 }
 
-class RPFIsFalse extends RPrimFun {
+class RPFFalseHuh extends RPrimFun {
   constructor() {
     super("false?", { arity: 1 });
   }

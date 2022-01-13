@@ -11,7 +11,7 @@ import {
 export {
   RPFSymbolToString,
   RPFAreSymbolsEqual,
-  RPFIsSymbol
+  RPFSymbolHuh
 };
 
 class RPFSymbolToString extends RPrimFun {
@@ -34,7 +34,7 @@ class RPFAreSymbolsEqual extends RPrimFun {
   }
 }
 
-class RPFIsSymbol extends RPrimFun {
+class RPFSymbolHuh extends RPrimFun {
   constructor() {
     super("symbol?", { arity: 1 });
   }
