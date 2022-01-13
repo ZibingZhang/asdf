@@ -377,7 +377,7 @@ class Lexer implements Stage<string, SExpr[]> {
             } else {
               throw new StageError(
                 RS_BAD_SYNTAX_ERR(text),
-                new SourceSpan(lineno, colno - text.length + 1, lineno, colno + 1)
+                new SourceSpan(lineno, colno - text.length, lineno, colno)
               );
             }
             state = State.INIT;
@@ -535,7 +535,7 @@ class Lexer implements Stage<string, SExpr[]> {
         } else {
           throw new StageError(
             RS_BAD_SYNTAX_ERR(text),
-            new SourceSpan(lineno, colno - text.length + 1, lineno, colno + 1)
+            new SourceSpan(lineno, colno - text.length, lineno, colno)
           );
         }
         break;
