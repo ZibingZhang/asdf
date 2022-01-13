@@ -73,39 +73,39 @@ body .CodeMirror {
   color: #2626B3 !important;
 }
 
-.cm-boolean {
+.cm-s-racket span.cm-boolean {
   color: #FF9000 !important;
 }
 
-.cm-bracket {
+.cm-s-racket span.cm-bracket {
   color: #0096FF !important;
 }
 
-.cm-comment {
+.cm-s-racket span.cm-comment {
   color: #E4B41F !important;
 }
 
-.cm-error {
+.cm-s-racket span.cm-error {
   color: #FF0000 !important;
 }
 
-.cm-keyword, .cm-placeholder {
+.cm-s-racket span.cm-keyword, .cm-placeholder {
   color: #708 !important;
 }
 
-.cm-number {
+.cm-s-racket span.cm-number {
   color: #E548FF !important;
 }
 
-.cm-string {
+.cm-s-racket span.cm-string {
   color: #00AA00 !important;
 }
 
-.cm-highlight-error {
+.cm-s-racket span.cm-highlight-error {
   background-color: #FFC0CB;
 }
 
-.cm-highlight-unused {
+.cm-s-racket span.cm-highlight-unused {
   background: black;
   color: #FF7F00 !important;
 }

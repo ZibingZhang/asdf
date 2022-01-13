@@ -20,6 +20,7 @@ const EDITOR = CodeMirror(
     lineNumbers: true,
     tabSize: 2,
     mode: "racket",
+    theme: "racket",
     extraKeys: {
       "Alt-Enter": () => runEditorCode()
     }
