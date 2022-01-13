@@ -73,6 +73,11 @@ body .CodeMirror {
   background-color: #FFC0CB;
 }
 
+.cm-highlight-unused {
+  background: black;
+  color: #FF7F00 !important;
+}
+
 /* Material Design */
 
 :root {

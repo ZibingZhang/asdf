@@ -83,6 +83,7 @@ function runReplCode(code) {
     replOutput += "> ";
     appendToRepl(replOutput);
   });
+  window.racket.setUnusedCallback(null);
   window.racket.pipeline.evaluateCode(code);
 }
 

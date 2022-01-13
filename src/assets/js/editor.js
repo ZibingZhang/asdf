@@ -41,21 +41,22 @@ function runEditorCode() {
     window.racket.pipeline.reset();
     let replOutput = "";
     for (const stageError of stageErrors) {
-      markEditor(stageError.sourceSpan);
+      markEditor(stageError.sourceSpan, "cm-highlight-error");
       replOutput += stageError.msg + "\n";
     }
     replOutput += "> ";
     appendToRepl(replOutput);
   });
+  window.racket.pipeline.setUnusedCallback(sourceSpan => markEditor(sourceSpan, "cm-highlight-unused"))
   window.racket.pipeline.evaluateCode(EDITOR.getValue());
 }
 
 let editorMarked = false;
-function markEditor(sourceSpan) {
+function markEditor(sourceSpan, className) {
   editorMarked = true;
   EDITOR.markText(
     { line: sourceSpan.startLineno - 1, ch: sourceSpan.startColno },
     { line: sourceSpan.endLineno - 1, ch: sourceSpan.endColno },
-    { className: "cm-highlight-error" }
+    { className: className }
   );
 }
