@@ -6,17 +6,21 @@ import {
   updateSettings
 } from "./js/settings";
 import {
-  EDITOR
+  EDITOR,
+  runEditorCode
 } from "./js/editor";
 import {
   INFO
 } from "./js/info";
 import {
-  runEditorCode
-} from "./js/common";
+  appendToRepl
+} from "./js/repl";
+import {
+  handleTestResults
+} from "./js/test-output";
 
 function init() {
-  document.getElementById("run-button").onclick = () => runEditorCode(EDITOR.getValue());
+  document.getElementById("run-button").onclick = runEditorCode;
   document.getElementById("editor-button").onclick = switchToEditor;
   document.getElementById("settings-button").onclick = switchToSettings;
   document.getElementById("info-button").onclick = switchToInfo;
@@ -27,6 +31,16 @@ function init() {
       e.preventDefault();
     }
   }, false);
+
+  window.racket.pipeline.setSuccessCallback(output => {
+    let replOutput = "";
+    for (const text of output) {
+      replOutput += text + "\n";
+    }
+    replOutput += "> ";
+    appendToRepl(replOutput);
+  });
+  window.racket.pipeline.setTestResultsCallback(handleTestResults);
 
   EDITOR.focus();
   updateSettings();

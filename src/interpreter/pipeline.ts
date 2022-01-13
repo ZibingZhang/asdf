@@ -9,8 +9,14 @@ import {
   ParseSExpr
 } from "./parse";
 import {
+  Program
+} from "./program";
+import {
   RNG
 } from "./random";
+import {
+  SExpr
+} from "./sexpr";
 import {
   SourceSpan
 } from "./sourcespan";
@@ -55,33 +61,72 @@ interface Stage<S, T> {
   run(input: StageOutput<S>): StageOutput<T>;
 }
 
-const LEXING_STAGE = new Lexer();
-const PARSING_SEXPRS_STAGE = new ParseSExpr();
-const WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
-const EVALUATE_CODE_STAGE = new EvaluateCode();
-
 class Pipeline {
-  stages: Stage<any, any>[] = [
-    LEXING_STAGE,
-    PARSING_SEXPRS_STAGE,
-    WELL_FORMED_PROGRAM_STAGE,
-    EVALUATE_CODE_STAGE
-  ];
+  private LEXING_STAGE = new Lexer();
+  private PARSING_SEXPRS_STAGE = new ParseSExpr();
+  private WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
+  private EVALUATE_CODE_STAGE = new EvaluateCode();
+
+  private errorsCallback: (stageErrors: StageError[]) => void = () => {};
+  private successCallback: (output: string[]) => void = () => {};
+  private testResultsCallback: (testResults: StageTestResult[]) => void = () => {};
+
+  private static ShortCircuitPipeline = class extends Error {
+    constructor(readonly stageOutput: StageOutput<any>) {
+      super();
+    }
+  }
 
   evaluateCode(code: string): StageOutput<any> {
-    let nextInput = new StageOutput(code);
-    for (const stage of this.stages) {
-      nextInput = stage.run(nextInput);
-      if (nextInput.errors.length > 0) {
-        return nextInput;
+    try {
+      return this.evaluateCodeHelper(code);
+    } catch (e) {
+      if (e instanceof Pipeline.ShortCircuitPipeline) {
+        return e.stageOutput;
+      } else {
+        throw e;
       }
     }
-    return nextInput;
+  }
+
+  evaluateCodeHelper(code: string): StageOutput<any> {
+    const initOutput: StageOutput<string> = new StageOutput(code);
+    const lexingOutput: StageOutput<SExpr[]> = this.LEXING_STAGE.run(initOutput);
+    this.handleErrors(lexingOutput);
+    const parsingOutput: StageOutput<Program> = this.PARSING_SEXPRS_STAGE.run(lexingOutput);
+    this.handleErrors(parsingOutput);
+    const wellFormedOutput: StageOutput<Program> = this.WELL_FORMED_PROGRAM_STAGE.run(parsingOutput);
+    this.handleErrors(wellFormedOutput);
+    const evaluateCodeOutput: StageOutput<string[]> = this.EVALUATE_CODE_STAGE.run(wellFormedOutput);
+    this.handleErrors(evaluateCodeOutput);
+    this.successCallback(evaluateCodeOutput.output);
+    this.testResultsCallback(evaluateCodeOutput.tests);
+    return evaluateCodeOutput;
+  }
+
+  handleErrors(stageOutput: StageOutput<any>) {
+    if (stageOutput.errors.length > 0) {
+      this.errorsCallback(stageOutput.errors);
+      this.testResultsCallback(stageOutput.tests);
+      throw new Pipeline.ShortCircuitPipeline(stageOutput);
+    }
   }
 
   reset() {
     RNG.reset();
-    WELL_FORMED_PROGRAM_STAGE.reset();
-    EVALUATE_CODE_STAGE.reset();
+    this.WELL_FORMED_PROGRAM_STAGE.reset();
+    this.EVALUATE_CODE_STAGE.reset();
+  }
+
+  setErrorsCallback(errorsCallback: (stageErrors: StageError[]) => void) {
+    this.errorsCallback = errorsCallback;
+  }
+
+  setSuccessCallback(successCallback: (output: string[]) => void) {
+    this.successCallback = successCallback;
+  }
+
+  setTestResultsCallback(testResultCallback: (testResults: StageTestResult[]) => void) {
+    this.testResultsCallback = testResultCallback;
   }
 }

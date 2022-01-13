@@ -1,10 +1,8 @@
-import {
-  runReplCode
-} from "./common";
-
 export {
   appendToRepl,
-  resetRepl
+  markREPL,
+  resetRepl,
+  runReplCode
 };
 
 const replTextArea = document.getElementById("repl-textarea");
@@ -32,19 +30,15 @@ const REPL = CodeMirror(
     // }
   }
 );
-
-function resetRepl() {
-  REPL.setValue("");
-}
-function appendToRepl(text) {
-  REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()));
-}
-function appendToReplLn(text) {
-  appendToRepl(`${text}\n`);
-}
-
+REPL.on("change",
+  (cm, changeObj) => {
+    if (replMarked && changeObj.origin !== "ignore") {
+      cm.doc.getAllMarks().forEach(marker => marker.clear());
+    }
+  }
+);
 REPL.on("cursorActivity",
-  cm => cm.setCursor(cm.lineCount(), 0)
+  (cm) => cm.setCursor(cm.lineCount(), 0)
 );
 REPL.on("keydown",
   (cm, event) => {
@@ -59,10 +53,46 @@ REPL.on("keydown",
       case "Enter": {
         event.preventDefault();
         appendToReplLn("");
-        const text = cm.doc.getLine(cm.doc.lastLine() - 1).slice(2);
-        runReplCode(text);
+        const code = cm.doc.getLine(cm.doc.lastLine() - 1).slice(2);
+        runReplCode(code);
         break;
       }
     }
   }
 );
+
+function appendToRepl(text) {
+  REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()), null, "ignore");
+}
+
+function appendToReplLn(text) {
+  appendToRepl(`${text}\n`);
+}
+
+function resetRepl() {
+  REPL.setValue("");
+}
+
+function runReplCode(code) {
+  window.racket.pipeline.setErrorsCallback(stageErrors => {
+    let replOutput = "";
+    for (const stageError of stageErrors) {
+      markREPL(stageError.sourceSpan);
+      replOutput += stageError.msg + "\n";
+    }
+    replOutput += "> ";
+    appendToRepl(replOutput);
+  });
+  window.racket.pipeline.evaluateCode(code);
+}
+
+let replMarked = false;
+function markREPL(sourceSpan) {
+  replMarked = true;
+  const line = REPL.lastLine() - 1;
+  REPL.markText(
+    { line, ch: sourceSpan.startColno + 2 },
+    { line, ch: sourceSpan.endColno + 2 },
+    { className: "cm-highlight-error" }
+  );
+}

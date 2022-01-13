@@ -1,10 +1,15 @@
 import {
-  runEditorCode
-} from "./common";
+  appendToRepl,
+  resetRepl
+} from "./repl";
+import {
+  resetTestOutput
+} from "./test-output";
 
 export {
   EDITOR,
-  markEditor
+  markEditor,
+  runEditorCode
 };
 
 const editorTextArea = document.getElementById("editor-textarea");
@@ -20,6 +25,30 @@ const EDITOR = CodeMirror(
     }
   }
 );
+EDITOR.on("changes",
+  (cm) => {
+    if (editorMarked) {
+      cm.doc.getAllMarks().forEach(marker => marker.clear());
+    }
+  }
+);
+
+function runEditorCode() {
+  resetRepl();
+  resetTestOutput();
+  window.racket.pipeline.reset();
+  window.racket.pipeline.setErrorsCallback(stageErrors => {
+    window.racket.pipeline.reset();
+    let replOutput = "";
+    for (const stageError of stageErrors) {
+      markEditor(stageError.sourceSpan);
+      replOutput += stageError.msg + "\n";
+    }
+    replOutput += "> ";
+    appendToRepl(replOutput);
+  });
+  window.racket.pipeline.evaluateCode(EDITOR.getValue());
+}
 
 let editorMarked = false;
 function markEditor(sourceSpan) {
@@ -30,11 +59,3 @@ function markEditor(sourceSpan) {
     { className: "cm-highlight-error" }
   );
 }
-
-EDITOR.on("changes",
-  cm => {
-    if (editorMarked) {
-      cm.doc.getAllMarks().forEach(marker => marker.clear());
-    }
-  }
-);
