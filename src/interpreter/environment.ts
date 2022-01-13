@@ -47,6 +47,8 @@ import {
   RPFPlus,
   RPFQuotient,
   RPFRandom,
+  RPFRemainder,
+  RPFRound,
   RPFSqr,
   RPFSqrt,
   RPFSub1
@@ -239,6 +241,8 @@ addFnToPrimEnv(new RPFIsOdd());
 addFnToPrimEnv(new RPFIsPositive());
 addFnToPrimEnv(new RPFQuotient());
 addFnToPrimEnv(new RPFRandom());
+addFnToPrimEnv(new RPFRemainder());
+addFnToPrimEnv(new RPFRound());
 addFnToPrimEnv(new RPFIsNumber("rational?"));
 addFnToPrimEnv(new RPFIsNumber("real?"));
 addFnToPrimEnv(new RPFSqr());

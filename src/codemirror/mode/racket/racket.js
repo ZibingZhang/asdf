@@ -4,7 +4,9 @@
 })(function(CodeMirror) {
   "use strict";
 
-  CodeMirror.defineMode("racket", function (_config) {
+  CodeMirror.defineMode("racket", function(config) {
+    const support = config.support || [];
+
     const untilDelimiter = /^[^\s"'([{)\]};`,]*/;
     const openBrackets = "([{";
     const closeBrackets = ")]}";
@@ -42,6 +44,10 @@
         return "string";
       }
       if (ch === "#") {
+        if (support.includes("inexactNumber") && stream.match(/^i[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/)) {
+          return "number";
+        }
+
         if (stream.eol() || stream.match(/^\s/, false)) { return "error"; }
         if (stream.match(/^![/ ]/)) { stream.skipToEnd(); return "comment"; }
 

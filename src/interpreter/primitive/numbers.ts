@@ -64,6 +64,8 @@ export {
   RPFIsPositive,
   RPFQuotient,
   RPFRandom,
+  RPFRemainder,
+  RPFRound,
   RPFSqr,
   RPFSqrt,
   RPFSub1,
@@ -462,6 +464,43 @@ class RPFRandom extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return new RExactReal(BigInt(Math.floor(RNG.next() * Number((<RExactReal>args[0]).numerator))));
+  }
+}
+
+class RPFRemainder extends RPrimFun {
+  constructor() {
+    super("remainder", { arity: 2, allArgsTypeName: TypeName.INTEGER });
+  }
+
+  call(args: RValue[]): RValue {
+    const dividend = <RNumber>args[0];
+    const divisor = <RNumber>args[1];
+    const isExact = isRExactReal(dividend) && isRExactReal(divisor);
+    return RMath.make(isExact, dividend.numerator - divisor.numerator * (dividend.numerator / divisor.numerator));
+  }
+}
+
+class RPFRound extends RPrimFun {
+  constructor() {
+    super("round", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+  }
+
+  call(args: RValue[]): RValue {
+    const number = <RNumber>args[0];
+    const isExact = isRExactReal(number);
+    if (number.denominator === 2n) {
+      if ((number.numerator / 2n) % 2n === 0n) {
+        return RMath.make(isExact, number.numerator / number.denominator);
+      } else {
+        return RMath.make(isExact, number.numerator / number.denominator + 1n);
+      }
+    } else {
+      if (number.numerator - number.denominator * (number.numerator / number.denominator) < number.denominator) {
+        return RMath.make(isExact, number.numerator / number.denominator);
+      } else {
+        return RMath.make(isExact, number.numerator / number.denominator + 1n);
+      }
+    }
   }
 }
 
