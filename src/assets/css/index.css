@@ -118,6 +118,10 @@ body .CodeMirror {
   color: #FF7F00 !important;
 }
 
+.cm-highlight-error-message {
+  color: #FF0000 !important;
+}
+
 /* Material Design */
 
 :root {

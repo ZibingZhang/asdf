@@ -14,7 +14,7 @@ const REPL = CodeMirror(
     smartIndent: false,
     tabSize: 2,
     value: "> ",
-    mode: "text"
+    mode: "racket"
     // extraKeys: {
     //   "Alt-I": () => {
     //     let element = document.createElement("canvas");
@@ -32,8 +32,18 @@ const REPL = CodeMirror(
 );
 REPL.on("change",
   (cm, changeObj) => {
-    if (replMarked && changeObj.origin !== "ignore") {
-      cm.doc.getAllMarks().forEach(marker => marker.clear());
+    if (changeObj.origin.match("cm-highlight-error-message")) {
+      REPL.markText(
+        { line: REPL.lastLine() - 1, ch: 0 },
+        { line: REPL.lastLine() - 1 },
+        { className: "cm-highlight-error-message"}
+      );
+    }
+
+    if (replMarked && !changeObj.origin.match("ignore")) {
+      cm.doc.getAllMarks()
+        .filter(marker => marker.className !== "cm-highlight-error-message")
+        .forEach(marker => marker.clear());
     }
   }
 );
@@ -52,7 +62,7 @@ REPL.on("keydown",
       }
       case "Enter": {
         event.preventDefault();
-        appendToReplLn("");
+        appendToRepl("\n");
         const code = cm.doc.getLine(cm.doc.lastLine() - 1).slice(2);
         runReplCode(code);
         break;
@@ -61,12 +71,8 @@ REPL.on("keydown",
   }
 );
 
-function appendToRepl(text) {
-  REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()), null, "ignore");
-}
-
-function appendToReplLn(text) {
-  appendToRepl(`${text}\n`);
+function appendToRepl(text, className) {
+  REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()), null, `ignore ${className}`);
 }
 
 function resetRepl() {
@@ -81,7 +87,7 @@ function runReplCode(code) {
       replOutput += stageError.msg + "\n";
     }
     replOutput += "> ";
-    appendToRepl(replOutput);
+    appendToRepl(replOutput, "cm-highlight-error-message");
   });
   window.racket.pipeline.setUnusedCallback(null);
   window.racket.pipeline.evaluateCode(code);
