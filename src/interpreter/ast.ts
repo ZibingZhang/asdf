@@ -56,6 +56,7 @@ import {
 import {
   StageError
 } from "./pipeline";
+import { UserError } from "./primitive/misc";
 
 export {
   ASTNode,
@@ -536,11 +537,22 @@ class FunAppNode extends ASTNodeBase {
       this.fn.sourceSpan
     );
     if (isRCallable(rval)) {
-      return rval.accept(new EvaluateRCallableVisitor(
-        this.args,
-        env,
-        this.sourceSpan
-      ));
+      try {
+        return rval.accept(new EvaluateRCallableVisitor(
+          this.args,
+          env,
+          this.sourceSpan
+        ));
+      } catch (e) {
+        if (e instanceof UserError) {
+          throw new StageError(
+            e.message,
+            this.sourceSpan
+          );
+        } else {
+          throw e;
+        }
+      }
     } else {
       throw new StageError(
         FC_EXPECTED_FUNCTION_ERR(

@@ -78,6 +78,7 @@ import {
   RPFAreEqual,
   RPFAreEqualWithin,
   RPFAreEqv,
+  RPFError,
   RPFIdentity,
   RPFIsStruct
 } from "./primitive/misc";
@@ -291,5 +292,6 @@ addFnToPrimEnv(new RPFAreEq());
 addFnToPrimEnv(new RPFAreEqual());
 addFnToPrimEnv(new RPFAreEqualWithin());
 addFnToPrimEnv(new RPFAreEqv());
+addFnToPrimEnv(new RPFError());
 addFnToPrimEnv(new RPFIdentity());
 addFnToPrimEnv(new RPFIsStruct());

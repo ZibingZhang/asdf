@@ -5,7 +5,9 @@ import {
   TypeName,
   isRData,
   isRStruct,
-  toRBoolean
+  toRBoolean,
+  isRSymbol,
+  isRString
 } from "../rvalue";
 
 export {
@@ -13,9 +15,13 @@ export {
   RPFAreEqual,
   RPFAreEqualWithin,
   RPFAreEqv,
+  RPFError,
   RPFIdentity,
-  RPFIsStruct
+  RPFIsStruct,
+  UserError
 };
+
+class UserError extends Error {}
 
 class RPFAreEq extends RPrimFun {
   constructor() {
@@ -55,6 +61,26 @@ class RPFAreEqv extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return toRBoolean(isRData(args[0]) && args[0].eqv(args[1]));
+  }
+}
+
+class RPFError extends RPrimFun {
+  constructor() {
+    super("error", {});
+  }
+
+  call(args: RValue[]): RValue {
+    let message = "";
+    for (const arg of args) {
+      if (isRString(arg)) {
+        message += arg.val;
+      } else if (isRSymbol(arg)) {
+        message += `${arg}: `;
+      } else {
+        message += arg.stringify();
+      }
+    }
+    throw new UserError(message);
   }
 }
 
