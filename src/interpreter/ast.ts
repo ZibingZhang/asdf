@@ -110,7 +110,7 @@ type DExprNode =
   | ExprNode
 
 abstract class ASTNodeBase {
-  used: boolean = false;
+  used = false;
 
   constructor(
     readonly sourceSpan: SourceSpan

@@ -32,7 +32,7 @@ function updateSettings() {
       window.racket.updateSettings(settings);
       return true;
     }
-  } catch (e) {}
+  } catch (e) { /* fall through */ }
   alert("The settings are not a valid JSON object.");
   return false;
 }

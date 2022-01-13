@@ -5,6 +5,7 @@ import {
   CheckErrorNode,
   CheckMemberOfNode,
   CheckNode,
+  CheckRangeNode,
   CheckSatisfiedNode,
   CheckWithinNode,
   CondNode,
@@ -18,8 +19,7 @@ import {
   LambdaNode,
   OrNode,
   VarNode,
-  isDefnNode,
-  CheckRangeNode
+  isDefnNode
 } from "./ast";
 import {
   AtomSExpr,

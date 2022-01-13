@@ -87,7 +87,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     node.value.accept(this);
   }
 
-  visitDefnStructNode(node: DefnStructNode): void {
+  visitDefnStructNode(_: DefnStructNode): void {
     // always well-formed
   }
 

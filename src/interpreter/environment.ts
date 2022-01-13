@@ -20,21 +20,16 @@ import {
   RPFDenominator,
   RPFDivide,
   RPFEqual,
+  RPFEvenHuh,
   RPFExactToInexact,
   RPFExp,
   RPFExpt,
   RPFFloor,
   RPFGreater,
   RPFGreaterThan,
-  RPFInexactToExact,
-  RPFEvenHuh,
   RPFInexactHuh,
+  RPFInexactToExact,
   RPFIntegerHuh,
-  RPFNegativeHuh,
-  RPFNumberHuh,
-  RPFOddHuh,
-  RPFPositiveHuh,
-  RPFZeroHuh,
   RPFLess,
   RPFLessThan,
   RPFMax,
@@ -42,16 +37,21 @@ import {
   RPFMinus,
   RPFModulo,
   RPFMultiply,
+  RPFNegativeHuh,
+  RPFNumberHuh,
   RPFNumberToString,
   RPFNumerator,
+  RPFOddHuh,
   RPFPlus,
+  RPFPositiveHuh,
   RPFQuotient,
   RPFRandom,
   RPFRemainder,
   RPFRound,
   RPFSqr,
   RPFSqrt,
-  RPFSub1
+  RPFSub1,
+  RPFZeroHuh
 } from "./primitive/numbers";
 import {
   RPFAppend,
@@ -59,30 +59,30 @@ import {
   RPFCdr,
   RPFCons,
   RPFEighth,
-  RPFFirst,
   RPFEmptyHuh,
-  RPFListHuh,
-  RPFList,
-  RPFMember,
-  RPFRest,
-  R_NULL,
   RPFFifth,
+  RPFFirst,
   RPFFourth,
   RPFLength,
+  RPFList,
+  RPFListHuh,
   RPFListStar,
   RPFMakeList,
+  RPFMember,
   RPFRemove,
   RPFRemoveAll,
+  RPFRest,
   RPFReverse,
   RPFSecond,
   RPFSeventh,
   RPFSixth,
-  RPFThird
+  RPFThird,
+  R_NULL
 } from "./primitive/lists";
 import {
   RPFAreBooleansEqual,
-  RPFBooleanToString,
   RPFBooleanHuh,
+  RPFBooleanToString,
   RPFFalseHuh,
   RPFNot
 } from "./primitive/booleans";
@@ -101,10 +101,10 @@ import {
   RPFSymbolToString
 } from "./primitive/symbols";
 import {
-  RPFStringHuh,
-  RPFStringLessEqualThanHuh,
   RPFStringDowncase,
-  RPFStringLength
+  RPFStringHuh,
+  RPFStringLength,
+  RPFStringLessEqualThanHuh
 } from "./primitive/string";
 import {
   SC_USED_BEFORE_DEFINITION_ERR

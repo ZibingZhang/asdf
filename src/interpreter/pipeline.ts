@@ -69,23 +69,23 @@ class Pipeline {
   private PARSING_SEXPRS_STAGE = new ParseSExpr();
   private WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
   private EVALUATE_CODE_STAGE = new EvaluateCode();
-  private UNUSED_CODE_STAGE = new UnusedCode(() => {});
+  private UNUSED_CODE_STAGE = new UnusedCode(() => { /* do nothing */ });
 
   private lexingOutput: StageOutput<SExpr[]> = new StageOutput([]);
   private parsingOutput: StageOutput<Program> = new StageOutput(new Program([], []));
   private wellFormedOutput: StageOutput<Program> = new StageOutput(new Program([], []));
   private evaluateCodeOutput: StageOutput<string[]> = new StageOutput([]);
 
-  private errorsCallback: (stageErrors: StageError[]) => void = () => {};
-  private successCallback: (output: string[]) => void = () => {};
-  private testResultsCallback: (testResults: StageTestResult[]) => void = () => {};
+  private errorsCallback: (stageErrors: StageError[]) => void = () => { /* do nothing */ };
+  private successCallback: (output: string[]) => void = () => { /* do nothing */ };
+  private testResultsCallback: (testResults: StageTestResult[]) => void = () => { /* do nothing */ };
   private unusedCallback: ((sourceSpan: SourceSpan) => void) | null = null;
 
   private static ShortCircuitPipeline = class extends Error {
     constructor(readonly stageOutput: StageOutput<any>) {
       super();
     }
-  }
+  };
 
   evaluateCode(code: string): StageOutput<any> {
     try {
@@ -117,7 +117,7 @@ class Pipeline {
 
   handleErrors(
     stageOutput: StageOutput<any>,
-    runUnusedCallback: boolean = false
+    runUnusedCallback = false
   ) {
     if (stageOutput.errors.length > 0) {
       this.errorsCallback(stageOutput.errors);

@@ -58,7 +58,7 @@ class EvaluateCode implements Stage<Program, string[]> {
   }
 
   private runHelper(program: Program): string[] {
-    program.defns.forEach(defn => { defn.eval(this.env); defn.used = false });
+    program.defns.forEach(defn => { defn.eval(this.env); defn.used = false; });
     const output: string[] = [];
     for (const node of program.nodes) {
       const result = node.eval(this.env);

@@ -49,7 +49,7 @@ function runEditorCode() {
     replOutput += "> ";
     appendToRepl(replOutput, "cm-highlight-error-message");
   });
-  window.racket.pipeline.setUnusedCallback(sourceSpan => markEditor(sourceSpan, "cm-highlight-unused"))
+  window.racket.pipeline.setUnusedCallback(sourceSpan => markEditor(sourceSpan, "cm-highlight-unused"));
   window.racket.pipeline.evaluateCode(EDITOR.getValue());
 }
 

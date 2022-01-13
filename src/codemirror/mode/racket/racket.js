@@ -13,7 +13,7 @@
     const booleanLiteral = /^(T|t|true|F|f|false)$/;
     const specialForm = /^(and|check-error|check-expect|check-member-of|check-random|check-range|check-satisfied|check-within|cond|define|define-struct|else|if|lambda|or|quote|require)$/;
     const numLiteral = /^[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
-    const placeholder = /^\.{2,6}$/
+    const placeholder = /^\.{2,6}$/;
 
     // unclosed block comments should be "error", but aren't
     function tokenComment(depth) {

@@ -2,13 +2,13 @@ import "./css/index.css";
 import "./js/misc";
 
 import {
-  SETTINGS,
-  updateSettings
-} from "./js/settings";
-import {
   EDITOR,
   runEditorCode
 } from "./js/editor";
+import {
+  SETTINGS,
+  updateSettings
+} from "./js/settings";
 import {
   INFO
 } from "./js/info";

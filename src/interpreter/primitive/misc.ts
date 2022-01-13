@@ -4,10 +4,10 @@ import {
   RValue,
   TypeName,
   isRData,
+  isRString,
   isRStruct,
-  toRBoolean,
   isRSymbol,
-  isRString
+  toRBoolean
 } from "../rvalue";
 
 export {

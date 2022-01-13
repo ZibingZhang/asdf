@@ -1,5 +1,7 @@
 import {
   RList,
+  RMath,
+  RNumber,
   RPrimFun,
   RValue,
   R_EMPTY_LIST,
@@ -7,9 +9,7 @@ import {
   isRData,
   isREmptyList,
   isRList,
-  toRBoolean,
-  RMath,
-  RNumber
+  toRBoolean
 } from "../rvalue";
 
 export {
