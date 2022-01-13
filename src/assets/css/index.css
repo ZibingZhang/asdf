@@ -69,6 +69,38 @@ body .CodeMirror {
   scrollbar-width: none;
 }
 
+.cm-s-default {
+  color: #2626B3 !important;
+}
+
+.cm-boolean {
+  color: #FF9000 !important;
+}
+
+.cm-bracket {
+  color: #0096FF !important;
+}
+
+.cm-comment {
+  color: #E4B41F !important;
+}
+
+.cm-error {
+  color: #FF0000 !important;
+}
+
+.cm-keyword, .cm-placeholder {
+  color: #708 !important;
+}
+
+.cm-number {
+  color: #E548FF !important;
+}
+
+.cm-string {
+  color: #00AA00 !important;
+}
+
 .cm-highlight-error {
   background-color: #FFC0CB;
 }

@@ -134,7 +134,7 @@ class AndNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     let result: RValue = R_FALSE;
     for (const arg of this.args) {
       result = arg.eval(env);
@@ -163,7 +163,7 @@ class AtomNode extends ASTNodeBase {
   }
 
   eval(_: Environment) {
-    this.use();
+    this.used = true;
     return this.rval;
   }
 }
@@ -183,7 +183,7 @@ class CheckNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     switch (this.name) {
       case "check-expect":
       case "check-random": {
@@ -231,7 +231,7 @@ class CheckErrorNode extends CheckNode {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     let expectedErrMsg: RValue | null = null;
     if (this.args[1]) {
       expectedErrMsg = this.args[1].eval(env);
@@ -276,7 +276,7 @@ class CheckMemberOfNode extends CheckNode {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     if (isRFalse(this.arg.eval(env))) {
       return new RTestResult(
         false,
@@ -299,7 +299,7 @@ class CheckSatisfiedNode extends CheckNode {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     const val = this.arg.eval(env);
     if (!isRBoolean(val)) {
       return new RTestResult(
@@ -331,7 +331,7 @@ class CheckWithinNode extends CheckNode {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     if (isRFalse(this.arg.eval(env))) {
       return new RTestResult(
         false,
@@ -356,7 +356,7 @@ class CondNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     for (const [question, answer] of this.questionAnswerClauses) {
       const questionResult = question.eval(env);
       if (!isRBoolean(questionResult)) {
@@ -389,7 +389,7 @@ class DefnStructNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     env.set(this.name, new RStructType(this.name));
     env.set(`make-${this.name}`, new RMakeStructFun(this.name, this.fields.length));
     env.set(`${this.name}?`, new RIsStructFun(this.name));
@@ -415,7 +415,7 @@ class DefnVarNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     env.set(this.name, this.value.eval(env));
     return R_VOID;
   }
@@ -475,7 +475,7 @@ class FunAppNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     const rval = env.get(
       this.fn.name,
       this.fn.sourceSpan
@@ -514,7 +514,7 @@ class IfNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     const questionResult = this.question.eval(env);
     if (!isRBoolean(questionResult)) {
       throw new StageError(
@@ -544,7 +544,7 @@ class LambdaNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     return new RLambda(env.copy(), this.params, this.body);
   }
 }
@@ -562,7 +562,7 @@ class OrNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     let result: RValue = R_TRUE;
     for (const arg of this.args) {
       result = arg.eval(env);
@@ -591,7 +591,7 @@ class VarNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    this.use();
+    this.used = true;
     return env.get(
       this.name,
       this.sourceSpan

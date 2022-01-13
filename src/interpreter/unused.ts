@@ -72,24 +72,21 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitDefnVarNode(node: DefnVarNode): void {
     if (!node.used) {
-      this.unusedCallback(node.sourceSpan);
-    } else {
-      node.value.accept(this);
+      this.unusedCallback(node.nameSourceSpan);
+      this.unusedCallback(node.value.sourceSpan);
     }
   }
 
-  visitDefnStructNode(node: DefnStructNode): void {
-    if (!node.used) {
-      this.unusedCallback(node.sourceSpan);
-    }
+  visitDefnStructNode(_: DefnStructNode): void {
+    // always used
   }
 
-  visitEllipsisFunAllNode(node: EllipsisFunAppNode): void {
-    // is never used, yet always used
+  visitEllipsisFunAllNode(_: EllipsisFunAppNode): void {
+    // never used, yet always used
   }
 
-  visitEllipsisNode(node: EllipsisNode): void {
-    // is never used, yet always used
+  visitEllipsisNode(_: EllipsisNode): void {
+    // never used, yet always used
   }
 
   visitFunAppNode(node: FunAppNode): void {
