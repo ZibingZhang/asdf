@@ -14,7 +14,8 @@ const REPL = CodeMirror(
     smartIndent: false,
     tabSize: 2,
     value: "> ",
-    mode: "racket"
+    mode: "racket",
+    theme: "racket"
     // extraKeys: {
     //   "Alt-I": () => {
     //     let element = document.createElement("canvas");
