@@ -49,6 +49,9 @@ import {
   Environment
 } from "./environment";
 import {
+  Keyword
+} from "./keyword";
+import {
   RNG
 } from "./random";
 import {
@@ -57,7 +60,9 @@ import {
 import {
   StageError
 } from "./pipeline";
-import { UserError } from "./primitive/misc";
+import {
+  UserError
+} from "./primitive/misc";
 
 export {
   ASTNode,
@@ -146,7 +151,7 @@ class AndNode extends ASTNodeBase {
     }
     if (!isRBoolean(result)) {
       throw new StageError(
-        WF_QUESTION_NOT_BOOL_ERR("and", result.stringify()),
+        WF_QUESTION_NOT_BOOL_ERR(Keyword.And, result.stringify()),
         this.sourceSpan
       );
     }
@@ -188,11 +193,11 @@ class CheckNode extends ASTNodeBase {
   eval(env: Environment): RValue {
     this.used = true;
     switch (this.name) {
-      case "check-expect":
-      case "check-random": {
+      case Keyword.CheckExpect:
+      case Keyword.CheckRandom: {
         let actualVal;
         let expectedVal;
-        if (this.name === "check-expect") {
+        if (this.name === Keyword.CheckExpect) {
           actualVal = this.args[0].eval(env);
           expectedVal = this.args[1].eval(env);
         } else {
@@ -237,7 +242,7 @@ class CheckErrorNode extends CheckNode {
     readonly args: ASTNode[],
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-error", args, sourceSpan);
+    super(Keyword.CheckError, args, sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -285,7 +290,7 @@ class CheckMemberOfNode extends CheckNode {
     readonly testAgainstValNodes: ASTNode[],
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-member-of", [testValNode, ...testAgainstValNodes], sourceSpan);
+    super(Keyword.CheckMemberOf, [testValNode, ...testAgainstValNodes], sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -313,7 +318,7 @@ class CheckRangeNode extends CheckNode {
     readonly upperBoundValNode: ASTNode,
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-range", [testValNode, lowerBoundValNode, upperBoundValNode], sourceSpan);
+    super(Keyword.CheckRange, [testValNode, lowerBoundValNode, upperBoundValNode], sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -342,7 +347,7 @@ class CheckSatisfiedNode extends CheckNode {
     readonly testFnName: string,
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-satisfied", [testValNode, testFnNode], sourceSpan);
+    super(Keyword.CheckSatisfied, [testValNode, testFnNode], sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -380,7 +385,7 @@ class CheckWithinNode extends CheckNode {
     readonly withinNode: ASTNode,
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-within", [actualNode, expectedNode, withinNode], sourceSpan);
+    super(Keyword.CheckWithin, [actualNode, expectedNode, withinNode], sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -418,7 +423,7 @@ class CondNode extends ASTNodeBase {
       const questionResult = question.eval(env);
       if (!isRBoolean(questionResult)) {
         throw new StageError(
-          WF_QUESTION_NOT_BOOL_ERR("cond", questionResult.stringify()),
+          WF_QUESTION_NOT_BOOL_ERR(Keyword.Cond, questionResult.stringify()),
           this.sourceSpan
         );
       }
@@ -586,7 +591,7 @@ class IfNode extends ASTNodeBase {
     const questionResult = this.question.eval(env);
     if (!isRBoolean(questionResult)) {
       throw new StageError(
-        WF_QUESTION_NOT_BOOL_ERR("if", questionResult.stringify()),
+        WF_QUESTION_NOT_BOOL_ERR(Keyword.If, questionResult.stringify()),
         this.sourceSpan
       );
     }
@@ -638,7 +643,7 @@ class OrNode extends ASTNodeBase {
     }
     if (!isRBoolean(result)) {
       throw new StageError(
-        WF_QUESTION_NOT_BOOL_ERR("or", result.stringify()),
+        WF_QUESTION_NOT_BOOL_ERR(Keyword.Or, result.stringify()),
         this.sourceSpan
       );
     }

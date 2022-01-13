@@ -101,7 +101,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   visitFunAppNode(node: FunAppNode): void {
     const meta = this.scope.get(node.fn.name, false, node.fn.sourceSpan);
-    if (meta.type === VariableType.USER_DEFINED_FUNCTION && meta.arity != node.args.length) {
+    if (meta.type === VariableType.UserDefinedFunction && meta.arity != node.args.length) {
       throw new StageError(
         FA_ARITY_ERR(node.fn.name, meta.arity, node.args.length),
         node.sourceSpan
@@ -130,13 +130,13 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   visitVarNode(node: VarNode): void {
     const meta = this.scope.get(node.name, true, node.sourceSpan);
-    if (meta.type === VariableType.STRUCTURE_TYPE) {
+    if (meta.type === VariableType.StructureType) {
       throw new StageError(
         WF_STRUCTURE_TYPE_ERR(node.name),
         node.sourceSpan
       );
     }
-    if (meta.type !== VariableType.DATA) {
+    if (meta.type !== VariableType.Data) {
       throw new StageError(
         WF_EXPECTED_FUNCTION_CALL_ERR(node.name),
         node.sourceSpan
@@ -168,7 +168,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
           this.scope.add(
             defn.name,
             new VariableMeta(
-              VariableType.USER_DEFINED_FUNCTION,
+              VariableType.UserDefinedFunction,
               defn.value.params.length
             )
           );
@@ -185,7 +185,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         }
         this.scope.add(
           `make-${defn.name}`,
-          new VariableMeta(VariableType.USER_DEFINED_FUNCTION, defn.fields.length)
+          new VariableMeta(VariableType.UserDefinedFunction, defn.fields.length)
         );
         if (this.scope.has(`${defn.name}?`)) {
           throw new StageError(
@@ -195,7 +195,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         }
         this.scope.add(
           `${defn.name}?`,
-          new VariableMeta(VariableType.USER_DEFINED_FUNCTION, 1)
+          new VariableMeta(VariableType.UserDefinedFunction, 1)
         );
         defn.fields.forEach(field => {
           if (this.scope.has(`${defn.name}-${field}`)) {
@@ -206,7 +206,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
           }
           this.scope.add(
             `${defn.name}-${field}`,
-            new VariableMeta(VariableType.USER_DEFINED_FUNCTION, 1)
+            new VariableMeta(VariableType.UserDefinedFunction, 1)
           );
         });
       }
@@ -249,11 +249,10 @@ class Scope {
 }
 
 enum VariableType {
-  DATA = "DATA",
-  PRIMITIVE_FUNCTION = "PRIMITIVE_FUNCTION",
-  PRIMITIVE_TEST_FUNCTION = "PRIMITIVE_TEST_FUNCTION",
-  STRUCTURE_TYPE = "STRUCTURE_TYPE",
-  USER_DEFINED_FUNCTION = "USER_DEFINED_FUNCTION"
+  Data = "DATA",
+  PrimitiveFunction = "PRIMITIVE_FUNCTION",
+  StructureType = "STRUCTURE_TYPE",
+  UserDefinedFunction = "USER_DEFINED_FUNCTION"
 }
 
 class VariableMeta {
@@ -263,10 +262,10 @@ class VariableMeta {
   ) {}
 }
 
-const DATA_VARIABLE_META = new VariableMeta(VariableType.DATA);
-const STRUCTURE_TYPE_VARIABLE_META = new VariableMeta(VariableType.STRUCTURE_TYPE);
+const DATA_VARIABLE_META = new VariableMeta(VariableType.Data);
+const STRUCTURE_TYPE_VARIABLE_META = new VariableMeta(VariableType.StructureType);
 
 const PRIMITIVE_SCOPE = new Scope();
 PRIMITIVE_DATA_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, DATA_VARIABLE_META));
-PRIMITIVE_FUNCTIONS.forEach((config, name) => PRIMITIVE_SCOPE.add(name, new VariableMeta(VariableType.PRIMITIVE_FUNCTION, config.arity || config.minArity || -1)));
+PRIMITIVE_FUNCTIONS.forEach((config, name) => PRIMITIVE_SCOPE.add(name, new VariableMeta(VariableType.PrimitiveFunction, config.arity || config.minArity || -1)));
 PRIMITIVE_STRUCT_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, STRUCTURE_TYPE_VARIABLE_META));

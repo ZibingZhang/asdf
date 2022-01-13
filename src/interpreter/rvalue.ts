@@ -399,27 +399,27 @@ class RLambda extends RCallableBase {
 }
 
 enum TypeName {
-  ANY = "any",
-  BOOLEAN = "boolean",
-  EXACT_NON_NEGATIVE_INTEGER = "exact-non-negative-integer",
-  EXACT_POSITIVE_INTEGER = "exact-positive-integer",
-  INTEGER = "integer",
-  LIST = "list",
-  N_LIST_2 = "list with 2 or more elements",
-  N_LIST_3 = "list with 3 or more elements",
-  N_LIST_4 = "list with 4 or more elements",
-  N_LIST_5 = "list with 5 or more elements",
-  N_LIST_6 = "list with 6 or more elements",
-  N_LIST_7 = "list with 7 or more elements",
-  N_LIST_8 = "list with 8 or more elements",
-  NON_EMPTY_LIST = "non-empty list",
-  NON_NEGATIVE_REAL = "non-negative-real",
-  NUMBER = "number",
-  PAIR = "pair",
-  RATIONAL = "rational",
-  REAL = "real",
-  STRING = "string",
-  SYMBOL = "symbol"
+  Any = "any",
+  Boolean = "boolean",
+  ExactNonNegativeInteger = "exact-non-negative-integer",
+  ExactPositiveInteger = "exact-positive-integer",
+  Integer = "integer",
+  List = "list",
+  NList2 = "list with 2 or more elements",
+  NList3 = "list with 3 or more elements",
+  NList4 = "list with 4 or more elements",
+  NList5 = "list with 5 or more elements",
+  NList6 = "list with 6 or more elements",
+  NList7 = "list with 7 or more elements",
+  NList8 = "list with 8 or more elements",
+  NonEmptyList = "non-empty list",
+  NonNegativeReal = "non-negative-real",
+  Number = "number",
+  Pair = "pair",
+  Rational = "rational",
+  Real = "real",
+  String = "string",
+  Symbol = "symbol"
 }
 
 interface RPrimFunConfig {
@@ -442,44 +442,44 @@ class RPrimFun extends RCallableBase {
 
   typeGuardOf(typeName: TypeName): (rval: RValue) => boolean {
     switch(typeName) {
-      case TypeName.ANY:
+      case TypeName.Any:
         return () => true;
-      case TypeName.BOOLEAN:
+      case TypeName.Boolean:
         return isRBoolean;
-      case TypeName.EXACT_NON_NEGATIVE_INTEGER:
+      case TypeName.ExactNonNegativeInteger:
         return isRExactNonNegativeInteger;
-      case TypeName.EXACT_POSITIVE_INTEGER:
+      case TypeName.ExactPositiveInteger:
         return isRExactPositiveInteger;
-      case TypeName.INTEGER:
+      case TypeName.Integer:
         return isRInteger;
-      case TypeName.LIST:
+      case TypeName.List:
         return isRList;
-      case TypeName.NON_EMPTY_LIST:
-      case TypeName.PAIR:
+      case TypeName.NonEmptyList:
+      case TypeName.Pair:
         return isRNonEmptyList;
-      case TypeName.N_LIST_2:
+      case TypeName.NList2:
         return isRNList(2);
-      case TypeName.N_LIST_3:
+      case TypeName.NList3:
         return isRNList(3);
-      case TypeName.N_LIST_4:
+      case TypeName.NList4:
         return isRNList(4);
-      case TypeName.N_LIST_5:
+      case TypeName.NList5:
         return isRNList(5);
-      case TypeName.N_LIST_6:
+      case TypeName.NList6:
         return isRNList(6);
-      case TypeName.N_LIST_7:
+      case TypeName.NList7:
         return isRNList(7);
-      case TypeName.N_LIST_8:
+      case TypeName.NList8:
         return isRNList(8);
-      case TypeName.NON_NEGATIVE_REAL:
+      case TypeName.NonNegativeReal:
         return isRNonNegativeReal;
-      case TypeName.NUMBER:
-      case TypeName.RATIONAL:
-      case TypeName.REAL:
+      case TypeName.Number:
+      case TypeName.Rational:
+      case TypeName.Real:
         return isRNumber;
-      case TypeName.STRING:
+      case TypeName.String:
         return isRString;
-      case TypeName.SYMBOL:
+      case TypeName.Symbol:
         return isRSymbol;
       default:
         throw `illegal state: unsupported type name ${typeName}`;

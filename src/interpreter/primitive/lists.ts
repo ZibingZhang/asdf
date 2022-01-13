@@ -43,7 +43,7 @@ const R_NULL = R_EMPTY_LIST;
 
 class RPFAppend extends RPrimFun {
   constructor() {
-    super("append", { minArity: 2, allArgsTypeName: TypeName.LIST });
+    super("append", { minArity: 2, allArgsTypeName: TypeName.List });
   }
 
   call(args: RValue[]): RValue {
@@ -53,7 +53,7 @@ class RPFAppend extends RPrimFun {
 
 class RPFCar extends RPrimFun {
   constructor() {
-    super("car", { arity: 1, onlyArgTypeName: TypeName.PAIR });
+    super("car", { arity: 1, onlyArgTypeName: TypeName.Pair });
   }
 
   call(args: RValue[]): RValue {
@@ -63,7 +63,7 @@ class RPFCar extends RPrimFun {
 
 class RPFCdr extends RPrimFun {
   constructor() {
-    super("cdr", { arity: 1, onlyArgTypeName: TypeName.PAIR });
+    super("cdr", { arity: 1, onlyArgTypeName: TypeName.Pair });
   }
 
   call(args: RValue[]): RValue {
@@ -73,7 +73,7 @@ class RPFCdr extends RPrimFun {
 
 class RPFCons extends RPrimFun {
   constructor() {
-    super("cons", { arity: 2, argsTypeNames: [TypeName.ANY, TypeName.LIST] });
+    super("cons", { arity: 2, argsTypeNames: [TypeName.Any, TypeName.List] });
   }
 
   call(args: RValue[]): RValue {
@@ -83,7 +83,7 @@ class RPFCons extends RPrimFun {
 
 class RPFEighth extends RPrimFun {
   constructor() {
-    super("eighth", { arity: 1, onlyArgTypeName: TypeName.N_LIST_8 });
+    super("eighth", { arity: 1, onlyArgTypeName: TypeName.NList8 });
   }
 
   call(args: RValue[]): RValue {
@@ -103,7 +103,7 @@ class RPFEmptyHuh extends RPrimFun {
 
 class RPFFifth extends RPrimFun {
   constructor() {
-    super("fifth", { arity: 1, onlyArgTypeName: TypeName.N_LIST_5 });
+    super("fifth", { arity: 1, onlyArgTypeName: TypeName.NList5 });
   }
 
   call(args: RValue[]): RValue {
@@ -113,7 +113,7 @@ class RPFFifth extends RPrimFun {
 
 class RPFFirst extends RPrimFun {
   constructor() {
-    super("first", { arity: 1, onlyArgTypeName: TypeName.NON_EMPTY_LIST });
+    super("first", { arity: 1, onlyArgTypeName: TypeName.NonEmptyList });
   }
 
   call(args: RValue[]): RValue {
@@ -123,7 +123,7 @@ class RPFFirst extends RPrimFun {
 
 class RPFFourth extends RPrimFun {
   constructor() {
-    super("fourth", { arity: 1, onlyArgTypeName: TypeName.N_LIST_4 });
+    super("fourth", { arity: 1, onlyArgTypeName: TypeName.NList4 });
   }
 
   call(args: RValue[]): RValue {
@@ -133,7 +133,7 @@ class RPFFourth extends RPrimFun {
 
 class RPFLength extends RPrimFun {
   constructor() {
-    super("length", { arity: 1, onlyArgTypeName: TypeName.LIST });
+    super("length", { arity: 1, onlyArgTypeName: TypeName.List });
   }
 
   call(args: RValue[]): RValue {
@@ -153,7 +153,7 @@ class RPFList extends RPrimFun {
 
 class RPFListStar extends RPrimFun {
   constructor() {
-    super("list*", { lastArgTypeName: TypeName.LIST });
+    super("list*", { lastArgTypeName: TypeName.List });
   }
 
   call(args: RValue[]): RValue {
@@ -173,7 +173,7 @@ class RPFListHuh extends RPrimFun {
 
 class RPFMakeList extends RPrimFun {
   constructor() {
-    super("make-list", { arity: 2, argsTypeNames: [TypeName.EXACT_NON_NEGATIVE_INTEGER, TypeName.ANY] });
+    super("make-list", { arity: 2, argsTypeNames: [TypeName.ExactNonNegativeInteger, TypeName.Any] });
   }
 
   call(args: RValue[]): RValue {
@@ -183,7 +183,7 @@ class RPFMakeList extends RPrimFun {
 
 class RPFMember extends RPrimFun {
   constructor(alias?: string) {
-    super(alias || "member", { argsTypeNames: [TypeName.ANY, TypeName.LIST] });
+    super(alias || "member", { argsTypeNames: [TypeName.Any, TypeName.List] });
   }
 
   call(args: RValue[]): RValue {
@@ -194,7 +194,7 @@ class RPFMember extends RPrimFun {
 
 class RPFRemove extends RPrimFun {
   constructor() {
-    super("remove", { argsTypeNames: [TypeName.ANY, TypeName.LIST] });
+    super("remove", { argsTypeNames: [TypeName.Any, TypeName.List] });
   }
 
   call(args: RValue[]): RValue {
@@ -215,7 +215,7 @@ class RPFRemove extends RPrimFun {
 
 class RPFRemoveAll extends RPrimFun {
   constructor() {
-    super("remove-all", { argsTypeNames: [TypeName.ANY, TypeName.LIST] });
+    super("remove-all", { argsTypeNames: [TypeName.Any, TypeName.List] });
   }
 
   call(args: RValue[]): RValue {
@@ -230,7 +230,7 @@ class RPFRemoveAll extends RPrimFun {
 
 class RPFRest extends RPrimFun {
   constructor() {
-    super("rest", { arity: 1, onlyArgTypeName: TypeName.NON_EMPTY_LIST });
+    super("rest", { arity: 1, onlyArgTypeName: TypeName.NonEmptyList });
   }
 
   call(args: RValue[]): RValue {
@@ -240,7 +240,7 @@ class RPFRest extends RPrimFun {
 
 class RPFReverse extends RPrimFun {
   constructor() {
-    super("reverse", { arity: 1, onlyArgTypeName: TypeName.LIST });
+    super("reverse", { arity: 1, onlyArgTypeName: TypeName.List });
   }
 
   call(args: RValue[]): RValue {
@@ -250,7 +250,7 @@ class RPFReverse extends RPrimFun {
 
 class RPFSecond extends RPrimFun {
   constructor() {
-    super("second", { arity: 1, onlyArgTypeName: TypeName.N_LIST_2 });
+    super("second", { arity: 1, onlyArgTypeName: TypeName.NList2 });
   }
 
   call(args: RValue[]): RValue {
@@ -260,7 +260,7 @@ class RPFSecond extends RPrimFun {
 
 class RPFSeventh extends RPrimFun {
   constructor() {
-    super("seventh", { arity: 1, onlyArgTypeName: TypeName.N_LIST_7 });
+    super("seventh", { arity: 1, onlyArgTypeName: TypeName.NList7 });
   }
 
   call(args: RValue[]): RValue {
@@ -270,7 +270,7 @@ class RPFSeventh extends RPrimFun {
 
 class RPFSixth extends RPrimFun {
   constructor() {
-    super("sixth", { arity: 1, onlyArgTypeName: TypeName.N_LIST_6 });
+    super("sixth", { arity: 1, onlyArgTypeName: TypeName.NList6 });
   }
 
   call(args: RValue[]): RValue {
@@ -280,7 +280,7 @@ class RPFSixth extends RPrimFun {
 
 class RPFThird extends RPrimFun {
   constructor() {
-    super("third", { arity: 1, onlyArgTypeName: TypeName.N_LIST_3 });
+    super("third", { arity: 1, onlyArgTypeName: TypeName.NList3 });
   }
 
   call(args: RValue[]): RValue {

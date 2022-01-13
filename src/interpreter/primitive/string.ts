@@ -17,7 +17,7 @@ export {
 
 class RPFStringDowncase extends RPrimFun {
   constructor() {
-    super("string-downcase", { arity: 1, onlyArgTypeName: TypeName.STRING });
+    super("string-downcase", { arity: 1, onlyArgTypeName: TypeName.String });
   }
 
   call(args: RValue[]): RValue {
@@ -27,7 +27,7 @@ class RPFStringDowncase extends RPrimFun {
 
 class RPFStringLength extends RPrimFun {
   constructor() {
-    super("string-length", { arity: 1, onlyArgTypeName: TypeName.STRING });
+    super("string-length", { arity: 1, onlyArgTypeName: TypeName.String });
   }
 
   call(args: RValue[]): RValue {
@@ -37,7 +37,7 @@ class RPFStringLength extends RPrimFun {
 
 class RPFStringLessEqualThanHuh extends RPrimFun {
   constructor() {
-    super("string<=?", { arity: 2, allArgsTypeName: TypeName.STRING });
+    super("string<=?", { arity: 2, allArgsTypeName: TypeName.String });
   }
 
   call(args: RValue[]): RValue {

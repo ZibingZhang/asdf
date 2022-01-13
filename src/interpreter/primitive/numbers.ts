@@ -77,7 +77,7 @@ const RPC_PI = new RInexactReal(884279719003555n, 281474976710656n);
 
 class RPFMultiply extends RPrimFun {
   constructor() {
-    super("*", { minArity: 2, allArgsTypeName: TypeName.NUMBER });
+    super("*", { minArity: 2, allArgsTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -89,7 +89,7 @@ class RPFMultiply extends RPrimFun {
 
 class RPFPlus extends RPrimFun {
   constructor() {
-    super("+", { minArity: 2, allArgsTypeName: TypeName.NUMBER });
+    super("+", { minArity: 2, allArgsTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -101,7 +101,7 @@ class RPFPlus extends RPrimFun {
 
 class RPFMinus extends RPrimFun {
   constructor() {
-    super("-", { minArity: 1, allArgsTypeName: TypeName.NUMBER });
+    super("-", { minArity: 1, allArgsTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -116,7 +116,7 @@ class RPFMinus extends RPrimFun {
 
 class RPFDivide extends RPrimFun {
   constructor() {
-    super("/", { minArity: 2, allArgsTypeName: TypeName.NUMBER });
+    super("/", { minArity: 2, allArgsTypeName: TypeName.Number });
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
@@ -136,7 +136,7 @@ class RPFDivide extends RPrimFun {
 
 class RPFLess extends RPrimFun {
   constructor() {
-    super("<", { minArity: 1, allArgsTypeName: TypeName.REAL });
+    super("<", { minArity: 1, allArgsTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -151,7 +151,7 @@ class RPFLess extends RPrimFun {
 
 class RPFLessThan extends RPrimFun {
   constructor() {
-    super("<=", { minArity: 1, allArgsTypeName: TypeName.REAL });
+    super("<=", { minArity: 1, allArgsTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -166,7 +166,7 @@ class RPFLessThan extends RPrimFun {
 
 class RPFEqual extends RPrimFun {
   constructor() {
-    super("=", { minArity: 1, allArgsTypeName: TypeName.REAL });
+    super("=", { minArity: 1, allArgsTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -181,7 +181,7 @@ class RPFEqual extends RPrimFun {
 
 class RPFGreater extends RPrimFun {
   constructor() {
-    super(">", { minArity: 1, allArgsTypeName: TypeName.REAL });
+    super(">", { minArity: 1, allArgsTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -196,7 +196,7 @@ class RPFGreater extends RPrimFun {
 
 class RPFGreaterThan extends RPrimFun {
   constructor() {
-    super(">=", { minArity: 1, allArgsTypeName: TypeName.REAL });
+    super(">=", { minArity: 1, allArgsTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -211,7 +211,7 @@ class RPFGreaterThan extends RPrimFun {
 
 class RPFAbs extends RPrimFun {
   constructor() {
-    super("abs", { arity: 1, onlyArgTypeName: TypeName.REAL });
+    super("abs", { arity: 1, onlyArgTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -226,7 +226,7 @@ class RPFAbs extends RPrimFun {
 
 class RPFAdd1 extends RPrimFun {
   constructor() {
-    super("add1", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("add1", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -236,7 +236,7 @@ class RPFAdd1 extends RPrimFun {
 
 class RPFCeiling extends RPrimFun {
   constructor() {
-    super("ceiling", { arity: 1, onlyArgTypeName: TypeName.REAL });
+    super("ceiling", { arity: 1, onlyArgTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -246,7 +246,7 @@ class RPFCeiling extends RPrimFun {
 
 class RPFDenominator extends RPrimFun {
   constructor() {
-    super("denominator", { arity: 1, onlyArgTypeName: TypeName.RATIONAL });
+    super("denominator", { arity: 1, onlyArgTypeName: TypeName.Rational });
   }
 
   call(args: RValue[]): RValue {
@@ -257,7 +257,7 @@ class RPFDenominator extends RPrimFun {
 
 class RPFEvenHuh extends RPrimFun {
   constructor() {
-    super("even?", { arity: 1, onlyArgTypeName: TypeName.INTEGER });
+    super("even?", { arity: 1, onlyArgTypeName: TypeName.Integer });
   }
 
   call(args: RValue[]): RValue {
@@ -267,7 +267,7 @@ class RPFEvenHuh extends RPrimFun {
 
 class RPFExactToInexact extends RPrimFun {
   constructor() {
-    super("exact->inexact", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("exact->inexact", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -277,7 +277,7 @@ class RPFExactToInexact extends RPrimFun {
 
 class RPFExp extends RPrimFun {
   constructor() {
-    super("exp", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("exp", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -287,7 +287,7 @@ class RPFExp extends RPrimFun {
 
 class RPFExpt extends RPrimFun {
   constructor() {
-    super("expt", { arity: 2, allArgsTypeName: TypeName.NUMBER });
+    super("expt", { arity: 2, allArgsTypeName: TypeName.Number });
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
@@ -305,7 +305,7 @@ class RPFExpt extends RPrimFun {
 
 class RPFFloor extends RPrimFun {
   constructor() {
-    super("floor", { arity: 1, onlyArgTypeName: TypeName.REAL });
+    super("floor", { arity: 1, onlyArgTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -315,7 +315,7 @@ class RPFFloor extends RPrimFun {
 
 class RPFInexactToExact extends RPrimFun {
   constructor() {
-    super("inexact->exact", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("inexact->exact", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -345,7 +345,7 @@ class RPFIntegerHuh extends RPrimFun {
 
 class RPFMax extends RPrimFun {
   constructor() {
-    super("max", { minArity: 1, allArgsTypeName: TypeName.REAL });
+    super("max", { minArity: 1, allArgsTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -357,7 +357,7 @@ class RPFMax extends RPrimFun {
 
 class RPFMin extends RPrimFun {
   constructor() {
-    super("min", { minArity: 1, allArgsTypeName: TypeName.REAL });
+    super("min", { minArity: 1, allArgsTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -369,7 +369,7 @@ class RPFMin extends RPrimFun {
 
 class RPFModulo extends RPrimFun {
   constructor() {
-    super("modulo", { arity: 2, allArgsTypeName: TypeName.INTEGER });
+    super("modulo", { arity: 2, allArgsTypeName: TypeName.Integer });
   }
 
   call(args: RValue[]): RValue {
@@ -385,7 +385,7 @@ class RPFModulo extends RPrimFun {
 
 class RPFNegativeHuh extends RPrimFun {
   constructor() {
-    super("negative?", { arity: 1, onlyArgTypeName: TypeName.REAL });
+    super("negative?", { arity: 1, onlyArgTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -395,7 +395,7 @@ class RPFNegativeHuh extends RPrimFun {
 
 class RPFNumberToString extends RPrimFun {
   constructor() {
-    super("number->string", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("number->string", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -415,7 +415,7 @@ class RPFNumberHuh extends RPrimFun {
 
 class RPFNumerator extends RPrimFun {
   constructor() {
-    super("numerator", { arity: 1, onlyArgTypeName: TypeName.RATIONAL });
+    super("numerator", { arity: 1, onlyArgTypeName: TypeName.Rational });
   }
 
   call(args: RValue[]): RValue {
@@ -426,7 +426,7 @@ class RPFNumerator extends RPrimFun {
 
 class RPFOddHuh extends RPrimFun {
   constructor() {
-    super("odd?", { arity: 1, onlyArgTypeName: TypeName.INTEGER });
+    super("odd?", { arity: 1, onlyArgTypeName: TypeName.Integer });
   }
 
   call(args: RValue[]): RValue {
@@ -436,7 +436,7 @@ class RPFOddHuh extends RPrimFun {
 
 class RPFPositiveHuh extends RPrimFun {
   constructor() {
-    super("positive?", { arity: 1, onlyArgTypeName: TypeName.REAL });
+    super("positive?", { arity: 1, onlyArgTypeName: TypeName.Real });
   }
 
   call(args: RValue[]): RValue {
@@ -446,7 +446,7 @@ class RPFPositiveHuh extends RPrimFun {
 
 class RPFQuotient extends RPrimFun {
   constructor() {
-    super("quotient", { arity: 2, allArgsTypeName: TypeName.INTEGER });
+    super("quotient", { arity: 2, allArgsTypeName: TypeName.Integer });
   }
 
   call(args: RValue[]): RValue {
@@ -459,7 +459,7 @@ class RPFQuotient extends RPrimFun {
 
 class RPFRandom extends RPrimFun {
   constructor() {
-    super("random", { arity: 1, onlyArgTypeName: TypeName.EXACT_POSITIVE_INTEGER });
+    super("random", { arity: 1, onlyArgTypeName: TypeName.ExactPositiveInteger });
   }
 
   call(args: RValue[]): RValue {
@@ -469,7 +469,7 @@ class RPFRandom extends RPrimFun {
 
 class RPFRemainder extends RPrimFun {
   constructor() {
-    super("remainder", { arity: 2, allArgsTypeName: TypeName.INTEGER });
+    super("remainder", { arity: 2, allArgsTypeName: TypeName.Integer });
   }
 
   call(args: RValue[]): RValue {
@@ -482,7 +482,7 @@ class RPFRemainder extends RPrimFun {
 
 class RPFRound extends RPrimFun {
   constructor() {
-    super("round", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("round", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -508,7 +508,7 @@ class RPFSqr extends RPrimFun {
   expt = new RExactReal(2n);
 
   constructor() {
-    super("sqr", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("sqr", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -520,7 +520,7 @@ class RPFSqrt extends RPrimFun {
   expt = new RExactReal(1n, 2n);
 
   constructor() {
-    super("sqrt", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("sqrt", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
@@ -537,7 +537,7 @@ class RPFSqrt extends RPrimFun {
 
 class RPFSub1 extends RPrimFun {
   constructor() {
-    super("sub1", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("sub1", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -547,7 +547,7 @@ class RPFSub1 extends RPrimFun {
 
 class RPFZeroHuh extends RPrimFun {
   constructor() {
-    super("zero?", { arity: 1, onlyArgTypeName: TypeName.NUMBER });
+    super("zero?", { arity: 1, onlyArgTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {

@@ -16,7 +16,7 @@ export {
 
 class RPFSymbolToString extends RPrimFun {
   constructor() {
-    super("symbol->string", { arity: 1, onlyArgTypeName: TypeName.SYMBOL });
+    super("symbol->string", { arity: 1, onlyArgTypeName: TypeName.Symbol });
   }
 
   call(args: RValue[]): RValue {
@@ -26,7 +26,7 @@ class RPFSymbolToString extends RPrimFun {
 
 class RPFAreSymbolsEqual extends RPrimFun {
   constructor() {
-    super("symbol=?", { arity: 2, allArgsTypeName: TypeName.SYMBOL });
+    super("symbol=?", { arity: 2, allArgsTypeName: TypeName.Symbol });
   }
 
   call(args: RValue[]): RValue {

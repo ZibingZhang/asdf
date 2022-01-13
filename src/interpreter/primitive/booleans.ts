@@ -18,7 +18,7 @@ export {
 
 class RPFBooleanToString extends RPrimFun {
   constructor() {
-    super("boolean->string", { arity: 1, onlyArgTypeName: TypeName.BOOLEAN });
+    super("boolean->string", { arity: 1, onlyArgTypeName: TypeName.Boolean });
   }
 
   call(args: RValue[]): RValue {
@@ -28,7 +28,7 @@ class RPFBooleanToString extends RPrimFun {
 
 class RPFAreBooleansEqual extends RPrimFun {
   constructor() {
-    super("boolean=?", { arity: 2, allArgsTypeName: TypeName.BOOLEAN });
+    super("boolean=?", { arity: 2, allArgsTypeName: TypeName.Boolean });
   }
 
   call(args: RValue[]): RValue {
@@ -58,7 +58,7 @@ class RPFFalseHuh extends RPrimFun {
 
 class RPFNot extends RPrimFun {
   constructor() {
-    super("not", { arity: 1, onlyArgTypeName: TypeName.BOOLEAN });
+    super("not", { arity: 1, onlyArgTypeName: TypeName.Boolean });
   }
 
   call(args: RValue[]): RValue {

@@ -75,6 +75,9 @@ import {
   TokenType
 } from "./token";
 import {
+  Keyword
+} from "./keyword";
+import {
   PRIMITIVE_TEST_FUNCTIONS
 } from "./environment";
 import {
@@ -122,32 +125,32 @@ class ParseSExpr implements Stage<SExpr[], Program> {
   private toNodeHelper(sexpr: SExpr): ASTNode {
     if (isAtomSExpr(sexpr)) {
       switch (sexpr.token.type) {
-        case TokenType.TRUE: {
+        case TokenType.True: {
           return new AtomNode(
             R_TRUE,
             sexpr.sourceSpan
           );
         }
-        case TokenType.FALSE: {
+        case TokenType.False: {
           return new AtomNode(
             R_FALSE,
             sexpr.sourceSpan
           );
         }
-        case TokenType.INTEGER: {
+        case TokenType.Integer: {
           return new AtomNode(
             new RExactReal(BigInt(sexpr.token.text.replace(".", ""))),
             sexpr.sourceSpan
           );
         }
-        case TokenType.RATIONAL: {
+        case TokenType.Rational: {
           const parts = sexpr.token.text.split("/");
           return new AtomNode(
             new RExactReal(BigInt(parts[0]), BigInt(parts[1])),
             sexpr.sourceSpan
           );
         }
-        case TokenType.DECIMAL: {
+        case TokenType.Decimal: {
           const [whole, decimal] = sexpr.token.text.split(".");
           const scalar = 10n ** BigInt(decimal.length);
           const wholeBigInt = BigInt(whole);
@@ -163,18 +166,18 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             );
           }
         }
-        case TokenType.STRING: {
+        case TokenType.String: {
           return new AtomNode(
             new RString(sexpr.token.text.slice(1, -1)),
             sexpr.sourceSpan
           );
         }
-        case TokenType.NAME: {
+        case TokenType.Name: {
           return new VarNode(sexpr.token.text, sexpr.sourceSpan);
         }
-        case TokenType.KEYWORD: {
+        case TokenType.Keyword: {
           switch (sexpr.token.text) {
-            case "else":
+            case Keyword.Else:
               throw new StageError(
                 ES_NOT_IN_COND_ERR,
                 sexpr.sourceSpan
@@ -186,7 +189,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
               );
           }
         }
-        case TokenType.PLACEHOLDER: {
+        case TokenType.Placeholder: {
           return new EllipsisNode(sexpr, sexpr.sourceSpan);
         }
         default:
@@ -207,32 +210,22 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         );
       }
       switch (leadingSExpr.token.type) {
-        case TokenType.PLACEHOLDER: {
+        case TokenType.Placeholder: {
           return new EllipsisFunAppNode(leadingSExpr, sexpr.sourceSpan);
         }
-        case TokenType.NAME: {
-          if (leadingSExpr.token.text === "quote") {
-            if (!sexpr.subExprs[1]) {
-              throw new StageError(
-                QU_EXPECTED_EXPRESSION,
-                sexpr.sourceSpan
-              );
-            }
-            return this.toQuoteNode(sexpr, sexpr.subExprs[1]);
-          } else {
-            return new FunAppNode(
-              new VarNode(leadingSExpr.token.text, leadingSExpr.sourceSpan),
-              sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
-              sexpr.sourceSpan
-            );
-          }
+        case TokenType.Name: {
+          return new FunAppNode(
+            new VarNode(leadingSExpr.token.text, leadingSExpr.sourceSpan),
+            sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
+            sexpr.sourceSpan
+          );
         }
-        case TokenType.KEYWORD: {
+        case TokenType.Keyword: {
           switch (leadingSExpr.token.text) {
-            case "and": {
+            case Keyword.And: {
               if (sexpr.subExprs.length - 1 < 2) {
                 throw new StageError(
-                  FA_MIN_ARITY_ERR("and", 2, sexpr.subExprs.length - 1),
+                  FA_MIN_ARITY_ERR(Keyword.And, 2, sexpr.subExprs.length - 1),
                   leadingSExpr.sourceSpan
                 );
               }
@@ -241,43 +234,43 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 sexpr.sourceSpan
               );
             }
-            case "check-error":
-            case "check-expect":
-            case "check-member-of":
-            case "check-random":
-            case "check-range":
-            case "check-satisfied":
-            case "check-within": {
+            case Keyword.CheckError:
+            case Keyword.CheckExpect:
+            case Keyword.CheckMemberOf:
+            case Keyword.CheckRandom:
+            case Keyword.CheckRange:
+            case Keyword.CheckSatisfied:
+            case Keyword.CheckWithin: {
               return this.toCheckNode(leadingSExpr.token.text, sexpr);
             }
-            case "cond": {
+            case Keyword.Cond: {
               return this.toCondNode(sexpr);
             }
-            case "define": {
+            case Keyword.Define: {
               if (!this.atTopLevel()) {
                 throw new StageError(
-                  SX_NOT_TOP_LEVEL_DEFN_ERR("define"),
+                  SX_NOT_TOP_LEVEL_DEFN_ERR(Keyword.Define),
                   sexpr.sourceSpan
                 );
               }
               return this.toDefnNode(sexpr);
             }
-            case "define-struct": {
+            case Keyword.DefineStruct: {
               if (!this.atTopLevel()) {
                 throw new StageError(
-                  SX_NOT_TOP_LEVEL_DEFN_ERR("define-struct"),
+                  SX_NOT_TOP_LEVEL_DEFN_ERR(Keyword.DefineStruct),
                   sexpr.sourceSpan
                 );
               }
               return this.toDefnStructNode(sexpr);
             }
-            case "else": {
+            case Keyword.Else: {
               throw new StageError(
                 ES_NOT_IN_COND_ERR,
                 leadingSExpr.sourceSpan
               );
             }
-            case "if": {
+            case Keyword.If: {
               if (sexpr.subExprs.length - 1 !== 3) {
                 throw new StageError(
                   IF_EXPECTED_THREE_PARTS_ERR(sexpr.subExprs.length - 1),
@@ -291,10 +284,10 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 sexpr.sourceSpan
               );
             }
-            case "or": {
+            case Keyword.Or: {
               if (sexpr.subExprs.length - 1 < 2) {
                 throw new StageError(
-                  FA_MIN_ARITY_ERR("or", 2, sexpr.subExprs.length - 1),
+                  FA_MIN_ARITY_ERR(Keyword.Or, 2, sexpr.subExprs.length - 1),
                   leadingSExpr.sourceSpan
                 );
               }
@@ -302,6 +295,15 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
                 sexpr.sourceSpan
               );
+            }
+            case Keyword.Quote: {
+              if (!sexpr.subExprs[1]) {
+                throw new StageError(
+                  QU_EXPECTED_EXPRESSION,
+                  sexpr.sourceSpan
+                );
+              }
+              return this.toQuoteNode(sexpr, sexpr.subExprs[1]);
             }
             default:
               throw "illegal state: non-existent keyword";
@@ -345,26 +347,26 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       );
     }
     switch (checkName) {
-      case "check-error": {
+      case Keyword.CheckError: {
         return new CheckErrorNode(
           sexpr.subExprs.slice(1).map(sexpr => this.toNode(sexpr)),
           sexpr.sourceSpan
         );
       }
-      case "check-member-of": {
+      case Keyword.CheckMemberOf: {
         return new CheckMemberOfNode(
           this.toNode(
             new ListSExpr(
               [
                 new AtomSExpr(
-                  new Token(TokenType.NAME, "member", sexpr.sourceSpan),
+                  new Token(TokenType.Name, "member", sexpr.sourceSpan),
                   sexpr.sourceSpan
                 ),
                 sexpr.subExprs[1],
                 new ListSExpr(
                   [
                     new AtomSExpr(
-                      new Token(TokenType.NAME, "list", sexpr.sourceSpan),
+                      new Token(TokenType.Name, "list", sexpr.sourceSpan),
                       sexpr.sourceSpan
                     ),
                     ...sexpr.subExprs.slice(2)
@@ -380,7 +382,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           sexpr.sourceSpan
         );
       }
-      case "check-range": {
+      case Keyword.CheckRange: {
         const testValSExpr = sexpr.subExprs[1];
         const lowerBoundValSExpr = sexpr.subExprs[2];
         const upperBoundValSExpr = sexpr.subExprs[3];
@@ -389,13 +391,13 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             new ListSExpr(
               [
                 new AtomSExpr(
-                  new Token(TokenType.KEYWORD, "and", sexpr.sourceSpan),
+                  new Token(TokenType.Keyword, Keyword.And, sexpr.sourceSpan),
                   sexpr.sourceSpan
                 ),
                 new ListSExpr(
                   [
                     new AtomSExpr(
-                      new Token(TokenType.NAME, "<=", sexpr.sourceSpan),
+                      new Token(TokenType.Name, "<=", sexpr.sourceSpan),
                       sexpr.sourceSpan
                     ),
                     lowerBoundValSExpr,
@@ -406,7 +408,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 new ListSExpr(
                   [
                     new AtomSExpr(
-                      new Token(TokenType.NAME, "<=", sexpr.sourceSpan),
+                      new Token(TokenType.Name, "<=", sexpr.sourceSpan),
                       sexpr.sourceSpan
                     ),
                     testValSExpr,
@@ -424,7 +426,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           sexpr.sourceSpan
         );
       }
-      case "check-satisfied": {
+      case Keyword.CheckSatisfied: {
         return new CheckSatisfiedNode(
           this.toNode(
             new ListSExpr(
@@ -441,13 +443,13 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           sexpr.sourceSpan
         );
       }
-      case "check-within": {
+      case Keyword.CheckWithin: {
         return new CheckWithinNode(
           this.toNode(
             new ListSExpr(
               [
                 new AtomSExpr(
-                  new Token(TokenType.NAME, "equal~?", sexpr.sourceSpan),
+                  new Token(TokenType.Name, "equal~?", sexpr.sourceSpan),
                   sexpr.sourceSpan
                 ),
                 sexpr.subExprs[1],
@@ -491,8 +493,8 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       }
       const questionSExpr = token.subExprs[0];
       if (isAtomSExpr(questionSExpr)
-        && questionSExpr.token.type === TokenType.KEYWORD
-        && questionSExpr.token.text === "else"
+        && questionSExpr.token.type === TokenType.Keyword
+        && questionSExpr.token.text === Keyword.Else
       ) {
         if (idx < sexpr.subExprs.length - 2) {
           throw new StageError(
@@ -519,7 +521,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     let name = sexpr.subExprs[1];
     if (isAtomSExpr(name)) {
       // (define variable-name ...)
-      if (name.token.type !== TokenType.NAME) {
+      if (name.token.type !== TokenType.Name) {
         throw new StageError(
           DF_EXPECTED_VAR_OR_FUN_NAME_ERR(name),
           name.sourceSpan
@@ -553,7 +555,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         );
       }
       name = nameAndArgs.subExprs[0];
-      if (!isAtomSExpr(name) || name.token.type !== TokenType.NAME) {
+      if (!isAtomSExpr(name) || name.token.type !== TokenType.Name) {
         throw new StageError(
           DF_EXPECTED_FUNCTION_NAME_ERR(name),
           sexpr.sourceSpan
@@ -567,7 +569,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       }
       const params: string[] = [];
       for (const arg of nameAndArgs.subExprs.slice(1)) {
-        if (!isAtomSExpr(arg) || arg.token.type !== TokenType.NAME) {
+        if (!isAtomSExpr(arg) || arg.token.type !== TokenType.Name) {
           throw new StageError(
             DF_EXPECTED_VARIABLE_ERR(arg),
             arg.sourceSpan
@@ -615,7 +617,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       );
     }
     const name = sexpr.subExprs[1];
-    if (!isAtomSExpr(name) || name.token.type !== TokenType.NAME) {
+    if (!isAtomSExpr(name) || name.token.type !== TokenType.Name) {
       throw new StageError(
         DS_EXPECTED_STRUCT_NAME_ERR(name),
         name.sourceSpan
@@ -638,7 +640,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     for (const fieldNameSExpr of fieldNamesSExpr.subExprs) {
       if (
         !isAtomSExpr(fieldNameSExpr)
-        || (fieldNameSExpr.token.type !== TokenType.NAME && fieldNameSExpr.token.type !== TokenType.KEYWORD)
+        || (fieldNameSExpr.token.type !== TokenType.Name && fieldNameSExpr.token.type !== TokenType.Keyword)
       ) {
         throw new StageError(
           DS_EXPECTED_FIELD_NAME_ERR(fieldNameSExpr),
@@ -671,8 +673,8 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     // '...
     if (isAtomSExpr(quotedSexpr)) {
       if (
-        quotedSexpr.token.type === TokenType.NAME
-        || quotedSexpr.token.type === TokenType.KEYWORD
+        quotedSexpr.token.type === TokenType.Name
+        || quotedSexpr.token.type === TokenType.Keyword
       ) {
         return new AtomNode(
           new RSymbol(quotedSexpr.token.text),

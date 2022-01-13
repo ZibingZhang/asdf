@@ -82,18 +82,18 @@ function foundStr(found: SExpr | string): string {
   } else {
     if (isAtomSExpr(found)) {
       switch (found.token.type) {
-        case TokenType.TRUE:
-        case TokenType.FALSE:
+        case TokenType.True:
+        case TokenType.False:
           return "boolean";
-        case TokenType.INTEGER:
-        case TokenType.RATIONAL:
-        case TokenType.DECIMAL:
+        case TokenType.Integer:
+        case TokenType.Rational:
+        case TokenType.Decimal:
           return "number";
-        case TokenType.STRING:
+        case TokenType.String:
           return "string";
-        case TokenType.KEYWORD:
+        case TokenType.Keyword:
           return "keyword";
-        case TokenType.PLACEHOLDER:
+        case TokenType.Placeholder:
           return "template";
         default:
           throw "something else";

@@ -107,6 +107,9 @@ import {
   RPFStringLessEqualThanHuh
 } from "./primitive/string";
 import {
+  Keyword
+} from "./keyword";
+import {
   SC_USED_BEFORE_DEFINITION_ERR
 } from "./error";
 import {
@@ -179,13 +182,13 @@ const PRIMITIVE_STRUCT_NAMES: Set<string> = new Set();
 const PRIMITIVE_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 const PRIMITIVE_TEST_FUNCTIONS: Map<string, RPrimFunConfig> = new Map();
 
-PRIMITIVE_TEST_FUNCTIONS.set("check-error", { minArity: 1, maxArity: 2 });
-PRIMITIVE_TEST_FUNCTIONS.set("check-expect", { arity: 2 });
-PRIMITIVE_TEST_FUNCTIONS.set("check-member-of", { minArity: 2 });
-PRIMITIVE_TEST_FUNCTIONS.set("check-random", { arity: 2 });
-PRIMITIVE_TEST_FUNCTIONS.set("check-range", { arity: 3 });
-PRIMITIVE_TEST_FUNCTIONS.set("check-satisfied", { arity: 2 });
-PRIMITIVE_TEST_FUNCTIONS.set("check-within", { arity: 3 });
+PRIMITIVE_TEST_FUNCTIONS.set(Keyword.CheckError, { minArity: 1, maxArity: 2 });
+PRIMITIVE_TEST_FUNCTIONS.set(Keyword.CheckExpect, { arity: 2 });
+PRIMITIVE_TEST_FUNCTIONS.set(Keyword.CheckMemberOf, { minArity: 2 });
+PRIMITIVE_TEST_FUNCTIONS.set(Keyword.CheckRandom, { arity: 2 });
+PRIMITIVE_TEST_FUNCTIONS.set(Keyword.CheckRange, { arity: 3 });
+PRIMITIVE_TEST_FUNCTIONS.set(Keyword.CheckSatisfied, { arity: 2 });
+PRIMITIVE_TEST_FUNCTIONS.set(Keyword.CheckWithin, { arity: 3 });
 
 function addDataToPrimEnv(name: string, val: RData) {
   PRIMITIVE_DATA_NAMES.add(name);

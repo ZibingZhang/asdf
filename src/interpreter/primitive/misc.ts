@@ -45,7 +45,7 @@ class RPFAreEqual extends RPrimFun {
 
 class RPFAreEqualWithin extends RPrimFun {
   constructor() {
-    super("equal~?", { arity: 3, argsTypeNames: [TypeName.ANY, TypeName.ANY, TypeName.NON_NEGATIVE_REAL] });
+    super("equal~?", { arity: 3, argsTypeNames: [TypeName.Any, TypeName.Any, TypeName.NonNegativeReal] });
   }
 
   call(args: RValue[]): RValue {
