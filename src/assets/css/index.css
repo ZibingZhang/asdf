@@ -69,43 +69,51 @@ body .CodeMirror {
   scrollbar-width: none;
 }
 
-.cm-s-default {
-  color: #2626B3 !important;
+.cm-s-racket .CodeMirror-selected  {
+  background-color: #0078D7 !important;
+}
+
+.cm-s-racket span span.CodeMirror-selectedtext  {
+  color: white !important;
+}
+
+.cm-s-racket {
+  color: #2626B3;
 }
 
 .cm-s-racket span.cm-boolean {
-  color: #FF9000 !important;
+  color: #FF9000;
 }
 
 .cm-s-racket span.cm-bracket {
-  color: #0096FF !important;
+  color: #0096FF;
 }
 
 .cm-s-racket span.cm-comment {
-  color: #E4B41F !important;
+  color: #E4B41F;
 }
 
 .cm-s-racket span.cm-error {
-  color: #FF0000 !important;
+  color: #FF0000;
 }
 
 .cm-s-racket span.cm-keyword, .cm-placeholder {
-  color: #708 !important;
+  color: #708;
 }
 
 .cm-s-racket span.cm-number {
-  color: #E548FF !important;
+  color: #E548FF;
 }
 
 .cm-s-racket span.cm-string {
-  color: #00AA00 !important;
+  color: #00AA00;
 }
 
-.cm-s-racket span.cm-highlight-error {
-  background-color: #FFC0CB;
+.cm-highlight-error {
+  background: #FFC0CB;
 }
 
-.cm-s-racket span.cm-highlight-unused {
+.cm-highlight-unused {
   background: black;
   color: #FF7F00 !important;
 }

@@ -74,6 +74,8 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
     if (!node.used) {
       this.unusedCallback(node.nameSourceSpan);
       this.unusedCallback(node.value.sourceSpan);
+    } else {
+      node.value.accept(this);
     }
   }
 

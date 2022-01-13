@@ -21,6 +21,7 @@ const EDITOR = CodeMirror(
     tabSize: 2,
     mode: "racket",
     theme: "racket",
+    styleSelectedText: true,
     extraKeys: {
       "Alt-Enter": () => runEditorCode()
     }
@@ -58,6 +59,6 @@ function markEditor(sourceSpan, className) {
   EDITOR.markText(
     { line: sourceSpan.startLineno - 1, ch: sourceSpan.startColno },
     { line: sourceSpan.endLineno - 1, ch: sourceSpan.endColno },
-    { className: className }
+    { className }
   );
 }
