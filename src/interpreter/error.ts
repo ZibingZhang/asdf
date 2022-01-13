@@ -15,6 +15,7 @@ export {
   CE_CANT_COMPARE_INEXACT_ERR,
   CE_EXPECTED_AN_ERROR_ERR,
   CE_EXPECTED_ERROR_MESSAGE_ERR,
+  CE_NOT_IN_RANGE_ERR,
   CE_NOT_MEMBER_OF_ERR,
   CE_NOT_SATISFIED_ERR,
   CE_NOT_WITHIN_ERR,
@@ -113,6 +114,9 @@ const CE_EXPECTED_AN_ERROR_ERR = (value: string) => {
 };
 const CE_EXPECTED_ERROR_MESSAGE_ERR = (value: string) => {
   return `check-error: expects a string (the expected error message) for the second argument. Given ${value}`;
+};
+const CE_NOT_IN_RANGE_ERR = (actual: string, lowerBound: string, upperBound: string) => {
+  return `Actual value ${actual} is not between ${lowerBound} and ${upperBound}, inclusive.`;
 };
 const CE_NOT_MEMBER_OF_ERR = (actual: string, against: string[]) => {
   return `Actual value ${actual} differs from all given members in ${against.join(" ")}`;

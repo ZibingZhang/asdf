@@ -18,7 +18,8 @@ import {
   LambdaNode,
   OrNode,
   VarNode,
-  isDefnNode
+  isDefnNode,
+  CheckRangeNode
 } from "./ast";
 import {
   AtomSExpr,
@@ -244,6 +245,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             case "check-expect":
             case "check-member-of":
             case "check-random":
+            case "check-range":
             case "check-satisfied":
             case "check-within": {
               return this.toCheckNode(leadingSExpr.token.text, sexpr);
@@ -378,6 +380,50 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           sexpr.sourceSpan
         );
       }
+      case "check-range": {
+        const testValSExpr = sexpr.subExprs[1];
+        const lowerBoundValSExpr = sexpr.subExprs[2];
+        const upperBoundValSExpr = sexpr.subExprs[3];
+        return new CheckRangeNode(
+          this.toNode(
+            new ListSExpr(
+              [
+                new AtomSExpr(
+                  new Token(TokenType.KEYWORD, "and", sexpr.sourceSpan),
+                  sexpr.sourceSpan
+                ),
+                new ListSExpr(
+                  [
+                    new AtomSExpr(
+                      new Token(TokenType.NAME, "<=", sexpr.sourceSpan),
+                      sexpr.sourceSpan
+                    ),
+                    lowerBoundValSExpr,
+                    testValSExpr
+                  ],
+                  sexpr.sourceSpan
+                ),
+                new ListSExpr(
+                  [
+                    new AtomSExpr(
+                      new Token(TokenType.NAME, "<=", sexpr.sourceSpan),
+                      sexpr.sourceSpan
+                    ),
+                    testValSExpr,
+                    upperBoundValSExpr
+                  ],
+                  sexpr.sourceSpan
+                )
+              ],
+              sexpr.sourceSpan
+            )
+          ),
+          this.toNode(testValSExpr),
+          this.toNode(lowerBoundValSExpr),
+          this.toNode(upperBoundValSExpr),
+          sexpr.sourceSpan
+        );
+      }
       case "check-satisfied": {
         return new CheckSatisfiedNode(
           this.toNode(
@@ -390,6 +436,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             )
           ),
           this.toNode(sexpr.subExprs[1]),
+          this.toNode(sexpr.subExprs[2]),
           sexpr.subExprs[2].stringify(),
           sexpr.sourceSpan
         );

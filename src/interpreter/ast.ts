@@ -4,6 +4,7 @@ import {
   CE_CANT_COMPARE_INEXACT_ERR,
   CE_EXPECTED_AN_ERROR_ERR,
   CE_EXPECTED_ERROR_MESSAGE_ERR,
+  CE_NOT_IN_RANGE_ERR,
   CE_NOT_MEMBER_OF_ERR,
   CE_NOT_SATISFIED_ERR,
   CE_NOT_WITHIN_ERR,
@@ -63,6 +64,7 @@ export {
   CheckErrorNode,
   CheckMemberOfNode,
   CheckNode,
+  CheckRangeNode,
   CheckSatisfiedNode,
   CheckWithinNode,
   CondNode,
@@ -172,8 +174,7 @@ class CheckNode extends ASTNodeBase {
   constructor(
     readonly name: string,
     readonly args: ASTNode[],
-    readonly sourceSpan: SourceSpan,
-    readonly meta: any[] = []
+    readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
   }
@@ -193,7 +194,7 @@ class CheckNode extends ASTNodeBase {
           actualVal = this.args[0].eval(env);
           expectedVal = this.args[1].eval(env);
         } else {
-          const seed = "0";
+          const seed = (new Date()).toString() + (new Date()).getMilliseconds();
           RNG.reset(seed);
           actualVal = this.args[0].eval(env);
           RNG.reset(seed);
@@ -202,7 +203,11 @@ class CheckNode extends ASTNodeBase {
         if (isRInexactReal(actualVal) || isRInexactReal(expectedVal)) {
           return new RTestResult(
             false,
-            CE_CANT_COMPARE_INEXACT_ERR(this.name, actualVal.stringify(), expectedVal.stringify()),
+            CE_CANT_COMPARE_INEXACT_ERR(
+              this.name,
+              actualVal.stringify(),
+              expectedVal.stringify()
+            ),
             this.sourceSpan
           );
         } else if (isRData(actualVal) && actualVal.equal(expectedVal)) {
@@ -210,7 +215,10 @@ class CheckNode extends ASTNodeBase {
         } else {
           return new RTestResult(
             false,
-            CE_ACTUAL_VALUE_NOT_EXPECTED_ERR(actualVal.stringify(), expectedVal.stringify()),
+            CE_ACTUAL_VALUE_NOT_EXPECTED_ERR(
+              actualVal.stringify(),
+              expectedVal.stringify()
+            ),
             this.sourceSpan
           );
         }
@@ -253,7 +261,10 @@ class CheckErrorNode extends CheckNode {
         if (expectedErrMsg && expectedErrMsg.val !== e.msg) {
           return new RTestResult(
             false,
-            CE_WRONG_ERROR_ERR(expectedErrMsg.val, e.msg),
+            CE_WRONG_ERROR_ERR(
+              expectedErrMsg.val,
+              e.msg
+            ),
             this.sourceSpan
           );
         }
@@ -272,15 +283,48 @@ class CheckMemberOfNode extends CheckNode {
     readonly testAgainstValNodes: ASTNode[],
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-member-of", [arg], sourceSpan);
+    super("check-member-of", [testValNode, ...testAgainstValNodes], sourceSpan);
   }
 
   eval(env: Environment): RValue {
     this.used = true;
-    if (isRFalse(this.arg.eval(env))) {
+    const testResult = this.arg.eval(env);
+    if (isRFalse(testResult)) {
       return new RTestResult(
         false,
-        CE_NOT_MEMBER_OF_ERR(this.testValNode.eval(env).stringify(), this.testAgainstValNodes.map(node => node.eval(env).stringify())),
+        CE_NOT_MEMBER_OF_ERR(
+          this.testValNode.eval(env).stringify(),
+          this.testAgainstValNodes.map(node => node.eval(env).stringify())
+        ),
+        this.sourceSpan
+      );
+    }
+    return new RTestResult(true);
+  }
+}
+
+class CheckRangeNode extends CheckNode {
+  constructor(
+    readonly arg: ASTNode,
+    readonly testValNode: ASTNode,
+    readonly lowerBoundValNode: ASTNode,
+    readonly upperBoundValNode: ASTNode,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super("check-range", [testValNode, lowerBoundValNode, upperBoundValNode], sourceSpan);
+  }
+
+  eval(env: Environment): RValue {
+    this.used = true;
+    const testResult = this.arg.eval(env);
+    if (isRFalse(testResult)) {
+      return new RTestResult(
+        false,
+        CE_NOT_IN_RANGE_ERR(
+          this.testValNode.eval(env).stringify(),
+          this.lowerBoundValNode.eval(env).stringify(),
+          this.upperBoundValNode.eval(env).stringify()
+        ),
         this.sourceSpan
       );
     }
@@ -292,26 +336,33 @@ class CheckSatisfiedNode extends CheckNode {
   constructor(
     readonly arg: ASTNode,
     readonly testValNode: ASTNode,
+    readonly testFnNode: ASTNode,
     readonly testFnName: string,
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-satisfied", [arg], sourceSpan);
+    super("check-satisfied", [testValNode, testFnNode], sourceSpan);
   }
 
   eval(env: Environment): RValue {
     this.used = true;
-    const val = this.arg.eval(env);
-    if (!isRBoolean(val)) {
+    const testResult = this.arg.eval(env);
+    if (!isRBoolean(testResult)) {
       return new RTestResult(
         false,
-        CE_SATISFIED_NOT_BOOLEAN_ERR(this.testFnName, val.stringify()),
+        CE_SATISFIED_NOT_BOOLEAN_ERR(
+          this.testFnName,
+          testResult.stringify()
+        ),
         this.sourceSpan
       );
     }
-    if (isRFalse(val)) {
+    if (isRFalse(testResult)) {
       return new RTestResult(
         false,
-        CE_NOT_SATISFIED_ERR(this.testFnName, this.testValNode.eval(env).stringify()),
+        CE_NOT_SATISFIED_ERR(
+          this.testFnName,
+          this.testValNode.eval(env).stringify()
+        ),
         this.sourceSpan
       );
     }
@@ -327,7 +378,7 @@ class CheckWithinNode extends CheckNode {
     readonly withinNode: ASTNode,
     readonly sourceSpan: SourceSpan
   ) {
-    super("check-within", [arg], sourceSpan);
+    super("check-within", [actualNode, expectedNode, withinNode], sourceSpan);
   }
 
   eval(env: Environment): RValue {
@@ -335,7 +386,11 @@ class CheckWithinNode extends CheckNode {
     if (isRFalse(this.arg.eval(env))) {
       return new RTestResult(
         false,
-        CE_NOT_WITHIN_ERR(this.actualNode.eval(env).stringify(), this.expectedNode.eval(env).stringify(), this.withinNode.eval(env).stringify()),
+        CE_NOT_WITHIN_ERR(
+          this.actualNode.eval(env).stringify(),
+          this.expectedNode.eval(env).stringify(),
+          this.withinNode.eval(env).stringify()
+        ),
         this.sourceSpan
       );
     }

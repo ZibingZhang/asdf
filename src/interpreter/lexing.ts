@@ -42,6 +42,7 @@ const KEYWORDS = new Set(
     "check-expect",
     "check-member-of",
     "check-random",
+    "check-range",
     "check-satisfied",
     "check-within",
     "cond",

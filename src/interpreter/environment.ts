@@ -167,6 +167,7 @@ PRIMITIVE_TEST_FUNCTIONS.set("check-error", { minArity: 1, maxArity: 2 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-expect", { arity: 2 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-member-of", { minArity: 2 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-random", { arity: 2 });
+PRIMITIVE_TEST_FUNCTIONS.set("check-range", { arity: 3 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-satisfied", { arity: 2 });
 PRIMITIVE_TEST_FUNCTIONS.set("check-within", { arity: 3 });
 
