@@ -83,6 +83,7 @@ import {
 import {
   Program
 } from "./program";
+import { SETTINGS } from "./settings";
 
 export {
   ParseSExpr
@@ -669,32 +670,42 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     );
   }
 
-  private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): AtomNode {
+  private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): ASTNode {
     // '...
     if (isAtomSExpr(quotedSexpr)) {
       if (
         quotedSexpr.token.type === TokenType.Name
         || quotedSexpr.token.type === TokenType.Keyword
+        || quotedSexpr.token.type === TokenType.Placeholder
       ) {
         return new AtomNode(
           new RSymbol(quotedSexpr.token.text),
           quotedSexpr.sourceSpan
         );
-      } else {
+      } else if (!SETTINGS.syntax.listAbbreviation) {
         throw new StageError(
           QU_EXPECTED_POST_QUOTE_ERR(quotedSexpr),
           sexpr.sourceSpan
         );
+      } else {
+        return this.toNode(quotedSexpr);
       }
     } else {
-      if (quotedSexpr.subExprs.length > 0) {
-        throw new StageError(
-          QU_EXPECTED_POST_QUOTE_ERR(quotedSexpr),
+      if (quotedSexpr.subExprs.length === 0) {
+        return new AtomNode(
+          R_EMPTY_LIST,
           sexpr.sourceSpan
         );
       } else {
-        return new AtomNode(
-          R_EMPTY_LIST,
+        if (!SETTINGS.syntax.listAbbreviation) {
+          throw new StageError(
+            QU_EXPECTED_POST_QUOTE_ERR(quotedSexpr),
+            sexpr.sourceSpan
+          );
+        }
+        return new FunAppNode(
+          new VarNode("list", sexpr.sourceSpan),
+          quotedSexpr.subExprs.map(subExpr => this.toQuoteNode(sexpr, subExpr)),
           sexpr.sourceSpan
         );
       }

@@ -26,8 +26,7 @@
       } else if (ch === ";") {
         stream.skipToEnd();
         return "comment";
-      } else if (ch.match(/^['`]/) && stream.match(specialForm, false)) {
-        state.ignoreNextKeyword = true;
+      } else if (ch.match(/^['`]/)) {
         return "keyword";
       } else if (ch.match(/^['`,]/)) {
         return "keyword";
@@ -69,12 +68,7 @@
 
       const name = ch + stream.match(untilDelimiter);
       if (name.match(specialForm)) {
-        if (state.ignoreNextKeyword) {
-          state.ignoreNextKeyword = false;
-          return null;
-        } else {
-          return "keyword";
-        }
+        return "keyword";
       } else if (name.match(numLiteral)) {
         return "number";
       } else if (name.match(placeholder)) {
