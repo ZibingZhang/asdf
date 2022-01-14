@@ -125,6 +125,10 @@ abstract class ASTNodeBase {
 
   abstract eval(env: Environment): RValue;
 
+  isTemplate(): boolean {
+    return false;
+  }
+
   use() {
     this.used = true;
   }
@@ -156,6 +160,10 @@ class AndNode extends ASTNodeBase {
       );
     }
     return result;
+  }
+
+  isTemplate(): boolean {
+    return this.args.some(arg => arg.isTemplate());
   }
 }
 
@@ -434,6 +442,10 @@ class CondNode extends ASTNodeBase {
       this.sourceSpan
     );
   }
+
+  isTemplate(): boolean {
+    return this.questionAnswerClauses.some(clause => clause[0].isTemplate() || clause[1].isTemplate());
+  }
 }
 
 class DefnStructNode extends ASTNodeBase {
@@ -481,6 +493,10 @@ class DefnVarNode extends ASTNodeBase {
     env.set(this.name, this.value.eval(env));
     return R_VOID;
   }
+
+  isTemplate(): boolean {
+    return this.value.isTemplate();
+  }
 }
 
 class EllipsisFunAppNode extends ASTNodeBase {
@@ -501,6 +517,10 @@ class EllipsisFunAppNode extends ASTNodeBase {
       this.sourceSpan
     );
   }
+
+  isTemplate(): boolean {
+    return true;
+  }
 }
 
 class EllipsisNode extends ASTNodeBase {
@@ -520,6 +540,10 @@ class EllipsisNode extends ASTNodeBase {
       EL_EXPECTED_FINISHED_EXPR_ERR(this.placeholder.token.text),
       this.sourceSpan
     );
+  }
+
+  isTemplate(): boolean {
+    return true;
   }
 }
 
@@ -570,6 +594,10 @@ class FunAppNode extends ASTNodeBase {
       );
     }
   }
+
+  isTemplate(): boolean {
+    return this.args.some(arg => arg.isTemplate());
+  }
 }
 
 class IfNode extends ASTNodeBase {
@@ -601,6 +629,10 @@ class IfNode extends ASTNodeBase {
       return this.falseAnswer.eval(env);
     }
   }
+
+  isTemplate(): boolean {
+    return this.question.isTemplate() || this.trueAnswer.isTemplate() || this.falseAnswer.isTemplate();
+  }
 }
 
 class LambdaNode extends ASTNodeBase {
@@ -619,6 +651,10 @@ class LambdaNode extends ASTNodeBase {
   eval(env: Environment): RValue {
     this.used = true;
     return new RLambda(env.copy(), this.params, this.body);
+  }
+
+  isTemplate(): boolean {
+    return this.body.isTemplate();
   }
 }
 
@@ -648,6 +684,10 @@ class OrNode extends ASTNodeBase {
       );
     }
     return result;
+  }
+
+  isTemplate(): boolean {
+    return this.args.some(arg => arg.isTemplate());
   }
 }
 

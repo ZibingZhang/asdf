@@ -41,7 +41,9 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitAndNode(node: AndNode): void {
     if (!node.used) {
-      this.unusedCallback(node.sourceSpan);
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
     } else {
       node.args.forEach(arg => arg.accept(this));
     }
@@ -61,7 +63,9 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitCondNode(node: CondNode): void {
     if (!node.used) {
-      this.unusedCallback(node.sourceSpan);
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
     } else {
       node.questionAnswerClauses.forEach(clause => {
         clause[0].accept(this);
@@ -72,8 +76,9 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitDefnVarNode(node: DefnVarNode): void {
     if (!node.used) {
-      this.unusedCallback(node.nameSourceSpan);
-      this.unusedCallback(node.value.sourceSpan);
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
     } else {
       node.value.accept(this);
     }
@@ -93,7 +98,9 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitFunAppNode(node: FunAppNode): void {
     if (!node.used) {
-      this.unusedCallback(node.sourceSpan);
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
     } else {
       node.args.forEach(arg => arg.accept(this));
     }
@@ -101,7 +108,9 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitIfNode(node: IfNode): void {
     if (!node.used) {
-      this.unusedCallback(node.sourceSpan);
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
     } else {
       node.question.accept(this);
       node.trueAnswer.accept(this);
@@ -111,7 +120,9 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitLambdaNode(node: LambdaNode): void {
     if (!node.used) {
-      this.unusedCallback(node.sourceSpan);
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
     } else {
       node.body.accept(this);
     }
@@ -119,7 +130,9 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitOrNode(node: OrNode): void {
     if (!node.used) {
-      this.unusedCallback(node.sourceSpan);
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
     } else {
       node.args.forEach(arg => arg.accept(this));
     }
