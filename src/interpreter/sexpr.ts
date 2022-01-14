@@ -36,14 +36,14 @@ class AtomSExpr extends SExprBase {
 
 class ListSExpr extends SExprBase {
   constructor(
-    readonly subExprs: SExpr[],
+    readonly subSExprs: SExpr[],
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
   }
 
   stringify(): string {
-    return `(${this.subExprs.map(sexpr => sexpr.stringify()).join(" ")})`;
+    return `(${this.subSExprs.map(sexpr => sexpr.stringify()).join(" ")})`;
   }
 }
 

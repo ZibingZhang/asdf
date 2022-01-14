@@ -19,6 +19,7 @@ enum Keyword {
   Else = "else",
   If = "if",
   Lambda = "lambda",
+  Local = "local",
   Or = "or",
   Quote = "quote",
   Require = "require"

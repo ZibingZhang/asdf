@@ -58,6 +58,7 @@ export {
   LM_NO_VARIABLES_ERR,
   LM_NOT_FUNCTION_DEFINITION_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
+  QU_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   RQ_EXPECTED_MODULE_NAME_ERR,
   RQ_MODULE_NOT_FOUND_ERR,
@@ -156,13 +157,13 @@ const CN_ELSE_NOT_LAST_CLAUSE_ERR = "cond: found an else clause that isn't the l
 const CN_EXPECTED_TWO_PART_CLAUSE_ERR = (found?: SExpr) => {
   if (found) {
     if (isListSExpr(found)) {
-      switch (found.subExprs.length) {
+      switch (found.subSExprs.length) {
         case 0:
           return "cond: expected a clause with a question and an answer, but found an empty part";
         case 1:
           return "cond: expected a clause with a question and an answer, but found a clause with only one part";
         default:
-          return `cond: expected a clause with a question and an answer, but found a clause with ${found.subExprs.length} parts`;
+          return `cond: expected a clause with a question and an answer, but found a clause with ${found.subSExprs.length} parts`;
       }
     } else {
       return `cond: expected a clause with a question and an answer, but found a ${foundStr(found)}`;
@@ -285,6 +286,9 @@ const LM_NO_VARIABLES_ERR = "lambda: expected (lambda (variable more-variable ..
 const LM_NOT_FUNCTION_DEFINITION_ERR = "lambda: found a lambda that is not a function definition";
 
 const QU_EXPECTED_EXPRESSION_ERR = "quote: expected an expression after quote, but nothing's there";
+const QU_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
+  return `quote: expected only one expression after quote, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
+};
 const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
   return `quote: expected the name of a symbol or () after the quote, but found a ${foundStr(found)}`;
 };
