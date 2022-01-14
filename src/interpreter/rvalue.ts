@@ -19,6 +19,7 @@ export {
   R_TRUE,
   R_VOID,
   RBoolean,
+  RCharacter,
   RData,
   RExactReal,
   RInexactReal,
@@ -82,6 +83,7 @@ type RData =
   | RStruct;
 type RAtomic =
   | RBoolean
+  | RCharacter
   | RNumber
   | RString
   | RStructType
@@ -136,6 +138,21 @@ class RBoolean extends RDataBase {
 
   equalWithin(rval: RValue, _: number): boolean {
     return isRBoolean(rval)
+      && rval.val === this.val;
+  }
+}
+
+class RCharacter extends RDataBase {
+  constructor(readonly val: string) {
+    super();
+  }
+
+  stringify(): string {
+    return `#\\${this.val}`;
+  }
+
+  equalWithin(rval: RValue, _: number): boolean {
+    return isRCharacter(rval)
       && rval.val === this.val;
   }
 }
@@ -572,6 +589,10 @@ function isRBoolean(rval: RValue): rval is RBoolean {
 
 function isRCallable(rval: RValue): rval is RCallable {
   return rval instanceof RCallableBase;
+}
+
+function isRCharacter(rval: RValue): rval is RCharacter {
+  return rval instanceof RCharacter;
 }
 
 function isRData(rval: RValue): rval is RDataBase {

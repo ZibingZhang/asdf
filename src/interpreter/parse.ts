@@ -51,12 +51,13 @@ import {
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
-  QU_EXPECTED_EXPRESSION,
+  QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR
 } from "./error";
 import {
+  RCharacter,
   RExactReal,
   RPrimFunConfig,
   RString,
@@ -166,6 +167,12 @@ class ParseSExpr implements Stage<SExpr[], Program> {
               sexpr.sourceSpan
             );
           }
+        }
+        case TokenType.Character: {
+          return new AtomNode(
+            new RCharacter(sexpr.token.text.slice(2)),
+            sexpr.sourceSpan
+          );
         }
         case TokenType.String: {
           return new AtomNode(
@@ -300,7 +307,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             case Keyword.Quote: {
               if (!sexpr.subExprs[1]) {
                 throw new StageError(
-                  QU_EXPECTED_EXPRESSION,
+                  QU_EXPECTED_EXPRESSION_ERR,
                   sexpr.sourceSpan
                 );
               }

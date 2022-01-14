@@ -51,7 +51,10 @@
           return state.tokenize(stream, state);
         } else if (ch === "\\") {
           const characterName = stream.match(untilDelimiter)[0];
-          if (characterName.match(/^(.|nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout)$/)) {
+          if (characterName === "" && !stream.eol() && stream.peek().match(/\S/)) {
+            stream.next();
+            return "character";
+          } else if (characterName.match(/^(.|nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout)$/)) {
             return "character";
           } else {
             return "error";

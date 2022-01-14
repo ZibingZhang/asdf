@@ -51,10 +51,12 @@ export {
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
-  QU_EXPECTED_EXPRESSION,
+  QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
+  RS_BAD_CHARACTER_CONSTANT_ERR,
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
+  RS_EXPECTED_CHARACTER_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
   RS_EXPECTED_CLOSING_QUOTE_ERR,
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
@@ -253,17 +255,21 @@ const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {
   }
 };
 
-const QU_EXPECTED_EXPRESSION = "quote: expected an expression after quote, but nothing's there";
+const QU_EXPECTED_EXPRESSION_ERR = "quote: expected an expression after quote, but nothing's there";
 const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
   return `quote: expected the name of a symbol or () after the quote, but found a ${foundStr(found)}`;
 };
 
+const RS_BAD_CHARACTER_CONSTANT_ERR = (found: string) => {
+  return `read-syntax: bad character constant \`#\\${found}\``;
+};
 const RS_BAD_SYNTAX_ERR = (syntax: string) => {
   return `read-syntax: bad syntax \`${syntax}\``;
 };
 const RS_DIV_BY_ZERO_ERR = (number: string) => {
   return `read-syntax: division by zero in \`${number}\``;
 };
+const RS_EXPECTED_CHARACTER_ERR = "read-syntax: expected a character after `#\\`";
 const RS_EXPECTED_CLOSING_PAREN_ERR = (opening: string) => {
   if (opening === "(") {
     return "read-syntax: expected a `)` to close preceding `(`";

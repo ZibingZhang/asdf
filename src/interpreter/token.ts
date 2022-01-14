@@ -12,6 +12,7 @@ enum TokenType {
   // RightParen = "RIGHT_PAREN",
   True = "TRUE",
   False = "FALSE",
+  Character = "CHARACTER",
   String = "STRING",
   Name = "NAME",
   Keyword = "KEYWORD",

@@ -4,8 +4,10 @@ import {
   SExpr
 } from "./sexpr";
 import {
+  RS_BAD_CHARACTER_CONSTANT_ERR,
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
+  RS_EXPECTED_CHARACTER_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
   RS_EXPECTED_CLOSING_QUOTE_ERR,
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
@@ -43,11 +45,13 @@ const RIGHT_PAREN_RE = /^[)\]}]$/;
 const QUASI_QUOTE_RE = /^[`,]$/;
 const TRUE_LITERAL_RE = /^#(T|t|true)$/;
 const FALSE_LITERAL_RE = /^#(F|f|false)$/;
+const CHARACTER_LITERAL_RE = /^#\\.*$/;
 const INTEGER_RE = /^[+-]?\d+\.?$/;
 const RATIONAL_RE = /^[+-]?\d+\/\d+$/;
 const DECIMAL_RE = /^[+-]?\d*\.\d+$/;
 const DIV_BY_ZERO_RE = /^[+-]?\d+\/0+$/;
 const PLACEHOLDER_RE = /^\.{2,6}$/;
+const CHARACTER_SPECIAL_FORMS_RE = /^nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout$/;
 
 const ESCAPED_A = String.fromCharCode(7);
 const ESCAPED_B = String.fromCharCode(8);
@@ -213,17 +217,38 @@ class Lexer implements Stage<string, SExpr[]> {
         new SourceSpan(poundLineno, poundColno, this.lineno, this.colno)
       );
     }
-    const name = "#" + this.nextName();
+    let name = "#" + this.nextName();
+    const sourceSpan = new SourceSpan(poundLineno, poundColno, this.lineno, this.colno);
     if (name.match(TRUE_LITERAL_RE)) {
-      const sourceSpan = new SourceSpan(poundLineno, poundColno, this.lineno, this.colno);
       return new AtomSExpr(
         new Token(TokenType.True, name, sourceSpan),
         sourceSpan
       );
     } else if (name.match(FALSE_LITERAL_RE)) {
-      const sourceSpan = new SourceSpan(poundLineno, poundColno, this.lineno, this.colno);
       return new AtomSExpr(
         new Token(TokenType.False, name, sourceSpan),
+        sourceSpan
+      );
+    } else if (name.match(CHARACTER_LITERAL_RE)) {
+      if (name === "#\\") {
+        if (this.atEnd || this.peek().match(/\s/)) {
+          throw new StageError(
+            RS_EXPECTED_CHARACTER_ERR,
+            sourceSpan
+          );
+        }
+        name += this.next();
+      } else {
+        const character = name.slice(2);
+        if (character.length !== 1 && !character.match(CHARACTER_SPECIAL_FORMS_RE)) {
+          throw new StageError(
+            RS_BAD_CHARACTER_CONSTANT_ERR(character),
+            sourceSpan
+          );
+        }
+      }
+      return new AtomSExpr(
+        new Token(TokenType.Character, name, sourceSpan),
         sourceSpan
       );
     } else {
