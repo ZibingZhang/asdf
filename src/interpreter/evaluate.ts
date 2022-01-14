@@ -20,16 +20,21 @@ import {
 import {
   RT_MAX_CALL_STACK_SIZE_ERR
 } from "./error";
+import {
+  isCheckNode
+} from "./ast";
 
 export {
   EvaluateCode
 };
 
 class EvaluateCode implements Stage<Program, string[]> {
+  private globalEnv: Environment = new Environment();
   private env: Environment = new Environment();
   private testResults: StageTestResult[] = [];
 
   reset() {
+    this.globalEnv = new Environment();
     this.env = new Environment();
   }
 
@@ -58,10 +63,15 @@ class EvaluateCode implements Stage<Program, string[]> {
   }
 
   private runHelper(program: Program): string[] {
-    program.defns.forEach(defn => { defn.eval(this.env); defn.used = false; });
+    program.defns.forEach(defn => { defn.eval(this.globalEnv); defn.used = false; });
     const output: string[] = [];
     for (const node of program.nodes) {
-      const result = node.eval(this.env);
+      let result;
+      if (isCheckNode(node)) {
+        result = node.eval(this.globalEnv);
+      } else {
+        result = node.eval(this.env);
+      }
       if (result instanceof RTestResult) {
         this.testResults.push(new StageTestResult(
           result.passed,

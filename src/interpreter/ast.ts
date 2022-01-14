@@ -87,6 +87,7 @@ export {
   LambdaNode,
   OrNode,
   VarNode,
+  isCheckNode,
   isDefnNode,
   ASTNodeVisitor
 };
@@ -710,6 +711,10 @@ class VarNode extends ASTNodeBase {
       this.sourceSpan
     );
   }
+}
+
+function isCheckNode(node: ASTNode) {
+  return node instanceof CheckNode;
 }
 
 function isDefnNode(node: ASTNode): node is DefnNode {
