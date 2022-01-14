@@ -52,6 +52,12 @@ import {
   FA_MIN_ARITY_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
+  LM_DUPLICATE_VARIABLE_ERR,
+  LM_EXPECTED_EXPRESSION_ERR,
+  LM_EXPECTED_FORMAT_ERR,
+  LM_EXPECTED_VARIABLE_ERR,
+  LM_NOT_FUNCTION_DEFINITION_ERR,
+  LM_NO_VARIABLES_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   RQ_EXPECTED_MODULE_NAME_ERR,
@@ -95,9 +101,11 @@ export {
 };
 
 class ParseSExpr implements Stage<SExpr[], Program> {
+  inFunDef = false;
   level = 0;
 
   run(input: StageOutput<SExpr[]>): StageOutput<Program> {
+    this.inFunDef = false;
     this.level = 0;
     try {
       return new StageOutput(this.processSExprs(input.output));
@@ -236,7 +244,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           );
         }
         case TokenType.Keyword: {
-          switch (<Keyword>leadingSExpr.token.text) {
+          switch (leadingSExpr.token.text) {
             case Keyword.And: {
               if (sexpr.subExprs.length - 1 < 2) {
                 throw new StageError(
@@ -298,6 +306,15 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 this.toNode(sexpr.subExprs[3]),
                 sexpr.sourceSpan
               );
+            }
+            case Keyword.Lambda: {
+              if (!this.inFunDef) {
+                throw new StageError(
+                  LM_NOT_FUNCTION_DEFINITION_ERR,
+                  sexpr.sourceSpan
+                );
+              }
+              return this.toLambdaNode(sexpr);
             }
             case Keyword.Or: {
               if (sexpr.subExprs.length - 1 < 2) {
@@ -572,12 +589,15 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           sexpr.subExprs[3].sourceSpan
         );
       }
-      return new DefnVarNode(
+      this.inFunDef = true;
+      const node = new DefnVarNode(
         name.token.text,
         name.sourceSpan,
         this.toNode(sexpr.subExprs[2]),
         sexpr.sourceSpan
       );
+      this.inFunDef = false;
+      return node;
     } else {
       // (define (function-name ...) ...)
       const nameAndArgs = name;
@@ -702,7 +722,56 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     );
   }
 
-  private toQuoteNode(sexpr: SExpr, quotedSexpr: SExpr): ASTNode {
+  private toLambdaNode(sexpr: ListSExpr): LambdaNode {
+    if (sexpr.subExprs.length - 1 === 0) {
+      throw new StageError(
+        LM_EXPECTED_FORMAT_ERR(),
+        sexpr.sourceSpan
+      );
+    }
+    const variables = sexpr.subExprs[1];
+    if (isAtomSExpr(variables)) {
+      throw new StageError(
+        LM_EXPECTED_FORMAT_ERR(variables),
+        variables.sourceSpan
+      );
+    }
+    if (variables.subExprs.length === 0) {
+      throw new StageError(
+        LM_NO_VARIABLES_ERR,
+        variables.sourceSpan
+      );
+    }
+    const variableNames: string[] = [];
+    for (const variable of variables.subExprs) {
+      if (isListSExpr(variable) || variable.token.type !== TokenType.Name) {
+        throw new StageError(
+          LM_EXPECTED_VARIABLE_ERR(variable),
+          variable.sourceSpan
+        );
+      }
+      if (variableNames.includes(variable.token.text)) {
+        throw new StageError(
+          LM_DUPLICATE_VARIABLE_ERR(variable.token.text),
+          variable.sourceSpan
+        );
+      }
+      variableNames.push(variable.token.text);
+    }
+    if (sexpr.subExprs.length - 1 !== 2) {
+      throw new StageError(
+        LM_EXPECTED_EXPRESSION_ERR(sexpr.subExprs.length - 1),
+        sexpr.sourceSpan
+      );
+    }
+    return new LambdaNode(
+      variableNames,
+      this.toNode(sexpr.subExprs[2]),
+      sexpr.sourceSpan
+    );
+  }
+
+  private toQuoteNode(sexpr: ListSExpr, quotedSexpr: SExpr): ASTNode {
     // '...
     if (isAtomSExpr(quotedSexpr)) {
       if (

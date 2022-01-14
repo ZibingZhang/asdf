@@ -51,6 +51,12 @@ export {
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
+  LM_DUPLICATE_VARIABLE_ERR,
+  LM_EXPECTED_EXPRESSION_ERR,
+  LM_EXPECTED_FORMAT_ERR,
+  LM_EXPECTED_VARIABLE_ERR,
+  LM_NO_VARIABLES_ERR,
+  LM_NOT_FUNCTION_DEFINITION_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   RQ_EXPECTED_MODULE_NAME_ERR,
@@ -258,6 +264,25 @@ const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {
     return `if: expected a question and two answers, but found ${parts} parts`;
   }
 };
+
+const LM_DUPLICATE_VARIABLE_ERR = (name: string) => {
+  return `lambda: found a variable that is used more than once: ${name}`;
+};
+const LM_EXPECTED_EXPRESSION_ERR = (parts: number) => {
+  if (parts === 0) {
+    return "lambda: expected an expression for the function body, but nothing's there";
+  } else {
+    return `lambda: expected only one expression for the function body, but found ${parts} extra parts`;
+  }
+};
+const LM_EXPECTED_FORMAT_ERR = (found: SExpr | null = null) => {
+  return `lambda: expected (lambda (variable more-variable ...) expression), but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
+};
+const LM_EXPECTED_VARIABLE_ERR = (found: SExpr) => {
+  return `lambda: expected a variable, but found a ${foundStr(found)}`;
+};
+const LM_NO_VARIABLES_ERR = "lambda: expected (lambda (variable more-variable ...) expression), but found no variables";
+const LM_NOT_FUNCTION_DEFINITION_ERR = "lambda: found a lambda that is not a function definition";
 
 const QU_EXPECTED_EXPRESSION_ERR = "quote: expected an expression after quote, but nothing's there";
 const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
