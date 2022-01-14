@@ -31,9 +31,9 @@ import {
   TokenType
 } from "./token";
 import {
-  Keyword,
-  SUPPORTED_KEYWORDS
+  Keyword
 } from "./keyword";
+import { SETTINGS } from "./settings";
 
 export {
   Lexer
@@ -158,7 +158,7 @@ class Lexer implements Stage<string, SExpr[]> {
         }
       } else if (text.match(DECIMAL_RE)) {
         addToken(lineno, colno, TokenType.Decimal, text);
-      } else if (SUPPORTED_KEYWORDS.has(text) && elementToQuoteCount === 0) {
+      } else if (SETTINGS.syntax.forms.includes(text) && elementToQuoteCount === 0) {
         addToken(lineno, colno, TokenType.Keyword, text);
       } else {
         addToken(lineno, colno, TokenType.Name, text);

@@ -7,6 +7,26 @@ const initValue =
 `{
   "stringify": {
     "abbreviatedList": false
+  },
+  "syntax": {
+    "forms": [
+      "and",
+      "check-error",
+      "check-expect",
+      "check-member-of",
+      "check-random",
+      "check-range",
+      "check-satisfied",
+      "check-within",
+      "cond",
+      "define",
+      "define-struct",
+      "else",
+      "if",
+      "lambda",
+      "or",
+      "quote"
+    ]
   }
 }`;
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export {
-  SUPPORTED_KEYWORDS,
+  ALL_KEYWORDS,
   Keyword
 }
 
@@ -23,11 +23,8 @@ enum Keyword {
   Quote = "quote"
 }
 
-const ALL_KEYWORDS: Set<string> = new Set()
-let SUPPORTED_KEYWORDS: Set<string> = new Set();
+const ALL_KEYWORDS: string[] = [];
 
 for (const keyword in Keyword) {
-  ALL_KEYWORDS.add((<any>Keyword.valueOf())[keyword]);
+  ALL_KEYWORDS.push((<any>Keyword.valueOf())[keyword]);
 }
-
-SUPPORTED_KEYWORDS = ALL_KEYWORDS;
