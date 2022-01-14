@@ -104,7 +104,7 @@
       if (stream.eatSpace()) {
         return null;
       }
-      while (true) {
+      while (!stream.eol()) {
         if (stream.peek() === "\\") {
           state.tokenize = tokenEscapedCharacter;
           return "string";
@@ -113,10 +113,9 @@
         if (ch === "\"") {
           state.tokenize = tokenBase;
           return "string";
-        } else if (stream.eol()) {
-          return "string";
         }
       }
+      return "string";
     }
 
     function tokenEscapedCharacter(stream, state) {

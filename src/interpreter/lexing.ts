@@ -4,22 +4,18 @@ import {
   SExpr
 } from "./sexpr";
 import {
-  NO_SOURCE_SPAN,
-  SourceSpan
-} from "./sourcespan";
-import {
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
+  RS_EXPECTED_CLOSING_QUOTE_ERR,
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
   RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR,
-  RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
   RS_ILLEGAL_USE_OF_DOT_ERR,
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
-  RS_UNCLOSED_STRING_ERR,
-  RS_UNEXPECTED_ERR
+  RS_UNEXPECTED_ERR,
+  RS_UNKNOWN_ESCAPE_SEQUENCE_ERR
 } from "./error";
 import {
   Stage,
@@ -31,14 +27,17 @@ import {
   TokenType
 } from "./token";
 import {
-  Keyword
-} from "./keyword";
-import { SETTINGS } from "./settings";
+  SETTINGS
+} from "./settings";
+import {
+  SourceSpan
+} from "./sourcespan";
 
 export {
   Lexer
 };
 
+const DELIMITER_RE = /[\s"'([{)\]};`,]/;
 const LEFT_PAREN_RE = /^[([{]$/;
 const RIGHT_PAREN_RE = /^[)\]}]$/;
 const QUASI_QUOTE_RE = /^[`,]$/;
@@ -50,528 +49,329 @@ const DECIMAL_RE = /^[+-]?\d*\.\d+$/;
 const DIV_BY_ZERO_RE = /^[+-]?\d+\/0+$/;
 const PLACEHOLDER_RE = /^\.{2,6}$/;
 
-enum State {
-  Init,
-  BlockComment,
-  BlockCommentPipe,
-  BlockCommentPound,
-  LineComment,
-  Name,
-  Pound,
-  Quote,
-  String
-}
+const ESCAPED_A = String.fromCharCode(7);
+const ESCAPED_B = String.fromCharCode(8);
+const ESCAPED_T = String.fromCharCode(9);
+const ESCAPED_N = String.fromCharCode(10);
+const ESCAPED_V = String.fromCharCode(11);
+const ESCAPED_F = String.fromCharCode(12);
+const ESCAPED_R = String.fromCharCode(13);
+const ESCAPED_E = String.fromCharCode(27);
 
 class Lexer implements Stage<string, SExpr[]> {
   private position = 0;
+  private lineno = 1;
+  private colno = 0;
   private input = "";
-  private isAtEnd = false;
+  private atEnd = false;
+  private quoting = false;
 
   run(input: StageOutput<string>): StageOutput<SExpr[]> {
+    this.position = 0;
+    this.lineno = 1;
+    this.colno = 0;
+    this.input = input.output;
+    this.atEnd = this.input.length === 0;
+    this.quoting = false;
+    const sexprs: SExpr[] = [];
+    const sexprCommentDepth = this.eatSpace();
     try {
-      return new StageOutput(this.runHelper(input.output));
+      while (!this.atEnd) {
+        const sexpr = this.nextSExpr();
+        if (sexprCommentDepth.length > 0) {
+          sexprCommentDepth.pop();
+        } else {
+          sexprs.push(sexpr);
+        }
+        sexprCommentDepth.push(...this.eatSpace());
+      }
+      if (sexprCommentDepth.length > 0) {
+        throw new StageError(
+          RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
+          <SourceSpan>sexprCommentDepth.pop()
+        );
+      }
+      return new StageOutput(sexprs);
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput(<SExpr[]><unknown>null, [e]);
+        return new StageOutput([], [e]);
       } else {
         throw e;
       }
     }
   }
 
-  private runHelper(rawInput: string): SExpr[] {
-    this.position = 0;
-    this.input = rawInput;
-    this.isAtEnd = this.input.length === 0;
+  private nextSExpr(): SExpr {
+    const ch = this.next();
 
-    const sexprs: SExpr[] = [];
-    const sexprStack: SExpr[][] = [];
-    const parenStack: Token[] = [];
-    let opening;
-    let state = State.Init;
-    let text = "";
-    let lineno = 1;
-    let colno = 0;
-
-    let blockCommentDepth = 0;
-    let quoteSourceSpan = NO_SOURCE_SPAN;
-    let elementToQuoteCount = 0;
-    const elementToQuoteCountStack: number[] = [];
-    let sexprCommentSourceSpan = NO_SOURCE_SPAN;
-    let sexprToCommentCount = 0;
-    const sexprToCommentCountStack: number[] = [];
-
-    const addToken = (lineno: number, colno: number, type: TokenType, text: string) => {
-      const token = new Token(type, text, new SourceSpan(lineno, colno, lineno, colno + text.length));
-      let sexpr: SExpr = new AtomSExpr(token, token.sourceSpan);
-      if (sexprToCommentCount > 0) {
-        sexprToCommentCount--;
-      } else {
-        if (elementToQuoteCount > 0) {
-          elementToQuoteCount--;
-          sexpr = new ListSExpr(
-            [
-              new AtomSExpr(
-                new Token(
-                  TokenType.Keyword,
-                  Keyword.Quote,
-                  quoteSourceSpan
-                ),
-                quoteSourceSpan
-              ),
-              sexpr
-            ],
-            new SourceSpan(
-              quoteSourceSpan.startLineno,
-              quoteSourceSpan.startColno,
-              sexpr.sourceSpan.endLineno,
-              sexpr.sourceSpan.endColno
-            )
-          );
-        }
-        if (sexprStack.length === 0) {
-          sexprs.push(sexpr);
-        } else {
-          sexprStack[sexprStack.length - 1].push(sexpr);
-        }
-      }
-      text = "";
-    };
-    const addNameToken = (lineno: number, colno: number, text: string) => {
-      if (text === ".") {
-        throw new StageError(
-          RS_ILLEGAL_USE_OF_DOT_ERR,
-          new SourceSpan(lineno, colno, lineno, colno + 1)
-        );
-      } else if (text.match(PLACEHOLDER_RE)) {
-        addToken(lineno, colno, TokenType.Placeholder, text);
-      } else if (text.match(INTEGER_RE)) {
-        addToken(lineno, colno, TokenType.Integer, text);
-      } else if (text.match(RATIONAL_RE)) {
-        if (text.match(DIV_BY_ZERO_RE)) {
-          throw new StageError(
-            RS_DIV_BY_ZERO_ERR(text),
-            new SourceSpan(lineno, colno, lineno, colno + text.length)
-          );
-        } else {
-          addToken(lineno, colno, TokenType.Rational, text);
-        }
-      } else if (text.match(DECIMAL_RE)) {
-        addToken(lineno, colno, TokenType.Decimal, text);
-      } else if (SETTINGS.syntax.forms.includes(text) && elementToQuoteCount === 0) {
-        addToken(lineno, colno, TokenType.Keyword, text);
-      } else {
-        addToken(lineno, colno, TokenType.Name, text);
-      }
-    };
-    const addLeftParenToken = (lineno: number, colno: number, paren: string) => {
-      if (sexprToCommentCount > 0) {
-        sexprToCommentCountStack.push(sexprToCommentCount);
-        sexprToCommentCount = 0;
-      } else {
-        elementToQuoteCountStack.push(elementToQuoteCount);
-        elementToQuoteCount = 0;
-        sexprStack.push([]);
-      }
-      parenStack.push(new Token(TokenType.LeftParen, paren, new SourceSpan(lineno, colno, lineno, colno + 1)));
-      text = "";
-    };
-    const addRightParenToken = (lineno: number, colno: number, paren: string) => {
-      if (parenStack.length === 0) {
-        throw new StageError(
-          RS_UNEXPECTED_ERR(paren),
-          new SourceSpan(lineno, colno, lineno, colno + 1)
-        );
-      } else if (!this.matches((opening = <Token>parenStack.pop()).text, paren)) {
-        throw new StageError(
-          RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR(opening?.text, paren),
-          new SourceSpan(lineno, colno, lineno, colno + 1)
-        );
-      } else if (sexprToCommentCountStack.length > 0) {
-        sexprToCommentCount = <number>sexprToCommentCountStack.pop();
-        sexprToCommentCount--;
-      } else {
-        elementToQuoteCount = <number>elementToQuoteCountStack.pop();
-        let sexpr: SExpr = new ListSExpr(
-          sexprStack.pop() || [],
-          new SourceSpan(
-            opening.sourceSpan.startLineno,
-            opening.sourceSpan.startColno,
-            lineno,
-            colno + 1
-          )
-        );
-        if (elementToQuoteCount) {
-          elementToQuoteCount--;
-          sexpr = new ListSExpr(
-            [
-              new AtomSExpr(
-                new Token(
-                  TokenType.Keyword,
-                  Keyword.Quote,
-                  quoteSourceSpan
-                ),
-                quoteSourceSpan
-              ),
-              sexpr
-            ],
-            new SourceSpan(
-              quoteSourceSpan.startLineno,
-              quoteSourceSpan.startColno,
-              lineno,
-              colno + 1
-            )
-          );
-        }
-        if (sexprStack.length === 0) {
-          sexprs.push(sexpr);
-        } else {
-          sexprStack[sexprStack.length - 1].push(sexpr);
-        }
-        text = "";
-      }
-    };
-
-    while (!this.isAtEnd) {
-      const ch = this.next();
-
-      switch (state) {
-        case State.Init: {
-          text = ch;
-          if (ch.match(QUASI_QUOTE_RE)) {
-            throw new StageError(
-              RS_QUASI_QUOTE_UNSUPPORTED_ERR,
-              new SourceSpan(lineno, colno, lineno, colno + 1)
-            );
-          } else if (ch.match(/\s/)) {
-            // skip
-          } else if (ch.match(LEFT_PAREN_RE)) {
-            addLeftParenToken(lineno, colno, ch);
-          } else if (ch.match(RIGHT_PAREN_RE)) {
-            addRightParenToken(lineno, colno, ch);
-          } else if (ch === "\"") {
-            state = State.String;
-          } else if (ch === "#") {
-            if (this.match(";")) {
-              colno++;
-              sexprCommentSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 2);
-              sexprToCommentCount++;
-            } else if (this.match("|")) {
-              colno++;
-              blockCommentDepth = 0;
-              state = State.BlockComment;
-            } else if (this.peek(2).match(/!\/?/)) {
-              state = State.LineComment;
-            } else {
-              state = State.Pound;
-            }
-          } else if (ch === "'") {
-            quoteSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 1);
-            state = State.Quote;
-          } else if (ch === ";") {
-            state = State.LineComment;
-          } else {
-            state = State.Name;
-          }
-          break;
-        }
-
-        case State.BlockComment: {
-          if (ch === "#") {
-            state = State.BlockCommentPound;
-          } else if (ch === "|") {
-            state = State.BlockCommentPipe;
-          }
-          break;
-        }
-
-        case State.BlockCommentPipe: {
-          if (ch === "#") {
-            if (blockCommentDepth === 0) {
-              state = State.Init;
-            } else {
-              blockCommentDepth--;
-              state = State.BlockComment;
-            }
-          } else {
-            state = State.BlockComment;
-          }
-          break;
-        }
-
-        case State.BlockCommentPound: {
-          if (ch === "|") {
-            blockCommentDepth++;
-            state = State.BlockComment;
-          } else {
-            state = State.BlockComment;
-          }
-          break;
-        }
-
-        case State.LineComment: {
-          if (ch === "\n") {
-            state = State.Init;
-          }
-          break;
-        }
-
-        case State.Name: {
-          if (ch.match(QUASI_QUOTE_RE)) {
-            throw new StageError(
-              RS_QUASI_QUOTE_UNSUPPORTED_ERR,
-              new SourceSpan(lineno, colno, lineno, colno + 1)
-            );
-          } else if (ch.match(/\s/)) {
-            addNameToken(lineno, colno - text.length, text);
-            state = State.Init;
-          } else if (ch.match(LEFT_PAREN_RE)) {
-            addNameToken(lineno, colno - text.length, text);
-            addLeftParenToken(lineno, colno, ch);
-            state = State.Init;
-          } else if (ch.match(RIGHT_PAREN_RE)) {
-            addNameToken(lineno, colno - text.length, text);
-            addRightParenToken(lineno, colno, ch);
-            state = State.Init;
-          } else if (ch === "\"") {
-            addNameToken(lineno, colno - text.length, text);
-            text = ch;
-            state = State.String;
-          } else if (ch === "'") {
-            addNameToken(lineno, colno - text.length, text);
-            quoteSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 1);
-            state = State.Quote;
-          } else {
-            text += ch;
-          }
-          break;
-        }
-
-        case State.Pound: {
-          if (ch.match(QUASI_QUOTE_RE)) {
-            throw new StageError(
-              RS_QUASI_QUOTE_UNSUPPORTED_ERR,
-              new SourceSpan(lineno, colno, lineno, colno + 1)
-            );
-          } else if (ch.match(/\s/)) {
-            if (text.match(TRUE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.True, text);
-            } else if (text.match(FALSE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.False, text);
-            } else {
-              throw new StageError(
-                RS_BAD_SYNTAX_ERR(text),
-                new SourceSpan(lineno, colno - text.length, lineno, colno)
-              );
-            }
-            state = State.Init;
-          } else if (ch.match(LEFT_PAREN_RE)) {
-            if (text.match(TRUE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.True, text);
-            } else if (text.match(FALSE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.False, text);
-            } else {
-              throw new StageError(
-                RS_BAD_SYNTAX_ERR(text),
-                new SourceSpan(lineno, colno - text.length + 1, lineno, colno + 1)
-              );
-            }
-            addLeftParenToken(lineno, colno + 1, ch);
-            state = State.Init;
-          } else if (ch.match(RIGHT_PAREN_RE)) {
-            if (text.match(TRUE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.True, text);
-            } else if (text.match(FALSE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.False, text);
-            } else {
-              throw new StageError(
-                RS_BAD_SYNTAX_ERR(text),
-                new SourceSpan(lineno, colno - text.length + 1, lineno, colno + 1)
-              );
-            }
-            addRightParenToken(lineno, colno, ch);
-            state = State.Init;
-          } else if (ch === "\"") {
-            if (text.match(TRUE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.True, text);
-            } else if (text.match(FALSE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.False, text);
-            } else {
-              throw new StageError(
-                RS_BAD_SYNTAX_ERR(text),
-                new SourceSpan(lineno, colno - text.length + 1, lineno, colno + 1)
-              );
-            }
-            text = ch;
-            state = State.String;
-          } else if (ch === "'") {
-            if (text.match(TRUE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.True, text);
-            } else if (text.match(FALSE_LITERAL_RE)) {
-              addToken(lineno, colno - text.length, TokenType.False, text);
-            } else {
-              throw new StageError(
-                RS_BAD_SYNTAX_ERR(text),
-                new SourceSpan(lineno, colno - text.length + 1, lineno, colno + 1)
-              );
-            }
-            quoteSourceSpan = new SourceSpan(lineno, colno, lineno, colno + 1);
-            state = State.Quote;
-          } else {
-            text += ch;
-          }
-          break;
-        }
-
-        case State.Quote: {
-          if (elementToQuoteCount > 0) {
-            throw new StageError(
-              RS_NESTED_QUOTES_UNSUPPORTED_ERR,
-              new SourceSpan(lineno, colno, lineno, colno + 1)
-            );
-          }
-          text = ch;
-          elementToQuoteCount++;
-          if (ch.match(QUASI_QUOTE_RE)) {
-            throw new StageError(
-              RS_QUASI_QUOTE_UNSUPPORTED_ERR,
-              new SourceSpan(lineno, colno, lineno, colno + 1)
-            );
-          } else if (ch.match(/\s/)) {
-            throw new StageError(
-              RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
-              new SourceSpan(lineno, colno - 1, lineno, colno)
-            );
-          } else if (ch.match(LEFT_PAREN_RE)) {
-            addLeftParenToken(lineno, colno, ch);
-            state = State.Init;
-          } else if (ch.match(RIGHT_PAREN_RE)) {
-            throw new StageError(
-              RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR(ch),
-              new SourceSpan(lineno, colno, lineno, colno + 1)
-            );
-          } else if (ch === "\"") {
-            state = State.String;
-          } else if (ch === "#") {
-            if (this.match(";")) {
-              throw new StageError(
-                RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
-                new SourceSpan(lineno, colno - 1, lineno, colno)
-              );
-            } else if (this.match("|")) {
-              throw new StageError(
-                RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
-                new SourceSpan(lineno, colno - 1, lineno, colno)
-              );
-            } else if (this.peek(2).match(/!\/?/)) {
-              throw new StageError(
-                RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
-                new SourceSpan(lineno, colno - 1, lineno, colno)
-              );
-            } else {
-              state = State.Pound;
-            }
-          } else if (ch === "'") {
-            throw new StageError(
-              RS_NESTED_QUOTES_UNSUPPORTED_ERR,
-              new SourceSpan(lineno, colno, lineno, colno + 1)
-            );
-          } else if (ch === ";") {
-            throw new StageError(
-              RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
-              new SourceSpan(lineno, colno - 1, lineno, colno)
-            );
-          } else {
-            state = State.Name;
-          }
-          break;
-        }
-
-        case State.String: {
-          if (ch === "\"") {
-            addToken(lineno, colno - text.length, TokenType.String, text + ch);
-            state = State.Init;
-          } else if (ch === "\n") {
-            throw new StageError(
-              RS_UNCLOSED_STRING_ERR,
-              new SourceSpan(lineno, colno - text.length + 1, lineno, colno + 1)
-            );
-          }
-          text += ch;
-          break;
-        }
-      }
-
-      if (ch === "\n") { lineno++; colno = 0; } else { colno++; }
-    }
-
-    switch (state) {
-      case State.Name: {
-        addNameToken(lineno, colno - text.length, text);
-        break;
-      }
-
-      case State.Pound: {
-        if (text.match(TRUE_LITERAL_RE)) {
-          addToken(lineno, colno - text.length, TokenType.True, text);
-        } else if (text.match(FALSE_LITERAL_RE)) {
-          addToken(lineno, colno - text.length, TokenType.False, text);
-        } else {
-          throw new StageError(
-            RS_BAD_SYNTAX_ERR(text),
-            new SourceSpan(lineno, colno - text.length, lineno, colno)
-          );
-        }
-        break;
-      }
-
-      case State.Quote: {
-        throw new StageError(
-          RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR("end-of-file"),
-          new SourceSpan(lineno, colno - 1, lineno, colno)
-        );
-      }
-
-      case State.String: {
-        throw new StageError(
-          RS_UNCLOSED_STRING_ERR,
-          new SourceSpan(lineno, colno - text.length, lineno, colno)
-        );
-      }
-    }
-
-    let errorSourceSpan = NO_SOURCE_SPAN;
-    let error: StageError | false = false;
-
-    if (elementToQuoteCount > 0 && quoteSourceSpan.comesAfter(errorSourceSpan)) {
-      errorSourceSpan = quoteSourceSpan;
-      error = new StageError(
-        RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR("end-of-file"),
-        new SourceSpan(quoteSourceSpan.startLineno, quoteSourceSpan.startColno, lineno, colno)
+    if (ch.match(LEFT_PAREN_RE)) {
+      return this.nextListSExpr(ch);
+    } else if (ch.match(RIGHT_PAREN_RE)) {
+      throw new StageError(
+        RS_UNEXPECTED_ERR(ch),
+        new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
       );
-    }
-
-    if (sexprToCommentCount > 0 && sexprCommentSourceSpan.comesAfter(errorSourceSpan)) {
-      error = new StageError(
-        RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
-        new SourceSpan(sexprCommentSourceSpan.startLineno, sexprCommentSourceSpan.startColno, lineno, colno)
+    } else if (ch === "#") {
+      return this.nextPoundSExpr();
+    } else if (ch.match(QUASI_QUOTE_RE)) {
+      throw new StageError(
+        RS_QUASI_QUOTE_UNSUPPORTED_ERR,
+        new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
       );
+    } else if (ch === "'") {
+      return this.nextQuotedSExpr();
+    } else if (ch === "\"") {
+      return this.nextString(this.lineno, this.colno - 1);
     }
 
-    if ((opening = parenStack.pop()) && opening.sourceSpan.comesAfter(errorSourceSpan)) {
-      error = new StageError(
-        RS_EXPECTED_CLOSING_PAREN_ERR(opening.text),
-        new SourceSpan(opening.sourceSpan.startLineno, opening.sourceSpan.startColno, opening.sourceSpan.startLineno, opening.sourceSpan.startColno + 1)
+    const name = ch + this.nextName();
+    const sourceSpan = new SourceSpan(this.lineno, this.colno - name.length, this.lineno, this.colno);
+    let tokenType;
+    if (name === ".") {
+      throw new StageError(
+        RS_ILLEGAL_USE_OF_DOT_ERR,
+        sourceSpan
       );
+    } else if (name.match(INTEGER_RE)) {
+      tokenType = TokenType.Integer;
+    } else if (name.match(RATIONAL_RE)) {
+      if (name.match(DIV_BY_ZERO_RE)) {
+        throw new StageError(
+          RS_DIV_BY_ZERO_ERR(name),
+          sourceSpan
+        );
+      }
+      tokenType = TokenType.Rational;
+    } else if (name.match(DECIMAL_RE)) {
+      tokenType = TokenType.Decimal;
+    } else if (SETTINGS.syntax.forms.includes(name)) {
+      tokenType = TokenType.Keyword;
+    } else if (name.match(PLACEHOLDER_RE)) {
+      tokenType = TokenType.Placeholder;
+    } else {
+      tokenType = TokenType.Name;
     }
-
-    if (error) { throw error; }
-
-    return sexprs;
+    return new AtomSExpr(
+      new Token(tokenType, name, sourceSpan),
+      sourceSpan
+    );
   }
 
-  private matches(left: string | null, right: string): boolean {
-    switch (left) {
+  private nextListSExpr(opening: string): ListSExpr {
+    const openingLineno = this.lineno;
+    const openingColno = this.colno - 1;
+    const sexprs: SExpr[] = [];
+    const sexprCommentDepth = this.eatSpace();
+    while (!this.atEnd && !this.peek().match(RIGHT_PAREN_RE)) {
+      const sexpr = this.nextSExpr();
+      if (sexprCommentDepth.length > 0) {
+        sexprCommentDepth.pop();
+      } else {
+        sexprs.push(sexpr);
+      }
+      sexprCommentDepth.push(...this.eatSpace());
+    }
+    if (this.atEnd) {
+      throw new StageError(
+        RS_EXPECTED_CLOSING_PAREN_ERR(opening),
+        new SourceSpan(openingLineno, openingColno, openingLineno, openingColno + 1)
+      );
+    }
+    const closing = this.next();
+    if (sexprCommentDepth.length > 0) {
+      throw new StageError(
+        RS_UNEXPECTED_ERR(closing),
+        <SourceSpan>sexprCommentDepth.pop()
+      );
+    }
+    if (!this.parenMatches(opening, closing)) {
+      throw new StageError(
+        RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR(opening, closing),
+        new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
+      );
+    }
+    return new ListSExpr(
+      sexprs,
+      new SourceSpan(openingLineno, openingColno, this.lineno, this.colno)
+    );
+  }
+
+  private nextPoundSExpr(): AtomSExpr {
+    const poundLineno = this.lineno;
+    const poundColno = this.colno - 1;
+    const poundSourceSpan = new SourceSpan(poundLineno, poundColno, poundLineno, poundColno + 1);
+    if (this.atEnd) {
+      throw new StageError(
+        RS_BAD_SYNTAX_ERR("#"),
+        poundSourceSpan
+      );
+    }
+    if (this.peek().match(DELIMITER_RE)) {
+      const ch = this.next();
+      throw new StageError(
+        RS_BAD_SYNTAX_ERR("#" + ch),
+        new SourceSpan(poundLineno, poundColno, this.lineno, this.colno)
+      );
+    }
+    const name = "#" + this.nextName();
+    if (name.match(TRUE_LITERAL_RE)) {
+      const sourceSpan = new SourceSpan(poundLineno, poundColno, this.lineno, this.colno);
+      return new AtomSExpr(
+        new Token(TokenType.True, name, sourceSpan),
+        sourceSpan
+      );
+    } else if (name.match(FALSE_LITERAL_RE)) {
+      const sourceSpan = new SourceSpan(poundLineno, poundColno, this.lineno, this.colno);
+      return new AtomSExpr(
+        new Token(TokenType.False, name, sourceSpan),
+        sourceSpan
+      );
+    } else {
+      throw new StageError(
+        RS_BAD_SYNTAX_ERR(name),
+        new SourceSpan(poundLineno, poundColno, this.lineno, this.colno)
+      );
+    }
+  }
+
+  private nextQuotedSExpr(): ListSExpr {
+    const quoteLineno = this.lineno;
+    const quoteColno = this.colno - 1;
+    const quoteSourceSpan = new SourceSpan(quoteLineno, quoteColno, quoteLineno, quoteColno + 1);
+    if (this.quoting) {
+      throw new StageError(
+        RS_NESTED_QUOTES_UNSUPPORTED_ERR,
+        quoteSourceSpan
+      );
+    }
+    this.quoting = true;
+    const sexprCommentDepth = this.eatSpace();
+    while (sexprCommentDepth.length > 0) {
+      if (this.atEnd) {
+        throw new StageError(
+          RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
+          <SourceSpan>sexprCommentDepth.pop()
+        );
+      }
+      this.nextSExpr();
+      sexprCommentDepth.pop();
+      sexprCommentDepth.push(...this.eatSpace());
+    }
+    if (this.atEnd) {
+      throw new StageError(
+        RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR("end-of-file"),
+        quoteSourceSpan
+      );
+    }
+    const sexpr = this.nextSExpr();
+    this.quoting = false;
+    return new ListSExpr(
+      [
+        new AtomSExpr(
+          new Token(TokenType.Keyword, "quote", quoteSourceSpan),
+          quoteSourceSpan
+        ),
+        sexpr
+      ],
+      new SourceSpan(quoteLineno, quoteColno, this.lineno, this.colno)
+    );
+  }
+
+  private nextString(lineno: number, colno: number): AtomSExpr {
+    let str = "\"";
+    while (!this.atEnd) {
+      const ch = this.next();
+      switch (ch) {
+        case "\"": {
+          return new AtomSExpr(
+            new Token(
+              TokenType.String,
+              str + "\"",
+              new SourceSpan(lineno, colno, this.lineno, this.colno)
+            ),
+            new SourceSpan(lineno, colno, this.lineno, this.colno)
+          );
+        }
+        case "\\": {
+          if (this.atEnd) {
+            throw new StageError(
+              RS_EXPECTED_CLOSING_QUOTE_ERR,
+              new SourceSpan(lineno, colno, this.lineno, this.colno)
+            );
+          }
+          const ch = this.next();
+          switch (ch) {
+            case "a": {
+              str += ESCAPED_A;
+              break;
+            }
+            case "b": {
+              str += ESCAPED_B;
+              break;
+            }
+            case "t": {
+              str += ESCAPED_T;
+              break;
+            }
+            case "n": {
+              str += ESCAPED_N;
+              break;
+            }
+            case "v": {
+              str += ESCAPED_V;
+              break;
+            }
+            case "f": {
+              str += ESCAPED_F;
+              break;
+            }
+            case "r": {
+              str += ESCAPED_R;
+              break;
+            }
+            case "e": {
+              str += ESCAPED_E;
+              break;
+            }
+            case "\"":
+            case "'":
+            case "\\": {
+              str += ch;
+              break;
+            }
+            case "\n": {
+              break;
+            }
+            default: {
+              throw new StageError(
+                RS_UNKNOWN_ESCAPE_SEQUENCE_ERR(ch),
+                new SourceSpan(this.lineno, this.colno - 2, this.lineno, this.colno)
+              );
+            }
+          }
+          break;
+        }
+        default: {
+          str += ch;
+        }
+      }
+    }
+    throw new StageError(
+      RS_EXPECTED_CLOSING_QUOTE_ERR,
+      new SourceSpan(lineno, colno, this.lineno, this.colno)
+    );
+  }
+
+  private nextName(): string {
+    let name = "";
+    while (!this.atEnd && !this.peek().match(DELIMITER_RE)) {
+      name += this.next();
+    }
+    return name;
+  }
+
+  private parenMatches(opening: string, right: string): boolean {
+    switch (opening) {
       case "(": return right === ")";
       case "[": return right === "]";
       case "{": return right === "}";
@@ -579,10 +379,53 @@ class Lexer implements Stage<string, SExpr[]> {
     }
   }
 
+  private eatSpace(): SourceSpan[] {
+    if (this.atEnd) {
+      return [];
+    }
+    const ch = this.peek();
+    if (ch.match(/\s/)) {
+      while(this.peek().match(/\s/)) {
+        this.next();
+      }
+      return this.eatSpace();
+    } else if (ch === ";" || (ch === "#" && this.peek(3).match(/^#![ /]$/))) {
+      while(!this.atEnd && this.peek() != "\n") {
+        this.next();
+      }
+      if (this.peek() === "\n") {
+        this.next();
+      }
+      return this.eatSpace();
+    } else if (ch === "#" && this.match("#|")) {
+      let depth = 1;
+      while(!this.atEnd && depth > 0) {
+        const ch = this.next();
+        if (ch === "#" && this.match("|")) {
+          depth++;
+        } else if (ch === "|" && this.match("#")) {
+          depth--;
+        }
+      }
+      return this.eatSpace();
+    } else if (ch === "#" && this.match("#;")) {
+      return [new SourceSpan(this.lineno, this.colno - 2, this.lineno, this.colno)].concat(this.eatSpace());
+    } else {
+      return [];
+    }
+  }
+
   private next(): string {
     this.position++;
     this.checkAtEnd();
-    return this.input[this.position - 1];
+    const ch = this.input[this.position - 1];
+    if (ch === "\n") {
+      this.lineno++;
+      this.colno = 0;
+    } else {
+      this.colno++;
+    }
+    return ch;
   }
 
   private peek(n = 1): string {
@@ -591,7 +434,9 @@ class Lexer implements Stage<string, SExpr[]> {
 
   private match(s: string): boolean {
     if (this.peek(s.length) === s) {
-      this.position += s.length;
+      for (let i = 0; i < s.length; i++) {
+        this.next();
+      }
       return true;
     } else {
       return false;
@@ -599,6 +444,6 @@ class Lexer implements Stage<string, SExpr[]> {
   }
 
   private checkAtEnd() {
-    if (this.position == this.input.length) { this.isAtEnd = true; }
+    if (this.position == this.input.length) { this.atEnd = true; }
   }
 }

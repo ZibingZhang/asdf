@@ -33,12 +33,16 @@ const REPL = CodeMirror(
 );
 REPL.on("change",
   (cm, changeObj) => {
-    if (changeObj.origin.match("cm-highlight-error-message")) {
-      REPL.markText(
-        { line: REPL.lastLine() - 1, ch: 0 },
-        { line: REPL.lastLine() - 1 },
-        { className: "cm-highlight-error-message"}
-      );
+    const match = changeObj.origin.match(/cm-highlight-error-message (\d+)/);
+    if (match) {
+      const lines = Number(match[1]);
+      for (let i = 0; i < lines; i++) {
+        REPL.markText(
+          { line: REPL.lastLine() - 1 - i, ch: 0 },
+          { line: REPL.lastLine() - 1 - i },
+          { className: "cm-highlight-error-message"}
+        );
+      }
     }
 
     if (replMarked && !changeObj.origin.match("ignore")) {
@@ -73,7 +77,7 @@ REPL.on("keydown",
 );
 
 function appendToRepl(text, className) {
-  REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()), null, `ignore ${className}`);
+  REPL.replaceRange(text, CodeMirror.Pos(REPL.lastLine()), null, `ignore ${className} ${(text.match(/\n/g) || "").length}`);
 }
 
 function resetRepl() {

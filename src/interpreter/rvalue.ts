@@ -177,12 +177,69 @@ class RList extends RDataBase {
 }
 
 class RString extends RDataBase {
+  ESCAPED_A = String.fromCharCode(7);
+  ESCAPED_B = String.fromCharCode(8);
+  ESCAPED_T = String.fromCharCode(9);
+  ESCAPED_N = String.fromCharCode(10);
+  ESCAPED_V = String.fromCharCode(11);
+  ESCAPED_F = String.fromCharCode(12);
+  ESCAPED_R = String.fromCharCode(13);
+  ESCAPED_E = String.fromCharCode(27);
+
   constructor(readonly val: string) {
     super();
   }
 
   stringify(): string {
-    return `"${this.val}"`;
+    let str = "";
+    for (const ch of this.val) {
+      switch (ch) {
+        case this.ESCAPED_A: {
+          str += "\\a";
+          break;
+        }
+        case this.ESCAPED_B: {
+          str += "\\b";
+          break;
+        }
+        case this.ESCAPED_T: {
+          str += "\\t";
+          break;
+        }
+        case this.ESCAPED_N: {
+          str += "\\n";
+          break;
+        }
+        case this.ESCAPED_V: {
+          str += "\\v";
+          break;
+        }
+        case this.ESCAPED_F: {
+          str += "\\f";
+          break;
+        }
+        case this.ESCAPED_R: {
+          str += "\\r";
+          break;
+        }
+        case this.ESCAPED_E: {
+          str += "\\e";
+          break;
+        }
+        case "\"": {
+          str += "\\\"";
+          break;
+        }
+        case "\\": {
+          str += "\\\\";
+          break;
+        }
+        default: {
+          str += ch;
+        }
+      }
+    }
+    return `"${str}"`;
   }
 
   equalWithin(rval: RValue, _: number): boolean {

@@ -56,6 +56,7 @@ export {
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
+  RS_EXPECTED_CLOSING_QUOTE_ERR,
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
   RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR,
@@ -63,8 +64,8 @@ export {
   RS_ILLEGAL_USE_OF_DOT_ERR,
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
   RS_QUASI_QUOTE_UNSUPPORTED_ERR,
-  RS_UNCLOSED_STRING_ERR,
   RS_UNEXPECTED_ERR,
+  RS_UNKNOWN_ESCAPE_SEQUENCE_ERR,
   RT_MAX_CALL_STACK_SIZE_ERR,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
@@ -272,8 +273,9 @@ const RS_EXPECTED_CLOSING_PAREN_ERR = (opening: string) => {
     return "read-syntax: expected a `}` to close preceding `{`";
   }
 };
+const RS_EXPECTED_CLOSING_QUOTE_ERR = "read-syntax: expected a closing `\"`";
 const RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR = "read-syntax: expected a commented-out element for `#;`, but found end-of-file";
-const RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR = (opening: string | null, found: string): string => {
+const RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR = (opening: string, found: string): string => {
   if (opening === "(") {
     return `read-syntax: expected \`)\` to close preceding \`(\`, found instead \`${found}\``;
   } else if (opening === "[") {
@@ -289,9 +291,11 @@ const RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR = "read-syntax: expected a
 const RS_ILLEGAL_USE_OF_DOT_ERR = "read-syntax: illegal use of `.`";
 const RS_NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes are not supported";
 const RS_QUASI_QUOTE_UNSUPPORTED_ERR = "read-syntax: quasiquotes are not supported";
-const RS_UNCLOSED_STRING_ERR = "read-syntax: expected a closing `\"`";
 const RS_UNEXPECTED_ERR = (found: string) => {
   return `read-syntax: unexpected \`${found}\``;
+};
+const RS_UNKNOWN_ESCAPE_SEQUENCE_ERR = (found: string) => {
+  return `read-syntax: unknown escape sequence \`\\${found}\` in string`;
 };
 
 const RT_MAX_CALL_STACK_SIZE_ERR = "runtime: maximum call stack size exceeded";

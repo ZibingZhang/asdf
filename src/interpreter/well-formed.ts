@@ -231,6 +231,7 @@ class Scope {
       || (this.parentScope && this.parentScope.get(name, expectData, sourceSpan))
       || (
         !SETTINGS.primitives.blackList.includes(name)
+        && PRIMITIVE_SCOPE.variables.has(name)
         && PRIMITIVE_SCOPE.get(name, expectData, sourceSpan)
       );
     if (!meta) {
