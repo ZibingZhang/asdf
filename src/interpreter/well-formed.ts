@@ -254,7 +254,7 @@ class Scope {
       || (this.parentScope && this.parentScope.has(name))
       || (
         !SETTINGS.primitives.blackList.includes(name)
-        && PRIMITIVE_SCOPE.has(name)
+        && PRIMITIVE_SCOPE.variables.has(name)
       );
   }
 }
