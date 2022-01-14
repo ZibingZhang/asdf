@@ -53,6 +53,8 @@ export {
   IF_EXPECTED_THREE_PARTS_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
+  RQ_EXPECTED_MODULE_NAME_ERR,
+  RQ_MODULE_NOT_FOUND_ERR,
   RS_BAD_CHARACTER_CONSTANT_ERR,
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
@@ -92,6 +94,8 @@ function foundStr(found: SExpr | string): string {
         case TokenType.Rational:
         case TokenType.Decimal:
           return "number";
+        case TokenType.Character:
+          return "character";
         case TokenType.String:
           return "string";
         case TokenType.Keyword:
@@ -99,7 +103,7 @@ function foundStr(found: SExpr | string): string {
         case TokenType.Placeholder:
           return "template";
         default:
-          throw "something else";
+          return "something else";
       }
     } else {
       return "part";
@@ -258,6 +262,19 @@ const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {
 const QU_EXPECTED_EXPRESSION_ERR = "quote: expected an expression after quote, but nothing's there";
 const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
   return `quote: expected the name of a symbol or () after the quote, but found a ${foundStr(found)}`;
+};
+
+const RQ_EXPECTED_MODULE_NAME_ERR = (parts: number, found: SExpr) => {
+  if (parts === 0) {
+    return `require: expected a module name after \`require', but found nothing`;
+  } else if (parts > 1) {
+    return `require: expected a single module name after \`require', but found ${parts} parts`;
+  } else {
+    return `require: expected a module name after \`require', found a ${foundStr(found)}`;
+  }
+};
+const RQ_MODULE_NOT_FOUND_ERR = (name: string) => {
+  return `require: module not found: ${name}`;
 };
 
 const RS_BAD_CHARACTER_CONSTANT_ERR = (found: string) => {

@@ -12,7 +12,8 @@ import {
   IfNode,
   LambdaNode,
   OrNode,
-  VarNode
+  VarNode,
+  RequireNode
 } from "./ast";
 import {
   Stage,
@@ -135,6 +136,12 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
       }
     } else {
       node.args.forEach(arg => arg.accept(this));
+    }
+  }
+
+  visitRequireNode(node: RequireNode): void {
+    if (!node.used) {
+      this.unusedCallback(node.sourceSpan);
     }
   }
 

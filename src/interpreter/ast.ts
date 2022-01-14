@@ -86,6 +86,7 @@ export {
   IfNode,
   LambdaNode,
   OrNode,
+  RequireNode,
   VarNode,
   isCheckNode,
   isDefnNode,
@@ -692,6 +693,25 @@ class OrNode extends ASTNodeBase {
   }
 }
 
+class RequireNode extends ASTNodeBase {
+  constructor(
+    readonly name: string,
+    readonly nameSourceSpan: SourceSpan,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitRequireNode(this);
+  }
+
+  eval(_: Environment): RValue {
+    this.used = true;
+    throw "illegal state: no possible modules to load";
+  }
+}
+
 class VarNode extends ASTNodeBase {
   constructor(
     readonly name: string,
@@ -735,6 +755,7 @@ interface ASTNodeVisitor<T> {
   visitIfNode(node: IfNode): T;
   visitLambdaNode(node: LambdaNode): T;
   visitOrNode(node: OrNode): T;
+  visitRequireNode(node: RequireNode): T;
   visitVarNode(node: VarNode): T;
 }
 

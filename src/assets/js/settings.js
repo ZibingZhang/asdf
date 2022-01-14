@@ -28,7 +28,8 @@ const initValue =
       "if",
       "lambda",
       "or",
-      "quote"
+      "quote",
+      "require"
     ],
     "listAbbreviation": false
   }

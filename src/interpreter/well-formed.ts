@@ -13,11 +13,13 @@ import {
   IfNode,
   LambdaNode,
   OrNode,
-  VarNode
+  VarNode,
+  RequireNode
 } from "./ast";
 import {
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
   FA_ARITY_ERR,
+  RQ_MODULE_NOT_FOUND_ERR,
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
   WF_EXPECTED_FUNCTION_CALL_ERR,
@@ -129,6 +131,13 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   visitOrNode(node: OrNode): void {
     node.args.forEach(arg => arg.accept(this));
+  }
+
+  visitRequireNode(node: RequireNode): void {
+    throw new StageError(
+      RQ_MODULE_NOT_FOUND_ERR(node.name),
+      node.nameSourceSpan
+    );
   }
 
   visitVarNode(node: VarNode): void {

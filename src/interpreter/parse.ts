@@ -19,7 +19,8 @@ import {
   LambdaNode,
   OrNode,
   VarNode,
-  isDefnNode
+  isDefnNode,
+  RequireNode
 } from "./ast";
 import {
   AtomSExpr,
@@ -53,6 +54,7 @@ import {
   IF_EXPECTED_THREE_PARTS_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
+  RQ_EXPECTED_MODULE_NAME_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR
 } from "./error";
@@ -219,7 +221,10 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       }
       switch (leadingSExpr.token.type) {
         case TokenType.Placeholder: {
-          return new EllipsisFunAppNode(leadingSExpr, sexpr.sourceSpan);
+          return new EllipsisFunAppNode(
+            leadingSExpr,
+            sexpr.sourceSpan
+          );
         }
         case TokenType.Name: {
           return new FunAppNode(
@@ -229,7 +234,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           );
         }
         case TokenType.Keyword: {
-          switch (leadingSExpr.token.text) {
+          switch (<Keyword>leadingSExpr.token.text) {
             case Keyword.And: {
               if (sexpr.subExprs.length - 1 < 2) {
                 throw new StageError(
@@ -313,8 +318,23 @@ class ParseSExpr implements Stage<SExpr[], Program> {
               }
               return this.toQuoteNode(sexpr, sexpr.subExprs[1]);
             }
-            default:
-              throw "illegal state: non-existent keyword";
+            case Keyword.Require: {
+              if (
+                sexpr.subExprs.length - 1 !== 1
+                || !isAtomSExpr(sexpr.subExprs[1])
+                || sexpr.subExprs[1].token.type !== TokenType.Name
+              ) {
+                throw new StageError(
+                  RQ_EXPECTED_MODULE_NAME_ERR(sexpr.subExprs.length - 1, sexpr.subExprs[1]),
+                  sexpr.subExprs.length - 1 === 1 ? sexpr.subExprs[1].sourceSpan : sexpr.sourceSpan
+                );
+              }
+              return new RequireNode(
+                sexpr.subExprs[1].token.text,
+                sexpr.subExprs[1].sourceSpan,
+                sexpr.sourceSpan
+              );
+            }
           }
         }
         default: {

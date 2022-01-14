@@ -20,7 +20,8 @@ enum Keyword {
   If = "if",
   Lambda = "lambda",
   Or = "or",
-  Quote = "quote"
+  Quote = "quote",
+  Require = "require"
 }
 
 const ALL_KEYWORDS: string[] = [];
