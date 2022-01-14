@@ -12,8 +12,8 @@ import {
   IfNode,
   LambdaNode,
   OrNode,
-  VarNode,
-  RequireNode
+  RequireNode,
+  VarNode
 } from "./ast";
 import {
   Stage,

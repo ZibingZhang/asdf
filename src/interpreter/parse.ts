@@ -18,9 +18,9 @@ import {
   IfNode,
   LambdaNode,
   OrNode,
+  RequireNode,
   VarNode,
-  isDefnNode,
-  RequireNode
+  isDefnNode
 } from "./ast";
 import {
   AtomSExpr,
@@ -86,7 +86,9 @@ import {
 import {
   Program
 } from "./program";
-import { SETTINGS } from "./settings";
+import {
+  SETTINGS
+} from "./settings";
 
 export {
   ParseSExpr
@@ -334,6 +336,9 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                 sexpr.subExprs[1].sourceSpan,
                 sexpr.sourceSpan
               );
+            }
+            default: {
+              throw "illegal state: unhandled keyword";
             }
           }
         }

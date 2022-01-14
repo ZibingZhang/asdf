@@ -266,7 +266,7 @@ const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
 
 const RQ_EXPECTED_MODULE_NAME_ERR = (parts: number, found: SExpr) => {
   if (parts === 0) {
-    return `require: expected a module name after \`require', but found nothing`;
+    return "require: expected a module name after `require', but found nothing";
   } else if (parts > 1) {
     return `require: expected a single module name after \`require', but found ${parts} parts`;
   } else {

@@ -13,8 +13,8 @@ import {
   IfNode,
   LambdaNode,
   OrNode,
-  VarNode,
-  RequireNode
+  RequireNode,
+  VarNode
 } from "./ast";
 import {
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
