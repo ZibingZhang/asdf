@@ -113,6 +113,9 @@ import {
   SC_USED_BEFORE_DEFINITION_ERR
 } from "./error";
 import {
+  SETTINGS
+} from "./settings";
+import {
   SourceSpan
 } from "./sourcespan";
 import {
@@ -146,7 +149,10 @@ class Environment {
     if (val) {
       return val;
     } else if (!this.parentEnv) {
-      if (PRIMITIVE_ENVIRONMENT.map.has(name)) {
+      if (
+        !SETTINGS.primitives.blackList.includes(name)
+        && PRIMITIVE_ENVIRONMENT.map.has(name)
+      ) {
         return PRIMITIVE_ENVIRONMENT.get(name, sourceSpan);
       } else {
         throw new StageError(
@@ -220,11 +226,6 @@ addDataToPrimEnv("empty", R_EMPTY_LIST);
 addDataToPrimEnv("true", R_TRUE);
 addDataToPrimEnv("false", R_FALSE);
 
-// constants
-addDataToPrimEnv("e", RPC_E);
-addDataToPrimEnv("pi", RPC_PI);
-addDataToPrimEnv("null", R_NULL);
-
 // numbers
 addFnToPrimEnv(new RPFMultiply());
 addFnToPrimEnv(new RPFPlus());
@@ -241,9 +242,10 @@ addFnToPrimEnv(new RPFCeiling());
 addFnToPrimEnv(new RPFDenominator());
 addFnToPrimEnv(new RPFEvenHuh());
 addFnToPrimEnv(new RPFExactToInexact());
-addFnToPrimEnv(new RPFFloor());
+addDataToPrimEnv("e", RPC_E);
 addFnToPrimEnv(new RPFExp());
 addFnToPrimEnv(new RPFExpt());
+addFnToPrimEnv(new RPFFloor());
 addFnToPrimEnv(new RPFInexactToExact());
 addFnToPrimEnv(new RPFInexactHuh());
 addFnToPrimEnv(new RPFIntegerHuh());
@@ -255,13 +257,14 @@ addFnToPrimEnv(new RPFNumberToString());
 addFnToPrimEnv(new RPFNumberHuh());
 addFnToPrimEnv(new RPFNumerator());
 addFnToPrimEnv(new RPFOddHuh());
+addDataToPrimEnv("pi", RPC_PI);
 addFnToPrimEnv(new RPFPositiveHuh());
 addFnToPrimEnv(new RPFQuotient());
 addFnToPrimEnv(new RPFRandom());
 addFnToPrimEnv(new RPFRemainder());
-addFnToPrimEnv(new RPFRound());
 addFnToPrimEnv(new RPFNumberHuh("rational?"));
 addFnToPrimEnv(new RPFNumberHuh("real?"));
+addFnToPrimEnv(new RPFRound());
 addFnToPrimEnv(new RPFSqr());
 addFnToPrimEnv(new RPFSqrt());
 addFnToPrimEnv(new RPFSub1());
@@ -297,6 +300,7 @@ addFnToPrimEnv(new RPFListHuh());
 addFnToPrimEnv(new RPFMakeList());
 addFnToPrimEnv(new RPFMember());
 addFnToPrimEnv(new RPFMember("member?"));
+addDataToPrimEnv("null", R_NULL);
 addFnToPrimEnv(new RPFEmptyHuh("null?"));
 addFnToPrimEnv(new RPFRemove());
 addFnToPrimEnv(new RPFRemoveAll());

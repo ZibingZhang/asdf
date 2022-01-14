@@ -9,6 +9,9 @@ export {
 };
 
 type Settings = {
+  primitives: {
+    blackList: string[]
+  },
   stringify: {
     abbreviatedList: boolean
   }
@@ -17,7 +20,15 @@ type Settings = {
   }
 };
 
+function updateSettings(settings = {}) {
+  SETTINGS = {...DEFAULT_SETTINGS, ...settings};
+  SETTINGS.syntax.forms = SETTINGS.syntax.forms.filter(keyword => ALL_KEYWORDS.includes(keyword));
+}
+
 const DEFAULT_SETTINGS = {
+  primitives: {
+    blackList: []
+  },
   stringify: {
     abbreviatedList: false
   },
@@ -27,8 +38,3 @@ const DEFAULT_SETTINGS = {
 };
 
 let SETTINGS: Settings = DEFAULT_SETTINGS;
-
-function updateSettings(settings = {}) {
-  SETTINGS = {...DEFAULT_SETTINGS, ...settings};
-  SETTINGS.syntax.forms = SETTINGS.syntax.forms.filter(keyword => ALL_KEYWORDS.includes(keyword));
-}

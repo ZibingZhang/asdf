@@ -28,14 +28,18 @@ const EDITOR = CodeMirror(
   }
 );
 EDITOR.on("changes",
-  (cm) => {
-    if (editorMarked) {
-      cm.doc.getAllMarks().forEach(marker => marker.clear());
-    }
-  }
+  () => unmarkEditor()
 );
 
+function unmarkEditor() {
+  if (editorMarked) {
+    EDITOR.doc.getAllMarks().forEach(marker => marker.clear());
+    editorMarked = false;
+  }
+}
+
 function runEditorCode() {
+  unmarkEditor();
   resetRepl();
   resetTestOutput();
   window.racket.pipeline.reset();

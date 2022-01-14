@@ -2,7 +2,7 @@
 export {
   ALL_KEYWORDS,
   Keyword
-}
+};
 
 enum Keyword {
   And = "and",

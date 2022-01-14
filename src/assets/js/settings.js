@@ -5,6 +5,9 @@ export {
 
 const initValue =
 `{
+  "primitives": {
+    "blackList": []
+  },
   "stringify": {
     "abbreviatedList": false
   },

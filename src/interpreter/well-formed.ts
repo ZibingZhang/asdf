@@ -37,6 +37,9 @@ import {
   Program
 } from "./program";
 import {
+  SETTINGS
+} from "./settings";
+import {
   SourceSpan
 } from "./sourcespan";
 
@@ -45,10 +48,10 @@ export {
 };
 
 class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
-  scope: Scope = new Scope(PRIMITIVE_SCOPE);
+  scope: Scope = new Scope();
 
   reset() {
-    this.scope = new Scope(PRIMITIVE_SCOPE);
+    this.scope = new Scope();
   }
 
   run(input: StageOutput<Program>): StageOutput<Program> {
@@ -225,7 +228,11 @@ class Scope {
 
   get(name: string, expectData: boolean, sourceSpan: SourceSpan): VariableMeta {
     const meta = this.variables.get(name)
-      || (this.parentScope && this.parentScope.get(name, expectData, sourceSpan));
+      || (this.parentScope && this.parentScope.get(name, expectData, sourceSpan))
+      || (
+        !SETTINGS.primitives.blackList.includes(name)
+        && PRIMITIVE_SCOPE.get(name, expectData, sourceSpan)
+      );
     if (!meta) {
       if (expectData) {
         throw new StageError(
@@ -244,7 +251,11 @@ class Scope {
 
   has(name: string): boolean {
     return this.variables.has(name)
-      || (this.parentScope && this.parentScope.has(name));
+      || (this.parentScope && this.parentScope.has(name))
+      || (
+        !SETTINGS.primitives.blackList.includes(name)
+        && PRIMITIVE_SCOPE.has(name)
+      );
   }
 }
 
