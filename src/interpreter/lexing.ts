@@ -185,7 +185,7 @@ class Lexer implements Stage<string, SExpr[]> {
     if (sexprCommentDepth.length > 0) {
       throw new StageError(
         RS_UNEXPECTED_ERR(closing),
-        <SourceSpan>sexprCommentDepth.pop()
+        new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
       );
     }
     if (!this.parenMatches(opening, closing)) {
