@@ -89,6 +89,10 @@ body .CodeMirror {
   color: #0096FF;
 }
 
+.cm-s-racket span.cm-character, .cm-s-racket span.cm-string {
+  color: #00AA00;
+}
+
 .cm-s-racket span.cm-comment {
   color: #E4B41F;
 }
@@ -103,10 +107,6 @@ body .CodeMirror {
 
 .cm-s-racket span.cm-number {
   color: #E548FF;
-}
-
-.cm-s-racket span.cm-string {
-  color: #00AA00;
 }
 
 .cm-highlight-error {

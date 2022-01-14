@@ -15,7 +15,6 @@ const REPL = CodeMirror(
     tabSize: 2,
     value: "> ",
     mode: "racket",
-    support: [ "inexactNumber" ],
     theme: "racket"
     // extraKeys: {
     //   "Alt-I": () => {
