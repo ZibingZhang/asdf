@@ -17,6 +17,7 @@ import {
   RPFAbs,
   RPFAdd1,
   RPFCeiling,
+  RPFCurrentSeconds,
   RPFDenominator,
   RPFDivide,
   RPFEqual,
@@ -239,6 +240,7 @@ addFnToPrimEnv(new RPFGreaterThan());
 addFnToPrimEnv(new RPFAbs());
 addFnToPrimEnv(new RPFAdd1());
 addFnToPrimEnv(new RPFCeiling());
+addFnToPrimEnv(new RPFCurrentSeconds());
 addFnToPrimEnv(new RPFDenominator());
 addFnToPrimEnv(new RPFEvenHuh());
 addFnToPrimEnv(new RPFExactToInexact());

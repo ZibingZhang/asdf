@@ -31,7 +31,7 @@ class RandomNumberGenerator {
   private rng: () => number;
 
   constructor() {
-    this.seed = xmur3((new Date()).toString());
+    this.seed = xmur3(new Date().toString());
     this.rng = mulberry32(this.seed());
   }
 

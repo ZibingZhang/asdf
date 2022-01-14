@@ -211,7 +211,7 @@ class CheckNode extends ASTNodeBase {
           actualVal = this.args[0].eval(env);
           expectedVal = this.args[1].eval(env);
         } else {
-          const seed = (new Date()).toString() + (new Date()).getMilliseconds();
+          const seed = new Date().toString() + new Date().getMilliseconds();
           RNG.reset(seed);
           actualVal = this.args[0].eval(env);
           RNG.reset(seed);

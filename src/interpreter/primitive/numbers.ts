@@ -42,6 +42,7 @@ export {
   RPFAbs,
   RPFAdd1,
   RPFCeiling,
+  RPFCurrentSeconds,
   RPFDenominator,
   RPC_E,
   RPFEvenHuh,
@@ -241,6 +242,16 @@ class RPFCeiling extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return RMath.ceil(<RNumber>args[0]);
+  }
+}
+
+class RPFCurrentSeconds extends RPrimFun {
+  constructor() {
+    super("current-seconds", { arity: 0 });
+  }
+
+  call(_: RValue[]): RValue {
+    return RMath.make(true, BigInt(Math.floor(new Date().getTime() / 1000)));
   }
 }
 
