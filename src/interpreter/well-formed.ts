@@ -14,7 +14,8 @@ import {
   LambdaNode,
   OrNode,
   RequireNode,
-  VarNode
+  VarNode,
+  LocalNode
 } from "./ast";
 import {
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
@@ -127,6 +128,10 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     node.params.forEach(param => this.scope.add(param, DATA_VARIABLE_META));
     node.body.accept(this);
     this.scope = outerScope;
+  }
+
+  visitLocalNode(node: LocalNode): void {
+    node.body.accept(this);
   }
 
   visitOrNode(node: OrNode): void {

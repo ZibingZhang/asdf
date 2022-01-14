@@ -20,7 +20,8 @@ import {
   OrNode,
   RequireNode,
   VarNode,
-  isDefnNode
+  isDefnNode,
+  LocalNode
 } from "./ast";
 import {
   AtomSExpr,
@@ -58,6 +59,10 @@ import {
   LM_EXPECTED_VARIABLE_ERR,
   LM_NOT_FUNCTION_DEFINITION_ERR,
   LM_NO_VARIABLES_ERR,
+  LO_EXPECTED_DEFINITIONS_ERR,
+  LO_EXPECTED_DEFINITION_ERR,
+  LO_EXPECTED_EXPRESSION_ERR,
+  LO_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
@@ -278,6 +283,9 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             }
             case Keyword.Lambda: {
               return this.toLambdaNode(sexpr);
+            }
+            case Keyword.Local: {
+              return this.toLocalNode(sexpr);
             }
             case Keyword.Or: {
               return this.toOrNode(sexpr);
@@ -749,6 +757,50 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     }
     return new LambdaNode(
       variableNames,
+      this.toNode(sexpr.subSExprs[2]),
+      sexpr.sourceSpan
+    );
+  }
+
+  private toLocalNode(sexpr: ListSExpr): LocalNode {
+    if (sexpr.subSExprs.length - 1 === 0) {
+      throw new StageError(
+        LO_EXPECTED_DEFINITIONS_ERR(),
+        sexpr.sourceSpan
+      );
+    }
+    const definitions = sexpr.subSExprs[1];
+    if (isAtomSExpr(definitions)) {
+      throw new StageError(
+        LO_EXPECTED_DEFINITIONS_ERR(definitions),
+        definitions.sourceSpan
+      );
+    }
+    const defns: DefnNode[] = [];
+    for (const sexpr of definitions.subSExprs) {
+      const node = this.toNode(sexpr);
+      if (!isDefnNode(node)) {
+        throw new StageError(
+          LO_EXPECTED_DEFINITION_ERR(sexpr),
+          node.sourceSpan
+        );
+      }
+      defns.push(node);
+    }
+    if (sexpr.subSExprs.length - 1 === 1) {
+      throw new StageError(
+        LO_EXPECTED_EXPRESSION_ERR,
+        sexpr.sourceSpan
+      );
+    }
+    if (sexpr.subSExprs.length - 1 > 2) {
+      throw new StageError(
+        LO_EXPECTED_ONE_EXPRESSION_ERR(sexpr.subSExprs.length - 3),
+        sexpr.subSExprs[3].sourceSpan
+      );
+    }
+    return new LocalNode(
+      defns,
       this.toNode(sexpr.subSExprs[2]),
       sexpr.sourceSpan
     );

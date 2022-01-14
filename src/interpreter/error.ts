@@ -57,6 +57,10 @@ export {
   LM_EXPECTED_VARIABLE_ERR,
   LM_NO_VARIABLES_ERR,
   LM_NOT_FUNCTION_DEFINITION_ERR,
+  LO_EXPECTED_DEFINITION_ERR,
+  LO_EXPECTED_DEFINITIONS_ERR,
+  LO_EXPECTED_EXPRESSION_ERR,
+  LO_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
@@ -284,6 +288,17 @@ const LM_EXPECTED_VARIABLE_ERR = (found: SExpr) => {
 };
 const LM_NO_VARIABLES_ERR = "lambda: expected (lambda (variable more-variable ...) expression), but found no variables";
 const LM_NOT_FUNCTION_DEFINITION_ERR = "lambda: found a lambda that is not a function definition";
+
+const LO_EXPECTED_DEFINITION_ERR = (found: SExpr) => {
+  return `local: expected a definition, but found a ${foundStr(found)}`;
+};
+const LO_EXPECTED_DEFINITIONS_ERR = (found: SExpr | null = null) => {
+  return `local: expected at least one definition (in square brackets) after local, but ${found ? `found a ${foundStr(found)}` : "nothing's there" }`;
+};
+const LO_EXPECTED_EXPRESSION_ERR = `local: expected an expression after the local definitions, but nothing's there`;
+const LO_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
+  return `local: expected only one expression after the local definitions, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
+};
 
 const QU_EXPECTED_EXPRESSION_ERR = "quote: expected an expression after quote, but nothing's there";
 const QU_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
