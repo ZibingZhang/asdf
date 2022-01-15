@@ -304,6 +304,28 @@ const LO_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
   return `local: expected only one expression after the local definitions, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
 
+const LT_EXPECTED_BINDING_ERR = (name: string, found: SExpr | null = null) => {
+  return `${name}: expected at least one binding (in parentheses) after ${name}, but ${found ? `found a ${foundStr(found)}` : "nothing's there" }`;
+};
+const LT_EXPECTED_EXPRESSION = (name: string) => {
+  return `${name}: expected an expression after the bindings, but nothing's there`;
+};
+const LT_EXPECTED_ONE_EXPRESSION = (name: string, parts: number) => {
+  return `${name}: expected an expression after the bindings, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
+};
+const LT_EXPECTED_TWO_PART_BINDING_ERR = (name: string, found: SExpr) => {
+  return `${name}: expected a binding with a variable and an expression, but found a ${foundStr(found)}`;
+};
+const LT_BINDING_EXPECTED_EXPRESSION_ERR = (name: string, boundName: string) => {
+  return `${name}: expected an expression after the name ${boundName}, but nothing's there`;
+};
+const LT_BINDING_EXPECTED_ONE_EXPRESSION_ERR = (name: string, boundName: string, parts: number) => {
+  return `${name}: expected only one expression after the name ${boundName}, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
+};
+const LT_BINDING_EXPECTED_VARIABLE_ERR = (name: string, found: SExpr) => {
+  return `${name}: expected a variable for the binding, but found a ${foundStr(found)}`;
+};
+
 const QU_EXPECTED_EXPRESSION_ERR = "quote: expected an expression after quote, but nothing's there";
 const QU_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
   return `quote: expected only one expression after quote, but found ${parts} extra part${parts > 1 ? "s" : ""}`;

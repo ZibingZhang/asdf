@@ -67,8 +67,7 @@ import {
   QU_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   RQ_EXPECTED_MODULE_NAME_ERR,
-  SX_EXPECTED_OPEN_PAREN_ERR,
-  SX_NOT_TOP_LEVEL_DEFN_ERR
+  SX_EXPECTED_OPEN_PAREN_ERR
 } from "./error";
 import {
   RCharacter,
@@ -108,11 +107,9 @@ export {
 
 class ParseSExpr implements Stage<SExpr[], Program> {
   inFunDef = false;
-  level = 0;
 
   run(input: StageOutput<SExpr[]>): StageOutput<Program> {
     this.inFunDef = false;
-    this.level = 0;
     try {
       return new StageOutput(this.processSExprs(input.output));
     } catch (e) {
@@ -136,13 +133,6 @@ class ParseSExpr implements Stage<SExpr[], Program> {
   }
 
   private toNode(sexpr: SExpr): ASTNode {
-    this.level++;
-    const node = this.toNodeHelper(sexpr);
-    this.level--;
-    return node;
-  }
-
-  private toNodeHelper(sexpr: SExpr): ASTNode {
     if (isAtomSExpr(sexpr)) {
       switch (sexpr.token.type) {
         case TokenType.True: {
@@ -327,12 +317,6 @@ class ParseSExpr implements Stage<SExpr[], Program> {
 
   private toCheckNode(checkName: string, sexpr: ListSExpr): CheckNode {
     // (check-... ...)
-    if (!this.atTopLevel()) {
-      throw new StageError(
-        CE_TEST_NOT_TOP_LEVEL_ERR(checkName),
-        sexpr.sourceSpan
-      );
-    }
     const config = <RPrimFunConfig>PRIMITIVE_TEST_FUNCTIONS.get(checkName);
     if (config.arity && sexpr.subSExprs.length - 1 !== config.arity) {
       throw new StageError(
@@ -518,12 +502,6 @@ class ParseSExpr implements Stage<SExpr[], Program> {
 
   private toDefnNode(sexpr: ListSExpr): DefnNode {
     // (define ...)
-    if (!this.atTopLevel()) {
-      throw new StageError(
-        SX_NOT_TOP_LEVEL_DEFN_ERR(Keyword.Define),
-        sexpr.sourceSpan
-      );
-    }
     if (sexpr.subSExprs.length - 1 === 0) {
       throw new StageError(
         DF_EXPECTED_VAR_OR_FUN_NAME_ERR(),
@@ -625,12 +603,6 @@ class ParseSExpr implements Stage<SExpr[], Program> {
 
   private toDefnStructNode(sexpr: ListSExpr): DefnStructNode {
     // (define-struct ...)
-    if (!this.atTopLevel()) {
-      throw new StageError(
-        SX_NOT_TOP_LEVEL_DEFN_ERR(Keyword.DefineStruct),
-        sexpr.sourceSpan
-      );
-    }
     if (sexpr.subSExprs.length - 1 === 0) {
       throw new StageError(
         DS_EXPECTED_STRUCT_NAME_ERR(),
@@ -776,8 +748,6 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         definitions.sourceSpan
       );
     }
-    const level = this.level;
-    this.level = 0;
     const defns: DefnNode[] = [];
     for (const sexpr of definitions.subSExprs) {
       const node = this.toNode(sexpr);
@@ -789,7 +759,6 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       }
       defns.push(node);
     }
-    this.level = level;
     if (sexpr.subSExprs.length - 1 === 1) {
       throw new StageError(
         LO_EXPECTED_EXPRESSION_ERR,
@@ -894,9 +863,5 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       sexpr.sourceSpan
     );
 
-  }
-
-  private atTopLevel() {
-    return this.level === 1;
   }
 }

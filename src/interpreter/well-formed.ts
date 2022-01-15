@@ -21,16 +21,15 @@ import {
 import {
   DATA_VARIABLE_META,
   Scope,
-  STRUCTURE_TYPE_VARIABLE_META,
-  VariableMeta,
   VariableType
 } from "./scope";
 import {
-  DF_PREVIOUSLY_DEFINED_NAME_ERR,
+  CE_TEST_NOT_TOP_LEVEL_ERR,
   FA_ARITY_ERR,
   LO_ALREADY_DEFINED_LOCALLY_ERR,
   RQ_MODULE_NOT_FOUND_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
+  SX_NOT_TOP_LEVEL_DEFN_ERR,
   WF_EXPECTED_FUNCTION_CALL_ERR,
   WF_STRUCTURE_TYPE_ERR
 } from "./error";
@@ -40,6 +39,9 @@ import {
   StageOutput
 } from "./pipeline";
 import {
+  Keyword
+} from "./keyword";
+import {
   Program
 } from "./program";
 
@@ -48,6 +50,7 @@ export {
 };
 
 class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
+  level: number = 0;
   scope: Scope = new Scope();
 
   reset() {
@@ -68,6 +71,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitAndNode(node: AndNode): void {
+    this.incrementLevel();
     node.args.forEach(arg => arg.accept(this));
   }
 
@@ -76,10 +80,18 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitCheckNode(node: CheckNode): void {
+    if (!this.atTopLevel()) {
+      throw new StageError(
+        CE_TEST_NOT_TOP_LEVEL_ERR(node.name),
+        node.sourceSpan
+      );
+    }
+    this.incrementLevel();
     node.args.forEach(arg => arg.accept(this));
   }
 
   visitCondNode(node: CondNode): void {
+    this.incrementLevel();
     node.questionAnswerClauses.forEach(([question, answer]) => {
       question.accept(this);
       answer.accept(this);
@@ -87,11 +99,23 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitDefnVarNode(node: DefnVarNode): void {
+    if (!this.atTopLevel()) {
+      throw new StageError(
+        SX_NOT_TOP_LEVEL_DEFN_ERR(Keyword.Define),
+        node.sourceSpan
+      );
+    }
+    this.incrementLevel();
     node.value.accept(this);
   }
 
-  visitDefnStructNode(_: DefnStructNode): void {
-    // always well-formed
+  visitDefnStructNode(node: DefnStructNode): void {
+    if (!this.atTopLevel()) {
+      throw new StageError(
+        SX_NOT_TOP_LEVEL_DEFN_ERR(Keyword.DefineStruct),
+        node.sourceSpan
+      );
+    }
   }
 
   visitEllipsisFunAllNode(_: EllipsisFunAppNode): void {
@@ -103,6 +127,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitFunAppNode(node: FunAppNode): void {
+    this.incrementLevel();
     const meta = this.scope.get(node.fn.name, false, node.fn.sourceSpan);
     if (meta.type === VariableType.UserDefinedFunction && meta.arity != node.args.length) {
       throw new StageError(
@@ -114,12 +139,14 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitIfNode(node: IfNode): void {
+    this.incrementLevel();
     node.question.accept(this);
     node.trueAnswer.accept(this);
     node.falseAnswer.accept(this);
   }
 
   visitLambdaNode(node: LambdaNode): void {
+    this.incrementLevel();
     const outerScope = this.scope;
     this.scope = new Scope(this.scope);
     node.params.forEach(param => this.scope.add(param, DATA_VARIABLE_META));
@@ -128,7 +155,8 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitLetNode(node: LetNode): void {
-      throw "TODO";
+    this.incrementLevel();
+    throw "TODO";
   }
 
   visitLocalNode(node: LocalNode): void {
@@ -144,14 +172,17 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
       names.add(defn.name);
       defn.addToScope(childScope, true)
     });
+    this.resetLevel();
     const scope = this.scope;
     this.scope = childScope;
     node.defns.forEach(defn => defn.accept(this));
+    this.incrementLevel();
     node.body.accept(this);
     this.scope = scope;
   }
 
   visitOrNode(node: OrNode): void {
+    this.incrementLevel();
     node.args.forEach(arg => arg.accept(this));
   }
 
@@ -185,6 +216,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   private assertWellFormedProgram(program: Program) {
+    this.resetLevel();
     this.addDefinitionsToScope(program.defns);
     program.nodes.forEach(node => node.accept(this));
   }
@@ -193,5 +225,17 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     for (const defn of defns) {
       defn.addToScope(this.scope);
     }
+  }
+
+  private resetLevel(): void {
+    this.level = 0;
+  }
+
+  private incrementLevel(): void {
+    this.incrementLevel();
+  }
+
+  private atTopLevel(): boolean {
+    return this.level === 0;
   }
 }
