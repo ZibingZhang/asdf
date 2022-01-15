@@ -132,7 +132,7 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
 
   visitLocalNode(node: LocalNode): void {
     if (!node.used) {
-      if (!node.isTemplate) {
+      if (!node.isTemplate()) {
         this.unusedCallback(node.sourceSpan);
       }
     } else {

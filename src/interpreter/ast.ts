@@ -630,7 +630,10 @@ class LocalNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    return this.body.eval(env);
+    this.used = true;
+    const parentEnv = new Environment(env);
+    this.defns.forEach(defn => defn.eval(parentEnv));
+    return this.body.eval(parentEnv);
   }
 
   isTemplate(): boolean {
@@ -712,7 +715,22 @@ class VarNode extends ASTNodeBase {
 }
 
 abstract class DefnNodeBase extends ASTNodeBase {
-  abstract addToScope(scope: Scope): void;
+  constructor(
+    readonly name: string,
+    readonly nameSourceSpan: SourceSpan,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  addToScope(scope: Scope): void {
+    if (scope.has(this.name)) {
+      throw new StageError(
+        DF_PREVIOUSLY_DEFINED_NAME_ERR(this.name),
+        this.nameSourceSpan
+      );
+    }
+  }
 }
 
 class DefnStructNode extends DefnNodeBase {
@@ -722,7 +740,11 @@ class DefnStructNode extends DefnNodeBase {
     readonly fields: string[],
     readonly sourceSpan: SourceSpan
   ) {
-    super(sourceSpan);
+    super(
+      name,
+      nameSourceSpan,
+      sourceSpan
+    );
   }
 
   accept<T>(visitor: ASTNodeVisitor<T>): T {
@@ -741,6 +763,7 @@ class DefnStructNode extends DefnNodeBase {
   }
 
   addToScope(scope: Scope): void {
+    super.addToScope(scope);
     scope.add(this.name, STRUCTURE_TYPE_VARIABLE_META);
     if (scope.has(`make-${this.name}`)) {
       throw new StageError(
@@ -784,7 +807,11 @@ class DefnVarNode extends DefnNodeBase {
     readonly value: ExprNode,
     readonly sourceSpan: SourceSpan
   ) {
-    super(sourceSpan);
+    super(
+      name,
+      nameSourceSpan,
+      sourceSpan
+    );
   }
 
   accept<T>(visitor: ASTNodeVisitor<T>): T {
@@ -802,6 +829,7 @@ class DefnVarNode extends DefnNodeBase {
   }
 
   addToScope(scope: Scope): void {
+    super.addToScope(scope);
     if (this.value instanceof LambdaNode) {
       scope.add(
         this.name,

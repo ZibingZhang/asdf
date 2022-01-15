@@ -776,6 +776,8 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         definitions.sourceSpan
       );
     }
+    const level = this.level;
+    this.level = 0;
     const defns: DefnNode[] = [];
     for (const sexpr of definitions.subSExprs) {
       const node = this.toNode(sexpr);
@@ -787,6 +789,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       }
       defns.push(node);
     }
+    this.level = level;
     if (sexpr.subSExprs.length - 1 === 1) {
       throw new StageError(
         LO_EXPECTED_EXPRESSION_ERR,

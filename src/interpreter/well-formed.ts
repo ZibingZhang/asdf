@@ -126,7 +126,13 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitLocalNode(node: LocalNode): void {
+    const parentScope = new Scope(this.scope);
+    node.defns.forEach(defn => defn.addToScope(parentScope));
+    const scope = this.scope;
+    this.scope = parentScope;
+    node.defns.forEach(defn => defn.accept(this));
     node.body.accept(this);
+    this.scope = scope;
   }
 
   visitOrNode(node: OrNode): void {
@@ -169,12 +175,6 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   private addDefinitionsToScope(defns: DefnNode[]) {
     for (const defn of defns) {
-      if (this.scope.has(defn.name)) {
-        throw new StageError(
-          DF_PREVIOUSLY_DEFINED_NAME_ERR(defn.name),
-          defn.nameSourceSpan
-        );
-      }
       defn.addToScope(this.scope);
     }
   }
