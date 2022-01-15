@@ -14,7 +14,8 @@ import {
   OrNode,
   RequireNode,
   VarNode,
-  LocalNode
+  LocalNode,
+  LetNode
 } from "./ast";
 import {
   Stage,
@@ -128,6 +129,10 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
     } else {
       node.body.accept(this);
     }
+  }
+
+  visitLetNode(node: LetNode): void {
+      throw "TODO";
   }
 
   visitLocalNode(node: LocalNode): void {

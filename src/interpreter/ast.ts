@@ -90,6 +90,7 @@ export {
   FunAppNode,
   IfNode,
   LambdaNode,
+  LetNode,
   LocalNode,
   OrNode,
   RequireNode,
@@ -116,6 +117,7 @@ type ExprNode =
   | FunAppNode
   | IfNode
   | LambdaNode
+  | LetNode
   | LocalNode
   | OrNode
   | VarNode;
@@ -616,6 +618,23 @@ class LambdaNode extends ASTNodeBase {
   }
 }
 
+class LetNode extends ASTNodeBase {
+  constructor(
+    readonly name: string,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitLetNode(this);
+  }
+
+  eval(env: Environment): RValue {
+    throw "TODO";
+  }
+}
+
 class LocalNode extends ASTNodeBase {
   constructor(
     readonly defns: DefnNode[],
@@ -871,6 +890,7 @@ interface ASTNodeVisitor<T> {
   visitFunAppNode(node: FunAppNode): T;
   visitIfNode(node: IfNode): T;
   visitLambdaNode(node: LambdaNode): T;
+  visitLetNode(node: LetNode): T;
   visitLocalNode(node: LocalNode): T;
   visitOrNode(node: OrNode): T;
   visitRequireNode(node: RequireNode): T;

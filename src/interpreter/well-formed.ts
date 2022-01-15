@@ -15,7 +15,8 @@ import {
   OrNode,
   RequireNode,
   VarNode,
-  LocalNode
+  LocalNode,
+  LetNode
 } from "./ast";
 import {
   DATA_VARIABLE_META,
@@ -124,6 +125,10 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     node.params.forEach(param => this.scope.add(param, DATA_VARIABLE_META));
     node.body.accept(this);
     this.scope = outerScope;
+  }
+
+  visitLetNode(node: LetNode): void {
+      throw "TODO";
   }
 
   visitLocalNode(node: LocalNode): void {
