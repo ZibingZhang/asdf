@@ -57,7 +57,10 @@ import {
 } from "./random";
 import {
   DATA_VARIABLE_META,
-  Scope, STRUCTURE_TYPE_VARIABLE_META, VariableMeta, VariableType
+  Scope,
+  STRUCTURE_TYPE_VARIABLE_META,
+  VariableMeta,
+  VariableType
 } from "./scope";
 import {
   SourceSpan
@@ -97,6 +100,7 @@ export {
   VarNode,
   isCheckNode,
   isDefnNode,
+  isVarNode,
   ASTNodeVisitor
 };
 
@@ -621,6 +625,8 @@ class LambdaNode extends ASTNodeBase {
 class LetNode extends ASTNodeBase {
   constructor(
     readonly name: string,
+    readonly bindings: [VarNode, ASTNode][],
+    readonly body: ASTNode,
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
@@ -876,6 +882,10 @@ function isCheckNode(node: ASTNode) {
 function isDefnNode(node: ASTNode): node is DefnNode {
   return node instanceof DefnStructNode
     || node instanceof DefnVarNode;
+}
+
+function isVarNode(node: ASTNode): node is VarNode {
+  return node instanceof VarNode;
 }
 
 interface ASTNodeVisitor<T> {

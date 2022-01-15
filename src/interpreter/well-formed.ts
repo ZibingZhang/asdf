@@ -232,7 +232,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   private incrementLevel(): void {
-    this.incrementLevel();
+    this.level++;
   }
 
   private atTopLevel(): boolean {

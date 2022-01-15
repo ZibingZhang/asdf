@@ -62,6 +62,13 @@ export {
   LO_EXPECTED_DEFINITIONS_ERR,
   LO_EXPECTED_EXPRESSION_ERR,
   LO_EXPECTED_ONE_EXPRESSION_ERR,
+  LT_BINDING_EXPECTED_EXPRESSION_ERR,
+  LT_BINDING_EXPECTED_ONE_EXPRESSION_ERR,
+  LT_BINDING_EXPECTED_VARIABLE_ERR,
+  LT_EXPECTED_BINDINGS_ERR,
+  LT_EXPECTED_EXPRESSION_ERR,
+  LT_EXPECTED_ONE_EXPRESSION_ERR,
+  LT_EXPECTED_TWO_PART_BINDING_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
@@ -101,24 +108,24 @@ function foundStr(found: SExpr | string): string {
       switch (found.token.type) {
         case TokenType.True:
         case TokenType.False:
-          return "boolean";
+          return "a boolean";
         case TokenType.Integer:
         case TokenType.Rational:
         case TokenType.Decimal:
-          return "number";
+          return "a number";
         case TokenType.Character:
-          return "character";
+          return "a character";
         case TokenType.String:
-          return "string";
+          return "a string";
         case TokenType.Keyword:
-          return "keyword";
+          return "a keyword";
         case TokenType.Placeholder:
-          return "template";
+          return "a template";
         default:
           return "something else";
       }
     } else {
-      return "part";
+      return "a part";
     }
   }
 }
@@ -171,7 +178,7 @@ const CN_EXPECTED_TWO_PART_CLAUSE_ERR = (found?: SExpr) => {
           return `cond: expected a clause with a question and an answer, but found a clause with ${found.subSExprs.length} parts`;
       }
     } else {
-      return `cond: expected a clause with a question and an answer, but found a ${foundStr(found)}`;
+      return `cond: expected a clause with a question and an answer, but found ${foundStr(found)}`;
     }
   } else {
     return "cond: expected a clause after cond, but nothing's there";
@@ -187,13 +194,13 @@ const DF_EXPECTED_EXPR_ERR = (name: string) => {
 };
 const DF_EXPECTED_FUNCTION_BODY_ERR = "define: expected an expression for the function body, but nothing's there";
 const DF_EXPECTED_FUNCTION_NAME_ERR = (found?: SExpr) => {
-  return `define: expected the name of the function, but ${found ? `found a ${foundStr(found)}` : "nothing's there" }`;
+  return `define: expected the name of the function, but ${found ? `found ${foundStr(found)}` : "nothing's there" }`;
 };
 const DF_EXPECTED_VAR_OR_FUN_NAME_ERR = (found?: SExpr) => {
-  return `define: expected a variable name, or a function name and its variables (in parentheses), but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
+  return `define: expected a variable name, or a function name and its variables (in parentheses), but ${found ? `found ${foundStr(found)}` : "nothing's there"}`;
 };
 const DF_EXPECTED_VARIABLE_ERR = (found: SExpr) => {
-  return `define: expected a variable, but found a ${foundStr(found)}`;
+  return `define: expected a variable, but found ${foundStr(found)}`;
 };
 const DF_TOO_MANY_EXPRS_ERR = (name: string, parts: number) => {
   return `define: expected only one expression after the variable name ${name}, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
@@ -209,13 +216,13 @@ const DS_DUPLICATE_FIELD_NAME = (name: string) => {
   return `define-struct: found a field name that is used more than once: ${name}`;
 };
 const DS_EXPECTED_FIELD_NAME_ERR = (found: SExpr) => {
-  return `define-struct: expected a field name, but found a ${foundStr(found)}`;
+  return `define-struct: expected a field name, but found ${foundStr(found)}`;
 };
 const DS_EXPECTED_FIELD_NAMES_ERR = (found?: SExpr) => {
-  return `define-struct: expected at least one field name (in parentheses) after the structure name, but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
+  return `define-struct: expected at least one field name (in parentheses) after the structure name, but ${found ? `found ${foundStr(found)}` : "nothing's there"}`;
 };
 const DS_EXPECTED_STRUCT_NAME_ERR = (found?: SExpr) => {
-  return `define-struct: expected the structure name after define-struct, but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
+  return `define-struct: expected the structure name after define-struct, but ${found ? `found ${foundStr(found)}` : "nothing's there"}`;
 };
 const DS_EXTRA_PARTS_ERR = (parts: number) => {
   return `define-struct: expected nothing after the field names, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
@@ -256,7 +263,7 @@ const FA_WRONG_TYPE_ERR = (name: string, expected: string, actual: string) => {
 };
 
 const FC_EXPECTED_FUNCTION_ERR = (found?: SExpr | string) => {
-  return `function call: expected a function after the open parenthesis, but ${found ? `found a ${foundStr(found)}`: "nothing's there"}`;
+  return `function call: expected a function after the open parenthesis, but ${found ? `found ${foundStr(found)}`: "nothing's there"}`;
 };
 
 const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {
@@ -282,10 +289,10 @@ const LM_EXPECTED_EXPRESSION_ERR = (parts: number) => {
   }
 };
 const LM_EXPECTED_FORMAT_ERR = (found: SExpr | null = null) => {
-  return `lambda: expected (lambda (variable more-variable ...) expression), but ${found ? `found a ${foundStr(found)}` : "nothing's there"}`;
+  return `lambda: expected (lambda (variable more-variable ...) expression), but ${found ? `found ${foundStr(found)}` : "nothing's there"}`;
 };
 const LM_EXPECTED_VARIABLE_ERR = (found: SExpr) => {
-  return `lambda: expected a variable, but found a ${foundStr(found)}`;
+  return `lambda: expected a variable, but found ${foundStr(found)}`;
 };
 const LM_NO_VARIABLES_ERR = "lambda: expected (lambda (variable more-variable ...) expression), but found no variables";
 const LM_NOT_FUNCTION_DEFINITION_ERR = "lambda: found a lambda that is not a function definition";
@@ -294,28 +301,16 @@ const LO_ALREADY_DEFINED_LOCALLY_ERR = (name: string) => {
   return `local: ${name} was defined locally more than once`;
 };
 const LO_EXPECTED_DEFINITION_ERR = (found: SExpr) => {
-  return `local: expected a definition, but found a ${foundStr(found)}`;
+  return `local: expected a definition, but found ${foundStr(found)}`;
 };
 const LO_EXPECTED_DEFINITIONS_ERR = (found: SExpr | null = null) => {
-  return `local: expected at least one definition (in square brackets) after local, but ${found ? `found a ${foundStr(found)}` : "nothing's there" }`;
+  return `local: expected at least one definition (in square brackets) after local, but ${found ? `found ${foundStr(found)}` : "nothing's there" }`;
 };
 const LO_EXPECTED_EXPRESSION_ERR = `local: expected an expression after the local definitions, but nothing's there`;
 const LO_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
   return `local: expected only one expression after the local definitions, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
 
-const LT_EXPECTED_BINDING_ERR = (name: string, found: SExpr | null = null) => {
-  return `${name}: expected at least one binding (in parentheses) after ${name}, but ${found ? `found a ${foundStr(found)}` : "nothing's there" }`;
-};
-const LT_EXPECTED_EXPRESSION = (name: string) => {
-  return `${name}: expected an expression after the bindings, but nothing's there`;
-};
-const LT_EXPECTED_ONE_EXPRESSION = (name: string, parts: number) => {
-  return `${name}: expected an expression after the bindings, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
-};
-const LT_EXPECTED_TWO_PART_BINDING_ERR = (name: string, found: SExpr) => {
-  return `${name}: expected a binding with a variable and an expression, but found a ${foundStr(found)}`;
-};
 const LT_BINDING_EXPECTED_EXPRESSION_ERR = (name: string, boundName: string) => {
   return `${name}: expected an expression after the name ${boundName}, but nothing's there`;
 };
@@ -323,7 +318,19 @@ const LT_BINDING_EXPECTED_ONE_EXPRESSION_ERR = (name: string, boundName: string,
   return `${name}: expected only one expression after the name ${boundName}, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
 const LT_BINDING_EXPECTED_VARIABLE_ERR = (name: string, found: SExpr) => {
-  return `${name}: expected a variable for the binding, but found a ${foundStr(found)}`;
+  return `${name}: expected a variable for the binding, but found ${foundStr(found)}`;
+};
+const LT_EXPECTED_BINDINGS_ERR = (name: string, found: SExpr | null = null) => {
+  return `${name}: expected at least one binding (in parentheses) after ${name}, but ${found ? `found ${foundStr(found)}` : "nothing's there" }`;
+};
+const LT_EXPECTED_EXPRESSION_ERR = (name: string) => {
+  return `${name}: expected an expression after the bindings, but nothing's there`;
+};
+const LT_EXPECTED_ONE_EXPRESSION_ERR = (name: string, parts: number) => {
+  return `${name}: expected an expression after the bindings, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
+};
+const LT_EXPECTED_TWO_PART_BINDING_ERR = (name: string, found: SExpr) => {
+  return `${name}: expected a binding with a variable and an expression, but found ${foundStr(found)}`;
 };
 
 const QU_EXPECTED_EXPRESSION_ERR = "quote: expected an expression after quote, but nothing's there";
@@ -331,7 +338,7 @@ const QU_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
   return `quote: expected only one expression after quote, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
 const QU_EXPECTED_POST_QUOTE_ERR = (found: SExpr) => {
-  return `quote: expected the name of a symbol or () after the quote, but found a ${foundStr(found)}`;
+  return `quote: expected the name of a symbol or () after the quote, but found ${foundStr(found)}`;
 };
 
 const RQ_EXPECTED_MODULE_NAME_ERR = (parts: number, found: SExpr) => {
@@ -340,7 +347,7 @@ const RQ_EXPECTED_MODULE_NAME_ERR = (parts: number, found: SExpr) => {
   } else if (parts > 1) {
     return `require: expected a single module name after \`require', but found ${parts} parts`;
   } else {
-    return `require: expected a module name after \`require', found a ${foundStr(found)}`;
+    return `require: expected a module name after \`require', found ${foundStr(found)}`;
   }
 };
 const RQ_MODULE_NOT_FOUND_ERR = (name: string) => {

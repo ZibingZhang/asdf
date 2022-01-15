@@ -21,7 +21,9 @@ import {
   RequireNode,
   VarNode,
   isDefnNode,
-  LocalNode
+  LocalNode,
+  LetNode,
+  isVarNode
 } from "./ast";
 import {
   AtomSExpr,
@@ -63,6 +65,13 @@ import {
   LO_EXPECTED_DEFINITION_ERR,
   LO_EXPECTED_EXPRESSION_ERR,
   LO_EXPECTED_ONE_EXPRESSION_ERR,
+  LT_BINDING_EXPECTED_EXPRESSION_ERR,
+  LT_BINDING_EXPECTED_ONE_EXPRESSION_ERR,
+  LT_BINDING_EXPECTED_VARIABLE_ERR,
+  LT_EXPECTED_BINDINGS_ERR,
+  LT_EXPECTED_EXPRESSION_ERR,
+  LT_EXPECTED_ONE_EXPRESSION_ERR,
+  LT_EXPECTED_TWO_PART_BINDING_ERR,
   QU_EXPECTED_EXPRESSION_ERR,
   QU_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
@@ -274,6 +283,11 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             case Keyword.Lambda: {
               return this.toLambdaNode(sexpr);
             }
+            case Keyword.Letrec:
+            case Keyword.Letstar:
+            case Keyword.Let: {
+              return this.toLetNode(leadingSExpr.token.text, sexpr);
+            }
             case Keyword.Local: {
               return this.toLocalNode(sexpr);
             }
@@ -467,13 +481,13 @@ class ParseSExpr implements Stage<SExpr[], Program> {
 
   private toCondNode(sexpr: ListSExpr): CondNode {
     // (cond ...)
-    const questionAnswerClauses: [ASTNode, ASTNode][] = [];
     if (sexpr.subSExprs.length - 1 === 0) {
       throw new StageError(
         CN_EXPECTED_TWO_PART_CLAUSE_ERR(),
         sexpr.sourceSpan
       );
     }
+    const questionAnswerClauses: [ASTNode, ASTNode][] = [];
     for (const [idx, token] of sexpr.subSExprs.slice(1).entries()) {
       if (!isListSExpr(token) || token.subSExprs.length !== 2) {
         throw new StageError(
@@ -734,7 +748,67 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     );
   }
 
+  private toLetNode(letName: string, sexpr: ListSExpr): LetNode {
+    // (let... ...)
+    if (sexpr.subSExprs.length - 1 === 0) {
+      throw new StageError(
+        LT_EXPECTED_BINDINGS_ERR(letName),
+        sexpr.sourceSpan
+      );
+    }
+    const bindingsSExpr = sexpr.subSExprs[1];
+    if (isAtomSExpr(bindingsSExpr)) {
+      throw new StageError(
+        LT_EXPECTED_BINDINGS_ERR(letName, bindingsSExpr),
+        bindingsSExpr.sourceSpan
+      );
+    }
+    const bindings: [VarNode, ASTNode][] = [];
+    for (const binding of bindingsSExpr.subSExprs) {
+      if (isAtomSExpr(binding) || binding.subSExprs.length === 0) {
+        throw new StageError(
+          LT_EXPECTED_TWO_PART_BINDING_ERR(letName, binding),
+          binding.sourceSpan
+        );
+      }
+      const variable = this.toNode(binding.subSExprs[0]);
+      if (!isVarNode(variable)) {
+        throw new StageError(
+          LT_BINDING_EXPECTED_VARIABLE_ERR(letName, binding.subSExprs[0]),
+          variable.sourceSpan
+        );
+      }
+      if (binding.subSExprs.length === 1) {
+        throw new StageError(
+          LT_BINDING_EXPECTED_EXPRESSION_ERR(letName, variable.name),
+          binding.sourceSpan
+        );
+      }
+      if (binding.subSExprs.length > 2) {
+        throw new StageError(
+          LT_BINDING_EXPECTED_ONE_EXPRESSION_ERR(letName, variable.name, binding.subSExprs.length - 2),
+          binding.subSExprs[2].sourceSpan
+        );
+      }
+      bindings.push([variable, this.toNode(binding.subSExprs[1])]);
+    }
+    if (sexpr.subSExprs.length - 1 === 1) {
+      throw new StageError(
+        LT_EXPECTED_EXPRESSION_ERR(letName),
+        sexpr.sourceSpan
+      );
+    }
+    if (sexpr.subSExprs.length - 1 > 2) {
+      throw new StageError(
+        LT_EXPECTED_ONE_EXPRESSION_ERR(letName, sexpr.subSExprs.length - 3),
+        sexpr.subSExprs[3].sourceSpan
+      );
+    }
+    return new LetNode(letName, bindings, this.toNode(sexpr.subSExprs[2]), sexpr.sourceSpan);
+  }
+
   private toLocalNode(sexpr: ListSExpr): LocalNode {
+    // (local ...)
     if (sexpr.subSExprs.length - 1 === 0) {
       throw new StageError(
         LO_EXPECTED_DEFINITIONS_ERR(),
