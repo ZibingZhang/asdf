@@ -830,17 +830,17 @@ class DefnStructNode extends DefnNodeBase {
         }
       });
     }
-    scope.add(this.name, STRUCTURE_TYPE_VARIABLE_META);
-    scope.add(
+    scope.set(this.name, STRUCTURE_TYPE_VARIABLE_META);
+    scope.set(
       `make-${this.name}`,
       new VariableMeta(VariableType.UserDefinedFunction, this.fields.length)
     );
-    scope.add(
+    scope.set(
       `${this.name}?`,
       new VariableMeta(VariableType.UserDefinedFunction, 1)
     );
     this.fields.forEach(field => {
-      scope.add(
+      scope.set(
         `${this.name}-${field}`,
         new VariableMeta(VariableType.UserDefinedFunction, 1)
       );
@@ -881,7 +881,7 @@ class DefnVarNode extends DefnNodeBase {
       super.addToScope(scope);
     }
     if (this.value instanceof LambdaNode) {
-      scope.add(
+      scope.set(
         this.name,
         new VariableMeta(
           VariableType.UserDefinedFunction,
@@ -889,7 +889,7 @@ class DefnVarNode extends DefnNodeBase {
         )
       );
     } else {
-      scope.add(this.name, DATA_VARIABLE_META);
+      scope.set(this.name, DATA_VARIABLE_META);
     }
   }
 }

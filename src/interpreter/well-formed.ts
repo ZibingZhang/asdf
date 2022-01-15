@@ -149,7 +149,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     this.incrementLevel();
     const scope = this.scope;
     this.scope = new Scope(this.scope);
-    node.params.forEach(param => this.scope.add(param, DATA_VARIABLE_META));
+    node.params.forEach(param => this.scope.set(param, DATA_VARIABLE_META));
     node.body.accept(this);
     this.scope = scope;
   }
@@ -169,7 +169,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
             );
           }
           names.add(variable.name);
-          childScope.add(variable.name, DATA_VARIABLE_META);
+          childScope.set(variable.name, DATA_VARIABLE_META);
         });
         this.scope = childScope;
         node.bindings.forEach(([_, expr]) => expr.accept(this));
@@ -185,7 +185,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
             );
           }
           names.add(variable.name);
-          childScope.add(variable.name, DATA_VARIABLE_META);
+          childScope.set(variable.name, DATA_VARIABLE_META);
           expr.accept(this);
         });
         break;
@@ -199,7 +199,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
             );
           }
           names.add(variable.name);
-          childScope.add(variable.name, DATA_VARIABLE_META);
+          childScope.set(variable.name, DATA_VARIABLE_META);
         });
         node.bindings.forEach(([_, expr]) => expr.accept(this));
         this.scope = childScope;

@@ -9,8 +9,10 @@ export {
 };
 
 type Settings = {
+  higherOrderFunctions: boolean,
   primitives: {
-    blackList: string[]
+    blackList: string[],
+    relaxedConditions: string[]
   },
   stringify: {
     abbreviatedList: boolean
@@ -27,8 +29,10 @@ function updateSettings(settings = {}) {
 }
 
 const DEFAULT_SETTINGS = {
+  higherOrderFunctions: false,
   primitives: {
-    blackList: []
+    blackList: [],
+    relaxedConditions: []
   },
   stringify: {
     abbreviatedList: false

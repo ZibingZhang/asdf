@@ -34,7 +34,7 @@ class Scope {
     this.parentScope = parentScope;
   }
 
-  add(name: string, meta: VariableMeta) {
+  set(name: string, meta: VariableMeta) {
     this.variables.set(name, meta);
   }
 
@@ -90,6 +90,6 @@ const DATA_VARIABLE_META = new VariableMeta(VariableType.Data);
 const STRUCTURE_TYPE_VARIABLE_META = new VariableMeta(VariableType.StructureType);
 
 const PRIMITIVE_SCOPE = new Scope();
-PRIMITIVE_DATA_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, DATA_VARIABLE_META));
-PRIMITIVE_FUNCTIONS.forEach((config, name) => PRIMITIVE_SCOPE.add(name, new VariableMeta(VariableType.PrimitiveFunction, config.arity || config.minArity || -1)));
-PRIMITIVE_STRUCT_NAMES.forEach((name) => PRIMITIVE_SCOPE.add(name, STRUCTURE_TYPE_VARIABLE_META));
+PRIMITIVE_DATA_NAMES.forEach((name) => PRIMITIVE_SCOPE.set(name, DATA_VARIABLE_META));
+PRIMITIVE_FUNCTIONS.forEach((config, name) => PRIMITIVE_SCOPE.set(name, new VariableMeta(VariableType.PrimitiveFunction, config.arity || config.minArity || -1)));
+PRIMITIVE_STRUCT_NAMES.forEach((name) => PRIMITIVE_SCOPE.set(name, STRUCTURE_TYPE_VARIABLE_META));
