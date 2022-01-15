@@ -26,7 +26,7 @@ import {
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
   FA_ARITY_ERR,
-  LO_ALREADY_DEFINED_LOCALLY_ERR,
+  LT_ALREADY_DEFINED_LOCALLY_ERR,
   RQ_MODULE_NOT_FOUND_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
   SX_NOT_TOP_LEVEL_DEFN_ERR,
@@ -147,16 +147,70 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   visitLambdaNode(node: LambdaNode): void {
     this.incrementLevel();
-    const outerScope = this.scope;
+    const scope = this.scope;
     this.scope = new Scope(this.scope);
     node.params.forEach(param => this.scope.add(param, DATA_VARIABLE_META));
     node.body.accept(this);
-    this.scope = outerScope;
+    this.scope = scope;
   }
 
   visitLetNode(node: LetNode): void {
     this.incrementLevel();
-    throw "TODO";
+    const names: Set<string> = new Set();
+    const childScope = new Scope(this.scope);
+    const scope = this.scope;
+    switch (node.name) {
+      case "letrec": {
+        node.bindings.forEach(([variable, _]) => {
+          if (names.has(variable.name)) {
+            throw new StageError(
+              LT_ALREADY_DEFINED_LOCALLY_ERR(node.name),
+              variable.sourceSpan
+            );
+          }
+          names.add(variable.name);
+          childScope.add(variable.name, DATA_VARIABLE_META);
+        });
+        this.scope = childScope;
+        node.bindings.forEach(([_, expr]) => expr.accept(this));
+        break;
+      }
+      case "let*": {
+        this.scope = childScope;
+        node.bindings.forEach(([variable, expr]) => {
+          if (names.has(variable.name)) {
+            throw new StageError(
+              LT_ALREADY_DEFINED_LOCALLY_ERR(node.name),
+              variable.sourceSpan
+            );
+          }
+          names.add(variable.name);
+          childScope.add(variable.name, DATA_VARIABLE_META);
+          expr.accept(this);
+        });
+        break;
+      }
+      case "let": {
+        node.bindings.forEach(([variable, _]) => {
+          if (names.has(variable.name)) {
+            throw new StageError(
+              LT_ALREADY_DEFINED_LOCALLY_ERR(node.name),
+              variable.sourceSpan
+            );
+          }
+          names.add(variable.name);
+          childScope.add(variable.name, DATA_VARIABLE_META);
+        });
+        node.bindings.forEach(([_, expr]) => expr.accept(this));
+        this.scope = childScope;
+        break;
+      }
+      default: {
+        throw "illegal state: unsupported let-style expression";
+      }
+    }
+    node.body.accept(this);
+    this.scope = scope;
   }
 
   visitLocalNode(node: LocalNode): void {
@@ -165,7 +219,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     node.defns.forEach(defn => {
       if (names.has(defn.name)) {
         throw new StageError(
-          LO_ALREADY_DEFINED_LOCALLY_ERR(defn.name),
+          LT_ALREADY_DEFINED_LOCALLY_ERR(defn.name),
           defn.nameSourceSpan
         );
       }

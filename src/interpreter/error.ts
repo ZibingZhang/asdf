@@ -57,11 +57,11 @@ export {
   LM_EXPECTED_VARIABLE_ERR,
   LM_NO_VARIABLES_ERR,
   LM_NOT_FUNCTION_DEFINITION_ERR,
-  LO_ALREADY_DEFINED_LOCALLY_ERR,
   LO_EXPECTED_DEFINITION_ERR,
   LO_EXPECTED_DEFINITIONS_ERR,
   LO_EXPECTED_EXPRESSION_ERR,
   LO_EXPECTED_ONE_EXPRESSION_ERR,
+  LT_ALREADY_DEFINED_LOCALLY_ERR,
   LT_BINDING_EXPECTED_EXPRESSION_ERR,
   LT_BINDING_EXPECTED_ONE_EXPRESSION_ERR,
   LT_BINDING_EXPECTED_VARIABLE_ERR,
@@ -297,9 +297,6 @@ const LM_EXPECTED_VARIABLE_ERR = (found: SExpr) => {
 const LM_NO_VARIABLES_ERR = "lambda: expected (lambda (variable more-variable ...) expression), but found no variables";
 const LM_NOT_FUNCTION_DEFINITION_ERR = "lambda: found a lambda that is not a function definition";
 
-const LO_ALREADY_DEFINED_LOCALLY_ERR = (name: string) => {
-  return `local: ${name} was defined locally more than once`;
-};
 const LO_EXPECTED_DEFINITION_ERR = (found: SExpr) => {
   return `local: expected a definition, but found ${foundStr(found)}`;
 };
@@ -311,6 +308,9 @@ const LO_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
   return `local: expected only one expression after the local definitions, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };
 
+const LT_ALREADY_DEFINED_LOCALLY_ERR = (name: string) => {
+  return `local: ${name} was defined locally more than once`;
+};
 const LT_BINDING_EXPECTED_EXPRESSION_ERR = (name: string, boundName: string) => {
   return `${name}: expected an expression after the name ${boundName}, but nothing's there`;
 };

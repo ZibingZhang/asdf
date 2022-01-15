@@ -637,7 +637,26 @@ class LetNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
-    throw "TODO";
+    switch (this.name) {
+      case "letrec":
+      case "let*": {
+        const childEnv = new Environment(env);
+        this.bindings.forEach(([variable, expr]) => {
+          childEnv.set(variable.name, expr.eval(childEnv));
+        });
+        return this.body.eval(childEnv);
+      }
+      case "let": {
+        const childEnv = new Environment(env);
+        this.bindings.forEach(([variable, expr]) => {
+          childEnv.set(variable.name, expr.eval(env));
+        });
+        return this.body.eval(childEnv);
+      }
+      default: {
+        throw "illegal state: unsupported let-style expression";
+      }
+    }
   }
 }
 
