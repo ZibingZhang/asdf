@@ -27,6 +27,7 @@ import {
 import {
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
   FA_ARITY_ERR,
+  LO_ALREADY_DEFINED_LOCALLY_ERR,
   RQ_MODULE_NOT_FOUND_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
   WF_EXPECTED_FUNCTION_CALL_ERR,
@@ -126,8 +127,18 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitLocalNode(node: LocalNode): void {
+    const names: Set<string> = new Set();
     const childScope = new Scope(this.scope);
-    node.defns.forEach(defn => defn.addToScope(childScope, true));
+    node.defns.forEach(defn => {
+      if (names.has(defn.name)) {
+        throw new StageError(
+          LO_ALREADY_DEFINED_LOCALLY_ERR(defn.name),
+          defn.nameSourceSpan
+        );
+      }
+      names.add(defn.name);
+      defn.addToScope(childScope, true)
+    });
     const scope = this.scope;
     this.scope = childScope;
     node.defns.forEach(defn => defn.accept(this));

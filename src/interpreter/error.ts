@@ -57,6 +57,7 @@ export {
   LM_EXPECTED_VARIABLE_ERR,
   LM_NO_VARIABLES_ERR,
   LM_NOT_FUNCTION_DEFINITION_ERR,
+  LO_ALREADY_DEFINED_LOCALLY_ERR,
   LO_EXPECTED_DEFINITION_ERR,
   LO_EXPECTED_DEFINITIONS_ERR,
   LO_EXPECTED_EXPRESSION_ERR,
@@ -289,6 +290,9 @@ const LM_EXPECTED_VARIABLE_ERR = (found: SExpr) => {
 const LM_NO_VARIABLES_ERR = "lambda: expected (lambda (variable more-variable ...) expression), but found no variables";
 const LM_NOT_FUNCTION_DEFINITION_ERR = "lambda: found a lambda that is not a function definition";
 
+const LO_ALREADY_DEFINED_LOCALLY_ERR = (name: string) => {
+  return `local: ${name} was defined locally more than once`;
+};
 const LO_EXPECTED_DEFINITION_ERR = (found: SExpr) => {
   return `local: expected a definition, but found a ${foundStr(found)}`;
 };
