@@ -15,4 +15,4 @@ $ npm run build
 $ npm run serve
 ```
 
-Go to [http://localhost:9000/dist](http://localhost:9000/).
+Go to [http://localhost:9000/](http://localhost:9000/).
