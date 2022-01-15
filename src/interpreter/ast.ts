@@ -631,9 +631,9 @@ class LocalNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     this.used = true;
-    const parentEnv = new Environment(env);
-    this.defns.forEach(defn => defn.eval(parentEnv));
-    return this.body.eval(parentEnv);
+    const childEnv = new Environment(env);
+    this.defns.forEach(defn => defn.eval(childEnv));
+    return this.body.eval(childEnv);
   }
 
   isTemplate(): boolean {
@@ -762,36 +762,40 @@ class DefnStructNode extends DefnNodeBase {
     return R_VOID;
   }
 
-  addToScope(scope: Scope): void {
-    super.addToScope(scope);
-    scope.add(this.name, STRUCTURE_TYPE_VARIABLE_META);
-    if (scope.has(`make-${this.name}`)) {
-      throw new StageError(
-        DF_PREVIOUSLY_DEFINED_NAME_ERR(`make-${this.name}`),
-        this.sourceSpan
-      );
+  addToScope(scope: Scope, allowShadow = false): void {
+    if (!allowShadow) {
+      super.addToScope(scope);
+      if (scope.has(`make-${this.name}`)) {
+        throw new StageError(
+          DF_PREVIOUSLY_DEFINED_NAME_ERR(`make-${this.name}`),
+          this.sourceSpan
+        );
+      }
+      if (scope.has(`${this.name}?`)) {
+        throw new StageError(
+          DF_PREVIOUSLY_DEFINED_NAME_ERR(`${this.name}?`),
+          this.sourceSpan
+        );
+      }
+      this.fields.forEach(field => {
+        if (scope.has(`${this.name}-${field}`)) {
+          throw new StageError(
+            DF_PREVIOUSLY_DEFINED_NAME_ERR(`${this.name}-${field}`),
+            this.sourceSpan
+          );
+        }
+      });
     }
+    scope.add(this.name, STRUCTURE_TYPE_VARIABLE_META);
     scope.add(
       `make-${this.name}`,
       new VariableMeta(VariableType.UserDefinedFunction, this.fields.length)
     );
-    if (scope.has(`${this.name}?`)) {
-      throw new StageError(
-        DF_PREVIOUSLY_DEFINED_NAME_ERR(`${this.name}?`),
-        this.sourceSpan
-      );
-    }
     scope.add(
       `${this.name}?`,
       new VariableMeta(VariableType.UserDefinedFunction, 1)
     );
     this.fields.forEach(field => {
-      if (scope.has(`${this.name}-${field}`)) {
-        throw new StageError(
-          DF_PREVIOUSLY_DEFINED_NAME_ERR(`${this.name}-${field}`),
-          this.sourceSpan
-        );
-      }
       scope.add(
         `${this.name}-${field}`,
         new VariableMeta(VariableType.UserDefinedFunction, 1)
@@ -828,8 +832,10 @@ class DefnVarNode extends DefnNodeBase {
     return this.value.isTemplate();
   }
 
-  addToScope(scope: Scope): void {
-    super.addToScope(scope);
+  addToScope(scope: Scope, allowShadow = false): void {
+    if (!allowShadow) {
+      super.addToScope(scope);
+    }
     if (this.value instanceof LambdaNode) {
       scope.add(
         this.name,

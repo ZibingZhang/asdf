@@ -27,9 +27,12 @@ export {
 };
 
 class Scope {
+  parentScope: Scope | false;
   private variables: Map<string, VariableMeta> = new Map();
 
-  constructor(readonly parentScope: Scope | false = false) {}
+  constructor(parentScope: Scope | false = false) {
+    this.parentScope = parentScope;
+  }
 
   add(name: string, meta: VariableMeta) {
     this.variables.set(name, meta);

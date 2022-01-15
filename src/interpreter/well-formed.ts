@@ -126,10 +126,10 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
   }
 
   visitLocalNode(node: LocalNode): void {
-    const parentScope = new Scope(this.scope);
-    node.defns.forEach(defn => defn.addToScope(parentScope));
+    const childScope = new Scope(this.scope);
+    node.defns.forEach(defn => defn.addToScope(childScope, true));
     const scope = this.scope;
-    this.scope = parentScope;
+    this.scope = childScope;
     node.defns.forEach(defn => defn.accept(this));
     node.body.accept(this);
     this.scope = scope;
