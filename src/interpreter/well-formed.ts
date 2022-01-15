@@ -175,53 +175,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
           defn.nameSourceSpan
         );
       }
-      if (defn instanceof DefnVarNode) {
-        if (defn.value instanceof LambdaNode) {
-          this.scope.add(
-            defn.name,
-            new VariableMeta(
-              VariableType.UserDefinedFunction,
-              defn.value.params.length
-            )
-          );
-        } else {
-          this.scope.add(defn.name, DATA_VARIABLE_META);
-        }
-      } else {
-        this.scope.add(defn.name, STRUCTURE_TYPE_VARIABLE_META);
-        if (this.scope.has(`make-${defn.name}`)) {
-          throw new StageError(
-            DF_PREVIOUSLY_DEFINED_NAME_ERR(`make-${defn.name}`),
-            defn.sourceSpan
-          );
-        }
-        this.scope.add(
-          `make-${defn.name}`,
-          new VariableMeta(VariableType.UserDefinedFunction, defn.fields.length)
-        );
-        if (this.scope.has(`${defn.name}?`)) {
-          throw new StageError(
-            DF_PREVIOUSLY_DEFINED_NAME_ERR(`${defn.name}?`),
-            defn.sourceSpan
-          );
-        }
-        this.scope.add(
-          `${defn.name}?`,
-          new VariableMeta(VariableType.UserDefinedFunction, 1)
-        );
-        defn.fields.forEach(field => {
-          if (this.scope.has(`${defn.name}-${field}`)) {
-            throw new StageError(
-              DF_PREVIOUSLY_DEFINED_NAME_ERR(`${defn.name}-${field}`),
-              defn.sourceSpan
-            );
-          }
-          this.scope.add(
-            `${defn.name}-${field}`,
-            new VariableMeta(VariableType.UserDefinedFunction, 1)
-          );
-        });
-      }
+      defn.addToScope(this.scope);
     }
   }
 }

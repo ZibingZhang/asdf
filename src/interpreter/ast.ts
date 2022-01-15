@@ -11,6 +11,7 @@ import {
   CE_SATISFIED_NOT_BOOLEAN_ERR,
   CE_WRONG_ERROR_ERR,
   CN_ALL_QUESTION_RESULTS_FALSE_ERR,
+  DF_PREVIOUSLY_DEFINED_NAME_ERR,
   EL_EXPECTED_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
   FA_LAST_WRONG_TYPE_ERR,
@@ -54,6 +55,10 @@ import {
 import {
   RNG
 } from "./random";
+import {
+  DATA_VARIABLE_META,
+  Scope, STRUCTURE_TYPE_VARIABLE_META, VariableMeta, VariableType
+} from "./scope";
 import {
   SourceSpan
 } from "./sourcespan";
@@ -452,57 +457,6 @@ class CondNode extends ASTNodeBase {
   }
 }
 
-class DefnStructNode extends ASTNodeBase {
-  constructor(
-    readonly name: string,
-    readonly nameSourceSpan: SourceSpan,
-    readonly fields: string[],
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
-
-  accept<T>(visitor: ASTNodeVisitor<T>): T {
-    return visitor.visitDefnStructNode(this);
-  }
-
-  eval(env: Environment): RValue {
-    this.used = true;
-    env.set(this.name, new RStructType(this.name));
-    env.set(`make-${this.name}`, new RMakeStructFun(this.name, this.fields.length));
-    env.set(`${this.name}?`, new RIsStructFun(this.name));
-    this.fields.forEach((field, idx) => {
-      env.set(`${this.name}-${field}`, new RStructGetFun(this.name, field, idx));
-    });
-    return R_VOID;
-  }
-}
-
-class DefnVarNode extends ASTNodeBase {
-  constructor(
-    readonly name: string,
-    readonly nameSourceSpan: SourceSpan,
-    readonly value: ExprNode,
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
-
-  accept<T>(visitor: ASTNodeVisitor<T>): T {
-    return visitor.visitDefnVarNode(this);
-  }
-
-  eval(env: Environment): RValue {
-    this.used = true;
-    env.set(this.name, this.value.eval(env));
-    return R_VOID;
-  }
-
-  isTemplate(): boolean {
-    return this.value.isTemplate();
-  }
-}
-
 class EllipsisFunAppNode extends ASTNodeBase {
   constructor(
     readonly placeholder: AtomSExpr,
@@ -754,6 +708,111 @@ class VarNode extends ASTNodeBase {
       this.name,
       this.sourceSpan
     );
+  }
+}
+
+abstract class DefnNodeBase extends ASTNodeBase {
+  abstract addToScope(scope: Scope): void;
+}
+
+class DefnStructNode extends DefnNodeBase {
+  constructor(
+    readonly name: string,
+    readonly nameSourceSpan: SourceSpan,
+    readonly fields: string[],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitDefnStructNode(this);
+  }
+
+  eval(env: Environment): RValue {
+    this.used = true;
+    env.set(this.name, new RStructType(this.name));
+    env.set(`make-${this.name}`, new RMakeStructFun(this.name, this.fields.length));
+    env.set(`${this.name}?`, new RIsStructFun(this.name));
+    this.fields.forEach((field, idx) => {
+      env.set(`${this.name}-${field}`, new RStructGetFun(this.name, field, idx));
+    });
+    return R_VOID;
+  }
+
+  addToScope(scope: Scope): void {
+    scope.add(this.name, STRUCTURE_TYPE_VARIABLE_META);
+    if (scope.has(`make-${this.name}`)) {
+      throw new StageError(
+        DF_PREVIOUSLY_DEFINED_NAME_ERR(`make-${this.name}`),
+        this.sourceSpan
+      );
+    }
+    scope.add(
+      `make-${this.name}`,
+      new VariableMeta(VariableType.UserDefinedFunction, this.fields.length)
+    );
+    if (scope.has(`${this.name}?`)) {
+      throw new StageError(
+        DF_PREVIOUSLY_DEFINED_NAME_ERR(`${this.name}?`),
+        this.sourceSpan
+      );
+    }
+    scope.add(
+      `${this.name}?`,
+      new VariableMeta(VariableType.UserDefinedFunction, 1)
+    );
+    this.fields.forEach(field => {
+      if (scope.has(`${this.name}-${field}`)) {
+        throw new StageError(
+          DF_PREVIOUSLY_DEFINED_NAME_ERR(`${this.name}-${field}`),
+          this.sourceSpan
+        );
+      }
+      scope.add(
+        `${this.name}-${field}`,
+        new VariableMeta(VariableType.UserDefinedFunction, 1)
+      );
+    });
+  }
+}
+
+class DefnVarNode extends DefnNodeBase {
+  constructor(
+    readonly name: string,
+    readonly nameSourceSpan: SourceSpan,
+    readonly value: ExprNode,
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitDefnVarNode(this);
+  }
+
+  eval(env: Environment): RValue {
+    this.used = true;
+    env.set(this.name, this.value.eval(env));
+    return R_VOID;
+  }
+
+  isTemplate(): boolean {
+    return this.value.isTemplate();
+  }
+
+  addToScope(scope: Scope): void {
+    if (this.value instanceof LambdaNode) {
+      scope.add(
+        this.name,
+        new VariableMeta(
+          VariableType.UserDefinedFunction,
+          this.value.params.length
+        )
+      );
+    } else {
+      scope.add(this.name, DATA_VARIABLE_META);
+    }
   }
 }
 
