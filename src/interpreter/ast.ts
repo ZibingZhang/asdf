@@ -1013,12 +1013,14 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
     const argVals = this.args.map(arg => arg.eval(this.env));
     for (const [idx, paramType] of funType.paramTypes.entries()) {
       const argVal = argVals[idx];
-      const argType = argVal.getType(argsLength);
       if (isFunctionType(paramType)) {
+        const argType = argVal.getType(paramType.paramTypes.length);
         if (argType.isSuperTypeOf(paramType)) {
           continue;
         }
       } else {
+        // unsure if need to pass sensible value to `getType'
+        const argType = argVal.getType(argsLength);
         if (paramType.isSuperTypeOf(argType)) {
           continue;
         }
