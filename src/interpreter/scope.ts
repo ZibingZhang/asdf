@@ -1,12 +1,10 @@
-// import {
-//   PRIMITIVE_DATA_NAMES,
-//   PRIMITIVE_FUNCTIONS,
-//   PRIMITIVE_STRUCT_NAMES
-// } from "./environment";
 import {
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR
 } from "./error";
+import {
+  Global
+} from "./global";
 import {
   SETTINGS
 } from "./settings";
@@ -16,12 +14,8 @@ import {
 import {
   StageError
 } from "./pipeline";
-import { Global } from "./global";
 
 export {
-  // DATA_VARIABLE_META,
-  // PRIMITIVE_SCOPE,
-  // STRUCTURE_TYPE_VARIABLE_META,
   Scope,
   VariableType,
   VariableMeta

@@ -526,7 +526,7 @@ class RPrimFun extends RCallable {
   }
 
   stringify(): string {
-      return this.name;
+    return this.name;
   }
 
   call(_: RValue[], __: SourceSpan, ___: Environment): RValue {
@@ -541,8 +541,8 @@ class RPrimFun extends RCallable {
         return isRBoolean;
       case TypeName.ExactNonNegativeInteger:
         return isRExactNonNegativeInteger;
-        case TypeName.ExactNonNegativeIntegerToAny:
-          return isRExactNonNegativeIntegerToAny;
+      case TypeName.ExactNonNegativeIntegerToAny:
+        return isRExactNonNegativeIntegerToAny;
       case TypeName.ExactPositiveInteger:
         return isRExactPositiveInteger;
       case TypeName.Integer:

@@ -107,18 +107,19 @@ import {
   RPFStringLessEqualThanHuh
 } from "./primitive/string";
 import {
+  Scope,
+  VariableMeta,
+  VariableType
+} from "./scope";
+import {
   Environment
 } from "./environment";
 import {
   Keyword
 } from "./keyword";
 import {
-  // DATA_VARIABLE_META,
-  Scope,
-  VariableMeta,
-  VariableType
-} from "./scope";
-import { RPFBuildList } from "./primitive/higherOrder";
+  RPFBuildList
+} from "./primitive/higherOrder";
 
 export {
   Global
@@ -138,12 +139,12 @@ class Global {
 
   constructor() {
     if (Global.instance) {
-      return Global.instance
+      return Global.instance;
     }
     Global.instance = this;
 
     this.dataVariableMeta = new VariableMeta(VariableType.Data);
-    this.structureTypeVariableMeta = new VariableMeta(VariableType.StructureType)
+    this.structureTypeVariableMeta = new VariableMeta(VariableType.StructureType);
     this.primitiveScope = new Scope();
     this.primitiveRelaxedScope = new Scope();
     this.primitiveEnvironment = new Environment();

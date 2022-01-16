@@ -1,4 +1,12 @@
 import {
+  AtomNode,
+  EvaluateRCallableVisitor
+} from "../ast";
+import {
+  NO_SOURCE_SPAN,
+  SourceSpan
+} from "../sourcespan";
+import {
   RCallable,
   RList,
   RMath,
@@ -8,16 +16,8 @@ import {
   TypeName
 } from "../rvalue";
 import {
-  NO_SOURCE_SPAN,
-  SourceSpan
-} from "../sourcespan";
-import {
   Environment
 } from "../environment";
-import {
-  AtomNode,
-  EvaluateRCallableVisitor
-} from "../ast";
 
 export {
   RPFBuildList

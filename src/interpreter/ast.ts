@@ -22,13 +22,6 @@ import {
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error";
 import {
-  // DATA_VARIABLE_META,
-  // STRUCTURE_TYPE_VARIABLE_META,
-  Scope,
-  VariableMeta,
-  VariableType
-} from "./scope";
-import {
   RCallableVisitor,
   RIsStructFun,
   RLambda,
@@ -51,11 +44,19 @@ import {
   isRTrue
 } from "./rvalue";
 import {
+  Scope,
+  VariableMeta,
+  VariableType
+} from "./scope";
+import {
   AtomSExpr
 } from "./sexpr";
 import {
   Environment
 } from "./environment";
+import {
+  Global
+} from "./global";
 import {
   Keyword
 } from "./keyword";
@@ -74,7 +75,6 @@ import {
 import {
   UserError
 } from "./primitive/misc";
-import { Global } from "./global";
 
 export {
   ASTNode,

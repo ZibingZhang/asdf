@@ -23,8 +23,8 @@ import {
   RequireNode,
   VarNode,
   isDefnNode,
-  isVarNode,
-  isLambdaNode
+  isLambdaNode,
+  isVarNode
 } from "./ast";
 import {
   AtomSExpr,
@@ -98,18 +98,17 @@ import {
   TokenType
 } from "./token";
 import {
+  Global
+} from "./global";
+import {
   Keyword
 } from "./keyword";
-// import {
-//   PRIMITIVE_TEST_FUNCTIONS
-// } from "./environment";
 import {
   Program
 } from "./program";
 import {
   SETTINGS
 } from "./settings";
-import { Global } from "./global";
 
 export {
   ParseSExpr

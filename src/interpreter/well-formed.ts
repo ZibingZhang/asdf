@@ -29,7 +29,6 @@ import {
   WF_STRUCTURE_TYPE_ERR
 } from "./error";
 import {
-  // DATA_VARIABLE_META,
   Scope,
   VariableType
 } from "./scope";
@@ -39,13 +38,17 @@ import {
   StageOutput
 } from "./pipeline";
 import {
+  Global
+} from "./global";
+import {
   Keyword
 } from "./keyword";
 import {
   Program
 } from "./program";
-import { SETTINGS } from "./settings";
-import { Global } from "./global";
+import {
+  SETTINGS
+} from "./settings";
 
 export {
   WellFormedProgram

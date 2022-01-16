@@ -9,7 +9,6 @@ export {
 
 enum TokenType {
   LeftParen = "LEFT_PAREN",
-  // RightParen = "RIGHT_PAREN",
   True = "TRUE",
   False = "FALSE",
   Character = "CHARACTER",
