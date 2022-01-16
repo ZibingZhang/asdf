@@ -22,8 +22,8 @@ import {
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error";
 import {
-  DATA_VARIABLE_META,
-  STRUCTURE_TYPE_VARIABLE_META,
+  // DATA_VARIABLE_META,
+  // STRUCTURE_TYPE_VARIABLE_META,
   Scope,
   VariableMeta,
   VariableType
@@ -74,6 +74,7 @@ import {
 import {
   UserError
 } from "./primitive/misc";
+import { Global } from "./global";
 
 export {
   ASTNode,
@@ -786,6 +787,8 @@ abstract class DefnNodeBase extends ASTNodeBase {
 }
 
 class DefnStructNode extends DefnNodeBase {
+  private global = new Global();
+
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,
@@ -838,7 +841,7 @@ class DefnStructNode extends DefnNodeBase {
         }
       });
     }
-    scope.set(this.name, STRUCTURE_TYPE_VARIABLE_META);
+    scope.set(this.name, this.global.structureTypeVariableMeta);
     scope.set(
       `make-${this.name}`,
       new VariableMeta(VariableType.UserDefinedFunction, this.fields.length)
@@ -857,6 +860,8 @@ class DefnStructNode extends DefnNodeBase {
 }
 
 class DefnVarNode extends DefnNodeBase {
+  private global = new Global();
+
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,
@@ -897,7 +902,7 @@ class DefnVarNode extends DefnNodeBase {
         )
       );
     } else {
-      scope.set(this.name, DATA_VARIABLE_META);
+      scope.set(this.name, this.global.dataVariableMeta);
     }
   }
 }

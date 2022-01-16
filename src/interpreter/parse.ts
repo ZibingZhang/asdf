@@ -100,22 +100,24 @@ import {
 import {
   Keyword
 } from "./keyword";
-import {
-  PRIMITIVE_TEST_FUNCTIONS
-} from "./environment";
+// import {
+//   PRIMITIVE_TEST_FUNCTIONS
+// } from "./environment";
 import {
   Program
 } from "./program";
 import {
   SETTINGS
 } from "./settings";
+import { Global } from "./global";
 
 export {
   ParseSExpr
 };
 
 class ParseSExpr implements Stage<SExpr[], Program> {
-  inFunDef = false;
+  private global = new Global();
+  private inFunDef = false;
 
   run(input: StageOutput<SExpr[]>): StageOutput<Program> {
     this.inFunDef = false;
@@ -331,7 +333,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
 
   private toCheckNode(checkName: string, sexpr: ListSExpr): CheckNode {
     // (check-... ...)
-    const config = <RPrimFunConfig>PRIMITIVE_TEST_FUNCTIONS.get(checkName);
+    const config = <RPrimFunConfig>this.global.primitiveTestFunctions.get(checkName);
     if (config.arity && sexpr.subSExprs.length - 1 !== config.arity) {
       throw new StageError(
         FA_ARITY_ERR(checkName, config.arity, sexpr.subSExprs.length - 1),

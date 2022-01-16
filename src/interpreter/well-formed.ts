@@ -29,7 +29,7 @@ import {
   WF_STRUCTURE_TYPE_ERR
 } from "./error";
 import {
-  DATA_VARIABLE_META,
+  // DATA_VARIABLE_META,
   Scope,
   VariableType
 } from "./scope";
@@ -45,14 +45,16 @@ import {
   Program
 } from "./program";
 import { SETTINGS } from "./settings";
+import { Global } from "./global";
 
 export {
   WellFormedProgram
 };
 
 class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
-  level = 0;
-  scope: Scope = new Scope();
+  private global = new Global();
+  private level = 0;
+  private scope: Scope = new Scope();
 
   reset() {
     this.scope = new Scope();
@@ -150,7 +152,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     this.incrementLevel();
     const scope = this.scope;
     this.scope = new Scope(this.scope);
-    node.params.forEach(param => this.scope.set(param, DATA_VARIABLE_META));
+    node.params.forEach(param => this.scope.set(param, this.global.dataVariableMeta));
     node.body.accept(this);
     this.scope = scope;
   }
@@ -170,7 +172,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
             );
           }
           names.add(variable.name);
-          childScope.set(variable.name, DATA_VARIABLE_META);
+          childScope.set(variable.name, this.global.dataVariableMeta);
         });
         this.scope = childScope;
         node.bindings.forEach(([_, expr]) => expr.accept(this));
@@ -186,7 +188,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
             );
           }
           names.add(variable.name);
-          childScope.set(variable.name, DATA_VARIABLE_META);
+          childScope.set(variable.name, this.global.dataVariableMeta);
           expr.accept(this);
         });
         break;
@@ -200,7 +202,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
             );
           }
           names.add(variable.name);
-          childScope.set(variable.name, DATA_VARIABLE_META);
+          childScope.set(variable.name, this.global.dataVariableMeta);
         });
         node.bindings.forEach(([_, expr]) => expr.accept(this));
         this.scope = childScope;
