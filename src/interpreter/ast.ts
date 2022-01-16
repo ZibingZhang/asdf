@@ -14,7 +14,6 @@ import {
   DF_PREVIOUSLY_DEFINED_NAME_ERR,
   EL_EXPECTED_FINISHED_EXPR_ERR,
   FA_ARITY_ERR,
-  FA_LAST_WRONG_TYPE_ERR,
   FA_MIN_ARITY_ERR,
   FA_NTH_WRONG_TYPE_ERR,
   FA_WRONG_TYPE_ERR,
@@ -45,7 +44,6 @@ import {
 } from "./rvalue";
 import {
   Scope,
-  VariableMeta,
   VariableType
 } from "./scope";
 import {
@@ -75,6 +73,9 @@ import {
 import {
   UserError
 } from "./primitive/misc";
+import {
+  isFunctionType
+} from "./types";
 
 export {
   ASTNode,
@@ -842,19 +843,19 @@ class DefnStructNode extends DefnNodeBase {
         }
       });
     }
-    scope.set(this.name, this.global.structureTypeVariableMeta);
+    scope.set(this.name, VariableType.StructureType);
     scope.set(
       `make-${this.name}`,
-      new VariableMeta(VariableType.UserDefinedFunction, this.fields.length)
+      VariableType.UserDefinedFunction
     );
     scope.set(
       `${this.name}?`,
-      new VariableMeta(VariableType.UserDefinedFunction, 1)
+      VariableType.UserDefinedFunction
     );
     this.fields.forEach(field => {
       scope.set(
         `${this.name}-${field}`,
-        new VariableMeta(VariableType.UserDefinedFunction, 1)
+        VariableType.UserDefinedFunction
       );
     });
   }
@@ -897,13 +898,10 @@ class DefnVarNode extends DefnNodeBase {
     if (this.value instanceof LambdaNode) {
       scope.set(
         this.name,
-        new VariableMeta(
-          VariableType.UserDefinedFunction,
-          this.value.params.length
-        )
+        VariableType.UserDefinedFunction
       );
     } else {
-      scope.set(this.name, this.global.dataVariableMeta);
+      scope.set(this.name, VariableType.Data);
     }
   }
 }
@@ -988,65 +986,51 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
   }
 
   visitRPrimFun(rval: RPrimFun): RValue {
+    const argsLength = this.args.length;
     if (
       SETTINGS.primitives.relaxedConditions.includes(rval.name)
       && rval.config.relaxedMinArity !== undefined
     ) {
-      if (this.args.length < rval.config.relaxedMinArity) {
+      if (argsLength < rval.config.relaxedMinArity) {
         throw new StageError(
-          FA_MIN_ARITY_ERR(rval.name, rval.config.relaxedMinArity, this.args.length),
+          FA_MIN_ARITY_ERR(rval.name, rval.config.relaxedMinArity, argsLength),
           this.sourceSpan
         );
       }
-    } else if (rval.config.minArity && this.args.length < rval.config.minArity) {
+    } else if (rval.config.minArity && argsLength < rval.config.minArity) {
       throw new StageError(
-        FA_MIN_ARITY_ERR(rval.name, rval.config.minArity, this.args.length),
+        FA_MIN_ARITY_ERR(rval.name, rval.config.minArity, argsLength),
         this.sourceSpan
       );
     }
-    if (rval.config.arity && this.args.length !== rval.config.arity) {
+    const funType = rval.getType(this.args.length);
+    if (argsLength !== funType.paramTypes.length) {
       throw new StageError(
-        FA_ARITY_ERR(rval.name, rval.config.arity, this.args.length),
+        FA_ARITY_ERR(rval.name, funType.paramTypes.length, argsLength),
         this.sourceSpan
       );
     }
     const argVals = this.args.map(arg => arg.eval(this.env));
-    if (rval.config.onlyArgTypeName) {
-      const typeGuard = rval.typeGuardOf(rval.config.onlyArgTypeName);
-      if (!typeGuard(argVals[0])) {
+    for (const [idx, paramType] of funType.paramTypes.entries()) {
+      const argVal = argVals[idx];
+      const argType = argVal.getType(argsLength);
+      if (isFunctionType(paramType)) {
+        if (argType.isSuperTypeOf(paramType)) {
+          continue;
+        }
+      } else {
+        if (paramType.isSuperTypeOf(argType)) {
+          continue;
+        }
+      }
+      if (funType.paramTypes.length === 1) {
         throw new StageError(
-          FA_WRONG_TYPE_ERR(rval.name, rval.config.onlyArgTypeName, argVals[0].stringify()),
+          FA_WRONG_TYPE_ERR(rval.name, paramType.stringify(), argVal.stringify()),
           this.sourceSpan
         );
-      }
-    }
-    if (rval.config.allArgsTypeName) {
-      const typeGuard = rval.typeGuardOf(rval.config.allArgsTypeName);
-      for (const [idx, argVal] of argVals.entries()) {
-        if (!typeGuard(argVal)) {
-          throw new StageError(
-            FA_NTH_WRONG_TYPE_ERR(rval.name, rval.config.allArgsTypeName, idx, argVal.stringify()),
-            this.sourceSpan
-          );
-        }
-      }
-    }
-    if (rval.config.argsTypeNames) {
-      for (const [idx, argVal] of argVals.entries()) {
-        const typeGuard = rval.typeGuardOf(rval.config.argsTypeNames[idx]);
-        if (!typeGuard(argVal)) {
-          throw new StageError(
-            FA_NTH_WRONG_TYPE_ERR(rval.name, rval.config.argsTypeNames[idx], idx, argVal.stringify()),
-            this.sourceSpan
-          );
-        }
-      }
-    }
-    if (rval.config.lastArgTypeName) {
-      const typeGuard = rval.typeGuardOf(rval.config.lastArgTypeName);
-      if (!typeGuard(argVals[argVals.length - 1])) {
+      } else {
         throw new StageError(
-          FA_LAST_WRONG_TYPE_ERR(rval.name, rval.config.lastArgTypeName, argVals[argVals.length - 1].stringify()),
+          FA_NTH_WRONG_TYPE_ERR(rval.name, paramType.stringify(), idx, argVal.stringify()),
           this.sourceSpan
         );
       }

@@ -1,9 +1,10 @@
 import {
+  RCallable,
   RData,
   RIsStructFun,
   RMakeStructFun,
   RPrimFun,
-  RPrimFunConfig,
+  RPrimTestFunConfig,
   RStructGetFun,
   RStructType,
   R_EMPTY_LIST,
@@ -108,7 +109,6 @@ import {
 } from "./primitive/string";
 import {
   Scope,
-  VariableMeta,
   VariableType
 } from "./scope";
 import {
@@ -126,15 +126,13 @@ export {
 };
 
 class Global {
-  dataVariableMeta: VariableMeta;
-  structureTypeVariableMeta: VariableMeta;
   primitiveScope: Scope;
   primitiveRelaxedScope: Scope;
   primitiveEnvironment: Environment;
   primitiveDataNames: Set<string>;
   primitiveStructNames: Set<string>;
-  primitiveFunctions: Map<string, RPrimFunConfig>;
-  primitiveTestFunctions: Map<string, RPrimFunConfig>;
+  primitiveFunctions: Map<string, RCallable>;
+  primitiveTestFunctions: Map<string, RPrimTestFunConfig>;
 
   private static instance: Global;
   private higherOrderFunctions = new Set([
@@ -147,8 +145,6 @@ class Global {
     }
     Global.instance = this;
 
-    this.dataVariableMeta = new VariableMeta(VariableType.Data);
-    this.structureTypeVariableMeta = new VariableMeta(VariableType.StructureType);
     this.primitiveScope = new Scope();
     this.primitiveRelaxedScope = new Scope();
     this.primitiveEnvironment = new Environment();
@@ -298,32 +294,36 @@ class Global {
 
   private addFnToPrimEnv(val: RPrimFun) {
     this.primitiveEnvironment.set(val.name, val);
-    this.primitiveFunctions.set(val.name, val.config);
+    this.primitiveFunctions.set(val.name, val);
   }
 
   private addStructToPrimEnv(name: string, fields: string[]) {
-    this.primitiveEnvironment.set(name, new RStructType(name));
-    this.primitiveEnvironment.set(`make-${name}`, new RMakeStructFun(name, fields.length));
-    this.primitiveEnvironment.set(`${name}?`, new RIsStructFun(name));
-    fields.forEach((field, idx) => {
-      this.primitiveEnvironment.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
+    const structType = new RStructType(name);
+    const makeStructFun = new RMakeStructFun(name, fields.length);
+    const isStructFun = new RIsStructFun(name);
+    const structGetFuns = fields.map((field, idx) => new RStructGetFun(name, field, idx));
+    this.primitiveEnvironment.set(name, structType);
+    this.primitiveEnvironment.set(`make-${name}`, makeStructFun);
+    this.primitiveEnvironment.set(`${name}?`, isStructFun);
+    structGetFuns.forEach(fun => {
+      this.primitiveEnvironment.set(`${name}-${fun.fieldName}`, fun);
     });
     this.primitiveStructNames.add(name);
-    this.primitiveFunctions.set(`make-${name}`, { arity: fields.length });
-    this.primitiveFunctions.set(`${name}?`, { arity: 1 });
-    fields.forEach((field) => {
-      this.primitiveFunctions.set(`${name}-${field}`, { arity: 1 });
+    this.primitiveFunctions.set(`make-${name}`, makeStructFun);
+    this.primitiveFunctions.set(`${name}?`, isStructFun);
+    structGetFuns.forEach(fun => {
+      this.primitiveFunctions.set(`${name}-${fun.fieldName}`, fun);
     });
   }
 
   private defineScopes() {
-    this.primitiveDataNames.forEach((name) => this.primitiveScope.set(name, this.dataVariableMeta));
-    this.primitiveFunctions.forEach((config, name) => {
-      if (config.relaxedMinArity !== undefined) {
-        this.primitiveRelaxedScope.set(name, new VariableMeta(VariableType.PrimitiveFunction, config.relaxedMinArity));
+    this.primitiveDataNames.forEach((name) => this.primitiveScope.set(name, VariableType.Data));
+    this.primitiveFunctions.forEach((callable, name) => {
+      if (callable.config.relaxedMinArity !== undefined) {
+        this.primitiveRelaxedScope.set(name, VariableType.PrimitiveFunction);
       }
-      this.primitiveScope.set(name, new VariableMeta(VariableType.PrimitiveFunction, config.arity || config.minArity || -1));
+      this.primitiveScope.set(name, VariableType.PrimitiveFunction);
     });
-    this.primitiveStructNames.forEach((name) => this.primitiveScope.set(name, this.structureTypeVariableMeta));
+    this.primitiveStructNames.forEach((name) => this.primitiveScope.set(name, VariableType.StructureType));
   }
 }

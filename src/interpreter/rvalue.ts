@@ -1,5 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  AnyType,
+  BooleanType,
+  CharacterType,
+  ExactNonNegativeIntegerType,
+  ExactPositiveIntegerType,
+  FunctionType,
+  IntegerType,
+  ListType,
+  NonNegativeRealType,
+  NumberType,
+  RealType,
+  StringType,
+  StructType,
+  StructTypeType,
+  SymbolType,
+  Type,
+  VoidType
+} from "./types";
+import {
   NO_SOURCE_SPAN,
   SourceSpan
 } from "./sourcespan";
@@ -31,7 +50,8 @@ export {
   RMath,
   RNumber,
   RPrimFun,
-  RPrimFunConfig,
+  RCallableConfig,
+  RPrimTestFunConfig,
   RString,
   RStruct,
   RStructGetFun,
@@ -39,7 +59,6 @@ export {
   RSymbol,
   RTestResult,
   RValue,
-  TypeName,
   isRBoolean,
   isRCallable,
   isRData,
@@ -90,6 +109,8 @@ type RNumber =
 
 interface RValBase {
   stringify(): string;
+
+  getType(args: number): Type;
 }
 
 class RTestResult implements RValBase {
@@ -102,10 +123,16 @@ class RTestResult implements RValBase {
   stringify(): string {
     throw "illegal state: cannot stringify a test result";
   }
+
+  getType(): Type {
+    throw "illegal state: should not be asking type of test result";
+  }
 }
 
 abstract class RDataBase implements RValBase {
   abstract stringify(): string;
+
+  abstract getType(): Type;
 
   abstract equalWithin(rval: RValue, ep: number): boolean;
 
@@ -131,6 +158,10 @@ class RBoolean extends RDataBase {
     return this.val ? "#true" : "#false";
   }
 
+  getType(): Type {
+    return new BooleanType();
+  }
+
   equalWithin(rval: RValue, _: number): boolean {
     return isRBoolean(rval)
       && rval.val === this.val;
@@ -144,6 +175,10 @@ class RCharacter extends RDataBase {
 
   stringify(): string {
     return `#\\${this.val}`;
+  }
+
+  getType(): Type {
+    return new CharacterType();
   }
 
   equalWithin(rval: RValue, _: number): boolean {
@@ -170,6 +205,10 @@ class RList extends RDataBase {
       output += " '()" + ")".repeat(this.vals.length);
       return output;
     }
+  }
+
+  getType(): Type {
+    return new ListType(this.vals.length);
   }
 
   equalWithin(rval: RValue, ep: number): boolean {
@@ -254,6 +293,10 @@ class RString extends RDataBase {
     return `"${str}"`;
   }
 
+  getType(): Type {
+    return new StringType();
+  }
+
   equalWithin(rval: RValue, _: number): boolean {
     return isRString(rval)
       && rval.val === this.val;
@@ -274,6 +317,10 @@ class RStruct extends RDataBase {
     } else {
       return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
     }
+  }
+
+  getType(): Type {
+    return new StructType(this.name);
   }
 
   equalWithin(rval: RValue, ep: number): boolean {
@@ -301,6 +348,10 @@ class RStructType extends RDataBase {
     throw "illegal state: cannot stringify a structure type";
   }
 
+  getType(): Type {
+    return new StructTypeType(this.name);
+  }
+
   equalWithin(rval: RValue, _: number): boolean {
     return isRStructType(rval)
       && rval.name === this.name;
@@ -316,6 +367,10 @@ class RSymbol extends RDataBase {
     return "'" + this.val;
   }
 
+  getType(): Type {
+    return new SymbolType();
+  }
+
   equalWithin(rval: RValue, _: number): boolean {
     return isRSymbol(rval)
       && rval.val === this.val;
@@ -325,6 +380,10 @@ class RSymbol extends RDataBase {
 class RVoid extends RDataBase {
   stringify(): string {
     return "(void)";
+  }
+
+  getType(): Type {
+    return new VoidType();
   }
 
   equalWithin(rval: RValue, _: number): boolean {
@@ -395,6 +454,22 @@ abstract class RNumberBase extends RDataBase {
 }
 
 class RExactReal extends RNumberBase {
+  getType(): Type {
+    if (this.denominator === 1n) {
+      if (this.numerator > 0) {
+        return new ExactPositiveIntegerType();
+      } else if (this.numerator === 0n) {
+        return new ExactNonNegativeIntegerType();
+      } else {
+        return new IntegerType();
+      }
+    } else if (this.numerator >= 0) {
+      return new NonNegativeRealType();
+    } else {
+      return new RealType();
+    }
+  }
+
   equal(rval: RValue): boolean {
     return isRExactReal(rval)
       && rval.numerator === this.numerator
@@ -411,6 +486,14 @@ class RInexactReal extends RNumberBase {
     return `#i${super.stringify()}`;
   }
 
+  getType(): Type {
+    if (this.denominator === 0n) {
+      return new IntegerType();
+    } else {
+      return new NumberType();
+    }
+  }
+
   equal(rval: RValue): boolean {
     return isRNumber(rval)
       && rval.numerator === this.numerator
@@ -422,10 +505,25 @@ class RInexactReal extends RNumberBase {
   }
 }
 
+interface RCallableConfig {
+  minArity?: number,
+  relaxedMinArity?: number
+}
+
+interface RPrimTestFunConfig {
+  minArity?: number,
+  arity?: number,
+  maxArity?: number
+}
+
 abstract class RCallable implements RValBase {
-  abstract accept<T>(visitor: RCallableVisitor<T>): T;
+  constructor(readonly config: RCallableConfig = {}) {}
 
   abstract stringify(): string;
+
+  abstract getType(args: number): FunctionType;
+
+  abstract accept<T>(visitor: RCallableVisitor<T>): T;
 }
 
 class RIsStructFun extends RCallable {
@@ -439,6 +537,10 @@ class RIsStructFun extends RCallable {
 
   stringify(): string {
     return this.name;
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 }
 
@@ -456,6 +558,10 @@ class RMakeStructFun extends RCallable {
 
   stringify(): string {
     return this.name;
+  }
+
+  getType(): FunctionType {
+    return new FunctionType(new Array(this.arity).fill(new AnyType()), new StructType(this.name));
   }
 }
 
@@ -475,48 +581,16 @@ class RLambda extends RCallable {
   stringify(): string {
     throw "illegal state: free-form lambdas not supported";
   }
+
+  getType(): FunctionType {
+    return new FunctionType(new Array(this.params.length).fill(new AnyType()), new AnyType());
+  }
 }
 
-enum TypeName {
-  Any = "any",
-  Boolean = "boolean",
-  ExactNonNegativeInteger = "exact-non-negative-integer",
-  ExactNonNegativeIntegerToAny = "(exact-nonnegative-integer? . -> . any/c)",
-  ExactPositiveInteger = "exact-positive-integer",
-  Integer = "integer",
-  List = "list",
-  NList2 = "list with 2 or more elements",
-  NList3 = "list with 3 or more elements",
-  NList4 = "list with 4 or more elements",
-  NList5 = "list with 5 or more elements",
-  NList6 = "list with 6 or more elements",
-  NList7 = "list with 7 or more elements",
-  NList8 = "list with 8 or more elements",
-  NonEmptyList = "non-empty list",
-  NonNegativeReal = "non-negative-real",
-  Number = "number",
-  Pair = "pair",
-  Rational = "rational",
-  Real = "real",
-  String = "string",
-  Symbol = "symbol"
-}
-
-interface RPrimFunConfig {
-  minArity?: number,
-  relaxedMinArity?: number,
-  maxArity?: number,
-  arity?: number,
-  onlyArgTypeName?: TypeName,
-  allArgsTypeName?: TypeName,
-  argsTypeNames?: TypeName[],
-  lastArgTypeName?: TypeName
-}
-
-class RPrimFun extends RCallable {
+abstract class RPrimFun extends RCallable {
   constructor(
     readonly name: string,
-    readonly config: RPrimFunConfig
+    readonly config: RCallableConfig = {}
   ) {
     super();
   }
@@ -531,54 +605,6 @@ class RPrimFun extends RCallable {
 
   call(_: RValue[], __: SourceSpan, ___: Environment): RValue {
     throw "illegal state: not implemented";
-  }
-
-  typeGuardOf(typeName: TypeName): (rval: RValue) => boolean {
-    switch(typeName) {
-      case TypeName.Any:
-        return () => true;
-      case TypeName.Boolean:
-        return isRBoolean;
-      case TypeName.ExactNonNegativeInteger:
-        return isRExactNonNegativeInteger;
-      case TypeName.ExactNonNegativeIntegerToAny:
-        return isRExactNonNegativeIntegerToAny;
-      case TypeName.ExactPositiveInteger:
-        return isRExactPositiveInteger;
-      case TypeName.Integer:
-        return isRInteger;
-      case TypeName.List:
-        return isRList;
-      case TypeName.NonEmptyList:
-      case TypeName.Pair:
-        return isRNonEmptyList;
-      case TypeName.NList2:
-        return isRNList(2);
-      case TypeName.NList3:
-        return isRNList(3);
-      case TypeName.NList4:
-        return isRNList(4);
-      case TypeName.NList5:
-        return isRNList(5);
-      case TypeName.NList6:
-        return isRNList(6);
-      case TypeName.NList7:
-        return isRNList(7);
-      case TypeName.NList8:
-        return isRNList(8);
-      case TypeName.NonNegativeReal:
-        return isRNonNegativeReal;
-      case TypeName.Number:
-      case TypeName.Rational:
-      case TypeName.Real:
-        return isRNumber;
-      case TypeName.String:
-        return isRString;
-      case TypeName.Symbol:
-        return isRSymbol;
-      default:
-        throw `illegal state: unsupported type name ${typeName}`;
-    }
   }
 }
 
@@ -597,6 +623,10 @@ class RStructGetFun extends RCallable {
 
   stringify(): string {
     return `${this.name}-${this.fieldName}`;
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new StructType(this.name)], new AnyType());
   }
 }
 
@@ -620,46 +650,6 @@ function isREmptyList(rval: RValue): rval is RList {
   return isRList(rval) && rval.vals.length === 0;
 }
 
-function isRExactNonNegativeInteger(rval: RValue): rval is RExactReal {
-  return isRExactReal(rval) && rval.denominator === 1n && rval.numerator >= 0n;
-}
-
-function isRExactNonNegativeIntegerToAny(rval: RValue): rval is RCallable {
-  if (!isRCallable(rval)) { return false; }
-  if (
-    isRIsStructFun(rval)
-    || (isRMakeStructFun(rval) && rval.arity === 1)
-    || (isRLambda(rval) && rval.params.length === 1)
-  ) {
-    return true;
-  }
-  if (isRPrimFun(rval)) {
-    const acceptedTypeNames = new Set([
-      TypeName.Number,
-      TypeName.Real
-    ]);
-    if (rval.config.arity === 1) { return true; }
-    if (
-      rval.config.minArity !== undefined
-      && rval.config.minArity <= 1
-      && rval.config.allArgsTypeName
-      && acceptedTypeNames.has(rval.config.allArgsTypeName)
-    ) {
-      return true;
-    }
-    if (
-      SETTINGS.primitives.relaxedConditions.includes(rval.name)
-      && rval.config.relaxedMinArity !== undefined
-      && rval.config.relaxedMinArity <= 1
-      && rval.config.allArgsTypeName
-      && acceptedTypeNames.has(rval.config.allArgsTypeName)
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function isRExactPositiveInteger(rval: RValue): rval is RExactReal {
   return isRExactReal(rval) && rval.denominator === 1n && rval.numerator > 0n;
 }
@@ -677,38 +667,12 @@ function isRInexactReal(rval: RValue): rval is RInexactReal {
   return rval instanceof RInexactReal;
 }
 
-function isRIsStructFun(rval: RValue): rval is RIsStructFun {
-  return rval instanceof RIsStructFun;
-}
-
 function isRInteger(rval: RValue): rval is RNumber {
   return isRNumber(rval) && rval.denominator === 1n;
 }
 
-function isRLambda(rval: RValue): rval is RLambda {
-  return rval instanceof RLambda;
-}
-
 function isRList(rval: RValue): rval is RList {
   return rval instanceof RList;
-}
-
-function isRMakeStructFun(rval: RValue): rval is RMakeStructFun {
-  return rval instanceof RMakeStructFun;
-}
-
-function isRNList(n: number): (rval: RValue) => boolean {
-  return (rval: RValue) => {
-    return isRList(rval) && rval.vals.length >= n;
-  };
-}
-
-function isRNonEmptyList(rval: RValue): rval is RList {
-  return isRList(rval) && rval.vals.length > 0;
-}
-
-function isRNonNegativeReal(rval: RValue): rval is RNumber {
-  return isRNumber(rval) && !rval.isNegative();
 }
 
 function isRNumber(rval: RValue): rval is RNumber {

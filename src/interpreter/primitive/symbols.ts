@@ -1,9 +1,15 @@
 import {
+  AnyType,
+  BooleanType,
+  FunctionType,
+  StringType,
+  SymbolType
+} from "../types";
+import {
   RPrimFun,
   RString,
   RSymbol,
   RValue,
-  TypeName,
   isRSymbol,
   toRBoolean
 } from "../rvalue";
@@ -16,7 +22,11 @@ export {
 
 class RPFSymbolToString extends RPrimFun {
   constructor() {
-    super("symbol->string", { arity: 1, onlyArgTypeName: TypeName.Symbol });
+    super("symbol->string");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new SymbolType()], new StringType());
   }
 
   call(args: RValue[]): RValue {
@@ -26,7 +36,11 @@ class RPFSymbolToString extends RPrimFun {
 
 class RPFAreSymbolsEqual extends RPrimFun {
   constructor() {
-    super("symbol=?", { arity: 2, allArgsTypeName: TypeName.Symbol });
+    super("symbol=?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new SymbolType(), new SymbolType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -36,7 +50,11 @@ class RPFAreSymbolsEqual extends RPrimFun {
 
 class RPFSymbolHuh extends RPrimFun {
   constructor() {
-    super("symbol?", { arity: 1 });
+    super("symbol?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {

@@ -1,4 +1,10 @@
 import {
+  AnyType,
+  ExactNonNegativeIntegerType,
+  FunctionType,
+  ListType
+} from "../types";
+import {
   AtomNode,
   EvaluateRCallableVisitor
 } from "../ast";
@@ -12,8 +18,7 @@ import {
   RMath,
   RNumber,
   RPrimFun,
-  RValue,
-  TypeName
+  RValue
 } from "../rvalue";
 import {
   Environment
@@ -25,7 +30,7 @@ export {
 
 class RPFBuildList extends RPrimFun {
   constructor() {
-    super("build-list", { arity: 2, argsTypeNames: [TypeName.ExactNonNegativeInteger, TypeName.ExactNonNegativeIntegerToAny] });
+    super("build-list");
   }
 
   call(args: RValue[], _: SourceSpan, env: Environment): RValue {
@@ -38,5 +43,9 @@ class RPFBuildList extends RPrimFun {
       listVals.push(callable.accept(evaluator));
     }
     return new RList(listVals);
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ExactNonNegativeIntegerType(), new FunctionType([new ExactNonNegativeIntegerType()], new AnyType())], new ListType());
   }
 }

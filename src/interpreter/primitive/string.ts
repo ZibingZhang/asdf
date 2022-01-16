@@ -1,9 +1,15 @@
 import {
+  AnyType,
+  BooleanType,
+  ExactNonNegativeIntegerType,
+  FunctionType,
+  StringType
+} from "../types";
+import {
   RExactReal,
   RPrimFun,
   RString,
   RValue,
-  TypeName,
   isRString,
   toRBoolean
 } from "../rvalue";
@@ -17,7 +23,11 @@ export {
 
 class RPFStringDowncase extends RPrimFun {
   constructor() {
-    super("string-downcase", { arity: 1, onlyArgTypeName: TypeName.String });
+    super("string-downcase");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new StringType()], new StringType());
   }
 
   call(args: RValue[]): RValue {
@@ -27,7 +37,11 @@ class RPFStringDowncase extends RPrimFun {
 
 class RPFStringLength extends RPrimFun {
   constructor() {
-    super("string-length", { arity: 1, onlyArgTypeName: TypeName.String });
+    super("string-length");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new StringType()], new ExactNonNegativeIntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -37,7 +51,11 @@ class RPFStringLength extends RPrimFun {
 
 class RPFStringLessEqualThanHuh extends RPrimFun {
   constructor() {
-    super("string<=?", { arity: 2, allArgsTypeName: TypeName.String });
+    super("string<=?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new StringType(), new StringType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -47,7 +65,11 @@ class RPFStringLessEqualThanHuh extends RPrimFun {
 
 class RPFStringHuh extends RPrimFun {
   constructor() {
-    super("string?", { arity: 1 });
+    super("string?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {

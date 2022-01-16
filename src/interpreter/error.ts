@@ -94,8 +94,8 @@ export {
   SC_UNDEFINED_VARIABLE_ERR,
   SC_USED_BEFORE_DEFINITION_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
-  SX_NOT_TOP_LEVEL_DEFN_ERR,
   WF_EXPECTED_FUNCTION_CALL_ERR,
+  WF_NOT_TOP_LEVEL_DEFN_ERR,
   WF_QUESTION_NOT_BOOL_ERR,
   WF_STRUCTURE_TYPE_ERR
 };
@@ -413,12 +413,12 @@ const SC_USED_BEFORE_DEFINITION_ERR = (name: string) => {
 const SX_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
   return `${name}: expected an open parenthesis before ${name}, but found none`;
 };
-const SX_NOT_TOP_LEVEL_DEFN_ERR = (name: string) => {
-  return `${name}: found a definition that is not at the top level`;
-};
 
 const WF_EXPECTED_FUNCTION_CALL_ERR = (name: string) => {
   return `${name}: expected a function call, but there is no open parenthesis before this function`;
+};
+const WF_NOT_TOP_LEVEL_DEFN_ERR = (name: string) => {
+  return `${name}: found a definition that is not at the top level`;
 };
 const WF_QUESTION_NOT_BOOL_ERR = (name: string, found: string) => {
   return `${name}: question result is not true or false: ${found}`;

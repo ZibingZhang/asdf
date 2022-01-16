@@ -81,7 +81,7 @@ import {
 import {
   RCharacter,
   RExactReal,
-  RPrimFunConfig,
+  RPrimTestFunConfig,
   RString,
   RSymbol,
   R_EMPTY_LIST,
@@ -332,7 +332,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
 
   private toCheckNode(checkName: string, sexpr: ListSExpr): CheckNode {
     // (check-... ...)
-    const config = <RPrimFunConfig>this.global.primitiveTestFunctions.get(checkName);
+    const config = <RPrimTestFunConfig>this.global.primitiveTestFunctions.get(checkName);
     if (config.arity && sexpr.subSExprs.length - 1 !== config.arity) {
       throw new StageError(
         FA_ARITY_ERR(checkName, config.arity, sexpr.subSExprs.length - 1),

@@ -1,8 +1,14 @@
 import {
+  AnyType,
+  BooleanType,
+  ErrorType,
+  FunctionType,
+  NonNegativeRealType
+} from "../types";
+import {
   RNumber,
   RPrimFun,
   RValue,
-  TypeName,
   isRData,
   isRString,
   isRStruct,
@@ -25,7 +31,11 @@ class UserError extends Error {}
 
 class RPFAreEq extends RPrimFun {
   constructor() {
-    super("eq?", { arity: 2 });
+    super("eq?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType(), new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -35,7 +45,11 @@ class RPFAreEq extends RPrimFun {
 
 class RPFAreEqual extends RPrimFun {
   constructor() {
-    super("equal?", { arity: 2 });
+    super("equal?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType(), new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -45,7 +59,11 @@ class RPFAreEqual extends RPrimFun {
 
 class RPFAreEqualWithin extends RPrimFun {
   constructor() {
-    super("equal~?", { arity: 3, argsTypeNames: [TypeName.Any, TypeName.Any, TypeName.NonNegativeReal] });
+    super("equal~?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType(), new AnyType(), new NonNegativeRealType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -56,7 +74,11 @@ class RPFAreEqualWithin extends RPrimFun {
 
 class RPFAreEqv extends RPrimFun {
   constructor() {
-    super("eqv?", { arity: 2 });
+    super("eqv?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType(), new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -67,6 +89,10 @@ class RPFAreEqv extends RPrimFun {
 class RPFError extends RPrimFun {
   constructor() {
     super("error", {});
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new AnyType()), new ErrorType());
   }
 
   call(args: RValue[]): RValue {
@@ -86,7 +112,11 @@ class RPFError extends RPrimFun {
 
 class RPFIdentity extends RPrimFun {
   constructor() {
-    super("identity", { arity: 1 });
+    super("identity");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -96,7 +126,11 @@ class RPFIdentity extends RPrimFun {
 
 class RPFStructHuh extends RPrimFun {
   constructor() {
-    super("struct?", { arity: 1 });
+    super("struct?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {

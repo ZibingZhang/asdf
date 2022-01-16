@@ -1,4 +1,16 @@
 import {
+  AnyType,
+  BooleanType,
+  ExactNonNegativeIntegerType,
+  ExactPositiveIntegerType,
+  FunctionType,
+  IntegerType,
+  NumberType,
+  RationalType,
+  RealType,
+  StringType
+} from "../types";
+import {
   FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR,
   FA_DIV_BY_ZERO_ERR
 } from "../error";
@@ -12,7 +24,6 @@ import {
   RValue,
   R_FALSE,
   R_TRUE,
-  TypeName,
   isRExactReal,
   isRInexactReal,
   isRInteger,
@@ -78,7 +89,11 @@ const RPC_PI = new RInexactReal(884279719003555n, 281474976710656n);
 
 class RPFMultiply extends RPrimFun {
   constructor() {
-    super("*", { minArity: 2, relaxedMinArity: 0, allArgsTypeName: TypeName.Number });
+    super("*", { minArity: 2, relaxedMinArity: 0 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new NumberType()), new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -90,7 +105,11 @@ class RPFMultiply extends RPrimFun {
 
 class RPFPlus extends RPrimFun {
   constructor() {
-    super("+", { minArity: 2, relaxedMinArity: 0, allArgsTypeName: TypeName.Number });
+    super("+", { minArity: 2, relaxedMinArity: 0 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new NumberType()), new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -102,7 +121,11 @@ class RPFPlus extends RPrimFun {
 
 class RPFMinus extends RPrimFun {
   constructor() {
-    super("-", { minArity: 1, allArgsTypeName: TypeName.Number });
+    super("-", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new NumberType()), new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -117,18 +140,29 @@ class RPFMinus extends RPrimFun {
 
 class RPFDivide extends RPrimFun {
   constructor() {
-    super("/", { minArity: 2, relaxedMinArity: 0, allArgsTypeName: TypeName.Number });
+    super("/", { minArity: 2, relaxedMinArity: 0 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new NumberType()), new NumberType());
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
     if (args.length === 1) {
+      if ((<RNumber>args[0]).isZero()) {
+        throw new StageError(
+          FA_DIV_BY_ZERO_ERR,
+          sourceSpan
+        );
+      }
       return RMath.div(RMath.make(true, 1n), <RNumber>args[0]);
     } else {
       return args.slice(1).reduce(
         (prev, curr) => {
           if ((<RNumber>curr).isZero()) {
             throw new StageError(
-              FA_DIV_BY_ZERO_ERR, sourceSpan
+              FA_DIV_BY_ZERO_ERR,
+              sourceSpan
             );
           }
           return RMath.div(<RNumber>prev, <RNumber>curr);
@@ -141,7 +175,11 @@ class RPFDivide extends RPrimFun {
 
 class RPFLess extends RPrimFun {
   constructor() {
-    super("<", { minArity: 1, allArgsTypeName: TypeName.Real });
+    super("<", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new RealType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -156,7 +194,11 @@ class RPFLess extends RPrimFun {
 
 class RPFLessThan extends RPrimFun {
   constructor() {
-    super("<=", { minArity: 1, allArgsTypeName: TypeName.Real });
+    super("<=", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new RealType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -171,7 +213,11 @@ class RPFLessThan extends RPrimFun {
 
 class RPFEqual extends RPrimFun {
   constructor() {
-    super("=", { minArity: 1, allArgsTypeName: TypeName.Real });
+    super("=", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new NumberType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -186,7 +232,11 @@ class RPFEqual extends RPrimFun {
 
 class RPFGreater extends RPrimFun {
   constructor() {
-    super(">", { minArity: 1, allArgsTypeName: TypeName.Real });
+    super(">", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new RealType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -201,7 +251,11 @@ class RPFGreater extends RPrimFun {
 
 class RPFGreaterThan extends RPrimFun {
   constructor() {
-    super(">=", { minArity: 1, allArgsTypeName: TypeName.Real });
+    super(">=", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new RealType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -216,7 +270,11 @@ class RPFGreaterThan extends RPrimFun {
 
 class RPFAbs extends RPrimFun {
   constructor() {
-    super("abs", { arity: 1, onlyArgTypeName: TypeName.Real });
+    super("abs");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new RealType()], new RealType());
   }
 
   call(args: RValue[]): RValue {
@@ -231,7 +289,11 @@ class RPFAbs extends RPrimFun {
 
 class RPFAdd1 extends RPrimFun {
   constructor() {
-    super("add1", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("add1");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -241,7 +303,11 @@ class RPFAdd1 extends RPrimFun {
 
 class RPFCeiling extends RPrimFun {
   constructor() {
-    super("ceiling", { arity: 1, onlyArgTypeName: TypeName.Real });
+    super("ceiling");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new RealType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -251,7 +317,11 @@ class RPFCeiling extends RPrimFun {
 
 class RPFCurrentSeconds extends RPrimFun {
   constructor() {
-    super("current-seconds", { arity: 0 });
+    super("current-seconds");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([], new ExactNonNegativeIntegerType());
   }
 
   call(_: RValue[]): RValue {
@@ -261,7 +331,11 @@ class RPFCurrentSeconds extends RPrimFun {
 
 class RPFDenominator extends RPrimFun {
   constructor() {
-    super("denominator", { arity: 1, onlyArgTypeName: TypeName.Rational });
+    super("denominator");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new RationalType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -272,7 +346,11 @@ class RPFDenominator extends RPrimFun {
 
 class RPFEvenHuh extends RPrimFun {
   constructor() {
-    super("even?", { arity: 1, onlyArgTypeName: TypeName.Integer });
+    super("even?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new IntegerType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -282,7 +360,11 @@ class RPFEvenHuh extends RPrimFun {
 
 class RPFExactToInexact extends RPrimFun {
   constructor() {
-    super("exact->inexact", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("exact->inexact");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -292,7 +374,11 @@ class RPFExactToInexact extends RPrimFun {
 
 class RPFExp extends RPrimFun {
   constructor() {
-    super("exp", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("exp");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -302,7 +388,11 @@ class RPFExp extends RPrimFun {
 
 class RPFExpt extends RPrimFun {
   constructor() {
-    super("expt", { arity: 2, allArgsTypeName: TypeName.Number });
+    super("expt");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType(), new NumberType()], new NumberType());
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
@@ -320,7 +410,11 @@ class RPFExpt extends RPrimFun {
 
 class RPFFloor extends RPrimFun {
   constructor() {
-    super("floor", { arity: 1, onlyArgTypeName: TypeName.Real });
+    super("floor");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new RealType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -330,7 +424,11 @@ class RPFFloor extends RPrimFun {
 
 class RPFInexactToExact extends RPrimFun {
   constructor() {
-    super("inexact->exact", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("inexact->exact");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -340,7 +438,11 @@ class RPFInexactToExact extends RPrimFun {
 
 class RPFInexactHuh extends RPrimFun {
   constructor() {
-    super("inexact?", { arity: 1 });
+    super("inexact?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -350,7 +452,11 @@ class RPFInexactHuh extends RPrimFun {
 
 class RPFIntegerHuh extends RPrimFun {
   constructor() {
-    super("integer?", { arity: 1 });
+    super("integer?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -360,7 +466,11 @@ class RPFIntegerHuh extends RPrimFun {
 
 class RPFMax extends RPrimFun {
   constructor() {
-    super("max", { minArity: 1, allArgsTypeName: TypeName.Real });
+    super("max", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new RealType()), new RealType());
   }
 
   call(args: RValue[]): RValue {
@@ -372,7 +482,11 @@ class RPFMax extends RPrimFun {
 
 class RPFMin extends RPrimFun {
   constructor() {
-    super("min", { minArity: 1, allArgsTypeName: TypeName.Real });
+    super("min", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new RealType()), new RealType());
   }
 
   call(args: RValue[]): RValue {
@@ -384,23 +498,32 @@ class RPFMin extends RPrimFun {
 
 class RPFModulo extends RPrimFun {
   constructor() {
-    super("modulo", { arity: 2, allArgsTypeName: TypeName.Integer });
+    super("modulo");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new IntegerType(), new IntegerType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
     const dividend = (<RNumber>args[0]).numerator;
     const divisor = (<RNumber>args[1]).numerator;
+    const isExact = isRExactReal(<RNumber>args[0]) && isRExactReal(<RNumber>args[1]);
     if (dividend > 0 && divisor < 0) {
-      return new RExactReal(dividend % divisor + divisor);
+      return RMath.make(isExact, dividend % divisor + divisor);
     } else {
-      return new RExactReal(dividend % divisor);
+      return RMath.make(isExact, dividend % divisor);
     }
   }
 }
 
 class RPFNegativeHuh extends RPrimFun {
   constructor() {
-    super("negative?", { arity: 1, onlyArgTypeName: TypeName.Real });
+    super("negative?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new RealType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -410,7 +533,11 @@ class RPFNegativeHuh extends RPrimFun {
 
 class RPFNumberToString extends RPrimFun {
   constructor() {
-    super("number->string", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("number->string");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new StringType());
   }
 
   call(args: RValue[]): RValue {
@@ -420,7 +547,11 @@ class RPFNumberToString extends RPrimFun {
 
 class RPFNumberHuh extends RPrimFun {
   constructor(alias?: string) {
-    super(alias || "number?", { arity: 1 });
+    super(alias || "number?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -430,7 +561,11 @@ class RPFNumberHuh extends RPrimFun {
 
 class RPFNumerator extends RPrimFun {
   constructor() {
-    super("numerator", { arity: 1, onlyArgTypeName: TypeName.Rational });
+    super("numerator");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new RationalType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -441,7 +576,11 @@ class RPFNumerator extends RPrimFun {
 
 class RPFOddHuh extends RPrimFun {
   constructor() {
-    super("odd?", { arity: 1, onlyArgTypeName: TypeName.Integer });
+    super("odd?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new IntegerType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -451,7 +590,12 @@ class RPFOddHuh extends RPrimFun {
 
 class RPFPositiveHuh extends RPrimFun {
   constructor() {
-    super("positive?", { arity: 1, onlyArgTypeName: TypeName.Real });
+    super("positive?");
+  }
+
+
+  getType(): FunctionType {
+    return new FunctionType([new RealType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -461,7 +605,11 @@ class RPFPositiveHuh extends RPrimFun {
 
 class RPFQuotient extends RPrimFun {
   constructor() {
-    super("quotient", { arity: 2, allArgsTypeName: TypeName.Integer });
+    super("quotient");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new IntegerType(), new IntegerType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -474,7 +622,11 @@ class RPFQuotient extends RPrimFun {
 
 class RPFRandom extends RPrimFun {
   constructor() {
-    super("random", { arity: 1, onlyArgTypeName: TypeName.ExactPositiveInteger });
+    super("random");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ExactPositiveIntegerType()], new ExactNonNegativeIntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -484,7 +636,11 @@ class RPFRandom extends RPrimFun {
 
 class RPFRemainder extends RPrimFun {
   constructor() {
-    super("remainder", { arity: 2, allArgsTypeName: TypeName.Integer });
+    super("remainder");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new IntegerType(), new IntegerType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -497,7 +653,11 @@ class RPFRemainder extends RPrimFun {
 
 class RPFRound extends RPrimFun {
   constructor() {
-    super("round", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("round");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new RealType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -523,7 +683,11 @@ class RPFSqr extends RPrimFun {
   expt = new RExactReal(2n);
 
   constructor() {
-    super("sqr", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("sqr");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -535,7 +699,11 @@ class RPFSqrt extends RPrimFun {
   expt = new RExactReal(1n, 2n);
 
   constructor() {
-    super("sqrt", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("sqrt");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
@@ -552,7 +720,11 @@ class RPFSqrt extends RPrimFun {
 
 class RPFSub1 extends RPrimFun {
   constructor() {
-    super("sub1", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("sub1");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -562,8 +734,13 @@ class RPFSub1 extends RPrimFun {
 
 class RPFZeroHuh extends RPrimFun {
   constructor() {
-    super("zero?", { arity: 1, onlyArgTypeName: TypeName.Number });
+    super("zero?");
   }
+
+  getType(): FunctionType {
+    return new FunctionType([new NumberType()], new BooleanType());
+  }
+
 
   call(args: RValue[]): RValue {
     return toRBoolean((<RNumber>args[0]).isZero());

@@ -1,9 +1,14 @@
 import {
+  AnyType,
+  BooleanType,
+  FunctionType,
+  StringType
+} from "../types";
+import {
   RBoolean,
   RPrimFun,
   RString,
   RValue,
-  TypeName,
   isRBoolean,
   toRBoolean
 } from "../rvalue";
@@ -18,7 +23,11 @@ export {
 
 class RPFBooleanToString extends RPrimFun {
   constructor() {
-    super("boolean->string", { arity: 1, onlyArgTypeName: TypeName.Boolean });
+    super("boolean->string");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new BooleanType()], new StringType());
   }
 
   call(args: RValue[]): RValue {
@@ -28,7 +37,11 @@ class RPFBooleanToString extends RPrimFun {
 
 class RPFAreBooleansEqual extends RPrimFun {
   constructor() {
-    super("boolean=?", { arity: 2, allArgsTypeName: TypeName.Boolean });
+    super("boolean=?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new BooleanType(), new BooleanType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -38,7 +51,11 @@ class RPFAreBooleansEqual extends RPrimFun {
 
 class RPFBooleanHuh extends RPrimFun {
   constructor() {
-    super("boolean?", { arity: 1 });
+    super("boolean?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -48,7 +65,11 @@ class RPFBooleanHuh extends RPrimFun {
 
 class RPFFalseHuh extends RPrimFun {
   constructor() {
-    super("false?", { arity: 1 });
+    super("false?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -58,7 +79,11 @@ class RPFFalseHuh extends RPrimFun {
 
 class RPFNot extends RPrimFun {
   constructor() {
-    super("not", { arity: 1, onlyArgTypeName: TypeName.Boolean });
+    super("not");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new BooleanType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {

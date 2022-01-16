@@ -1,11 +1,18 @@
 import {
+  AnyType,
+  BooleanType,
+  ExactNonNegativeIntegerType,
+  FunctionType,
+  ListType,
+  PairType
+} from "../types";
+import {
   RList,
   RMath,
   RNumber,
   RPrimFun,
   RValue,
   R_EMPTY_LIST,
-  TypeName,
   isRData,
   isREmptyList,
   isRList,
@@ -43,7 +50,11 @@ const R_NULL = R_EMPTY_LIST;
 
 class RPFAppend extends RPrimFun {
   constructor() {
-    super("append", { minArity: 2, allArgsTypeName: TypeName.List });
+    super("append", { minArity: 2 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new ListType()), new ListType());
   }
 
   call(args: RValue[]): RValue {
@@ -53,7 +64,11 @@ class RPFAppend extends RPrimFun {
 
 class RPFCar extends RPrimFun {
   constructor() {
-    super("car", { arity: 1, onlyArgTypeName: TypeName.Pair });
+    super("car");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new PairType()], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -63,7 +78,11 @@ class RPFCar extends RPrimFun {
 
 class RPFCdr extends RPrimFun {
   constructor() {
-    super("cdr", { arity: 1, onlyArgTypeName: TypeName.Pair });
+    super("cdr");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new PairType()], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -73,7 +92,11 @@ class RPFCdr extends RPrimFun {
 
 class RPFCons extends RPrimFun {
   constructor() {
-    super("cons", { arity: 2, argsTypeNames: [TypeName.Any, TypeName.List] });
+    super("cons");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType(), new ListType()], new ListType());
   }
 
   call(args: RValue[]): RValue {
@@ -83,7 +106,11 @@ class RPFCons extends RPrimFun {
 
 class RPFEighth extends RPrimFun {
   constructor() {
-    super("eighth", { arity: 1, onlyArgTypeName: TypeName.NList8 });
+    super("eighth");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(8)], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -93,7 +120,11 @@ class RPFEighth extends RPrimFun {
 
 class RPFEmptyHuh extends RPrimFun {
   constructor(alias?: string) {
-    super(alias || "empty?", { arity: 1 });
+    super(alias || "empty?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -103,7 +134,11 @@ class RPFEmptyHuh extends RPrimFun {
 
 class RPFFifth extends RPrimFun {
   constructor() {
-    super("fifth", { arity: 1, onlyArgTypeName: TypeName.NList5 });
+    super("fifth");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(5)], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -113,7 +148,11 @@ class RPFFifth extends RPrimFun {
 
 class RPFFirst extends RPrimFun {
   constructor() {
-    super("first", { arity: 1, onlyArgTypeName: TypeName.NonEmptyList });
+    super("first");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(1)], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -123,7 +162,11 @@ class RPFFirst extends RPrimFun {
 
 class RPFFourth extends RPrimFun {
   constructor() {
-    super("fourth", { arity: 1, onlyArgTypeName: TypeName.NList4 });
+    super("fourth");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(4)], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -133,7 +176,11 @@ class RPFFourth extends RPrimFun {
 
 class RPFLength extends RPrimFun {
   constructor() {
-    super("length", { arity: 1, onlyArgTypeName: TypeName.List });
+    super("length");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType()], new ExactNonNegativeIntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -146,6 +193,10 @@ class RPFList extends RPrimFun {
     super("list", {});
   }
 
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args).fill(new AnyType()), new ListType(args));
+  }
+
   call(args: RValue[]): RValue {
     return new RList(args);
   }
@@ -153,7 +204,11 @@ class RPFList extends RPrimFun {
 
 class RPFListStar extends RPrimFun {
   constructor() {
-    super("list*", { lastArgTypeName: TypeName.List });
+    super("list*", { minArity: 1 });
+  }
+
+  getType(args: number): FunctionType {
+    return new FunctionType(new Array(args - 1).fill(new AnyType()).concat([new ListType()]), new ListType(args - 1));
   }
 
   call(args: RValue[]): RValue {
@@ -163,7 +218,11 @@ class RPFListStar extends RPrimFun {
 
 class RPFListHuh extends RPrimFun {
   constructor(alias?: string) {
-    super(alias || "list?", { arity: 1 });
+    super(alias || "list?");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -173,7 +232,11 @@ class RPFListHuh extends RPrimFun {
 
 class RPFMakeList extends RPrimFun {
   constructor() {
-    super("make-list", { arity: 2, argsTypeNames: [TypeName.ExactNonNegativeInteger, TypeName.Any] });
+    super("make-list");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ExactNonNegativeIntegerType(), new AnyType()], new ListType());
   }
 
   call(args: RValue[]): RValue {
@@ -183,7 +246,11 @@ class RPFMakeList extends RPrimFun {
 
 class RPFMember extends RPrimFun {
   constructor(alias?: string) {
-    super(alias || "member", { argsTypeNames: [TypeName.Any, TypeName.List] });
+    super(alias || "member");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType(), new ListType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -194,7 +261,11 @@ class RPFMember extends RPrimFun {
 
 class RPFRemove extends RPrimFun {
   constructor() {
-    super("remove", { argsTypeNames: [TypeName.Any, TypeName.List] });
+    super("remove");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType(), new ListType()], new ListType());
   }
 
   call(args: RValue[]): RValue {
@@ -215,7 +286,11 @@ class RPFRemove extends RPrimFun {
 
 class RPFRemoveAll extends RPrimFun {
   constructor() {
-    super("remove-all", { argsTypeNames: [TypeName.Any, TypeName.List] });
+    super("remove-all");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new AnyType(), new ListType()], new ListType());
   }
 
   call(args: RValue[]): RValue {
@@ -230,7 +305,11 @@ class RPFRemoveAll extends RPrimFun {
 
 class RPFRest extends RPrimFun {
   constructor() {
-    super("rest", { arity: 1, onlyArgTypeName: TypeName.NonEmptyList });
+    super("rest");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(1)], new ListType());
   }
 
   call(args: RValue[]): RValue {
@@ -240,7 +319,11 @@ class RPFRest extends RPrimFun {
 
 class RPFReverse extends RPrimFun {
   constructor() {
-    super("reverse", { arity: 1, onlyArgTypeName: TypeName.List });
+    super("reverse");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType()], new ListType());
   }
 
   call(args: RValue[]): RValue {
@@ -250,7 +333,11 @@ class RPFReverse extends RPrimFun {
 
 class RPFSecond extends RPrimFun {
   constructor() {
-    super("second", { arity: 1, onlyArgTypeName: TypeName.NList2 });
+    super("second");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(2)], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -260,7 +347,11 @@ class RPFSecond extends RPrimFun {
 
 class RPFSeventh extends RPrimFun {
   constructor() {
-    super("seventh", { arity: 1, onlyArgTypeName: TypeName.NList7 });
+    super("seventh");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(7)], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -270,7 +361,11 @@ class RPFSeventh extends RPrimFun {
 
 class RPFSixth extends RPrimFun {
   constructor() {
-    super("sixth", { arity: 1, onlyArgTypeName: TypeName.NList6 });
+    super("sixth");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(6)], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -280,7 +375,11 @@ class RPFSixth extends RPrimFun {
 
 class RPFThird extends RPrimFun {
   constructor() {
-    super("third", { arity: 1, onlyArgTypeName: TypeName.NList3 });
+    super("third");
+  }
+
+  getType(): FunctionType {
+    return new FunctionType([new ListType(3)], new AnyType());
   }
 
   call(args: RValue[]): RValue {

@@ -17,24 +17,23 @@ import {
 
 export {
   Scope,
-  VariableType,
-  VariableMeta
+  VariableType
 };
 
 class Scope {
   parentScope: Scope | false;
   private global = new Global();
-  private variables: Map<string, VariableMeta> = new Map();
+  private variables: Map<string, VariableType> = new Map();
 
   constructor(parentScope: Scope | false = false) {
     this.parentScope = parentScope;
   }
 
-  set(name: string, meta: VariableMeta) {
-    this.variables.set(name, meta);
+  set(name: string, type: VariableType) {
+    this.variables.set(name, type);
   }
 
-  get(name: string, expectData: boolean, sourceSpan: SourceSpan): VariableMeta {
+  get(name: string, expectData: boolean, sourceSpan: SourceSpan): VariableType {
     const meta = this.variables.get(name)
       || (this.parentScope && this.parentScope.get(name, expectData, sourceSpan))
       || (
@@ -81,11 +80,4 @@ enum VariableType {
   PrimitiveFunction = "PRIMITIVE_FUNCTION",
   StructureType = "STRUCTURE_TYPE",
   UserDefinedFunction = "USER_DEFINED_FUNCTION"
-}
-
-class VariableMeta {
-  constructor(
-    readonly type: VariableType,
-    readonly arity: number = -1
-  ) {}
 }
