@@ -29,8 +29,8 @@ export {
 };
 
 class EvaluateCode implements Stage<Program, string[]> {
-  private globalEnv: Environment = new Environment();
-  private env: Environment = new Environment();
+  private globalEnv = new Environment();
+  private env = new Environment();
   private testResults: StageTestResult[] = [];
 
   reset() {

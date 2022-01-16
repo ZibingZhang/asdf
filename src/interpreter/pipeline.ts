@@ -2,6 +2,7 @@
 import {
   EvaluateCode
 } from "./evaluate";
+import { Global } from "./global";
 import {
   Lexer
 } from "./lexing";
@@ -14,6 +15,9 @@ import {
 import {
   RNG
 } from "./random";
+import {
+  SETTINGS
+} from "./settings";
 import {
   SExpr
 } from "./sexpr";
@@ -65,6 +69,9 @@ interface Stage<S, T> {
 }
 
 class Pipeline {
+  private global = new Global();
+  private higherOrderFunctions = false;
+
   private LEXING_STAGE = new Lexer();
   private PARSING_SEXPRS_STAGE = new ParseSExpr();
   private WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
@@ -88,6 +95,14 @@ class Pipeline {
   };
 
   evaluateCode(code: string): StageOutput<any> {
+    if (this.higherOrderFunctions !== SETTINGS.higherOrderFunctions) {
+      this.higherOrderFunctions = SETTINGS.higherOrderFunctions;
+      if (this.higherOrderFunctions) {
+        this.global.enableHigherOrderFunctions();
+      } else {
+        this.global.disableHigherOrderFunctions();
+      }
+    }
     try {
       return this.evaluateCodeHelper(code);
     } catch (e) {

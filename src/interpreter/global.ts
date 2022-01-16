@@ -126,7 +126,6 @@ export {
 };
 
 class Global {
-  static instance: Global;
   dataVariableMeta: VariableMeta;
   structureTypeVariableMeta: VariableMeta;
   primitiveScope: Scope;
@@ -136,6 +135,11 @@ class Global {
   primitiveStructNames: Set<string>;
   primitiveFunctions: Map<string, RPrimFunConfig>;
   primitiveTestFunctions: Map<string, RPrimFunConfig>;
+
+  private static instance: Global;
+  private higherOrderFunctions = new Set([
+    new RPFBuildList()
+  ]);
 
   constructor() {
     if (Global.instance) {
@@ -270,9 +274,49 @@ class Global {
     this.addFnToPrimEnv(new RPFIdentity());
     this.addFnToPrimEnv(new RPFStructHuh());
 
-    // higher-order
-    this.addFnToPrimEnv(new RPFBuildList());
+    this.defineScopes();
+  }
 
+  enableHigherOrderFunctions() {
+    // higher-order
+    this.higherOrderFunctions.forEach(fn => this.addFnToPrimEnv(fn));
+    this.defineScopes();
+  }
+
+  disableHigherOrderFunctions() {
+    this.higherOrderFunctions.forEach(fn => {
+      this.primitiveEnvironment.delete(fn.name);
+      this.primitiveFunctions.delete(fn.name);
+    });
+    this.defineScopes();
+  }
+
+  private addDataToPrimEnv(name: string, val: RData) {
+    this.primitiveEnvironment.set(name, val);
+    this.primitiveDataNames.add(name);
+  }
+
+  private addFnToPrimEnv(val: RPrimFun) {
+    this.primitiveEnvironment.set(val.name, val);
+    this.primitiveFunctions.set(val.name, val.config);
+  }
+
+  private addStructToPrimEnv(name: string, fields: string[]) {
+    this.primitiveEnvironment.set(name, new RStructType(name));
+    this.primitiveEnvironment.set(`make-${name}`, new RMakeStructFun(name, fields.length));
+    this.primitiveEnvironment.set(`${name}?`, new RIsStructFun(name));
+    fields.forEach((field, idx) => {
+      this.primitiveEnvironment.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
+    });
+    this.primitiveStructNames.add(name);
+    this.primitiveFunctions.set(`make-${name}`, { arity: fields.length });
+    this.primitiveFunctions.set(`${name}?`, { arity: 1 });
+    fields.forEach((field) => {
+      this.primitiveFunctions.set(`${name}-${field}`, { arity: 1 });
+    });
+  }
+
+  private defineScopes() {
     this.primitiveDataNames.forEach((name) => this.primitiveScope.set(name, this.dataVariableMeta));
     this.primitiveFunctions.forEach((config, name) => {
       if (config.relaxedMinArity !== undefined) {
@@ -281,30 +325,5 @@ class Global {
       this.primitiveScope.set(name, new VariableMeta(VariableType.PrimitiveFunction, config.arity || config.minArity || -1));
     });
     this.primitiveStructNames.forEach((name) => this.primitiveScope.set(name, this.structureTypeVariableMeta));
-  }
-
-  private addDataToPrimEnv(name: string, val: RData) {
-    this.primitiveDataNames.add(name);
-    this.primitiveEnvironment.set(name, val);
-  }
-
-  private addFnToPrimEnv(val: RPrimFun) {
-    this.primitiveFunctions.set(val.name, val.config);
-    this.primitiveEnvironment.set(val.name, val);
-  }
-
-  private addStructToPrimEnv(name: string, fields: string[]) {
-    this.primitiveStructNames.add(name);
-    this.primitiveFunctions.set(`make-${name}`, { arity: fields.length });
-    this.primitiveFunctions.set(`${name}?`, { arity: 1 });
-    fields.forEach((field) => {
-      this.primitiveFunctions.set(`${name}-${field}`, { arity: 1 });
-    });
-    this.primitiveEnvironment.set(name, new RStructType(name));
-    this.primitiveEnvironment.set(`make-${name}`, new RMakeStructFun(name, fields.length));
-    this.primitiveEnvironment.set(`${name}?`, new RIsStructFun(name));
-    fields.forEach((field, idx) => {
-      this.primitiveEnvironment.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
-    });
   }
 }

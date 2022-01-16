@@ -55,6 +55,10 @@ class Environment {
     }
   }
 
+  delete(name: string) {
+    this.map.delete(name);
+  }
+
   copy(): Environment {
     const env = new Environment();
     for (const entry of this.map.entries()) {
