@@ -78,7 +78,7 @@ const RPC_PI = new RInexactReal(884279719003555n, 281474976710656n);
 
 class RPFMultiply extends RPrimFun {
   constructor() {
-    super("*", { minArity: 2, allArgsTypeName: TypeName.Number });
+    super("*", { minArity: 2, relaxedMinArity: 0, allArgsTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -90,7 +90,7 @@ class RPFMultiply extends RPrimFun {
 
 class RPFPlus extends RPrimFun {
   constructor() {
-    super("+", { minArity: 2, allArgsTypeName: TypeName.Number });
+    super("+", { minArity: 2, relaxedMinArity: 0, allArgsTypeName: TypeName.Number });
   }
 
   call(args: RValue[]): RValue {
@@ -117,21 +117,25 @@ class RPFMinus extends RPrimFun {
 
 class RPFDivide extends RPrimFun {
   constructor() {
-    super("/", { minArity: 2, allArgsTypeName: TypeName.Number });
+    super("/", { minArity: 2, relaxedMinArity: 0, allArgsTypeName: TypeName.Number });
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
-    return args.slice(1).reduce(
-      (prev, curr) => {
-        if ((<RNumber>curr).isZero()) {
-          throw new StageError(
-            FA_DIV_BY_ZERO_ERR, sourceSpan
-          );
-        }
-        return RMath.div(<RNumber>prev, <RNumber>curr);
-      },
-      args[0]
-    );
+    if (args.length === 1) {
+      return RMath.div(RMath.make(true, 1n), <RNumber>args[0]);
+    } else {
+      return args.slice(1).reduce(
+        (prev, curr) => {
+          if ((<RNumber>curr).isZero()) {
+            throw new StageError(
+              FA_DIV_BY_ZERO_ERR, sourceSpan
+            );
+          }
+          return RMath.div(<RNumber>prev, <RNumber>curr);
+        },
+        args[0]
+      );
+    }
   }
 }
 

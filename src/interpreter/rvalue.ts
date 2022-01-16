@@ -498,6 +498,7 @@ enum TypeName {
 
 interface RPrimFunConfig {
   minArity?: number,
+  relaxedMinArity?: number,
   maxArity?: number,
   arity?: number,
   onlyArgTypeName?: TypeName,

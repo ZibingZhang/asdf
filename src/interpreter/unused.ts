@@ -11,11 +11,11 @@ import {
   FunAppNode,
   IfNode,
   LambdaNode,
+  LetNode,
+  LocalNode,
   OrNode,
   RequireNode,
-  VarNode,
-  LocalNode,
-  LetNode
+  VarNode
 } from "./ast";
 import {
   Stage,
@@ -132,7 +132,17 @@ class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
   }
 
   visitLetNode(node: LetNode): void {
-      throw "TODO";
+    if (!node.used) {
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
+    } else {
+      node.bindings.forEach(([variable, expr]) => {
+        variable.accept(this);
+        expr.accept(this);
+      });
+      node.body.accept(this);
+    }
   }
 
   visitLocalNode(node: LocalNode): void {

@@ -17,12 +17,12 @@ import {
   FunAppNode,
   IfNode,
   LambdaNode,
+  LetNode,
+  LocalNode,
   OrNode,
   RequireNode,
   VarNode,
   isDefnNode,
-  LocalNode,
-  LetNode,
   isVarNode
 } from "./ast";
 import {
@@ -33,7 +33,6 @@ import {
   isListSExpr
 } from "./sexpr";
 import {
-  CE_TEST_NOT_TOP_LEVEL_ERR,
   CN_ELSE_NOT_LAST_CLAUSE_ERR,
   CN_EXPECTED_TWO_PART_CLAUSE_ERR,
   DF_DUPLICATE_VARIABLE_ERR,

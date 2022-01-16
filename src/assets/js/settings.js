@@ -6,10 +6,15 @@ export {
 const initValue =
 `{
   "primitives": {
-    "blackList": []
+    "blackList": [],
+    "relaxedConditions": [
+      "*",
+      "+",
+      "/"
+    ]
   },
   "stringify": {
-    "abbreviatedList": false
+    "abbreviatedList": true
   },
   "syntax": {
     "forms": [
@@ -27,11 +32,14 @@ const initValue =
       "else",
       "if",
       "lambda",
+      "letrec",
+      "let*",
+      "let",
       "or",
       "quote",
       "require"
     ],
-    "listAbbreviation": false
+    "listAbbreviation": true
   }
 }`;
 

@@ -12,17 +12,12 @@ import {
   FunAppNode,
   IfNode,
   LambdaNode,
+  LetNode,
+  LocalNode,
   OrNode,
   RequireNode,
-  VarNode,
-  LocalNode,
-  LetNode
+  VarNode
 } from "./ast";
-import {
-  DATA_VARIABLE_META,
-  Scope,
-  VariableType
-} from "./scope";
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
   FA_ARITY_ERR,
@@ -33,6 +28,11 @@ import {
   WF_EXPECTED_FUNCTION_CALL_ERR,
   WF_STRUCTURE_TYPE_ERR
 } from "./error";
+import {
+  DATA_VARIABLE_META,
+  Scope,
+  VariableType
+} from "./scope";
 import {
   Stage,
   StageError,
@@ -50,7 +50,7 @@ export {
 };
 
 class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
-  level: number = 0;
+  level = 0;
   scope: Scope = new Scope();
 
   reset() {
@@ -224,7 +224,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         );
       }
       names.add(defn.name);
-      defn.addToScope(childScope, true)
+      defn.addToScope(childScope, true);
     });
     this.resetLevel();
     const scope = this.scope;

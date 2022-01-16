@@ -22,6 +22,13 @@ import {
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error";
 import {
+  DATA_VARIABLE_META,
+  STRUCTURE_TYPE_VARIABLE_META,
+  Scope,
+  VariableMeta,
+  VariableType
+} from "./scope";
+import {
   RCallableVisitor,
   RIsStructFun,
   RLambda,
@@ -56,12 +63,8 @@ import {
   RNG
 } from "./random";
 import {
-  DATA_VARIABLE_META,
-  Scope,
-  STRUCTURE_TYPE_VARIABLE_META,
-  VariableMeta,
-  VariableType
-} from "./scope";
+  SETTINGS
+} from "./settings";
 import {
   SourceSpan
 } from "./sourcespan";
@@ -970,7 +973,17 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
   }
 
   visitRPrimFun(rval: RPrimFun): RValue {
-    if (rval.config.minArity && this.args.length < rval.config.minArity) {
+    if (
+      SETTINGS.primitives.relaxedConditions.includes(rval.name)
+      && rval.config.relaxedMinArity !== undefined
+    ) {
+      if (this.args.length < rval.config.relaxedMinArity) {
+        throw new StageError(
+          FA_MIN_ARITY_ERR(rval.name, rval.config.relaxedMinArity, this.args.length),
+          this.sourceSpan
+        );
+      }
+    } else if (rval.config.minArity && this.args.length < rval.config.minArity) {
       throw new StageError(
         FA_MIN_ARITY_ERR(rval.name, rval.config.minArity, this.args.length),
         this.sourceSpan

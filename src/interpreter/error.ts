@@ -303,7 +303,7 @@ const LO_EXPECTED_DEFINITION_ERR = (found: SExpr) => {
 const LO_EXPECTED_DEFINITIONS_ERR = (found: SExpr | null = null) => {
   return `local: expected at least one definition (in square brackets) after local, but ${found ? `found ${foundStr(found)}` : "nothing's there" }`;
 };
-const LO_EXPECTED_EXPRESSION_ERR = `local: expected an expression after the local definitions, but nothing's there`;
+const LO_EXPECTED_EXPRESSION_ERR = "local: expected an expression after the local definitions, but nothing's there";
 const LO_EXPECTED_ONE_EXPRESSION_ERR = (parts: number) => {
   return `local: expected only one expression after the local definitions, but found ${parts} extra part${parts > 1 ? "s" : ""}`;
 };

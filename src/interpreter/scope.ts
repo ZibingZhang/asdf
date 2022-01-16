@@ -8,14 +8,14 @@ import {
   SC_UNDEFINED_VARIABLE_ERR
 } from "./error";
 import {
-  StageError
-} from "./pipeline";
-import {
   SETTINGS
 } from "./settings";
 import {
   SourceSpan
 } from "./sourcespan";
+import {
+  StageError
+} from "./pipeline";
 
 export {
   DATA_VARIABLE_META,
@@ -43,8 +43,16 @@ class Scope {
       || (this.parentScope && this.parentScope.get(name, expectData, sourceSpan))
       || (
         !SETTINGS.primitives.blackList.includes(name)
-        && PRIMITIVE_SCOPE.variables.has(name)
-        && PRIMITIVE_SCOPE.get(name, expectData, sourceSpan)
+        && (
+          (
+            SETTINGS.primitives.relaxedConditions.includes(name)
+            && PRIMITIVE_RELAXED_SCOPE.variables.has(name)
+            && PRIMITIVE_RELAXED_SCOPE.get(name, expectData, sourceSpan)
+          ) || (
+            PRIMITIVE_SCOPE.variables.has(name)
+            && PRIMITIVE_SCOPE.get(name, expectData, sourceSpan)
+          )
+        )
       );
     if (!meta) {
       if (expectData) {
@@ -90,6 +98,12 @@ const DATA_VARIABLE_META = new VariableMeta(VariableType.Data);
 const STRUCTURE_TYPE_VARIABLE_META = new VariableMeta(VariableType.StructureType);
 
 const PRIMITIVE_SCOPE = new Scope();
+const PRIMITIVE_RELAXED_SCOPE = new Scope();
 PRIMITIVE_DATA_NAMES.forEach((name) => PRIMITIVE_SCOPE.set(name, DATA_VARIABLE_META));
-PRIMITIVE_FUNCTIONS.forEach((config, name) => PRIMITIVE_SCOPE.set(name, new VariableMeta(VariableType.PrimitiveFunction, config.arity || config.minArity || -1)));
+PRIMITIVE_FUNCTIONS.forEach((config, name) => {
+  if (config.relaxedMinArity !== undefined) {
+    PRIMITIVE_RELAXED_SCOPE.set(name, new VariableMeta(VariableType.PrimitiveFunction, config.relaxedMinArity));
+  }
+  PRIMITIVE_SCOPE.set(name, new VariableMeta(VariableType.PrimitiveFunction, config.arity || config.minArity || -1));
+});
 PRIMITIVE_STRUCT_NAMES.forEach((name) => PRIMITIVE_SCOPE.set(name, STRUCTURE_TYPE_VARIABLE_META));
