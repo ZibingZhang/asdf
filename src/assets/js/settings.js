@@ -5,6 +5,7 @@ export {
 
 const initValue =
 `{
+  "higherOrderFunctions": true,
   "primitives": {
     "blackList": [],
     "relaxedConditions": [

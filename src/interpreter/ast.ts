@@ -103,6 +103,7 @@ export {
   VarNode,
   isCheckNode,
   isDefnNode,
+  isLambdaNode,
   isVarNode,
   ASTNodeVisitor
 };
@@ -603,12 +604,16 @@ class IfNode extends ASTNodeBase {
 }
 
 class LambdaNode extends ASTNodeBase {
+  name: string | null;
+
   constructor(
+    name: string | null,
     readonly params: string[],
     readonly body: ASTNode,
     readonly sourceSpan: SourceSpan
   ) {
     super(sourceSpan);
+    this.name = name;
   }
 
   accept<T>(visitor: ASTNodeVisitor<T>): T {
@@ -904,6 +909,10 @@ function isCheckNode(node: ASTNode) {
 function isDefnNode(node: ASTNode): node is DefnNode {
   return node instanceof DefnStructNode
     || node instanceof DefnVarNode;
+}
+
+function isLambdaNode(node: ASTNode): node is LambdaNode {
+  return node instanceof LambdaNode;
 }
 
 function isVarNode(node: ASTNode): node is VarNode {

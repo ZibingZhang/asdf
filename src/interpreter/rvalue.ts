@@ -430,9 +430,7 @@ class RInexactReal extends RNumberBase {
 abstract class RCallableBase implements RValBase {
   abstract accept<T>(visitor: RCallableVisitor<T>): T;
 
-  stringify(): string {
-    throw "illegal state: cannot stringify a callable";
-  }
+  abstract stringify(): string;
 }
 
 class RIsStructFun extends RCallableBase {
@@ -442,6 +440,10 @@ class RIsStructFun extends RCallableBase {
 
   accept<T>(visitor: RCallableVisitor<T>): T {
     return visitor.visitRIsStructFun(this);
+  }
+
+  stringify(): string {
+    return this.name;
   }
 }
 
@@ -456,6 +458,10 @@ class RMakeStructFun extends RCallableBase {
   accept<T>(visitor: RCallableVisitor<T>): T {
     return visitor.visitRMakeStructFun(this);
   }
+
+  stringify(): string {
+    return this.name;
+  }
 }
 
 class RLambda extends RCallableBase {
@@ -469,6 +475,10 @@ class RLambda extends RCallableBase {
 
   accept<T>(visitor: RCallableVisitor<T>): T {
     return visitor.visitRLambda(this);
+  }
+
+  stringify(): string {
+    throw "illegal state: free-form lambdas not supported";
   }
 }
 
@@ -513,6 +523,18 @@ class RPrimFun extends RCallableBase {
     readonly config: RPrimFunConfig
   ) {
     super();
+  }
+
+  accept<T>(visitor: RCallableVisitor<T>): T {
+    return visitor.visitRPrimFun(this);
+  }
+
+  stringify(): string {
+      return this.name;
+  }
+
+  call(_: RValue[], __: SourceSpan): RValue {
+    throw "illegal state: not implemented";
   }
 
   typeGuardOf(typeName: TypeName): (rval: RValue) => boolean {
@@ -560,14 +582,6 @@ class RPrimFun extends RCallableBase {
         throw `illegal state: unsupported type name ${typeName}`;
     }
   }
-
-  accept<T>(visitor: RCallableVisitor<T>): T {
-    return visitor.visitRPrimFun(this);
-  }
-
-  call(_: RValue[], __: SourceSpan): RValue {
-    throw "illegal state: not implemented";
-  }
 }
 
 class RStructGetFun extends RCallableBase {
@@ -581,6 +595,10 @@ class RStructGetFun extends RCallableBase {
 
   accept<T>(visitor: RCallableVisitor<T>): T {
     return visitor.visitRStructGetFun(this);
+  }
+
+  stringify(): string {
+    return `${this.name}-${this.fieldName}`;
   }
 }
 

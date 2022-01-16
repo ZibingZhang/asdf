@@ -44,6 +44,7 @@ import {
 import {
   Program
 } from "./program";
+import { SETTINGS } from "./settings";
 
 export {
   WellFormedProgram
@@ -255,7 +256,10 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         node.sourceSpan
       );
     }
-    if (meta.type !== VariableType.Data) {
+    if (
+      !SETTINGS.higherOrderFunctions
+      && meta.type !== VariableType.Data
+    ) {
       throw new StageError(
         WF_EXPECTED_FUNCTION_CALL_ERR(node.name),
         node.sourceSpan

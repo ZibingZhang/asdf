@@ -23,7 +23,8 @@ import {
   RequireNode,
   VarNode,
   isDefnNode,
-  isVarNode
+  isVarNode,
+  isLambdaNode
 } from "./ast";
 import {
   AtomSExpr,
@@ -543,10 +544,14 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         );
       }
       this.inFunDef = true;
+      const expr = this.toNode(sexpr.subSExprs[2]);
+      if (isLambdaNode(expr)) {
+        expr.name = name.token.text;
+      }
       const node = new DefnVarNode(
         name.token.text,
         name.sourceSpan,
-        this.toNode(sexpr.subSExprs[2]),
+        expr,
         sexpr.sourceSpan
       );
       this.inFunDef = false;
@@ -605,6 +610,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         name.token.text,
         name.sourceSpan,
         new LambdaNode(
+          name.token.text,
           params,
           this.toNode(sexpr.subSExprs[2]),
           sexpr.subSExprs[2].sourceSpan
@@ -741,6 +747,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       );
     }
     return new LambdaNode(
+      null,
       variableNames,
       this.toNode(sexpr.subSExprs[2]),
       sexpr.sourceSpan
