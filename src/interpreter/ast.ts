@@ -106,7 +106,8 @@ export {
   isDefnNode,
   isLambdaNode,
   isVarNode,
-  ASTNodeVisitor
+  ASTNodeVisitor,
+  EvaluateRCallableVisitor
 };
 
 type ASTNode =
@@ -1050,7 +1051,7 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
         );
       }
     }
-    return rval.call(argVals, this.sourceSpan);
+    return rval.call(argVals, this.sourceSpan, this.env);
   }
 
   visitRStructGetFun(rval: RStructGetFun): RValue {

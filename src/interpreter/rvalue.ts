@@ -19,6 +19,7 @@ export {
   R_TRUE,
   R_VOID,
   RBoolean,
+  RCallable,
   RCharacter,
   RData,
   RExactReal,
@@ -71,12 +72,6 @@ type RValue =
   | RCallable
   | RData
   | RTestResult;
-type RCallable =
-  | RIsStructFun
-  | RMakeStructFun
-  | RLambda
-  | RPrimFun
-  | RStructGetFun;
 type RData =
   | RAtomic
   | RList
@@ -427,13 +422,13 @@ class RInexactReal extends RNumberBase {
   }
 }
 
-abstract class RCallableBase implements RValBase {
+abstract class RCallable implements RValBase {
   abstract accept<T>(visitor: RCallableVisitor<T>): T;
 
   abstract stringify(): string;
 }
 
-class RIsStructFun extends RCallableBase {
+class RIsStructFun extends RCallable {
   constructor(readonly name: string) {
     super();
   }
@@ -447,7 +442,7 @@ class RIsStructFun extends RCallableBase {
   }
 }
 
-class RMakeStructFun extends RCallableBase {
+class RMakeStructFun extends RCallable {
   constructor(
     readonly name: string,
     readonly arity: number
@@ -464,7 +459,7 @@ class RMakeStructFun extends RCallableBase {
   }
 }
 
-class RLambda extends RCallableBase {
+class RLambda extends RCallable {
   constructor(
     readonly closure: Environment,
     readonly params: string[],
@@ -486,6 +481,7 @@ enum TypeName {
   Any = "any",
   Boolean = "boolean",
   ExactNonNegativeInteger = "exact-non-negative-integer",
+  ExactNonNegativeIntegerToAny = "(exact-nonnegative-integer? . -> . any/c)",
   ExactPositiveInteger = "exact-positive-integer",
   Integer = "integer",
   List = "list",
@@ -517,7 +513,7 @@ interface RPrimFunConfig {
   lastArgTypeName?: TypeName
 }
 
-class RPrimFun extends RCallableBase {
+class RPrimFun extends RCallable {
   constructor(
     readonly name: string,
     readonly config: RPrimFunConfig
@@ -533,7 +529,7 @@ class RPrimFun extends RCallableBase {
       return this.name;
   }
 
-  call(_: RValue[], __: SourceSpan): RValue {
+  call(_: RValue[], __: SourceSpan, ___: Environment): RValue {
     throw "illegal state: not implemented";
   }
 
@@ -545,6 +541,8 @@ class RPrimFun extends RCallableBase {
         return isRBoolean;
       case TypeName.ExactNonNegativeInteger:
         return isRExactNonNegativeInteger;
+        case TypeName.ExactNonNegativeIntegerToAny:
+          return isRExactNonNegativeIntegerToAny;
       case TypeName.ExactPositiveInteger:
         return isRExactPositiveInteger;
       case TypeName.Integer:
@@ -584,7 +582,7 @@ class RPrimFun extends RCallableBase {
   }
 }
 
-class RStructGetFun extends RCallableBase {
+class RStructGetFun extends RCallable {
   constructor(
     readonly name: string,
     readonly fieldName: string,
@@ -607,14 +605,14 @@ function isRBoolean(rval: RValue): rval is RBoolean {
 }
 
 function isRCallable(rval: RValue): rval is RCallable {
-  return rval instanceof RCallableBase;
+  return rval instanceof RCallable;
 }
 
 function isRCharacter(rval: RValue): rval is RCharacter {
   return rval instanceof RCharacter;
 }
 
-function isRData(rval: RValue): rval is RDataBase {
+function isRData(rval: RValue): rval is RData {
   return rval instanceof RDataBase;
 }
 
@@ -624,6 +622,42 @@ function isREmptyList(rval: RValue): rval is RList {
 
 function isRExactNonNegativeInteger(rval: RValue): rval is RExactReal {
   return isRExactReal(rval) && rval.denominator === 1n && rval.numerator >= 0n;
+}
+
+function isRExactNonNegativeIntegerToAny(rval: RValue): rval is RCallable {
+  if (!isRCallable(rval)) { return false; }
+  if (
+    isRIsStructFun(rval)
+    || (isRMakeStructFun(rval) && rval.arity === 1)
+    || (isRLambda(rval) && rval.params.length === 1)
+  ) {
+    return true;
+  }
+  if (isRPrimFun(rval)) {
+    const acceptedTypeNames = new Set([
+      TypeName.Number,
+      TypeName.Real
+    ]);
+    if (rval.config.arity === 1) { return true; }
+    if (
+      rval.config.minArity !== undefined
+      && rval.config.minArity <= 1
+      && rval.config.allArgsTypeName
+      && acceptedTypeNames.has(rval.config.allArgsTypeName)
+    ) {
+      return true;
+    }
+    if (
+      SETTINGS.primitives.relaxedConditions.includes(rval.name)
+      && rval.config.relaxedMinArity !== undefined
+      && rval.config.relaxedMinArity <= 1
+      && rval.config.allArgsTypeName
+      && acceptedTypeNames.has(rval.config.allArgsTypeName)
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function isRExactPositiveInteger(rval: RValue): rval is RExactReal {
@@ -643,12 +677,24 @@ function isRInexactReal(rval: RValue): rval is RInexactReal {
   return rval instanceof RInexactReal;
 }
 
+function isRIsStructFun(rval: RValue): rval is RIsStructFun {
+  return rval instanceof RIsStructFun;
+}
+
 function isRInteger(rval: RValue): rval is RNumber {
   return isRNumber(rval) && rval.denominator === 1n;
 }
 
+function isRLambda(rval: RValue): rval is RLambda {
+  return rval instanceof RLambda;
+}
+
 function isRList(rval: RValue): rval is RList {
   return rval instanceof RList;
+}
+
+function isRMakeStructFun(rval: RValue): rval is RMakeStructFun {
+  return rval instanceof RMakeStructFun;
 }
 
 function isRNList(n: number): (rval: RValue) => boolean {
@@ -661,11 +707,11 @@ function isRNonEmptyList(rval: RValue): rval is RList {
   return isRList(rval) && rval.vals.length > 0;
 }
 
-function isRNonNegativeReal(rval: RValue): rval is RNumberBase {
+function isRNonNegativeReal(rval: RValue): rval is RNumber {
   return isRNumber(rval) && !rval.isNegative();
 }
 
-function isRNumber(rval: RValue): rval is RNumberBase {
+function isRNumber(rval: RValue): rval is RNumber {
   return rval instanceof RNumberBase;
 }
 

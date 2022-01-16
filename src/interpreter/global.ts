@@ -118,6 +118,7 @@ import {
   VariableMeta,
   VariableType
 } from "./scope";
+import { RPFBuildList } from "./primitive/higherOrder";
 
 export {
   Global
@@ -267,6 +268,9 @@ class Global {
     this.addFnToPrimEnv(new RPFError());
     this.addFnToPrimEnv(new RPFIdentity());
     this.addFnToPrimEnv(new RPFStructHuh());
+
+    // higher-order
+    this.addFnToPrimEnv(new RPFBuildList());
 
     this.primitiveDataNames.forEach((name) => this.primitiveScope.set(name, this.dataVariableMeta));
     this.primitiveFunctions.forEach((config, name) => {

@@ -122,7 +122,7 @@ class RPFDivide extends RPrimFun {
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
     if (args.length === 1) {
-      return RMath.div(RMath.make(true, 1n), <RNumber>args[0]);
+      return RMath.div(RMath.make(true, 1n), <RNumber>args[0])
     } else {
       return args.slice(1).reduce(
         (prev, curr) => {
