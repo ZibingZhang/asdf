@@ -36,6 +36,7 @@ const initValue =
       "letrec",
       "let*",
       "let",
+      "local",
       "or",
       "quote",
       "require"
