@@ -558,19 +558,12 @@ class FunAppNode extends ASTNodeBase {
         }
       }
     } else {
-      if (
-        !SETTINGS.higherOrderFunctions
-        && isRStructType(rval)
-      ) {
-        throw new StageError(
-          FC_EXPECTED_FUNCTION_ERR(
-            `a structure type (do you mean make-${rval.name})`
-          ),
-          this.fn.sourceSpan
-        );
-      }
       throw new StageError(
-        FC_EXPECTED_FUNCTION_ERR("a variable"),
+        FC_EXPECTED_FUNCTION_ERR(
+          isRStructType(rval)
+          ? `a structure type (do you mean make-${rval.name})`
+          : "a variable"
+        ),
         this.fn.sourceSpan
       );
     }

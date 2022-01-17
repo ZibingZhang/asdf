@@ -245,7 +245,10 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   visitVarNode(node: VarNode): void {
     const variableType = this.scope.get(node.name, true, node.sourceSpan);
-    if (variableType === VariableType.StructureType) {
+    if (
+      !SETTINGS.higherOrderFunctions
+      && variableType === VariableType.StructureType
+    ) {
       throw new StageError(
         WF_STRUCTURE_TYPE_ERR(node.name),
         node.sourceSpan
