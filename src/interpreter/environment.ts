@@ -68,8 +68,10 @@ class Environment {
     let ancestorEnv: Environment | null = this;
     while (ancestorEnv.parentEnv) {
       ancestorEnv = ancestorEnv.parentEnv;
-      for (const entry of ancestorEnv.map.entries()) {
-        env.set(entry[0], entry[1]);
+      for (const [key, value] of ancestorEnv.map.entries()) {
+        if (!env.map.has(key)) {
+          env.set(key, value);
+        }
       }
     }
     return env;

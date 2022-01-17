@@ -73,6 +73,7 @@ export {
   isRPrimFun,
   isRString,
   isRStruct,
+  isRStructType,
   isRSymbol,
   isRTrue,
   toRBoolean,
@@ -345,7 +346,7 @@ class RStructType extends RDataBase {
   }
 
   stringify(): string {
-    throw "illegal state: cannot stringify a structure type";
+    return this.name;
   }
 
   getType(): Type {

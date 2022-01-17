@@ -40,7 +40,8 @@ import {
   isRInexactReal,
   isRProcedure,
   isRString,
-  isRTrue
+  isRTrue,
+  isRStructType
 } from "./rvalue";
 import {
   Scope,
@@ -557,12 +558,19 @@ class FunAppNode extends ASTNodeBase {
         }
       }
     } else {
+      if (
+        !SETTINGS.higherOrderFunctions
+        && isRStructType(rval)
+      ) {
+        throw new StageError(
+          FC_EXPECTED_FUNCTION_ERR(
+            `a structure type (do you mean make-${rval.name})`
+          ),
+          this.fn.sourceSpan
+        );
+      }
       throw new StageError(
-        FC_EXPECTED_FUNCTION_ERR(
-          rval instanceof RStructType
-            ? `a structure type (do you mean make-${rval.name})`
-            : "a variable"
-        ),
+        FC_EXPECTED_FUNCTION_ERR("a variable"),
         this.fn.sourceSpan
       );
     }
