@@ -18,6 +18,7 @@ export {
   RPFStringDowncase,
   RPFStringLength,
   RPFStringLessEqualThanHuh,
+  RPFStringEqualHuh,
   RPFStringHuh
 };
 
@@ -60,6 +61,20 @@ class RPFStringLessEqualThanHuh extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return toRBoolean((<RString>args[0]).val <= (<RString>args[1]).val);
+  }
+}
+
+class RPFStringEqualHuh extends RPrimFun {
+  constructor() {
+    super("string=?");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new StringType(), new StringType()], new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean((<RString>args[0]).val === (<RString>args[1]).val);
   }
 }
 

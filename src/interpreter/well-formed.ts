@@ -220,10 +220,12 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
       names.add(defn.name);
       defn.addToScope(childScope, true);
     });
-    this.resetLevel();
     const scope = this.scope;
     this.scope = childScope;
-    node.defns.forEach(defn => defn.accept(this));
+    node.defns.forEach(defn => {
+      this.resetLevel();
+      defn.accept(this);
+    });
     this.incrementLevel();
     node.body.accept(this);
     this.scope = scope;

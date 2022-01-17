@@ -113,6 +113,7 @@ import {
 } from "./primitive/symbols";
 import {
   RPFStringDowncase,
+  RPFStringEqualHuh,
   RPFStringHuh,
   RPFStringLength,
   RPFStringLessEqualThanHuh
@@ -273,6 +274,7 @@ class Global {
     this.addFnToPrimEnv(new RPFStringDowncase());
     this.addFnToPrimEnv(new RPFStringLength());
     this.addFnToPrimEnv(new RPFStringLessEqualThanHuh());
+    this.addFnToPrimEnv(new RPFStringEqualHuh());
     this.addFnToPrimEnv(new RPFStringHuh());
 
     // misc
