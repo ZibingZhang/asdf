@@ -700,7 +700,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
 
   private toLambdaNode(sexpr: ListSExpr): LambdaNode {
     // (lambda ...)
-    if (!this.inFunDef) {
+    if (!SETTINGS.syntax.lambdaExpression && !this.inFunDef) {
       throw new StageError(
         LM_NOT_FUNCTION_DEFINITION_ERR,
         sexpr.sourceSpan

@@ -41,6 +41,7 @@ const initValue =
       "quote",
       "require"
     ],
+    "lambdaExpression": true,
     "listAbbreviation": true
   }
 }`;

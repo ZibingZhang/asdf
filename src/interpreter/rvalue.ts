@@ -583,7 +583,7 @@ class RLambda extends RProcedure {
     if (this.name) {
       return this.name;
     } else {
-      throw "illegal state: free-form lambdas not supported";
+      return `(lambda (${this.params.map((_, idx) => `a${idx + 1}`).join(" ")}) ...)`;
     }
   }
 
