@@ -1,16 +1,17 @@
 export{
+  AnyProcedureType,
   AnyType,
   BooleanType,
   CharacterType,
   ErrorType,
   ExactNonNegativeIntegerType,
   ExactPositiveIntegerType,
-  FunctionType,
   IntegerType,
   ListType,
   NonNegativeRealType,
   NumberType,
   PairType,
+  ProcedureType,
   RationalType,
   RealType,
   StringType,
@@ -19,12 +20,25 @@ export{
   SymbolType,
   Type,
   VoidType,
-  isFunctionType
+  isAnyProcedureType,
+  isAnyType,
+  isProcedureType
 };
 
 abstract class Type {
   abstract isSuperTypeOf(type: Type): boolean;
   abstract stringify(): string;
+}
+
+class AnyProcedureType extends Type {
+  isSuperTypeOf(type: Type): boolean {
+    return type instanceof AnyProcedureType
+      || type instanceof ProcedureType;
+  }
+
+  stringify(): string {
+    return "procedure";
+  }
 }
 
 class AnyType extends Type {
@@ -89,25 +103,6 @@ class ExactPositiveIntegerType extends Type {
 
   stringify(): string {
     return "exact-positive-integer";
-  }
-}
-
-class FunctionType extends Type {
-  constructor(
-    readonly paramTypes: Type[],
-    readonly outputType: Type
-  ) {
-    super();
-  }
-
-  isSuperTypeOf(type: Type): boolean {
-    return type instanceof FunctionType
-      && type.paramTypes.length === this.paramTypes.length
-      && this.paramTypes.every((paramType, idx) => paramType.isSuperTypeOf(type.paramTypes[idx]));
-  }
-
-  stringify(): string {
-    return `(${this.paramTypes.map(paramType => paramType.stringify()).join(" ")} . -> . ${this.outputType.stringify()}}`;
   }
 }
 
@@ -190,6 +185,39 @@ class PairType extends Type {
 
   stringify(): string {
     return "pair";
+  }
+}
+
+class ProcedureType extends Type {
+  constructor(
+    readonly paramTypes: Type[],
+    readonly outputType: Type
+  ) {
+    super();
+  }
+
+  isSuperTypeOf(type: Type): boolean {
+    return type instanceof ProcedureType
+      && type.paramTypes.length === this.paramTypes.length
+      && this.paramTypes.every((paramType, idx) => paramType.isSuperTypeOf(type.paramTypes[idx]))
+      && this.outputType.isSuperTypeOf(type.outputType);
+  }
+
+  isCompatibleWith(type: Type): boolean {
+    return type instanceof ProcedureType
+      && type.paramTypes.length === this.paramTypes.length
+      && this.paramTypes.every((paramType, idx) =>
+        paramType.isSuperTypeOf(type.paramTypes[idx])
+          || type.paramTypes[idx].isSuperTypeOf(paramType)
+      )
+      && (
+        this.outputType.isSuperTypeOf(type.outputType)
+        || type.outputType.isSuperTypeOf(this.outputType)
+      );
+  }
+
+  stringify(): string {
+    return `(${this.paramTypes.map(paramType => paramType.stringify()).join(" ")} . -> . ${this.outputType.stringify()})`;
   }
 }
 
@@ -284,6 +312,14 @@ class VoidType extends Type {
   }
 }
 
-function isFunctionType(type: Type): type is FunctionType {
-  return type instanceof FunctionType;
+function isAnyProcedureType(type: Type): type is AnyProcedureType {
+  return type instanceof AnyProcedureType;
+}
+
+function isAnyType(type: Type): type is AnyType {
+  return type instanceof AnyType;
+}
+
+function isProcedureType(type: Type): type is ProcedureType {
+  return type instanceof ProcedureType;
 }

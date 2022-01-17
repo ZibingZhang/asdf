@@ -50,6 +50,8 @@ export {
   FA_NTH_WRONG_TYPE_ERR,
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
+  HO_CONTRACT_VIOLATION_ERR,
+  HO_EXPECTED_BOOLEAN_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
   LM_DUPLICATE_VARIABLE_ERR,
   LM_EXPECTED_EXPRESSION_ERR,
@@ -264,6 +266,13 @@ const FA_WRONG_TYPE_ERR = (name: string, expected: string, actual: string) => {
 
 const FC_EXPECTED_FUNCTION_ERR = (found?: SExpr | string) => {
   return `function call: expected a function after the open parenthesis, but ${found ? `found ${foundStr(found)}`: "nothing's there"}`;
+};
+
+const HO_CONTRACT_VIOLATION_ERR = (name: string, expected: string, received: string) => {
+  return `${name}: contract violation\n  expected: ${expected}\n  received: ${received}`;
+};
+const HO_EXPECTED_BOOLEAN_ERR = (name: string, procedureName: string, received: string) => {
+  return `${name}: expected a boolean from ${procedureName} (the function given to filter), but received ${received}`;
 };
 
 const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {

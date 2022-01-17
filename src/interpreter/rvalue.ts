@@ -5,11 +5,11 @@ import {
   CharacterType,
   ExactNonNegativeIntegerType,
   ExactPositiveIntegerType,
-  FunctionType,
   IntegerType,
   ListType,
   NonNegativeRealType,
   NumberType,
+  ProcedureType,
   RealType,
   StringType,
   StructType,
@@ -38,7 +38,7 @@ export {
   R_TRUE,
   R_VOID,
   RBoolean,
-  RCallable,
+  RProcedure,
   RCharacter,
   RData,
   RExactReal,
@@ -50,7 +50,7 @@ export {
   RMath,
   RNumber,
   RPrimFun,
-  RCallableConfig,
+  RProcedureConfig,
   RPrimTestFunConfig,
   RString,
   RStruct,
@@ -60,7 +60,7 @@ export {
   RTestResult,
   RValue,
   isRBoolean,
-  isRCallable,
+  isRProcedure,
   isRData,
   isREmptyList,
   isRExactPositiveInteger,
@@ -76,7 +76,7 @@ export {
   isRSymbol,
   isRTrue,
   toRBoolean,
-  RCallableVisitor
+  RProcedureVisitor
 };
 
 // https://stackoverflow.com/questions/17445231/js-how-to-find-the-greatest-common-divisor
@@ -88,7 +88,7 @@ function gcd(a: bigint, b: bigint): bigint {
 }
 
 type RValue =
-  | RCallable
+  | RProcedure
   | RData
   | RTestResult;
 type RData =
@@ -505,7 +505,7 @@ class RInexactReal extends RNumberBase {
   }
 }
 
-interface RCallableConfig {
+interface RProcedureConfig {
   minArity?: number,
   relaxedMinArity?: number
 }
@@ -516,22 +516,22 @@ interface RPrimTestFunConfig {
   maxArity?: number
 }
 
-abstract class RCallable implements RValBase {
-  constructor(readonly config: RCallableConfig = {}) {}
+abstract class RProcedure implements RValBase {
+  constructor(readonly config: RProcedureConfig = {}) {}
 
   abstract stringify(): string;
 
-  abstract getType(args: number): FunctionType;
+  abstract getType(args: number): ProcedureType;
 
-  abstract accept<T>(visitor: RCallableVisitor<T>): T;
+  abstract accept<T>(visitor: RProcedureVisitor<T>): T;
 }
 
-class RIsStructFun extends RCallable {
+class RIsStructFun extends RProcedure {
   constructor(readonly name: string) {
     super();
   }
 
-  accept<T>(visitor: RCallableVisitor<T>): T {
+  accept<T>(visitor: RProcedureVisitor<T>): T {
     return visitor.visitRIsStructFun(this);
   }
 
@@ -539,12 +539,12 @@ class RIsStructFun extends RCallable {
     return this.name;
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
   }
 }
 
-class RMakeStructFun extends RCallable {
+class RMakeStructFun extends RProcedure {
   constructor(
     readonly name: string,
     readonly arity: number
@@ -552,7 +552,7 @@ class RMakeStructFun extends RCallable {
     super();
   }
 
-  accept<T>(visitor: RCallableVisitor<T>): T {
+  accept<T>(visitor: RProcedureVisitor<T>): T {
     return visitor.visitRMakeStructFun(this);
   }
 
@@ -560,13 +560,14 @@ class RMakeStructFun extends RCallable {
     return this.name;
   }
 
-  getType(): FunctionType {
-    return new FunctionType(new Array(this.arity).fill(new AnyType()), new StructType(this.name));
+  getType(): ProcedureType {
+    return new ProcedureType(new Array(this.arity).fill(new AnyType()), new StructType(this.name));
   }
 }
 
-class RLambda extends RCallable {
+class RLambda extends RProcedure {
   constructor(
+    readonly name: string | null,
     readonly closure: Environment,
     readonly params: string[],
     readonly body: ASTNode
@@ -574,28 +575,32 @@ class RLambda extends RCallable {
     super();
   }
 
-  accept<T>(visitor: RCallableVisitor<T>): T {
+  accept<T>(visitor: RProcedureVisitor<T>): T {
     return visitor.visitRLambda(this);
   }
 
   stringify(): string {
-    throw "illegal state: free-form lambdas not supported";
+    if (this.name) {
+      return this.name;
+    } else {
+      throw "illegal state: free-form lambdas not supported";
+    }
   }
 
-  getType(): FunctionType {
-    return new FunctionType(new Array(this.params.length).fill(new AnyType()), new AnyType());
+  getType(): ProcedureType {
+    return new ProcedureType(new Array(this.params.length).fill(new AnyType()), new AnyType());
   }
 }
 
-abstract class RPrimFun extends RCallable {
+abstract class RPrimFun extends RProcedure {
   constructor(
     readonly name: string,
-    readonly config: RCallableConfig = {}
+    readonly config: RProcedureConfig = {}
   ) {
     super();
   }
 
-  accept<T>(visitor: RCallableVisitor<T>): T {
+  accept<T>(visitor: RProcedureVisitor<T>): T {
     return visitor.visitRPrimFun(this);
   }
 
@@ -608,7 +613,7 @@ abstract class RPrimFun extends RCallable {
   }
 }
 
-class RStructGetFun extends RCallable {
+class RStructGetFun extends RProcedure {
   constructor(
     readonly name: string,
     readonly fieldName: string,
@@ -617,7 +622,7 @@ class RStructGetFun extends RCallable {
     super();
   }
 
-  accept<T>(visitor: RCallableVisitor<T>): T {
+  accept<T>(visitor: RProcedureVisitor<T>): T {
     return visitor.visitRStructGetFun(this);
   }
 
@@ -625,8 +630,8 @@ class RStructGetFun extends RCallable {
     return `${this.name}-${this.fieldName}`;
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new StructType(this.name)], new AnyType());
+  getType(): ProcedureType {
+    return new ProcedureType([new StructType(this.name)], new AnyType());
   }
 }
 
@@ -634,8 +639,8 @@ function isRBoolean(rval: RValue): rval is RBoolean {
   return rval instanceof RBoolean;
 }
 
-function isRCallable(rval: RValue): rval is RCallable {
-  return rval instanceof RCallable;
+function isRProcedure(rval: RValue): rval is RProcedure {
+  return rval instanceof RProcedure;
 }
 
 function isRCharacter(rval: RValue): rval is RCharacter {
@@ -679,7 +684,7 @@ function isRNumber(rval: RValue): rval is RNumber {
   return rval instanceof RNumberBase;
 }
 
-function isRPrimFun(rval: RCallable): rval is RPrimFun {
+function isRPrimFun(rval: RProcedure): rval is RPrimFun {
   return rval instanceof RPrimFun;
 }
 
@@ -865,7 +870,7 @@ const R_TRUE = new RBoolean(true);
 const R_FALSE = new RBoolean(false);
 const R_EMPTY_LIST = new RList([]);
 
-interface RCallableVisitor<T> {
+interface RProcedureVisitor<T> {
   visitRIsStructFun(rval: RIsStructFun): T;
   visitRMakeStructFun(rval: RMakeStructFun): T;
   visitRLambda(rval: RLambda): T;

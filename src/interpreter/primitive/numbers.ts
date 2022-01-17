@@ -3,9 +3,9 @@ import {
   BooleanType,
   ExactNonNegativeIntegerType,
   ExactPositiveIntegerType,
-  FunctionType,
   IntegerType,
   NumberType,
+  ProcedureType,
   RationalType,
   RealType,
   StringType
@@ -92,8 +92,8 @@ class RPFMultiply extends RPrimFun {
     super("*", { minArity: 2, relaxedMinArity: 0 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new NumberType()), new NumberType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new NumberType()), new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -108,8 +108,8 @@ class RPFPlus extends RPrimFun {
     super("+", { minArity: 2, relaxedMinArity: 0 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new NumberType()), new NumberType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new NumberType()), new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -124,8 +124,8 @@ class RPFMinus extends RPrimFun {
     super("-", { minArity: 1 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new NumberType()), new NumberType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new NumberType()), new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -143,8 +143,8 @@ class RPFDivide extends RPrimFun {
     super("/", { minArity: 2, relaxedMinArity: 0 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new NumberType()), new NumberType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new NumberType()), new NumberType());
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
@@ -178,8 +178,8 @@ class RPFLess extends RPrimFun {
     super("<", { minArity: 1 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new RealType()), new BooleanType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new RealType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -197,8 +197,8 @@ class RPFLessThan extends RPrimFun {
     super("<=", { minArity: 1 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new RealType()), new BooleanType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new RealType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -216,8 +216,8 @@ class RPFEqual extends RPrimFun {
     super("=", { minArity: 1 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new NumberType()), new BooleanType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new NumberType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -235,8 +235,8 @@ class RPFGreater extends RPrimFun {
     super(">", { minArity: 1 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new RealType()), new BooleanType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new RealType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -254,8 +254,8 @@ class RPFGreaterThan extends RPrimFun {
     super(">=", { minArity: 1 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new RealType()), new BooleanType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new RealType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -273,8 +273,8 @@ class RPFAbs extends RPrimFun {
     super("abs");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new RealType()], new RealType());
+  getType(): ProcedureType {
+    return new ProcedureType([new RealType()], new RealType());
   }
 
   call(args: RValue[]): RValue {
@@ -292,8 +292,8 @@ class RPFAdd1 extends RPrimFun {
     super("add1");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new NumberType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -306,8 +306,8 @@ class RPFCeiling extends RPrimFun {
     super("ceiling");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new RealType()], new IntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new RealType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -320,8 +320,8 @@ class RPFCurrentSeconds extends RPrimFun {
     super("current-seconds");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([], new ExactNonNegativeIntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([], new ExactNonNegativeIntegerType());
   }
 
   call(_: RValue[]): RValue {
@@ -334,8 +334,8 @@ class RPFDenominator extends RPrimFun {
     super("denominator");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new RationalType()], new IntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new RationalType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -349,8 +349,8 @@ class RPFEvenHuh extends RPrimFun {
     super("even?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new IntegerType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new IntegerType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -363,8 +363,8 @@ class RPFExactToInexact extends RPrimFun {
     super("exact->inexact");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new NumberType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -377,8 +377,8 @@ class RPFExp extends RPrimFun {
     super("exp");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new NumberType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -391,8 +391,8 @@ class RPFExpt extends RPrimFun {
     super("expt");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType(), new NumberType()], new NumberType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType(), new NumberType()], new NumberType());
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
@@ -413,8 +413,8 @@ class RPFFloor extends RPrimFun {
     super("floor");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new RealType()], new IntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new RealType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -427,8 +427,8 @@ class RPFInexactToExact extends RPrimFun {
     super("inexact->exact");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new NumberType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -441,8 +441,8 @@ class RPFInexactHuh extends RPrimFun {
     super("inexact?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -455,8 +455,8 @@ class RPFIntegerHuh extends RPrimFun {
     super("integer?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -469,8 +469,8 @@ class RPFMax extends RPrimFun {
     super("max", { minArity: 1 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new RealType()), new RealType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new RealType()), new RealType());
   }
 
   call(args: RValue[]): RValue {
@@ -485,8 +485,8 @@ class RPFMin extends RPrimFun {
     super("min", { minArity: 1 });
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new RealType()), new RealType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new RealType()), new RealType());
   }
 
   call(args: RValue[]): RValue {
@@ -501,8 +501,8 @@ class RPFModulo extends RPrimFun {
     super("modulo");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new IntegerType(), new IntegerType()], new IntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new IntegerType(), new IntegerType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -522,8 +522,8 @@ class RPFNegativeHuh extends RPrimFun {
     super("negative?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new RealType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new RealType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -536,8 +536,8 @@ class RPFNumberToString extends RPrimFun {
     super("number->string");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new StringType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new StringType());
   }
 
   call(args: RValue[]): RValue {
@@ -550,8 +550,8 @@ class RPFNumberHuh extends RPrimFun {
     super(alias || "number?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -564,8 +564,8 @@ class RPFNumerator extends RPrimFun {
     super("numerator");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new RationalType()], new IntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new RationalType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -579,8 +579,8 @@ class RPFOddHuh extends RPrimFun {
     super("odd?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new IntegerType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new IntegerType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -594,8 +594,8 @@ class RPFPositiveHuh extends RPrimFun {
   }
 
 
-  getType(): FunctionType {
-    return new FunctionType([new RealType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new RealType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -608,8 +608,8 @@ class RPFQuotient extends RPrimFun {
     super("quotient");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new IntegerType(), new IntegerType()], new IntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new IntegerType(), new IntegerType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -625,8 +625,8 @@ class RPFRandom extends RPrimFun {
     super("random");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new ExactPositiveIntegerType()], new ExactNonNegativeIntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new ExactPositiveIntegerType()], new ExactNonNegativeIntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -639,8 +639,8 @@ class RPFRemainder extends RPrimFun {
     super("remainder");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new IntegerType(), new IntegerType()], new IntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new IntegerType(), new IntegerType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -656,8 +656,8 @@ class RPFRound extends RPrimFun {
     super("round");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new RealType()], new IntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new RealType()], new IntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -686,8 +686,8 @@ class RPFSqr extends RPrimFun {
     super("sqr");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new NumberType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -702,8 +702,8 @@ class RPFSqrt extends RPrimFun {
     super("sqrt");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new NumberType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[], sourceSpan: SourceSpan): RValue {
@@ -723,8 +723,8 @@ class RPFSub1 extends RPrimFun {
     super("sub1");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new NumberType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new NumberType());
   }
 
   call(args: RValue[]): RValue {
@@ -737,8 +737,8 @@ class RPFZeroHuh extends RPrimFun {
     super("zero?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new NumberType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType()], new BooleanType());
   }
 
 

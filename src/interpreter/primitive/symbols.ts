@@ -1,7 +1,7 @@
 import {
   AnyType,
   BooleanType,
-  FunctionType,
+  ProcedureType,
   StringType,
   SymbolType
 } from "../types";
@@ -25,8 +25,8 @@ class RPFSymbolToString extends RPrimFun {
     super("symbol->string");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new SymbolType()], new StringType());
+  getType(): ProcedureType {
+    return new ProcedureType([new SymbolType()], new StringType());
   }
 
   call(args: RValue[]): RValue {
@@ -39,8 +39,8 @@ class RPFAreSymbolsEqual extends RPrimFun {
     super("symbol=?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new SymbolType(), new SymbolType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new SymbolType(), new SymbolType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -53,8 +53,8 @@ class RPFSymbolHuh extends RPrimFun {
     super("symbol?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {

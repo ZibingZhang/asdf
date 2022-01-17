@@ -1,10 +1,10 @@
 import {
-  RCallable,
   RData,
   RIsStructFun,
   RMakeStructFun,
   RPrimFun,
   RPrimTestFunConfig,
+  RProcedure,
   RStructGetFun,
   RStructType,
   R_EMPTY_LIST,
@@ -81,6 +81,16 @@ import {
   R_NULL
 } from "./primitive/lists";
 import {
+  RPFApply,
+  RPFArgmax,
+  RPFArgmin,
+  RPFBuildList,
+  RPFFilter,
+  RPFMemf,
+  RPFProcedureHuh,
+  RPFSort
+} from "./primitive/higherOrder";
+import {
   RPFAreBooleansEqual,
   RPFBooleanHuh,
   RPFBooleanToString,
@@ -117,9 +127,6 @@ import {
 import {
   Keyword
 } from "./keyword";
-import {
-  RPFBuildList
-} from "./primitive/higherOrder";
 
 export {
   Global
@@ -131,12 +138,19 @@ class Global {
   primitiveEnvironment: Environment;
   primitiveDataNames: Set<string>;
   primitiveStructNames: Set<string>;
-  primitiveFunctions: Map<string, RCallable>;
+  primitiveFunctions: Map<string, RProcedure>;
   primitiveTestFunctions: Map<string, RPrimTestFunConfig>;
 
   private static instance: Global;
   private higherOrderFunctions = new Set([
-    new RPFBuildList()
+    new RPFApply(),
+    new RPFArgmax(),
+    new RPFArgmin(),
+    new RPFBuildList(),
+    new RPFFilter(),
+    new RPFMemf(),
+    new RPFProcedureHuh(),
+    new RPFSort()
   ]);
 
   constructor() {

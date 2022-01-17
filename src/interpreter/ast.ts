@@ -21,11 +21,11 @@ import {
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error";
 import {
-  RCallableVisitor,
   RIsStructFun,
   RLambda,
   RMakeStructFun,
   RPrimFun,
+  RProcedureVisitor,
   RStruct,
   RStructGetFun,
   RStructType,
@@ -35,10 +35,10 @@ import {
   R_TRUE,
   R_VOID,
   isRBoolean,
-  isRCallable,
   isRData,
   isRFalse,
   isRInexactReal,
+  isRProcedure,
   isRString,
   isRTrue
 } from "./rvalue";
@@ -46,6 +46,11 @@ import {
   Scope,
   VariableType
 } from "./scope";
+import {
+  isAnyProcedureType,
+  isAnyType,
+  isProcedureType
+} from "./types";
 import {
   AtomSExpr
 } from "./sexpr";
@@ -73,9 +78,6 @@ import {
 import {
   UserError
 } from "./primitive/misc";
-import {
-  isFunctionType
-} from "./types";
 
 export {
   ASTNode,
@@ -108,7 +110,7 @@ export {
   isLambdaNode,
   isVarNode,
   ASTNodeVisitor,
-  EvaluateRCallableVisitor
+  EvaluateRProcedureVisitor
 };
 
 type ASTNode =
@@ -537,9 +539,9 @@ class FunAppNode extends ASTNodeBase {
       this.fn.name,
       this.fn.sourceSpan
     );
-    if (isRCallable(rval)) {
+    if (isRProcedure(rval)) {
       try {
-        return rval.accept(new EvaluateRCallableVisitor(
+        return rval.accept(new EvaluateRProcedureVisitor(
           this.args,
           env,
           this.sourceSpan
@@ -558,8 +560,8 @@ class FunAppNode extends ASTNodeBase {
       throw new StageError(
         FC_EXPECTED_FUNCTION_ERR(
           rval instanceof RStructType
-            ? `structure type (do you mean make-${rval.name})`
-            : "variable"
+            ? `a structure type (do you mean make-${rval.name})`
+            : "a variable"
         ),
         this.fn.sourceSpan
       );
@@ -625,7 +627,7 @@ class LambdaNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     this.used = true;
-    return new RLambda(env.copy(), this.params, this.body);
+    return new RLambda(this.name, env.copy(), this.params, this.body);
   }
 
   isTemplate(): boolean {
@@ -942,7 +944,7 @@ interface ASTNodeVisitor<T> {
   visitVarNode(node: VarNode): T;
 }
 
-class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
+class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
   constructor(
     readonly args: ASTNode[],
     readonly env: Environment,
@@ -1013,12 +1015,17 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
     const argVals = this.args.map(arg => arg.eval(this.env));
     for (const [idx, paramType] of funType.paramTypes.entries()) {
       const argVal = argVals[idx];
-      if (isFunctionType(paramType)) {
+      if (
+        (isAnyType(paramType) || isAnyProcedureType(paramType))
+        && isRProcedure(argVal)
+      ) {
+        continue;
+      } else if (isProcedureType(paramType)) {
         const argType = argVal.getType(paramType.paramTypes.length);
-        if (argType.isSuperTypeOf(paramType)) {
+        if (paramType.isCompatibleWith(argType)) {
           continue;
         }
-      } else if (!isRCallable(argVal)) {
+      } else if (!isRProcedure(argVal)) {
         const argType = argVal.getType();
         if (paramType.isSuperTypeOf(argType)) {
           continue;

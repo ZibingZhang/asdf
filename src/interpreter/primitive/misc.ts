@@ -2,8 +2,8 @@ import {
   AnyType,
   BooleanType,
   ErrorType,
-  FunctionType,
-  NonNegativeRealType
+  NonNegativeRealType,
+  ProcedureType
 } from "../types";
 import {
   RNumber,
@@ -34,8 +34,8 @@ class RPFAreEq extends RPrimFun {
     super("eq?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType(), new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType(), new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -48,8 +48,8 @@ class RPFAreEqual extends RPrimFun {
     super("equal?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType(), new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType(), new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -62,8 +62,8 @@ class RPFAreEqualWithin extends RPrimFun {
     super("equal~?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType(), new AnyType(), new NonNegativeRealType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType(), new AnyType(), new NonNegativeRealType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -77,8 +77,8 @@ class RPFAreEqv extends RPrimFun {
     super("eqv?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType(), new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType(), new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -91,8 +91,8 @@ class RPFError extends RPrimFun {
     super("error", {});
   }
 
-  getType(args: number): FunctionType {
-    return new FunctionType(new Array(args).fill(new AnyType()), new ErrorType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new AnyType()), new ErrorType());
   }
 
   call(args: RValue[]): RValue {
@@ -115,8 +115,8 @@ class RPFIdentity extends RPrimFun {
     super("identity");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new AnyType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new AnyType());
   }
 
   call(args: RValue[]): RValue {
@@ -129,8 +129,8 @@ class RPFStructHuh extends RPrimFun {
     super("struct?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {

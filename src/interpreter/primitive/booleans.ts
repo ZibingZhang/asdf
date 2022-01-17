@@ -1,7 +1,7 @@
 import {
   AnyType,
   BooleanType,
-  FunctionType,
+  ProcedureType,
   StringType
 } from "../types";
 import {
@@ -26,8 +26,8 @@ class RPFBooleanToString extends RPrimFun {
     super("boolean->string");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new BooleanType()], new StringType());
+  getType(): ProcedureType {
+    return new ProcedureType([new BooleanType()], new StringType());
   }
 
   call(args: RValue[]): RValue {
@@ -40,8 +40,8 @@ class RPFAreBooleansEqual extends RPrimFun {
     super("boolean=?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new BooleanType(), new BooleanType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new BooleanType(), new BooleanType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -54,8 +54,8 @@ class RPFBooleanHuh extends RPrimFun {
     super("boolean?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -68,8 +68,8 @@ class RPFFalseHuh extends RPrimFun {
     super("false?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -82,8 +82,8 @@ class RPFNot extends RPrimFun {
     super("not");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new BooleanType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new BooleanType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {

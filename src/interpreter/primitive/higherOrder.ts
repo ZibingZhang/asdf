@@ -1,51 +1,288 @@
 import {
+  AnyProcedureType,
   AnyType,
+  BooleanType,
   ExactNonNegativeIntegerType,
-  FunctionType,
-  ListType
+  ListType,
+  ProcedureType,
+  RealType,
+  Type,
+  isProcedureType
 } from "../types";
 import {
   AtomNode,
-  EvaluateRCallableVisitor
+  EvaluateRProcedureVisitor
 } from "../ast";
 import {
-  NO_SOURCE_SPAN,
-  SourceSpan
-} from "../sourcespan";
+  HO_CONTRACT_VIOLATION_ERR,
+  HO_EXPECTED_BOOLEAN_ERR
+} from "../error";
 import {
-  RCallable,
   RList,
   RMath,
   RNumber,
   RPrimFun,
-  RValue
+  RProcedure,
+  RValue,
+  R_FALSE,
+  isRBoolean,
+  isRFalse,
+  isRProcedure,
+  isRTrue,
+  toRBoolean
 } from "../rvalue";
 import {
   Environment
 } from "../environment";
+import {
+  SourceSpan
+} from "../sourcespan";
+import {
+  StageError
+} from "../pipeline";
 
 export {
-  RPFBuildList
+  RPFApply,
+  RPFArgmax,
+  RPFArgmin,
+  RPFBuildList,
+  RPFFilter,
+  RPFMemf,
+  RPFProcedureHuh,
+  RPFSort
 };
 
-class RPFBuildList extends RPrimFun {
+abstract class RHigherOrderPrimFun extends RPrimFun {
+  assertBooleanType(receivedVal: RValue, procedure: RProcedure, sourceSpan: SourceSpan) {
+    if (!isRBoolean(receivedVal)) {
+      throw new StageError(
+        HO_EXPECTED_BOOLEAN_ERR(this.name, procedure.stringify(), receivedVal.stringify()),
+        sourceSpan
+      );
+    }
+  }
+
+  assertCorrectType(expectedType: Type, receivedVal: RValue, sourceSpan: SourceSpan) {
+    let receivedType;
+    if (isProcedureType(expectedType)) {
+      receivedType = receivedVal.getType(expectedType.paramTypes.length);
+      if (expectedType.isCompatibleWith(receivedType)) {
+        return;
+      }
+    } else if (!isRProcedure(receivedVal)) {
+      if (expectedType.isSuperTypeOf(receivedVal.getType())) {
+        return;
+      }
+    }
+    throw new StageError(
+      HO_CONTRACT_VIOLATION_ERR(this.name, expectedType.stringify(), receivedVal.stringify()),
+      sourceSpan
+    );
+  }
+}
+
+class RPFApply extends RHigherOrderPrimFun {
+  constructor() {
+    super("apply");
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType([new AnyProcedureType()].concat(new Array(args - 2).fill(new AnyType).concat(new ListType())), new AnyType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const callable = <RProcedure>args[0];
+    const argument$ = args.slice(1, -1).concat(...(<RList>args[args.length - 1]).vals);
+    return callable.accept(
+      new EvaluateRProcedureVisitor(
+        argument$.map(argument => new AtomNode(argument, sourceSpan)),
+        env,
+        sourceSpan
+      )
+    );
+  }
+}
+
+class RPFArgmax extends RHigherOrderPrimFun {
+  constructor() {
+    super("argmax");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new ProcedureType([new AnyType()], new RealType()), new ListType(1)], new AnyType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const callable = <RProcedure>args[0];
+    const list = <RList>args[1];
+    let maxElement = list.vals[0];
+    let max = <RNumber>callable.accept(
+      new EvaluateRProcedureVisitor([
+        new AtomNode(maxElement, sourceSpan)
+      ], env, sourceSpan)
+    );
+    this.assertCorrectType(new RealType(), max, sourceSpan);
+    for (const val of list.vals.slice(1)) {
+      const appliedVal = <RNumber>callable.accept(
+        new EvaluateRProcedureVisitor([
+          new AtomNode(val, sourceSpan)
+        ], env, sourceSpan));
+      this.assertCorrectType(new RealType(), appliedVal, sourceSpan);
+      if (appliedVal.toDecimal() > max.toDecimal()) {
+        maxElement = val;
+        max = appliedVal;
+      }
+    }
+    return maxElement;
+  }
+}
+
+class RPFArgmin extends RHigherOrderPrimFun {
+  constructor() {
+    super("argmin");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new ProcedureType([new AnyType()], new RealType()), new ListType(1)], new AnyType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const callable = <RProcedure>args[0];
+    const list = <RList>args[1];
+    let minElement = list.vals[0];
+    let min = <RNumber>callable.accept(
+      new EvaluateRProcedureVisitor([
+        new AtomNode(minElement, sourceSpan)
+      ], env, sourceSpan)
+    );
+    this.assertCorrectType(new RealType(), min, sourceSpan);
+    for (const val of list.vals.slice(1)) {
+      const appliedVal = <RNumber>callable.accept(
+        new EvaluateRProcedureVisitor([
+          new AtomNode(val, sourceSpan)
+        ], env, sourceSpan));
+      this.assertCorrectType(new RealType(), appliedVal, sourceSpan);
+      if (appliedVal.toDecimal() > min.toDecimal()) {
+        minElement = val;
+        min = appliedVal;
+      }
+    }
+    return minElement;
+  }
+}
+
+class RPFBuildList extends RHigherOrderPrimFun {
   constructor() {
     super("build-list");
   }
 
-  call(args: RValue[], _: SourceSpan, env: Environment): RValue {
-    const callable = <RCallable>args[1];
+  getType(): ProcedureType {
+    return new ProcedureType([new ExactNonNegativeIntegerType(), new ProcedureType([new ExactNonNegativeIntegerType()], new AnyType())], new ListType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const callable = <RProcedure>args[1];
     const listVals: RValue[] = [];
     for (let idx = 0n; idx < (<RNumber>args[0]).numerator; idx++) {
-      const evaluator = new EvaluateRCallableVisitor([
-        new AtomNode(RMath.make(true, idx), NO_SOURCE_SPAN)
-      ], env, NO_SOURCE_SPAN);
+      const evaluator = new EvaluateRProcedureVisitor([
+        new AtomNode(RMath.make(true, idx), sourceSpan)
+      ], env, sourceSpan);
       listVals.push(callable.accept(evaluator));
     }
     return new RList(listVals);
   }
+}
 
-  getType(): FunctionType {
-    return new FunctionType([new ExactNonNegativeIntegerType(), new FunctionType([new ExactNonNegativeIntegerType()], new AnyType())], new ListType());
+class RPFFilter extends RHigherOrderPrimFun {
+  constructor() {
+    super("filter");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new ProcedureType([new AnyType()], new BooleanType()), new ListType()], new ListType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const predicate = <RProcedure>args[0];
+    const list = <RList>args[1];
+    const filteredVals = [];
+    for (const val of list.vals) {
+      const stayInList = predicate.accept(
+        new EvaluateRProcedureVisitor([
+          new AtomNode(val, sourceSpan)
+        ], env, sourceSpan)
+      );
+      this.assertBooleanType(stayInList, predicate, sourceSpan);
+      if (isRTrue(stayInList)) {
+        filteredVals.push(val);
+      }
+    }
+    return new RList(filteredVals);
+  }
+}
+
+class RPFMemf extends RHigherOrderPrimFun {
+  constructor() {
+    super("memf");
+  }
+
+  getType(): ProcedureType {
+    // output type should be (union #false (listof X)), which is currently unsupported
+    return new ProcedureType([new ProcedureType([new AnyType()], new AnyType()), new ListType()], new AnyType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const predicate = <RProcedure>args[0];
+    const list = <RList>args[1];
+    for (const [idx, val] of list.vals.entries()) {
+      const shortCircuitEvaluation = predicate.accept(
+        new EvaluateRProcedureVisitor([
+          new AtomNode(val, sourceSpan)
+        ], env, sourceSpan)
+      );
+      if (!isRFalse(shortCircuitEvaluation)) {
+        return new RList(list.vals.slice(idx));
+      }
+    }
+    return R_FALSE;
+  }
+}
+
+class RPFProcedureHuh extends RPrimFun {
+  constructor() {
+    super("procedure?");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean(isRProcedure(args[0]));
+  }
+}
+
+class RPFSort extends RHigherOrderPrimFun {
+  constructor() {
+    super("sort");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new ListType(), new ProcedureType([new AnyType(), new AnyType()], new BooleanType())], new ListType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const list = <RList>args[0];
+    const comparison = <RProcedure>args[1];
+    return new RList(list.vals.sort((a: RValue, b: RValue) => {
+      const shouldSwap = comparison.accept(
+        new EvaluateRProcedureVisitor([
+          new AtomNode(a, sourceSpan),
+          new AtomNode(b, sourceSpan)
+        ], env, sourceSpan)
+      );
+      this.assertBooleanType(shouldSwap, comparison, sourceSpan);
+      return isRTrue(shouldSwap) ? -1 : 1;
+    }));
   }
 }

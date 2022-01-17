@@ -2,7 +2,7 @@ import {
   AnyType,
   BooleanType,
   ExactNonNegativeIntegerType,
-  FunctionType,
+  ProcedureType,
   StringType
 } from "../types";
 import {
@@ -26,8 +26,8 @@ class RPFStringDowncase extends RPrimFun {
     super("string-downcase");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new StringType()], new StringType());
+  getType(): ProcedureType {
+    return new ProcedureType([new StringType()], new StringType());
   }
 
   call(args: RValue[]): RValue {
@@ -40,8 +40,8 @@ class RPFStringLength extends RPrimFun {
     super("string-length");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new StringType()], new ExactNonNegativeIntegerType());
+  getType(): ProcedureType {
+    return new ProcedureType([new StringType()], new ExactNonNegativeIntegerType());
   }
 
   call(args: RValue[]): RValue {
@@ -54,8 +54,8 @@ class RPFStringLessEqualThanHuh extends RPrimFun {
     super("string<=?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new StringType(), new StringType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new StringType(), new StringType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
@@ -68,8 +68,8 @@ class RPFStringHuh extends RPrimFun {
     super("string?");
   }
 
-  getType(): FunctionType {
-    return new FunctionType([new AnyType()], new BooleanType());
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
   }
 
   call(args: RValue[]): RValue {
