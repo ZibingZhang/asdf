@@ -1018,9 +1018,8 @@ class EvaluateRCallableVisitor implements RCallableVisitor<RValue> {
         if (argType.isSuperTypeOf(paramType)) {
           continue;
         }
-      } else {
-        // unsure if need to pass sensible value to `getType'
-        const argType = argVal.getType(argsLength);
+      } else if (!isRCallable(argVal)) {
+        const argType = argVal.getType();
         if (paramType.isSuperTypeOf(argType)) {
           continue;
         }
