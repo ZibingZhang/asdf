@@ -30,7 +30,8 @@ import {
   isRFalse,
   isRProcedure,
   isRTrue,
-  toRBoolean
+  toRBoolean,
+  R_TRUE
 } from "../rvalue";
 import {
   Environment
@@ -43,6 +44,7 @@ import {
 } from "../pipeline";
 
 export {
+  RPFAndmap,
   RPFApply,
   RPFArgmax,
   RPFArgmin,
@@ -92,6 +94,34 @@ abstract class RHigherOrderPrimFun extends RPrimFun {
         );
       }
     }
+  }
+}
+
+class RPFAndmap extends RHigherOrderPrimFun {
+  constructor() {
+    super("andmap", { minArityWithoutLists: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType([new ProcedureType(new Array(args - 1).fill(new AnyType()), new BooleanType()), ...new Array(args - 1).fill(new ListType())], new ListType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const procedure = <RProcedure>args[0];
+    const lists = <RList[]>args.slice(1);
+    this.assertListsLength(lists, procedure, sourceSpan);
+    for (let idx = 0; idx < lists[0].vals.length; idx++) {
+      const val = procedure.accept(
+        new EvaluateRProcedureVisitor(lists.map(list =>
+          new AtomNode(list.vals[idx], sourceSpan)
+        ), env, sourceSpan)
+      );
+      this.assertBooleanType(val, procedure, sourceSpan);
+      if (isRFalse(val)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
   }
 }
 

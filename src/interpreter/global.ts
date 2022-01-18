@@ -81,6 +81,7 @@ import {
   R_NULL
 } from "./primitive/lists";
 import {
+  RPFAndmap,
   RPFApply,
   RPFArgmax,
   RPFArgmin,
@@ -145,6 +146,7 @@ class Global {
 
   private static instance: Global;
   private higherOrderFunctions = new Set([
+    new RPFAndmap(),
     new RPFApply(),
     new RPFArgmax(),
     new RPFArgmin(),
