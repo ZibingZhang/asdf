@@ -31,7 +31,8 @@ import {
   isRProcedure,
   isRTrue,
   toRBoolean,
-  R_TRUE
+  R_TRUE,
+  RLambda
 } from "../rvalue";
 import {
   Environment
@@ -50,6 +51,8 @@ export {
   RPFArgmin,
   RPFBuildList,
   RPFFilter,
+  RPFFoldl,
+  RPFFoldr,
   RPFMap,
   RPFMemf,
   RPFOrmap,
@@ -263,6 +266,58 @@ class RPFFilter extends RHigherOrderPrimFun {
       }
     }
     return new RList(filteredVals);
+  }
+}
+
+class RPFFoldl extends RHigherOrderPrimFun {
+  constructor() {
+    super("foldl", { minArityWithoutLists: 2 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType([new ProcedureType(new Array(args - 1).fill(new AnyType()), new AnyType()), new AnyType(), ...new Array(args - 2).fill(new ListType())], new AnyType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const procedure = <RProcedure>args[0];
+    const base = <RValue>args[1];
+    const lists = <RList[]>args.slice(2);
+    this.assertListsLength(lists, procedure, sourceSpan);
+    let result = base;
+    for (let idx = 0; idx < lists[0].vals.length; idx++) {
+      result = procedure.accept(
+        new EvaluateRProcedureVisitor(lists.map(list =>
+          new AtomNode(list.vals[idx], sourceSpan)
+        ).concat([new AtomNode(result, sourceSpan)]), env, sourceSpan)
+      );
+    }
+    return result;
+  }
+}
+
+class RPFFoldr extends RHigherOrderPrimFun {
+  constructor() {
+    super("foldr", { minArityWithoutLists: 2 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType([new ProcedureType(new Array(args - 1).fill(new AnyType()), new AnyType()), new AnyType(), ...new Array(args - 2).fill(new ListType())], new AnyType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const procedure = <RProcedure>args[0];
+    const base = <RValue>args[1];
+    const lists = <RList[]>args.slice(2);
+    this.assertListsLength(lists, procedure, sourceSpan);
+    let result = base;
+    for (let idx = lists[0].vals.length - 1; idx >= 0; idx--) {
+      result = procedure.accept(
+        new EvaluateRProcedureVisitor(lists.map(list =>
+          new AtomNode(list.vals[idx], sourceSpan)
+        ).concat([new AtomNode(result, sourceSpan)]), env, sourceSpan)
+      );
+    }
+    return result;
   }
 }
 
