@@ -11,7 +11,8 @@ import {
 } from "../types";
 import {
   AtomNode,
-  EvaluateRProcedureVisitor
+  EvaluateRProcedureVisitor,
+  FunAppNode
 } from "../ast";
 import {
   HO_CONTRACT_VIOLATION_ERR,
@@ -139,9 +140,9 @@ class RPFApply extends RHigherOrderPrimFun {
   }
 
   call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
-    const callable = <RProcedure>args[0];
+    const procedure = <RProcedure>args[0];
     const argument$ = args.slice(1, -1).concat(...(<RList>args[args.length - 1]).vals);
-    return callable.accept(
+    return procedure.accept(
       new EvaluateRProcedureVisitor(
         argument$.map(argument => new AtomNode(argument, sourceSpan)),
         env,
@@ -161,17 +162,17 @@ class RPFArgmax extends RHigherOrderPrimFun {
   }
 
   call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
-    const callable = <RProcedure>args[0];
+    const procedure = <RProcedure>args[0];
     const list = <RList>args[1];
     let maxElement = list.vals[0];
-    let max = <RNumber>callable.accept(
+    let max = <RNumber>procedure.accept(
       new EvaluateRProcedureVisitor([
         new AtomNode(maxElement, sourceSpan)
       ], env, sourceSpan)
     );
     this.assertCorrectType(new RealType(), max, sourceSpan);
     for (const val of list.vals.slice(1)) {
-      const appliedVal = <RNumber>callable.accept(
+      const appliedVal = <RNumber>procedure.accept(
         new EvaluateRProcedureVisitor([
           new AtomNode(val, sourceSpan)
         ], env, sourceSpan));
@@ -195,17 +196,17 @@ class RPFArgmin extends RHigherOrderPrimFun {
   }
 
   call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
-    const callable = <RProcedure>args[0];
+    const procedure = <RProcedure>args[0];
     const list = <RList>args[1];
     let minElement = list.vals[0];
-    let min = <RNumber>callable.accept(
+    let min = <RNumber>procedure.accept(
       new EvaluateRProcedureVisitor([
         new AtomNode(minElement, sourceSpan)
       ], env, sourceSpan)
     );
     this.assertCorrectType(new RealType(), min, sourceSpan);
     for (const val of list.vals.slice(1)) {
-      const appliedVal = <RNumber>callable.accept(
+      const appliedVal = <RNumber>procedure.accept(
         new EvaluateRProcedureVisitor([
           new AtomNode(val, sourceSpan)
         ], env, sourceSpan));
@@ -229,13 +230,13 @@ class RPFBuildList extends RHigherOrderPrimFun {
   }
 
   call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
-    const callable = <RProcedure>args[1];
+    const procedure = <RProcedure>args[1];
     const listVals: RValue[] = [];
     for (let idx = 0n; idx < (<RNumber>args[0]).numerator; idx++) {
       const evaluator = new EvaluateRProcedureVisitor([
         new AtomNode(RMath.make(true, idx), sourceSpan)
       ], env, sourceSpan);
-      listVals.push(callable.accept(evaluator));
+      listVals.push(procedure.accept(evaluator));
     }
     return new RList(listVals);
   }

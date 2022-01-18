@@ -344,8 +344,8 @@ class Global {
 
   private defineScopes() {
     this.primitiveDataNames.forEach((name) => this.primitiveScope.set(name, VariableType.Data));
-    this.primitiveFunctions.forEach((callable, name) => {
-      if (callable.config.relaxedMinArity !== undefined) {
+    this.primitiveFunctions.forEach((procedure, name) => {
+      if (procedure.config.relaxedMinArity !== undefined) {
         this.primitiveRelaxedScope.set(name, VariableType.PrimitiveFunction);
       }
       this.primitiveScope.set(name, VariableType.PrimitiveFunction);
