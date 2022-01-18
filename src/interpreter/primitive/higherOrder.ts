@@ -52,6 +52,7 @@ export {
   RPFFilter,
   RPFMap,
   RPFMemf,
+  RPFOrmap,
   RPFProcedureHuh,
   RPFSort
 };
@@ -311,6 +312,34 @@ class RPFMemf extends RHigherOrderPrimFun {
       );
       if (!isRFalse(shortCircuitEvaluation)) {
         return new RList(list.vals.slice(idx));
+      }
+    }
+    return R_FALSE;
+  }
+}
+
+class RPFOrmap extends RHigherOrderPrimFun {
+  constructor() {
+    super("ormap", { minArityWithoutLists: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType([new ProcedureType(new Array(args - 1).fill(new AnyType()), new BooleanType()), ...new Array(args - 1).fill(new ListType())], new ListType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const procedure = <RProcedure>args[0];
+    const lists = <RList[]>args.slice(1);
+    this.assertListsLength(lists, procedure, sourceSpan);
+    for (let idx = 0; idx < lists[0].vals.length; idx++) {
+      const val = procedure.accept(
+        new EvaluateRProcedureVisitor(lists.map(list =>
+          new AtomNode(list.vals[idx], sourceSpan)
+        ), env, sourceSpan)
+      );
+      this.assertBooleanType(val, procedure, sourceSpan);
+      if (isRTrue(val)) {
+        return R_TRUE;
       }
     }
     return R_FALSE;

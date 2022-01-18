@@ -89,6 +89,7 @@ import {
   RPFFilter,
   RPFMap,
   RPFMemf,
+  RPFOrmap,
   RPFProcedureHuh,
   RPFSort
 } from "./primitive/higherOrder";
@@ -154,6 +155,7 @@ class Global {
     new RPFFilter(),
     new RPFMap(),
     new RPFMemf(),
+    new RPFOrmap(),
     new RPFProcedureHuh(),
     new RPFSort()
   ]);
