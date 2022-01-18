@@ -15,7 +15,8 @@ import {
 } from "../ast";
 import {
   HO_CONTRACT_VIOLATION_ERR,
-  HO_EXPECTED_BOOLEAN_ERR
+  HO_EXPECTED_BOOLEAN_ERR,
+  HO_EXPECTED_LISTS_SAME_LENGTH_ERR
 } from "../error";
 import {
   RList,
@@ -47,6 +48,7 @@ export {
   RPFArgmin,
   RPFBuildList,
   RPFFilter,
+  RPFMap,
   RPFMemf,
   RPFProcedureHuh,
   RPFSort
@@ -78,6 +80,18 @@ abstract class RHigherOrderPrimFun extends RPrimFun {
       HO_CONTRACT_VIOLATION_ERR(this.name, expectedType.stringify(), receivedVal.stringify()),
       sourceSpan
     );
+  }
+
+  assertListsLength(lists: RList[], procedure: RProcedure, sourceSpan: SourceSpan) {
+    const initLength = lists[0].vals.length;
+    for (const list of lists.slice(1)) {
+      if (list.vals.length !== initLength) {
+        throw new StageError(
+          HO_EXPECTED_LISTS_SAME_LENGTH_ERR(this.name, initLength, list.vals.length, procedure.stringify()),
+          sourceSpan
+        );
+      }
+    }
   }
 }
 
@@ -205,7 +219,7 @@ class RPFFilter extends RHigherOrderPrimFun {
   call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
     const predicate = <RProcedure>args[0];
     const list = <RList>args[1];
-    const filteredVals = [];
+    const filteredVals: RValue[] = [];
     for (const val of list.vals) {
       const stayInList = predicate.accept(
         new EvaluateRProcedureVisitor([
@@ -218,6 +232,31 @@ class RPFFilter extends RHigherOrderPrimFun {
       }
     }
     return new RList(filteredVals);
+  }
+}
+
+class RPFMap extends RHigherOrderPrimFun {
+  constructor() {
+    super("map", { minArityWithoutLists: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType([new ProcedureType(new Array(args - 1).fill(new AnyType()), new AnyType()), ...new Array(args - 1).fill(new ListType())], new ListType());
+  }
+
+  call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
+    const procedure = <RProcedure>args[0];
+    const lists = <RList[]>args.slice(1);
+    this.assertListsLength(lists, procedure, sourceSpan);
+    const mappedVals: RValue[] = [];
+    for (let idx = 0; idx < lists[0].vals.length; idx++) {
+      mappedVals.push(procedure.accept(
+        new EvaluateRProcedureVisitor(lists.map(list =>
+          new AtomNode(list.vals[idx], sourceSpan)
+        ), env, sourceSpan)
+      ));
+    }
+    return new RList(mappedVals);
   }
 }
 

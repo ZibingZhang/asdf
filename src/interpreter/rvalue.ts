@@ -508,7 +508,8 @@ class RInexactReal extends RNumberBase {
 
 interface RProcedureConfig {
   minArity?: number,
-  relaxedMinArity?: number
+  relaxedMinArity?: number,
+  minArityWithoutLists?: number
 }
 
 interface RPrimTestFunConfig {

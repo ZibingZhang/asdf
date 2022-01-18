@@ -86,6 +86,7 @@ import {
   RPFArgmin,
   RPFBuildList,
   RPFFilter,
+  RPFMap,
   RPFMemf,
   RPFProcedureHuh,
   RPFSort
@@ -149,6 +150,7 @@ class Global {
     new RPFArgmin(),
     new RPFBuildList(),
     new RPFFilter(),
+    new RPFMap(),
     new RPFMemf(),
     new RPFProcedureHuh(),
     new RPFSort()

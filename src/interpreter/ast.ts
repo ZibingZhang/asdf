@@ -18,6 +18,7 @@ import {
   FA_NTH_WRONG_TYPE_ERR,
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
+  HO_EXPECTED_LIST_ARGUMENT_ERR,
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error";
 import {
@@ -990,7 +991,14 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
 
   visitRPrimFun(rval: RPrimFun): RValue {
     const argsLength = this.args.length;
-    if (
+    if (rval.config.minArityWithoutLists !== undefined) {
+      if (argsLength <= rval.config.minArityWithoutLists) {
+        throw new StageError(
+          HO_EXPECTED_LIST_ARGUMENT_ERR(rval.name),
+          this.sourceSpan
+        );
+      }
+    } else if (
       SETTINGS.primitives.relaxedConditions.includes(rval.name)
       && rval.config.relaxedMinArity !== undefined
     ) {

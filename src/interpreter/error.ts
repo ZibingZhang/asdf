@@ -51,6 +51,8 @@ export {
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   HO_CONTRACT_VIOLATION_ERR,
+  HO_EXPECTED_LIST_ARGUMENT_ERR,
+  HO_EXPECTED_LISTS_SAME_LENGTH_ERR,
   HO_EXPECTED_BOOLEAN_ERR,
   IF_EXPECTED_THREE_PARTS_ERR,
   LM_DUPLICATE_VARIABLE_ERR,
@@ -271,8 +273,14 @@ const FC_EXPECTED_FUNCTION_ERR = (found?: SExpr | string) => {
 const HO_CONTRACT_VIOLATION_ERR = (name: string, expected: string, received: string) => {
   return `${name}: contract violation\n  expected: ${expected}\n  received: ${received}`;
 };
-const HO_EXPECTED_BOOLEAN_ERR = (name: string, procedureName: string, received: string) => {
-  return `${name}: expected a boolean from ${procedureName} (the function given to filter), but received ${received}`;
+const HO_EXPECTED_BOOLEAN_ERR = (name: string, procedure: string, received: string) => {
+  return `${name}: expected a boolean from ${procedure} (the function given to filter), but received ${received}`;
+};
+const HO_EXPECTED_LIST_ARGUMENT_ERR = (name: string) => {
+  return `${name}: expects (at least) one list argument, given none`;
+};
+const HO_EXPECTED_LISTS_SAME_LENGTH_ERR = (name: string, initLength: number, wrongLength: number, procedure: string) => {
+  return `${name}: all lists must have same size\n  first list length: ${initLength}\e  other list length: ${wrongLength}\n  procedure: ${procedure}`;
 };
 
 const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {
