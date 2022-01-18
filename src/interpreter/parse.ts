@@ -230,15 +230,23 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         );
       }
       if (isListSExpr(leadingSExpr)) {
-        throw new StageError(
-          FC_EXPECTED_FUNCTION_ERR(leadingSExpr),
-          leadingSExpr.sourceSpan
-        );
+        if (SETTINGS.higherOrderFunctions) {
+          return new FunAppNode(
+            this.toNode(leadingSExpr),
+            sexpr.subSExprs.slice(1).map(sexpr => this.toNode(sexpr)),
+            sexpr.sourceSpan
+          );
+        } else {
+          throw new StageError(
+            FC_EXPECTED_FUNCTION_ERR(leadingSExpr),
+            leadingSExpr.sourceSpan
+          );
+        }
       }
       switch (leadingSExpr.token.type) {
         case TokenType.Name: {
           return new FunAppNode(
-            new VarNode(leadingSExpr.token.text, leadingSExpr.sourceSpan),
+            this.toNode(leadingSExpr),
             sexpr.subSExprs.slice(1).map(sexpr => this.toNode(sexpr)),
             sexpr.sourceSpan
           );

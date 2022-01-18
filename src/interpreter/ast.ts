@@ -524,7 +524,7 @@ class EllipsisNode extends ASTNodeBase {
 
 class FunAppNode extends ASTNodeBase {
   constructor(
-    readonly fn: VarNode,
+    readonly fn: ASTNode,
     readonly args: ASTNode[],
     readonly sourceSpan: SourceSpan
   ) {
@@ -537,10 +537,25 @@ class FunAppNode extends ASTNodeBase {
 
   eval(env: Environment): RValue {
     this.used = true;
-    const rval = env.get(
-      this.fn.name,
-      this.fn.sourceSpan
-    );
+    let rval: RValue;
+    if (isVarNode(this.fn)) {
+      rval = env.get(
+        this.fn.name,
+        this.fn.sourceSpan
+      );
+      if (!isRProcedure(rval)) {
+        throw new StageError(
+          FC_EXPECTED_FUNCTION_ERR(
+            isRStructType(rval)
+            ? `a structure type (do you mean make-${rval.name})`
+            : "a variable"
+          ),
+          this.fn.sourceSpan
+        );
+      }
+    } else {
+      rval = this.fn.eval(env);
+    }
     if (isRProcedure(rval)) {
       try {
         return rval.accept(new EvaluateRProcedureVisitor(
@@ -563,7 +578,7 @@ class FunAppNode extends ASTNodeBase {
         FC_EXPECTED_FUNCTION_ERR(
           isRStructType(rval)
           ? `a structure type (do you mean make-${rval.name})`
-          : "a variable"
+          : rval.stringify()
         ),
         this.fn.sourceSpan
       );
@@ -652,6 +667,7 @@ class LetNode extends ASTNodeBase {
   }
 
   eval(env: Environment): RValue {
+    this.used = true;
     switch (this.name) {
       case "letrec":
       case "let*": {
