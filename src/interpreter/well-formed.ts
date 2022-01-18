@@ -129,6 +129,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
 
   visitFunAppNode(node: FunAppNode): void {
     this.incrementLevel();
+    node.fn.accept(this);
     node.args.forEach(arg => arg.accept(this));
   }
 
