@@ -11,16 +11,121 @@ import {
   RString,
   RValue,
   isRString,
-  toRBoolean
+  toRBoolean,
+  R_FALSE,
+  R_TRUE
 } from "../rvalue";
 
 export {
+  RPFStringCiLessEqualHuh,
+  RPFStringCiLessHuh,
+  RPFStringCiEqualHuh,
+  RPFStringCiGreaterEqualHuh,
+  RPFStringCiGreaterHuh,
   RPFStringDowncase,
   RPFStringLength,
-  RPFStringLessEqualThanHuh,
+  RPFStringLessEqualHuh,
+  RPFStringLessHuh,
   RPFStringEqualHuh,
+  RPFStringGreaterEqualHuh,
+  RPFStringGreaterHuh,
   RPFStringHuh
 };
+
+class RPFStringCiLessEqualHuh extends RPrimFun {
+  constructor() {
+    super("string-ci<=?", { minArity: 2, relaxedMinArity: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val.toLowerCase() <= (<RString>args[idx + 1]).val.toLowerCase())) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFStringCiLessHuh extends RPrimFun {
+  constructor() {
+    super("string-ci<?", { minArity: 2, relaxedMinArity: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val.toLowerCase() < (<RString>args[idx + 1]).val.toLowerCase())) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFStringCiEqualHuh extends RPrimFun {
+  constructor() {
+    super("string-ci=?", { minArity: 2, relaxedMinArity: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val.toLowerCase() === (<RString>args[idx + 1]).val.toLowerCase())) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFStringCiGreaterEqualHuh extends RPrimFun {
+  constructor() {
+    super("string-ci>=?", { minArity: 2, relaxedMinArity: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val.toLowerCase() >= (<RString>args[idx + 1]).val.toLowerCase())) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFStringCiGreaterHuh extends RPrimFun {
+  constructor() {
+    super("string-ci>?", { minArity: 2, relaxedMinArity: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val.toLowerCase() >= (<RString>args[idx + 1]).val.toLowerCase())) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
 
 class RPFStringDowncase extends RPrimFun {
   constructor() {
@@ -50,31 +155,98 @@ class RPFStringLength extends RPrimFun {
   }
 }
 
-class RPFStringLessEqualThanHuh extends RPrimFun {
+class RPFStringLessEqualHuh extends RPrimFun {
   constructor() {
-    super("string<=?");
+    super("string<=?", { minArity: 2, relaxedMinArity: 1 });
   }
 
-  getType(): ProcedureType {
-    return new ProcedureType([new StringType(), new StringType()], new BooleanType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
-    return toRBoolean((<RString>args[0]).val <= (<RString>args[1]).val);
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val <= (<RString>args[idx + 1]).val)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFStringLessHuh extends RPrimFun {
+  constructor() {
+    super("string<?", { minArity: 2, relaxedMinArity: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val < (<RString>args[idx + 1]).val)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
   }
 }
 
 class RPFStringEqualHuh extends RPrimFun {
   constructor() {
-    super("string=?");
+    super("string=?", { minArity: 2, relaxedMinArity: 1 });
   }
 
-  getType(): ProcedureType {
-    return new ProcedureType([new StringType(), new StringType()], new BooleanType());
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
   }
 
   call(args: RValue[]): RValue {
-    return toRBoolean((<RString>args[0]).val === (<RString>args[1]).val);
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val === (<RString>args[idx + 1]).val)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFStringGreaterEqualHuh extends RPrimFun {
+  constructor() {
+    super("string>=?", { minArity: 2, relaxedMinArity: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val >= (<RString>args[idx + 1]).val)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
+  }
+}
+
+class RPFStringGreaterHuh extends RPrimFun {
+  constructor() {
+    super("string>?", { minArity: 2, relaxedMinArity: 1 });
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(args).fill(new StringType()), new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    for (let idx = 0; idx < args.length - 1; idx++) {
+      if (!((<RString>args[idx]).val >= (<RString>args[idx + 1]).val)) {
+        return R_FALSE;
+      }
+    }
+    return R_TRUE;
   }
 }
 

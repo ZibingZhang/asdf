@@ -11,7 +11,17 @@ const initValue =
     "relaxedConditions": [
       "*",
       "+",
-      "/"
+      "/",
+      "string-ci<=?",
+      "string-ci<?",
+      "string-ci=?",
+      "string-ci>=?",
+      "string-ci>?",
+      "string<=?",
+      "string<?",
+      "string=?",
+      "string>=?",
+      "string>?"
     ]
   },
   "stringify": {

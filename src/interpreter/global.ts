@@ -27,12 +27,12 @@ import {
   RPFExpt,
   RPFFloor,
   RPFGreater,
-  RPFGreaterThan,
+  RPFGreaterEqual,
   RPFInexactHuh,
   RPFInexactToExact,
   RPFIntegerHuh,
   RPFLess,
-  RPFLessThan,
+  RPFLessEqual,
   RPFMax,
   RPFMin,
   RPFMinus,
@@ -117,11 +117,19 @@ import {
   RPFSymbolToString
 } from "./primitive/symbols";
 import {
+  RPFStringCiEqualHuh,
+  RPFStringCiGreaterEqualHuh,
+  RPFStringCiGreaterHuh,
+  RPFStringCiLessEqualHuh,
+  RPFStringCiLessHuh,
   RPFStringDowncase,
   RPFStringEqualHuh,
+  RPFStringGreaterEqualHuh,
+  RPFStringGreaterHuh,
   RPFStringHuh,
   RPFStringLength,
-  RPFStringLessEqualThanHuh
+  RPFStringLessEqualHuh,
+  RPFStringLessHuh
 } from "./primitive/string";
 import {
   Scope,
@@ -197,10 +205,10 @@ class Global {
     this.addFnToPrimEnv(new RPFMinus());
     this.addFnToPrimEnv(new RPFDivide());
     this.addFnToPrimEnv(new RPFLess());
-    this.addFnToPrimEnv(new RPFLessThan());
+    this.addFnToPrimEnv(new RPFLessEqual());
     this.addFnToPrimEnv(new RPFEqual());
     this.addFnToPrimEnv(new RPFGreater());
-    this.addFnToPrimEnv(new RPFGreaterThan());
+    this.addFnToPrimEnv(new RPFGreaterEqual());
     this.addFnToPrimEnv(new RPFAbs());
     this.addFnToPrimEnv(new RPFAdd1());
     this.addFnToPrimEnv(new RPFCeiling());
@@ -281,10 +289,18 @@ class Global {
     this.addStructToPrimEnv("posn", ["x", "y"]);
 
     // strings
+    this.addFnToPrimEnv(new RPFStringCiLessEqualHuh());
+    this.addFnToPrimEnv(new RPFStringCiLessHuh());
+    this.addFnToPrimEnv(new RPFStringCiEqualHuh());
+    this.addFnToPrimEnv(new RPFStringCiGreaterEqualHuh());
+    this.addFnToPrimEnv(new RPFStringCiGreaterHuh());
     this.addFnToPrimEnv(new RPFStringDowncase());
     this.addFnToPrimEnv(new RPFStringLength());
-    this.addFnToPrimEnv(new RPFStringLessEqualThanHuh());
+    this.addFnToPrimEnv(new RPFStringLessEqualHuh());
+    this.addFnToPrimEnv(new RPFStringLessHuh());
     this.addFnToPrimEnv(new RPFStringEqualHuh());
+    this.addFnToPrimEnv(new RPFStringGreaterEqualHuh());
+    this.addFnToPrimEnv(new RPFStringGreaterHuh());
     this.addFnToPrimEnv(new RPFStringHuh());
 
     // misc

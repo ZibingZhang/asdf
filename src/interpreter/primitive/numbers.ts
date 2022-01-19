@@ -46,10 +46,10 @@ export {
   RPFMinus,
   RPFDivide,
   RPFLess,
-  RPFLessThan,
+  RPFLessEqual,
   RPFEqual,
   RPFGreater,
-  RPFGreaterThan,
+  RPFGreaterEqual,
   RPFAbs,
   RPFAdd1,
   RPFCeiling,
@@ -192,7 +192,7 @@ class RPFLess extends RPrimFun {
   }
 }
 
-class RPFLessThan extends RPrimFun {
+class RPFLessEqual extends RPrimFun {
   constructor() {
     super("<=", { minArity: 1 });
   }
@@ -249,7 +249,7 @@ class RPFGreater extends RPrimFun {
   }
 }
 
-class RPFGreaterThan extends RPrimFun {
+class RPFGreaterEqual extends RPrimFun {
   constructor() {
     super(">=", { minArity: 1 });
   }
