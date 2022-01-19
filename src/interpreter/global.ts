@@ -49,6 +49,7 @@ import {
   RPFRandom,
   RPFRemainder,
   RPFRound,
+  RPFSgn,
   RPFSqr,
   RPFSqrt,
   RPFSub1,
@@ -103,10 +104,13 @@ import {
   RPFNot
 } from "./primitive/booleans";
 import {
+  RPC_EOF,
   RPFAreEq,
   RPFAreEqual,
   RPFAreEqualWithin,
   RPFAreEqv,
+  RPFAreWithin,
+  RPFEofObjectHuh,
   RPFError,
   RPFIdentity,
   RPFStructHuh
@@ -117,11 +121,20 @@ import {
   RPFSymbolToString
 } from "./primitive/symbols";
 import {
+  RPFExplode,
+  RPFMakeString,
+  RPFReplicate,
+  RPFString,
+  RPFStringAlphabeticHuh,
+  RPFStringAppend,
   RPFStringCiEqualHuh,
   RPFStringCiGreaterEqualHuh,
   RPFStringCiGreaterHuh,
   RPFStringCiLessEqualHuh,
   RPFStringCiLessHuh,
+  RPFStringContainsCiHuh,
+  RPFStringContainsHuh,
+  RPFStringCopy,
   RPFStringDowncase,
   RPFStringEqualHuh,
   RPFStringGreaterEqualHuh,
@@ -129,7 +142,12 @@ import {
   RPFStringHuh,
   RPFStringLength,
   RPFStringLessEqualHuh,
-  RPFStringLessHuh
+  RPFStringLessHuh,
+  RPFStringLowerCaseHuh,
+  RPFStringNumericHuh,
+  RPFStringToSymbol,
+  RPFStringUpcase,
+  RPFStringUpperCaseHuh
 } from "./primitive/string";
 import {
   Scope,
@@ -239,6 +257,7 @@ class Global {
     this.addFnToPrimEnv(new RPFNumberHuh("rational?"));
     this.addFnToPrimEnv(new RPFNumberHuh("real?"));
     this.addFnToPrimEnv(new RPFRound());
+    this.addFnToPrimEnv(new RPFSgn());
     this.addFnToPrimEnv(new RPFSqr());
     this.addFnToPrimEnv(new RPFSqrt());
     this.addFnToPrimEnv(new RPFSub1());
@@ -289,13 +308,27 @@ class Global {
     this.addStructToPrimEnv("posn", ["x", "y"]);
 
     // strings
+    this.addFnToPrimEnv(new RPFExplode());
+    this.addFnToPrimEnv(new RPFMakeString());
+    this.addFnToPrimEnv(new RPFReplicate());
+    this.addFnToPrimEnv(new RPFString());
+    this.addFnToPrimEnv(new RPFStringToSymbol());
+    this.addFnToPrimEnv(new RPFStringAlphabeticHuh());
+    this.addFnToPrimEnv(new RPFStringAppend());
     this.addFnToPrimEnv(new RPFStringCiLessEqualHuh());
     this.addFnToPrimEnv(new RPFStringCiLessHuh());
     this.addFnToPrimEnv(new RPFStringCiEqualHuh());
     this.addFnToPrimEnv(new RPFStringCiGreaterEqualHuh());
     this.addFnToPrimEnv(new RPFStringCiGreaterHuh());
+    this.addFnToPrimEnv(new RPFStringContainsCiHuh());
+    this.addFnToPrimEnv(new RPFStringContainsHuh());
+    this.addFnToPrimEnv(new RPFStringCopy());
     this.addFnToPrimEnv(new RPFStringDowncase());
     this.addFnToPrimEnv(new RPFStringLength());
+    this.addFnToPrimEnv(new RPFStringLowerCaseHuh());
+    this.addFnToPrimEnv(new RPFStringNumericHuh());
+    this.addFnToPrimEnv(new RPFStringUpcase());
+    this.addFnToPrimEnv(new RPFStringUpperCaseHuh());
     this.addFnToPrimEnv(new RPFStringLessEqualHuh());
     this.addFnToPrimEnv(new RPFStringLessHuh());
     this.addFnToPrimEnv(new RPFStringEqualHuh());
@@ -304,6 +337,9 @@ class Global {
     this.addFnToPrimEnv(new RPFStringHuh());
 
     // misc
+    this.addFnToPrimEnv(new RPFAreWithin());
+    this.addDataToPrimEnv("eof", RPC_EOF);
+    this.addFnToPrimEnv(new RPFEofObjectHuh());
     this.addFnToPrimEnv(new RPFAreEq());
     this.addFnToPrimEnv(new RPFAreEqual());
     this.addFnToPrimEnv(new RPFAreEqualWithin());

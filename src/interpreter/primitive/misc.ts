@@ -3,6 +3,7 @@ import {
   BooleanType,
   ErrorType,
   NonNegativeRealType,
+  NumberType,
   ProcedureType
 } from "../types";
 import {
@@ -13,10 +14,15 @@ import {
   isRString,
   isRStruct,
   isRSymbol,
-  toRBoolean
+  toRBoolean,
+  REofObject,
+  isREofObject
 } from "../rvalue";
 
 export {
+  RPFAreWithin,
+  RPC_EOF,
+  RPFEofObjectHuh,
   RPFAreEq,
   RPFAreEqual,
   RPFAreEqualWithin,
@@ -28,6 +34,36 @@ export {
 };
 
 class UserError extends Error {}
+
+const RPC_EOF = new REofObject();
+
+class RPFAreWithin extends RPrimFun {
+  constructor() {
+    super("=~");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new NumberType(), new NumberType(), new NonNegativeRealType()], new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean((<RNumber>args[0]).equalWithin(<RNumber>args[1], (<RNumber>args[2]).toDecimal()));
+  }
+}
+
+class RPFEofObjectHuh extends RPrimFun {
+  constructor() {
+    super("eof-object?");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new AnyType()], new BooleanType());
+  }
+
+  call(args: RValue[]): RValue {
+    return toRBoolean(isREofObject(args[0]));
+  }
+}
 
 class RPFAreEq extends RPrimFun {
   constructor() {

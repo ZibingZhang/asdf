@@ -12,6 +12,7 @@ const initValue =
       "*",
       "+",
       "/",
+      "string-append",
       "string-ci<=?",
       "string-ci<?",
       "string-ci=?",

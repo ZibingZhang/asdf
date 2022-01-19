@@ -78,6 +78,7 @@ export {
   RPFRandom,
   RPFRemainder,
   RPFRound,
+  RPFSgn,
   RPFSqr,
   RPFSqrt,
   RPFSub1,
@@ -692,6 +693,29 @@ class RPFSqr extends RPrimFun {
 
   call(args: RValue[]): RValue {
     return RMath.pow(<RNumber>args[0], this.expt);
+  }
+}
+
+class RPFSgn extends RPrimFun {
+  constructor() {
+    super("sgn");
+  }
+
+  getType(): ProcedureType {
+    // output type should be (union 1 #i1.0 0 #i0.0 -1 #i-1.0), which is currently unsupported
+    return new ProcedureType([new RealType()], new IntegerType());
+  }
+
+  call(args: RValue[]): RValue {
+    const number = <RNumber>args[0];
+    const isExact = isRExactReal(number);
+    if (number.isPositive()) {
+      return RMath.make(isExact, 1n);
+    } else if (number.isNegative()) {
+      return RMath.make(isExact, -1n);
+    } else {
+      return RMath.make(isExact, 0n);
+    }
   }
 }
 

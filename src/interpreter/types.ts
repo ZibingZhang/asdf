@@ -3,6 +3,7 @@ export{
   AnyType,
   BooleanType,
   CharacterType,
+  EofObjectType,
   ErrorType,
   ExactNonNegativeIntegerType,
   ExactPositiveIntegerType,
@@ -68,6 +69,16 @@ class CharacterType extends Type {
 
   stringify(): string {
     return "character";
+  }
+}
+
+class EofObjectType extends Type {
+  isSuperTypeOf(type: Type): boolean {
+    return type instanceof VoidType;
+  }
+
+  stringify(): string {
+    return "eof-object";
   }
 }
 

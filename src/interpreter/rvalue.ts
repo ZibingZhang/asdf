@@ -41,6 +41,7 @@ export {
   RProcedure,
   RCharacter,
   RData,
+  REofObject,
   RExactReal,
   RInexactReal,
   RIsStructFun,
@@ -62,6 +63,7 @@ export {
   isRBoolean,
   isRProcedure,
   isRData,
+  isREofObject,
   isREmptyList,
   isRExactPositiveInteger,
   isRExactReal,
@@ -99,6 +101,7 @@ type RData =
 type RAtomic =
   | RBoolean
   | RCharacter
+  | REofObject
   | RNumber
   | RString
   | RStructType
@@ -185,6 +188,20 @@ class RCharacter extends RDataBase {
   equalWithin(rval: RValue, _: number): boolean {
     return isRCharacter(rval)
       && rval.val === this.val;
+  }
+}
+
+class REofObject extends RDataBase {
+  stringify(): string {
+    return "#<eof>";
+  }
+
+  getType(): Type {
+    return new VoidType();
+  }
+
+  equalWithin(rval: RValue, _: number): boolean {
+    return isREofObject(rval);
   }
 }
 
@@ -365,7 +382,11 @@ class RSymbol extends RDataBase {
   }
 
   stringify(): string {
-    return "'" + this.val;
+    if (this.val.includes("\n")) {
+      return `'|${this.val}|`;
+    } else {
+      return "'" + this.val;
+    }
   }
 
   getType(): Type {
@@ -491,7 +512,7 @@ class RInexactReal extends RNumberBase {
     if (this.denominator === 0n) {
       return new IntegerType();
     } else {
-      return new NumberType();
+      return new RealType();
     }
   }
 
@@ -651,6 +672,10 @@ function isRCharacter(rval: RValue): rval is RCharacter {
 
 function isRData(rval: RValue): rval is RData {
   return rval instanceof RDataBase;
+}
+
+function isREofObject(rval: RValue): rval is REofObject {
+  return rval instanceof REofObject;
 }
 
 function isREmptyList(rval: RValue): rval is RList {
