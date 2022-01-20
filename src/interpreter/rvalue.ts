@@ -173,11 +173,50 @@ class RBoolean extends RDataBase {
 }
 
 class RCharacter extends RDataBase {
+  static NULL_CHAR = String.fromCharCode(0);
+  static BACKSPACE_CHAR = String.fromCharCode(8);
+  static TAB_CHAR = String.fromCharCode(9);
+  static NEWLINE_CHAR = String.fromCharCode(10);
+  static VTAB_CHAR = String.fromCharCode(11);
+  static PAGE_CHAR = String.fromCharCode(12);
+  static RETURN_CHAR = String.fromCharCode(13);
+  static SPACE_CHAR = String.fromCharCode(32);
+  static RUBOUT_CHAR = String.fromCharCode(127);
+
   constructor(readonly val: string) {
     super();
   }
 
   stringify(): string {
+    switch (this.val) {
+      case RCharacter.NULL_CHAR: {
+        return "#\\null";
+      }
+      case RCharacter.BACKSPACE_CHAR: {
+        return "#\\backspace";
+      }
+      case RCharacter.TAB_CHAR: {
+        return "#\\tab";
+      }
+      case RCharacter.NEWLINE_CHAR: {
+        return "#\\newline";
+      }
+      case RCharacter.VTAB_CHAR: {
+        return "#\\vtab";
+      }
+      case RCharacter.PAGE_CHAR: {
+        return "#\\page";
+      }
+      case RCharacter.RETURN_CHAR: {
+        return "#\\return";
+      }
+      case RCharacter.SPACE_CHAR: {
+        return "#\\space";
+      }
+      case RCharacter.RUBOUT_CHAR: {
+        return "#\\rubout";
+      }
+    }
     return `#\\${this.val}`;
   }
 

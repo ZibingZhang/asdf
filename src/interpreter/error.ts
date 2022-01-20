@@ -83,6 +83,7 @@ export {
   RS_DIV_BY_ZERO_ERR,
   RS_EXPECTED_CHARACTER_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
+  RS_EXPECTED_CLOSING_PIPE_ERR,
   RS_EXPECTED_CLOSING_QUOTE_ERR,
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
@@ -390,6 +391,7 @@ const RS_EXPECTED_CLOSING_PAREN_ERR = (opening: string) => {
     return "read-syntax: expected a `}` to close preceding `{`";
   }
 };
+const RS_EXPECTED_CLOSING_PIPE_ERR = "read-syntax: end-of-file following `|` in symbol";
 const RS_EXPECTED_CLOSING_QUOTE_ERR = "read-syntax: expected a closing `\"`";
 const RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR = "read-syntax: expected a commented-out element for `#;`, but found end-of-file";
 const RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR = (opening: string, found: string): string => {

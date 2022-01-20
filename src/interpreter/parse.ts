@@ -187,8 +187,49 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           }
         }
         case TokenType.Character: {
+          let character = sexpr.token.text.slice(2);
+          switch (character) {
+            case "nul":
+            case "null": {
+              character = String.fromCharCode(0);
+              break;
+            }
+            case "backspace": {
+              character = String.fromCharCode(8);
+              break;
+            }
+            case "tab": {
+              character = String.fromCharCode(9);
+              break;
+            }
+            case "newline":
+            case "linefeed": {
+              character = String.fromCharCode(10);
+              break;
+            }
+            case "vtab": {
+              character = String.fromCharCode(11);
+              break;
+            }
+            case "page": {
+              character = String.fromCharCode(12);
+              break;
+            }
+            case "return": {
+              character = String.fromCharCode(13);
+              break;
+            }
+            case "space": {
+              character = String.fromCharCode(32);
+              break;
+            }
+            case "rubout": {
+              character = String.fromCharCode(127);
+              break;
+            }
+          }
           return new AtomNode(
-            new RCharacter(sexpr.token.text.slice(2)),
+            new RCharacter(character),
             sexpr.sourceSpan
           );
         }
