@@ -14,17 +14,21 @@ import {
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
   RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR,
+  RS_EXPECTED_ELEMENT_FOR_UNQUOTING_ERR,
   RS_ILLEGAL_USE_OF_DOT_ERR,
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
-  RS_QUASI_QUOTE_UNSUPPORTED_ERR,
   RS_UNEXPECTED_ERR,
-  RS_UNKNOWN_ESCAPE_SEQUENCE_ERR
+  RS_UNKNOWN_ESCAPE_SEQUENCE_ERR,
+  UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR
 } from "./error";
 import {
   Stage,
   StageError,
   StageOutput
 } from "./pipeline";
+import {
+  Keyword
+} from "./keyword";
 import {
   Token,
   TokenType
@@ -43,7 +47,6 @@ export {
 const DELIMITER_RE = /[\s"'([{)\]};`,]/;
 const LEFT_PAREN_RE = /^[([{]$/;
 const RIGHT_PAREN_RE = /^[)\]}]$/;
-const QUASI_QUOTE_RE = /^[`,]$/;
 const TRUE_LITERAL_RE = /^#(T|t|true)$/;
 const FALSE_LITERAL_RE = /^#(F|f|false)$/;
 const CHARACTER_LITERAL_RE = /^#\\.*$/;
@@ -70,6 +73,7 @@ class Lexer implements Stage<string, SExpr[]> {
   private input = "";
   private atEnd = false;
   private quoting = false;
+  private quasiQuoting = false;
 
   run(input: StageOutput<string>): StageOutput<SExpr[]> {
     this.position = 0;
@@ -78,6 +82,7 @@ class Lexer implements Stage<string, SExpr[]> {
     this.input = input.output;
     this.atEnd = this.input.length === 0;
     this.quoting = false;
+    this.quasiQuoting = false;
     const sexprs: SExpr[] = [];
     const sexprCommentDepth = this.eatSpace();
     try {
@@ -118,22 +123,29 @@ class Lexer implements Stage<string, SExpr[]> {
       );
     } else if (ch === "#") {
       return this.nextPoundSExpr();
-    } else if (ch.match(QUASI_QUOTE_RE)) {
-      throw new StageError(
-        RS_QUASI_QUOTE_UNSUPPORTED_ERR,
-        new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
-      );
     } else if (ch === "'") {
       return this.nextQuotedSExpr();
+    } else if (ch === "`") {
+      return this.nextQuotedSExpr(true);
     } else if (ch === "\"") {
       return this.nextString(this.lineno, this.colno - 1);
+    } else if (ch === ",") {
+      return this.nextUnquotedSExpr();
     }
 
-    this.position--;
-    const lineno = this.lineno;
-    const colno = this.colno - 1;
-    const name = this.nextName();
-    const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
+    let lineno = this.lineno;
+    let colno;
+    let name;
+    if (ch === "\\" || ch === "|") {
+      this.position--;
+      this.atEnd = false;
+      colno = --this.colno;
+      name = this.nextName()
+    } else {
+      colno = this.colno;
+      name = ch + this.nextName();
+    }
+    const sourceSpan = new SourceSpan(lineno, colno - 1, this.lineno, this.colno);
 
     let tokenType;
     if (name === ".") {
@@ -267,17 +279,21 @@ class Lexer implements Stage<string, SExpr[]> {
     }
   }
 
-  private nextQuotedSExpr(): ListSExpr {
+  private nextQuotedSExpr(quasiquote: boolean = false): ListSExpr {
     const quoteLineno = this.lineno;
     const quoteColno = this.colno - 1;
     const quoteSourceSpan = new SourceSpan(quoteLineno, quoteColno, quoteLineno, quoteColno + 1);
-    if (this.quoting) {
+    if (this.quoting || this.quasiQuoting) {
       throw new StageError(
         RS_NESTED_QUOTES_UNSUPPORTED_ERR,
         quoteSourceSpan
       );
     }
-    this.quoting = true;
+    if (quasiquote) {
+      this.quasiQuoting = true;
+    } else {
+      this.quoting = true;
+    }
     const sexprCommentDepth = this.eatSpace();
     while (sexprCommentDepth.length > 0) {
       if (this.atEnd) {
@@ -298,10 +314,11 @@ class Lexer implements Stage<string, SExpr[]> {
     }
     const sexpr = this.nextSExpr();
     this.quoting = false;
+    this.quasiQuoting = false;
     return new ListSExpr(
       [
         new AtomSExpr(
-          new Token(TokenType.Keyword, "quote", quoteSourceSpan),
+          new Token(TokenType.Keyword, quasiquote ? Keyword.Quasiquote : Keyword.Quote, quoteSourceSpan),
           quoteSourceSpan
         ),
         sexpr
@@ -396,6 +413,47 @@ class Lexer implements Stage<string, SExpr[]> {
     throw new StageError(
       RS_EXPECTED_CLOSING_QUOTE_ERR,
       new SourceSpan(lineno, colno, this.lineno, this.colno)
+    );
+  }
+
+  private nextUnquotedSExpr(): ListSExpr {
+    const unquoteLineno = this.lineno;
+    const unquoteColno = this.colno - 1;
+    const unquoteSourceSpan = new SourceSpan(unquoteLineno, unquoteColno, unquoteLineno, unquoteColno + 1);
+    if (!this.quasiQuoting) {
+      throw new StageError(
+        UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR("unquote", "comma"),
+        unquoteSourceSpan
+      );
+    }
+    const sexprCommentDepth = this.eatSpace();
+    while (sexprCommentDepth.length > 0) {
+      if (this.atEnd) {
+        throw new StageError(
+          RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
+          <SourceSpan>sexprCommentDepth.pop()
+        );
+      }
+      this.nextSExpr();
+      sexprCommentDepth.pop();
+      sexprCommentDepth.push(...this.eatSpace());
+    }
+    if (this.atEnd) {
+      throw new StageError(
+        RS_EXPECTED_ELEMENT_FOR_UNQUOTING_ERR("end-of-file"),
+        unquoteSourceSpan
+      );
+    }
+    const sexpr = this.nextSExpr();
+    return new ListSExpr(
+      [
+        new AtomSExpr(
+          new Token(TokenType.Keyword, Keyword.Unquote, unquoteSourceSpan),
+          unquoteSourceSpan
+        ),
+        sexpr
+      ],
+      new SourceSpan(unquoteLineno, unquoteColno, this.lineno, this.colno)
     );
   }
 

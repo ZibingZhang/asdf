@@ -24,8 +24,10 @@ enum Keyword {
   Let = "let",
   Local = "local",
   Or = "or",
+  Quasiquote = "quasiquote",
   Quote = "quote",
-  Require = "require"
+  Require = "require",
+  Unquote = "unquote"
 }
 
 const ALL_KEYWORDS: string[] = [];

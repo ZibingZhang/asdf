@@ -49,8 +49,10 @@ const initValue =
       "let",
       "local",
       "or",
+      "quasiquote",
       "quote",
-      "require"
+      "require",
+      "unquote"
     ],
     "lambdaExpression": true,
     "listAbbreviation": true

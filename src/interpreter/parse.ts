@@ -76,7 +76,9 @@ import {
   QU_EXPECTED_ONE_EXPRESSION_ERR,
   QU_EXPECTED_POST_QUOTE_ERR,
   RQ_EXPECTED_MODULE_NAME_ERR,
-  SX_EXPECTED_OPEN_PAREN_ERR
+  SX_EXPECTED_OPEN_PAREN_ERR,
+  UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR,
+  UQ_MISUSE_UNDER_BACKQUOTE_ERR
 } from "./error";
 import {
   RCharacter,
@@ -344,8 +346,17 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             case Keyword.Or: {
               return this.toOrNode(sexpr);
             }
+            case Keyword.Quasiquote: {
+              return this.toQuasiquoteNode(sexpr, sexpr.subSExprs[1]);
+            }
             case Keyword.Quote: {
               return this.toQuoteNode(sexpr, sexpr.subSExprs[1]);
+            }
+            case Keyword.Unquote: {
+              throw new StageError(
+                UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR("unquote", "comma"),
+                leadingSExpr.sourceSpan
+              );
             }
             case Keyword.Require: {
               return this.toRequireNode(sexpr);
@@ -920,6 +931,74 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       sexpr.subSExprs.slice(1).map(sexpr => this.toNode(sexpr)),
       sexpr.sourceSpan
     );
+  }
+
+  private toQuasiquoteNode(sexpr: ListSExpr, quotedSExpr: SExpr): ASTNode {
+    // (quasiquote quotedSExpr)
+    if (sexpr.subSExprs.length - 1 === 0) {
+      throw new StageError(
+        QU_EXPECTED_EXPRESSION_ERR,
+        sexpr.sourceSpan
+      );
+    }
+    if (sexpr.subSExprs.length - 1 > 1) {
+      throw new StageError(
+        QU_EXPECTED_ONE_EXPRESSION_ERR(sexpr.subSExprs.length - 2),
+        sexpr.subSExprs[2].sourceSpan
+      );
+    }
+    if (isAtomSExpr(quotedSExpr)) {
+      if (
+        quotedSExpr.token.type === TokenType.Name
+        || quotedSExpr.token.type === TokenType.Keyword
+        || quotedSExpr.token.type === TokenType.Placeholder
+      ) {
+        return new AtomNode(
+          new RSymbol(quotedSExpr.token.text),
+          quotedSExpr.sourceSpan
+        );
+      } else if (!SETTINGS.syntax.listAbbreviation) {
+        throw new StageError(
+          QU_EXPECTED_POST_QUOTE_ERR(quotedSExpr),
+          sexpr.sourceSpan
+        );
+      } else {
+        return this.toNode(quotedSExpr);
+      }
+    } else {
+      if (quotedSExpr.subSExprs.length === 0) {
+        return new AtomNode(
+          R_EMPTY_LIST,
+          sexpr.sourceSpan
+        );
+      } else {
+        if (!SETTINGS.syntax.listAbbreviation) {
+          throw new StageError(
+            QU_EXPECTED_POST_QUOTE_ERR(quotedSExpr),
+            sexpr.sourceSpan
+          );
+        }
+        if (
+          isAtomSExpr(quotedSExpr.subSExprs[0])
+          && quotedSExpr.subSExprs[0].token.type === TokenType.Keyword
+          && quotedSExpr.subSExprs[0].token.text === "unquote"
+        ) {
+          if (quotedSExpr.subSExprs.length - 1 !== 1) {
+            throw new StageError(
+              UQ_MISUSE_UNDER_BACKQUOTE_ERR("unquote"),
+              quotedSExpr.subSExprs[0].sourceSpan
+            );
+          }
+          return this.toNode(quotedSExpr.subSExprs[1]);
+        } else {
+          return new FunAppNode(
+            new VarNode("list", sexpr.sourceSpan),
+            quotedSExpr.subSExprs.map(subSExpr => this.toQuasiquoteNode(sexpr, subSExpr)),
+            sexpr.sourceSpan
+          );
+        }
+      }
+    }
   }
 
   private toQuoteNode(sexpr: ListSExpr, quotedSExpr: SExpr): ASTNode {

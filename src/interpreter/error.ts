@@ -88,10 +88,9 @@ export {
   RS_EXPECTED_COMMENTED_OUT_ELEMENT_ERR,
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
   RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR,
-  RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR,
+  RS_EXPECTED_ELEMENT_FOR_UNQUOTING_ERR,
   RS_ILLEGAL_USE_OF_DOT_ERR,
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
-  RS_QUASI_QUOTE_UNSUPPORTED_ERR,
   RS_UNEXPECTED_ERR,
   RS_UNKNOWN_ESCAPE_SEQUENCE_ERR,
   RT_MAX_CALL_STACK_SIZE_ERR,
@@ -99,6 +98,8 @@ export {
   SC_UNDEFINED_VARIABLE_ERR,
   SC_USED_BEFORE_DEFINITION_ERR,
   SX_EXPECTED_OPEN_PAREN_ERR,
+  UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR,
+  UQ_MISUSE_UNDER_BACKQUOTE_ERR,
   WF_EXPECTED_FUNCTION_CALL_ERR,
   WF_NOT_TOP_LEVEL_DEFN_ERR,
   WF_QUESTION_NOT_BOOL_ERR,
@@ -406,10 +407,11 @@ const RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR = (opening: string, found: string): 
 const RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR = (found: string) => {
   return `read-syntax: expected an element for quoting "'", but found ${found}`;
 };
-const RS_EXPECTED_ELEMENT_FOR_QUOTING_IMMEDIATELY_ERR = "read-syntax: expected an element for quoting immediately after quote";
+const RS_EXPECTED_ELEMENT_FOR_UNQUOTING_ERR = (found: string) => {
+  return `read-syntax: expected an element for unquoting "'", but found ${found}`;
+};
 const RS_ILLEGAL_USE_OF_DOT_ERR = "read-syntax: illegal use of `.`";
 const RS_NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes are not supported";
-const RS_QUASI_QUOTE_UNSUPPORTED_ERR = "read-syntax: quasiquotes are not supported";
 const RS_UNEXPECTED_ERR = (found: string) => {
   return `read-syntax: unexpected \`${found}\``;
 };
@@ -431,6 +433,13 @@ const SC_USED_BEFORE_DEFINITION_ERR = (name: string) => {
 
 const SX_EXPECTED_OPEN_PAREN_ERR = (name: string) => {
   return `${name}: expected an open parenthesis before ${name}, but found none`;
+};
+
+const UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR = (name: string, abbrevName: string) => {
+  return `${name}: misuse of a ${abbrevName} or ${name}, not under a quasiquoting backquote`;
+};
+const UQ_MISUSE_UNDER_BACKQUOTE_ERR = (name: string) => {
+  return `${name}: misuse of ${name} within a quasiquoting backquote`;
 };
 
 const WF_EXPECTED_FUNCTION_CALL_ERR = (name: string) => {
