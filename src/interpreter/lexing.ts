@@ -15,7 +15,7 @@ import {
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
   RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR,
   RS_EXPECTED_ELEMENT_FOR_UNQUOTING_ERR,
-  RS_ILLEGAL_USE_OF_DOT_ERR,
+  RS_ILLEGAL_USE_ERR,
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
   RS_UNEXPECTED_ERR,
   RS_UNKNOWN_ESCAPE_SEQUENCE_ERR,
@@ -126,10 +126,22 @@ class Lexer implements Stage<string, SExpr[]> {
     } else if (ch === "'") {
       return this.nextQuotedSExpr();
     } else if (ch === "`") {
+      if (!SETTINGS.syntax.quasiquoting) {
+        throw new StageError(
+          RS_ILLEGAL_USE_ERR("`"),
+          new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
+        );
+      }
       return this.nextQuotedSExpr(true);
     } else if (ch === "\"") {
       return this.nextString(this.lineno, this.colno - 1);
     } else if (ch === ",") {
+      if (!SETTINGS.syntax.quasiquoting) {
+        throw new StageError(
+          RS_ILLEGAL_USE_ERR(","),
+          new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
+        );
+      }
       return this.nextUnquotedSExpr();
     }
 
@@ -150,7 +162,7 @@ class Lexer implements Stage<string, SExpr[]> {
     let tokenType;
     if (name === ".") {
       throw new StageError(
-        RS_ILLEGAL_USE_OF_DOT_ERR,
+        RS_ILLEGAL_USE_ERR("."),
         sourceSpan
       );
     } else if (name.match(INTEGER_RE)) {

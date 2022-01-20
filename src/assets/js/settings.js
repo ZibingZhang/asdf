@@ -55,7 +55,8 @@ const initValue =
       "unquote"
     ],
     "lambdaExpression": true,
-    "listAbbreviation": true
+    "listAbbreviation": true,
+    "quasiquoting": true
   }
 }`;
 

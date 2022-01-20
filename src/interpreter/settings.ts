@@ -20,7 +20,8 @@ type Settings = {
   syntax: {
     forms: string[],
     lambdaExpression: boolean,
-    listAbbreviation: boolean
+    listAbbreviation: boolean,
+    quasiquoting: boolean
   }
 };
 
@@ -41,7 +42,8 @@ const DEFAULT_SETTINGS = {
   syntax: {
     forms: [...ALL_KEYWORDS],
     lambdaExpression: false,
-    listAbbreviation: false
+    listAbbreviation: false,
+    quasiquoting: false
   }
 };
 

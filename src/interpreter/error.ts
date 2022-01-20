@@ -89,7 +89,7 @@ export {
   RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR,
   RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR,
   RS_EXPECTED_ELEMENT_FOR_UNQUOTING_ERR,
-  RS_ILLEGAL_USE_OF_DOT_ERR,
+  RS_ILLEGAL_USE_ERR,
   RS_NESTED_QUOTES_UNSUPPORTED_ERR,
   RS_UNEXPECTED_ERR,
   RS_UNKNOWN_ESCAPE_SEQUENCE_ERR,
@@ -410,7 +410,9 @@ const RS_EXPECTED_ELEMENT_FOR_QUOTING_ERR = (found: string) => {
 const RS_EXPECTED_ELEMENT_FOR_UNQUOTING_ERR = (found: string) => {
   return `read-syntax: expected an element for unquoting "'", but found ${found}`;
 };
-const RS_ILLEGAL_USE_OF_DOT_ERR = "read-syntax: illegal use of `.`";
+const RS_ILLEGAL_USE_ERR = (found: string) => {
+  return `read-syntax: illegal use of \`${found}\``;
+};
 const RS_NESTED_QUOTES_UNSUPPORTED_ERR = "read-syntax: nested quotes are not supported";
 const RS_UNEXPECTED_ERR = (found: string) => {
   return `read-syntax: unexpected \`${found}\``;
@@ -439,7 +441,7 @@ const UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR = (name: string, abbrevName: string) => 
   return `${name}: misuse of a ${abbrevName} or ${name}, not under a quasiquoting backquote`;
 };
 const UQ_MISUSE_UNDER_BACKQUOTE_ERR = (name: string) => {
-  return `${name}: misuse of ${name} within a quasiquoting backquote`;
+  return `${name}: misuse of ${name} within a quas`;
 };
 
 const WF_EXPECTED_FUNCTION_CALL_ERR = (name: string) => {
