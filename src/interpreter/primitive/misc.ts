@@ -7,16 +7,16 @@ import {
   ProcedureType
 } from "../types";
 import {
+  REofObject,
   RNumber,
   RPrimFun,
   RValue,
   isRData,
+  isREofObject,
   isRString,
   isRStruct,
   isRSymbol,
-  toRBoolean,
-  REofObject,
-  isREofObject
+  toRBoolean
 } from "../rvalue";
 
 export {

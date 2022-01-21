@@ -2,7 +2,9 @@
 import {
   EvaluateCode
 } from "./evaluate";
-import { Global } from "./global";
+import {
+  Global
+} from "./global";
 import {
   Lexer
 } from "./lexing";

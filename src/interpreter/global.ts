@@ -56,6 +56,33 @@ import {
   RPFZeroHuh
 } from "./primitive/numbers";
 import {
+  RPC_EOF,
+  RPFAreEq,
+  RPFAreEqual,
+  RPFAreEqualWithin,
+  RPFAreEqv,
+  RPFAreWithin,
+  RPFEofObjectHuh,
+  RPFError,
+  RPFIdentity,
+  RPFStructHuh
+} from "./primitive/misc";
+import {
+  RPFAndmap,
+  RPFApply,
+  RPFArgmax,
+  RPFArgmin,
+  RPFBuildList,
+  RPFFilter,
+  RPFFoldl,
+  RPFFoldr,
+  RPFMap,
+  RPFMemf,
+  RPFOrmap,
+  RPFProcedureHuh,
+  RPFSort
+} from "./primitive/higherOrder";
+import {
   RPFAppend,
   RPFCar,
   RPFCdr,
@@ -82,39 +109,12 @@ import {
   R_NULL
 } from "./primitive/lists";
 import {
-  RPFAndmap,
-  RPFApply,
-  RPFArgmax,
-  RPFArgmin,
-  RPFBuildList,
-  RPFFilter,
-  RPFFoldl,
-  RPFFoldr,
-  RPFMap,
-  RPFMemf,
-  RPFOrmap,
-  RPFProcedureHuh,
-  RPFSort
-} from "./primitive/higherOrder";
-import {
   RPFAreBooleansEqual,
   RPFBooleanHuh,
   RPFBooleanToString,
   RPFFalseHuh,
   RPFNot
 } from "./primitive/booleans";
-import {
-  RPC_EOF,
-  RPFAreEq,
-  RPFAreEqual,
-  RPFAreEqualWithin,
-  RPFAreEqv,
-  RPFAreWithin,
-  RPFEofObjectHuh,
-  RPFError,
-  RPFIdentity,
-  RPFStructHuh
-} from "./primitive/misc";
 import {
   RPFAreSymbolsEqual,
   RPFSymbolHuh,

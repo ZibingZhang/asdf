@@ -11,8 +11,7 @@ import {
 } from "../types";
 import {
   AtomNode,
-  EvaluateRProcedureVisitor,
-  FunAppNode
+  EvaluateRProcedureVisitor
 } from "../ast";
 import {
   HO_CONTRACT_VIOLATION_ERR,
@@ -27,13 +26,12 @@ import {
   RProcedure,
   RValue,
   R_FALSE,
+  R_TRUE,
   isRBoolean,
   isRFalse,
   isRProcedure,
   isRTrue,
-  toRBoolean,
-  R_TRUE,
-  RLambda
+  toRBoolean
 } from "../rvalue";
 import {
   Environment

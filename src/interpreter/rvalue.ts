@@ -8,7 +8,6 @@ import {
   IntegerType,
   ListType,
   NonNegativeRealType,
-  NumberType,
   ProcedureType,
   RealType,
   StringType,

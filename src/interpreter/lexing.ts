@@ -27,12 +27,12 @@ import {
   StageOutput
 } from "./pipeline";
 import {
-  Keyword
-} from "./keyword";
-import {
   Token,
   TokenType
 } from "./token";
+import {
+  Keyword
+} from "./keyword";
 import {
   SETTINGS
 } from "./settings";
@@ -145,14 +145,14 @@ class Lexer implements Stage<string, SExpr[]> {
       return this.nextUnquotedSExpr();
     }
 
-    let lineno = this.lineno;
+    const lineno = this.lineno;
     let colno;
     let name;
     if (ch === "\\" || ch === "|") {
       this.position--;
       this.atEnd = false;
       colno = --this.colno;
-      name = this.nextName()
+      name = this.nextName();
     } else {
       colno = this.colno;
       name = ch + this.nextName();
@@ -291,7 +291,7 @@ class Lexer implements Stage<string, SExpr[]> {
     }
   }
 
-  private nextQuotedSExpr(quasiquote: boolean = false): ListSExpr {
+  private nextQuotedSExpr(quasiquote = false): ListSExpr {
     const quoteLineno = this.lineno;
     const quoteColno = this.colno - 1;
     const quoteSourceSpan = new SourceSpan(quoteLineno, quoteColno, quoteLineno, quoteColno + 1);
@@ -547,7 +547,7 @@ class Lexer implements Stage<string, SExpr[]> {
   }
 
   private next(): string {
-    let ch = this.input[this.position++];
+    const ch = this.input[this.position++];
     this.checkAtEnd();
     if (ch === "\n") {
       this.lineno++;

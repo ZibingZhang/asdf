@@ -41,8 +41,8 @@ import {
   isRInexactReal,
   isRProcedure,
   isRString,
-  isRTrue,
-  isRStructType
+  isRStructType,
+  isRTrue
 } from "./rvalue";
 import {
   Scope,
@@ -547,8 +547,8 @@ class FunAppNode extends ASTNodeBase {
         throw new StageError(
           FC_EXPECTED_FUNCTION_ERR(
             isRStructType(rval)
-            ? `a structure type (do you mean make-${rval.name})`
-            : "a variable"
+              ? `a structure type (do you mean make-${rval.name})`
+              : "a variable"
           ),
           this.fn.sourceSpan
         );
@@ -577,8 +577,8 @@ class FunAppNode extends ASTNodeBase {
       throw new StageError(
         FC_EXPECTED_FUNCTION_ERR(
           isRStructType(rval)
-          ? `a structure type (do you mean make-${rval.name})`
-          : rval.stringify()
+            ? `a structure type (do you mean make-${rval.name})`
+            : rval.stringify()
         ),
         this.fn.sourceSpan
       );

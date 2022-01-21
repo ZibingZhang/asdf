@@ -282,7 +282,7 @@ const HO_EXPECTED_LIST_ARGUMENT_ERR = (name: string) => {
   return `${name}: expects (at least) one list argument, given none`;
 };
 const HO_EXPECTED_LISTS_SAME_LENGTH_ERR = (name: string, initLength: number, wrongLength: number, procedure: string) => {
-  return `${name}: all lists must have same size\n  first list length: ${initLength}\e  other list length: ${wrongLength}\n  procedure: ${procedure}`;
+  return `${name}: all lists must have same size\n  first list length: ${initLength}\n  other list length: ${wrongLength}\n  procedure: ${procedure}`;
 };
 
 const IF_EXPECTED_THREE_PARTS_ERR = (parts: number) => {

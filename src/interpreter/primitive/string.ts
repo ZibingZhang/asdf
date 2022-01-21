@@ -9,18 +9,18 @@ import {
   SymbolType
 } from "../types";
 import {
+  RCharacter,
   RExactReal,
+  RList,
+  RNumber,
   RPrimFun,
   RString,
+  RSymbol,
   RValue,
-  isRString,
-  toRBoolean,
   R_FALSE,
   R_TRUE,
-  RList,
-  RCharacter,
-  RNumber,
-  RSymbol
+  isRString,
+  toRBoolean
 } from "../rvalue";
 
 export {
