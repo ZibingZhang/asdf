@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   Editor
@@ -19,6 +20,12 @@ export {
   Controller
 };
 
+const enum Tab {
+  Editor,
+  Settings,
+  Info
+}
+
 class Controller {
   editor: Editor;
   settings: Settings;
@@ -26,10 +33,8 @@ class Controller {
   repl: Repl;
   testOutput: TestOutput;
 
-  activeTab = "editor";
-  editorTab: HTMLElement;
-  settingsTab: HTMLElement;
-  infoTab: HTMLElement;
+  activeTab = Tab.Editor;
+  tabs: Map<Tab, [HTMLElement, any]> = new Map();
 
   constructor() {
     this.editor = new Editor("editor-textarea");
@@ -39,17 +44,17 @@ class Controller {
     this.testOutput = new TestOutput("test-output-textarea");
 
     this.editor.registerController(this);
-    this.editorTab = <HTMLElement>document.getElementById("editor-tab");
-    this.settingsTab = <HTMLElement>document.getElementById("settings-tab");
-    this.infoTab = <HTMLElement>document.getElementById("info-tab");
+    this.tabs.set(Tab.Editor, [<HTMLElement>document.getElementById("editor-tab"), this.editor]);
+    this.tabs.set(Tab.Settings, [<HTMLElement>document.getElementById("settings-tab"), this.settings]);
+    this.tabs.set(Tab.Info, [<HTMLElement>document.getElementById("info-tab"), this.info]);
 
     this.editor.cm.focus();
     this.settings.updateSettings();
 
     document.getElementById("run-button")!.onclick = this.editor.runCode;
-    document.getElementById("editor-button")!.onclick = this.switchToEditor;
-    document.getElementById("settings-button")!.onclick = this.switchToSettings;
-    document.getElementById("info-button")!.onclick = this.switchToInfo;
+    document.getElementById("editor-button")!.onclick = () => this.switchToTab(Tab.Editor);
+    document.getElementById("settings-button")!.onclick = () => this.switchToTab(Tab.Settings);
+    document.getElementById("info-button")!.onclick = () => this.switchToTab(Tab.Info);
 
     window.racket.pipeline.setSuccessCallback(output => {
       let replOutput = "";
@@ -62,31 +67,21 @@ class Controller {
     window.racket.pipeline.setTestResultsCallback(this.testOutput.handleTestResults);
   }
 
-  switchToEditor() {
-    if (this.activeTab === "settings") { if (!this.settings.updateSettings()) { return; } }
-    this.settingsTab.style.display = "none";
-    this.infoTab.style.display = "none";
-    this.editorTab.style.removeProperty("display");
-    this.editor.cm.refresh();
-    this.editor.cm.focus();
-    this.activeTab = "editor";
-  }
-
-  switchToSettings() {
-    this.editorTab.style.display = "none";
-    this.infoTab.style.display = "none";
-    this.settingsTab.style.removeProperty("display");
-    this.settings.cm.refresh();
-    this.settings.cm.focus();
-    this.activeTab = "settings";
-  }
-
-  switchToInfo() {
-    if (this.activeTab === "settings") { if (!this.settings.updateSettings()) { return; } }
-    this.editorTab.style.display = "none";
-    this.settingsTab.style.display = "none";
-    this.infoTab.style.removeProperty("display");
-    this.info.cm.refresh();
-    this.activeTab = "info";
+  switchToTab(nextTab: Tab) {
+    if (this.activeTab === Tab.Settings && nextTab !== Tab.Settings) {
+      if (!this.settings.updateSettings()) {
+        return;
+      }
+    }
+    for (const [tab, [element, cmWrapper]] of this.tabs.entries()) {
+      if (tab !== nextTab) {
+        element.style.display = "none";
+      } else {
+        element.style.removeProperty("display");
+        cmWrapper.cm.refresh();
+        cmWrapper.cm.focus();
+      }
+    }
+    this.activeTab = nextTab;
   }
 }
