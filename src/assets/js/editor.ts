@@ -2,11 +2,8 @@ import {
   SourceSpan
 } from "../../interpreter/sourcespan";
 import {
-  Repl
-} from "./repl";
-import {
-  resetTestOutput
-} from "./test-output";
+  Controller
+} from "./controller";
 
 export {
   Editor
@@ -17,7 +14,7 @@ declare var CodeMirror: any;
 class Editor {
   marked = false;
   cm: any;
-  repl: Repl;
+  controller: Controller;
 
   constructor(elementId: string) {
     const textArea = document.getElementById(elementId) || new Element();
@@ -31,15 +28,15 @@ class Editor {
         theme: "racket",
         styleSelectedText: true,
         extraKeys: {
-          "Alt-Enter": () => this.runEditorCode()
+          "Alt-Enter": () => this.runCode()
         }
       }
     );
     this.cm.on("changes", () => this.unmark());
   }
 
-  registerRepl(repl: Repl) {
-    this.repl = repl;
+  registerController(controller: Controller) {
+    this.controller = controller;
   }
 
   mark(sourceSpan: SourceSpan, className: string) {
@@ -58,10 +55,10 @@ class Editor {
     }
   }
 
-  runEditorCode() {
+  runCode() {
     this.unmark();
-    this.repl.resetRepl();
-    resetTestOutput();
+    this.controller.repl.resetRepl();
+    this.controller.testOutput.resetTestOutput();
     window.racket.pipeline.reset();
     window.racket.pipeline.setErrorsCallback(stageErrors => {
       window.racket.pipeline.reset();
@@ -71,7 +68,7 @@ class Editor {
         replOutput += stageError.msg + "\n";
       }
       replOutput += "> ";
-      this.repl.appendToRepl(replOutput, "cm-highlight-error-message");
+      this.controller.repl.appendToRepl(replOutput, "cm-highlight-error-message");
     });
     window.racket.pipeline.setUnusedCallback(sourceSpan => this.mark(sourceSpan, "cm-highlight-unused"));
     window.racket.pipeline.evaluateCode(this.cm.getValue());
