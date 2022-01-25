@@ -2,25 +2,30 @@ import "./css/index.css";
 import "./js/misc";
 
 import {
-  EDITOR,
-  runEditorCode
+  Editor
 } from "./js/editor";
 import {
-  SETTINGS,
-  updateSettings
+  Settings
 } from "./js/settings";
 import {
-  INFO
+  Info
 } from "./js/info";
 import {
-  appendToRepl
+  Repl
 } from "./js/repl";
 import {
   handleTestResults
 } from "./js/test-output";
 
+const EDITOR = new Editor("editor-textarea");
+const SETTINGS = new Settings("settings-textarea");
+const INFO = new Info("info-textarea");
+const REPL = new Repl("repl-textarea");
+
+EDITOR.registerRepl(REPL);
+
 function init() {
-  document.getElementById("run-button").onclick = runEditorCode;
+  document.getElementById("run-button").onclick = EDITOR.runEditorCode;
   document.getElementById("editor-button").onclick = switchToEditor;
   document.getElementById("settings-button").onclick = switchToSettings;
   document.getElementById("info-button").onclick = switchToInfo;
@@ -38,12 +43,12 @@ function init() {
       replOutput += text + "\n";
     }
     replOutput += "> ";
-    appendToRepl(replOutput);
+    REPL.appendToRepl(replOutput);
   });
   window.racket.pipeline.setTestResultsCallback(handleTestResults);
 
-  EDITOR.focus();
-  updateSettings();
+  EDITOR.cm.focus();
+  SETTINGS.updateSettings();
 }
 
 const editorTab = document.getElementById("editor-tab");
@@ -52,12 +57,12 @@ const infoTab = document.getElementById("info-tab");
 let activeTab = "editor";
 
 function switchToEditor() {
-  if (activeTab === "settings") { if (!updateSettings()) { return; } }
+  if (activeTab === "settings") { if (!SETTINGS.updateSettings()) { return; } }
   settingsTab.style.display = "none";
   infoTab.style.display = "none";
   editorTab.style.removeProperty("display");
-  EDITOR.refresh();
-  EDITOR.focus();
+  EDITOR.cm.refresh();
+  EDITOR.cm.focus();
   activeTab = "editor";
 }
 
@@ -65,17 +70,17 @@ function switchToSettings() {
   editorTab.style.display = "none";
   infoTab.style.display = "none";
   settingsTab.style.removeProperty("display");
-  SETTINGS.refresh();
-  SETTINGS.focus();
+  SETTINGS.cm.refresh();
+  SETTINGS.cm.focus();
   activeTab = "settings";
 }
 
 function switchToInfo() {
-  if (activeTab === "settings") { if (!updateSettings()) { return; } }
+  if (activeTab === "settings") { if (!SETTINGS.updateSettings()) { return; } }
   editorTab.style.display = "none";
   settingsTab.style.display = "none";
   infoTab.style.removeProperty("display");
-  INFO.refresh();
+  INFO.cm.refresh();
   activeTab = "info";
 }
 

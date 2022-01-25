@@ -1,10 +1,11 @@
 export {
-  SETTINGS,
-  updateSettings
+  Settings
 };
 
-const initValue =
-`{
+declare var CodeMirror: any;
+
+class Settings {
+  private INIT_VALUE = `{
   "higherOrderFunctions": true,
   "primitives": {
     "blackList": [],
@@ -60,29 +61,34 @@ const initValue =
   }
 }`;
 
-const settingsTextArea = document.getElementById("settings-textarea");
-const SETTINGS = CodeMirror(
-  (elt) => {
-    settingsTextArea.parentNode.replaceChild(elt, settingsTextArea);
-  }, {
-    lineNumbers: true,
-    tabSize: 2,
-    value: initValue,
-    mode: "application/json",
-    extraKeys: {
-      "Ctrl-S": () => updateSettings()
-    }
-  }
-);
+  cm: any;
 
-function updateSettings() {
-  try {
-    const settings = JSON.parse(SETTINGS.getValue());
-    if (!Array.isArray(settings) && typeof settings === "object") {
-      window.racket.updateSettings(settings);
-      return true;
-    }
-  } catch (e) { /* fall through */ }
-  alert("The settings are not a valid JSON object.");
-  return false;
+  constructor(elementId: string) {
+    const textArea = document.getElementById(elementId) || new Element();
+    this.cm = CodeMirror(
+      (elt: HTMLElement) => {
+        textArea.parentNode?.replaceChild(elt, textArea);
+      }, {
+        lineNumbers: true,
+        tabSize: 2,
+        value: this.INIT_VALUE,
+        mode: "application/json",
+        extraKeys: {
+          "Ctrl-S": () => this.updateSettings()
+        }
+      }
+    );
+  }
+
+  updateSettings(): boolean {
+    try {
+      const settings = JSON.parse(this.cm.getValue());
+      if (!Array.isArray(settings) && typeof settings === "object") {
+        window.racket.updateSettings(settings);
+        return true;
+      }
+    } catch (e) { /* fall through */ }
+    alert("The settings are not a valid JSON object.");
+    return false;
+  }
 }
