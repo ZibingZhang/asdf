@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   SourceSpan
 } from "../../interpreter/sourcespan";
@@ -6,7 +7,7 @@ export {
   Repl
 };
 
-declare var CodeMirror: any;
+declare let CodeMirror: any;
 
 class Repl {
   marked = false;

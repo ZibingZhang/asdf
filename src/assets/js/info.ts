@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export {
   Info
 };
 
-declare var CodeMirror: any;
+declare let CodeMirror: any;
 
 class Info {
   private INIT_VALUE = `Source code at https://github.com/ZibingZhang/racket-online-ide
@@ -21,7 +22,7 @@ Ctrl-s | Save settings`;
   cm: any;
 
   constructor(elementId: string) {
-    const textArea = document.getElementById(elementId) || new Element();
+    const textArea = <HTMLElement>document.getElementById(elementId);
     this.cm = CodeMirror(
       (elt: HTMLElement) => {
         textArea.parentNode?.replaceChild(elt, textArea);

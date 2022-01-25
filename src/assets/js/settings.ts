@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export {
   Settings
 };
 
-declare var CodeMirror: any;
+declare let CodeMirror: any;
 
 class Settings {
   private INIT_VALUE = `{
@@ -64,7 +65,7 @@ class Settings {
   cm: any;
 
   constructor(elementId: string) {
-    const textArea = document.getElementById(elementId) || new Element();
+    const textArea = <HTMLElement>document.getElementById(elementId);
     this.cm = CodeMirror(
       (elt: HTMLElement) => {
         textArea.parentNode?.replaceChild(elt, textArea);

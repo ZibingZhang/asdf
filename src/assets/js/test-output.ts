@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   StageTestResult
 } from "../../interpreter/pipeline";
@@ -6,7 +7,7 @@ export {
   TestOutput
 };
 
-declare var CodeMirror: any;
+declare let CodeMirror: any;
 
 class TestOutput {
   cm: any;
@@ -14,7 +15,7 @@ class TestOutput {
   totalTests = 0;
 
   constructor(elementId: string) {
-    const textArea = document.getElementById(elementId) || new Element();
+    const textArea = <HTMLElement>document.getElementById(elementId);
     this.cm = CodeMirror(
       (elt: HTMLElement) => {
         textArea.parentNode?.replaceChild(elt, textArea);

@@ -1,15 +1,16 @@
-import {
-  SourceSpan
-} from "../../interpreter/sourcespan";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Controller
 } from "./controller";
+import {
+  SourceSpan
+} from "../../interpreter/sourcespan";
 
 export {
   Editor
 };
 
-declare var CodeMirror: any;
+declare let CodeMirror: any;
 
 class Editor {
   marked = false;
@@ -17,7 +18,7 @@ class Editor {
   controller: Controller;
 
   constructor(elementId: string) {
-    const textArea = document.getElementById(elementId) || new Element();
+    const textArea = <HTMLElement>document.getElementById(elementId);
     this.cm = CodeMirror(
       (elt: HTMLElement) => {
         textArea.parentNode?.replaceChild(elt, textArea);

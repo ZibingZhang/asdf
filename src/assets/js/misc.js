@@ -82,3 +82,10 @@ document.addEventListener("DOMContentLoaded", function () {
     resizable(ele);
   });
 });
+
+// https://stackoverflow.com/a/11001012
+document.addEventListener("keydown", function(e) {
+  if (e.key === "s" && e.ctrlKey) {
+    e.preventDefault();
+  }
+}, false);

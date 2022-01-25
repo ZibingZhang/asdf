@@ -60,9 +60,6 @@ import {
   Environment
 } from "./environment";
 import {
-  Global
-} from "./global";
-import {
   Keyword
 } from "./keyword";
 import {
