@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export {
   prettyPrint
 };
 
 // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-521460510
-function prettyPrint(any) {
+function prettyPrint(any: any) {
   console.log(
     JSON.stringify(
       any,
