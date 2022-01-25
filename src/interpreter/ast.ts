@@ -809,8 +809,6 @@ abstract class DefnNodeBase extends ASTNodeBase {
 }
 
 class DefnStructNode extends DefnNodeBase {
-  private global = new Global();
-
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,
@@ -882,8 +880,6 @@ class DefnStructNode extends DefnNodeBase {
 }
 
 class DefnVarNode extends DefnNodeBase {
-  private global = new Global();
-
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,

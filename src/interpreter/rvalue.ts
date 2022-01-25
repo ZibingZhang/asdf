@@ -9,6 +9,7 @@ import {
   ListType,
   NonNegativeRealType,
   ProcedureType,
+  RationalType,
   RealType,
   StringType,
   StructType,
@@ -550,7 +551,7 @@ class RInexactReal extends RNumberBase {
     if (this.denominator === 0n) {
       return new IntegerType();
     } else {
-      return new RealType();
+      return new RationalType();
     }
   }
 
