@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+declare var CodeMirror: any;
+
 (function(mod) {
   // Plain browser env
   {mod(CodeMirror);}
-})(function(CodeMirror) {
+})(function(CodeMirror: any) {
   "use strict";
 
-  CodeMirror.defineMode("racket", function(_config) {
+  CodeMirror.defineMode("racket", function(_config: any) {
     const untilDelimiter = /^[^\s"'([{)\]};`,]*/;
     const openBrackets = "([{";
     const closeBrackets = ")]}";
@@ -14,7 +18,7 @@
     const exactnessNumLiteral = /^[ei]?[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
     const placeholder = /^\.{2,6}$/;
 
-    function tokenBase(stream, state) {
+    function tokenBase(stream: any, state: any) {
       if (stream.eatSpace()) {
         return null;
       }
@@ -81,8 +85,8 @@
       }
     }
 
-    function tokenComment(depth) {
-      return function(stream, state) {
+    function tokenComment(depth: number) {
+      return function(stream: any, state: any) {
         const m = stream.match(/^.*?(#\||\|#)/);
         if (!m) {
           stream.skipToEnd();
@@ -97,7 +101,7 @@
       };
     }
 
-    function tokenString(stream, state) {
+    function tokenString(stream: any, state: any) {
       if (stream.eatSpace()) {
         return null;
       }
@@ -115,7 +119,7 @@
       return "string";
     }
 
-    function tokenEscapedCharacter(stream, state) {
+    function tokenEscapedCharacter(stream: any, state: any) {
       stream.next();
       if (stream.eol()) {
         state.tokenize = tokenString;
@@ -135,12 +139,12 @@
         return { tokenize: tokenBase };
       },
 
-      token: function (stream, state) {
+      token: function (stream: any, state: any) {
         const style = state.tokenize(stream, state);
         return style;
       },
 
-      indent: function (_state, _textAfter) {
+      indent: function (_state: any, _textAfter: any) {
         return 0;
       },
 

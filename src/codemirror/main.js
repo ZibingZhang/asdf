@@ -1,1 +1,1 @@
-import "./mode/racket/racket.js";
+import "./mode/racket/racket";
