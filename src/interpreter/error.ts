@@ -374,7 +374,7 @@ const RQ_MODULE_NOT_FOUND_ERR = (name: string) => {
 };
 
 const RS_BAD_CHARACTER_CONSTANT_ERR = (found: string) => {
-  return `read-syntax: bad character constant \`#\\${found}\``;
+  return `read-syntax: bad character constant \`${found}\``;
 };
 const RS_BAD_SYNTAX_ERR = (syntax: string) => {
   return `read-syntax: bad syntax \`${syntax}\``;

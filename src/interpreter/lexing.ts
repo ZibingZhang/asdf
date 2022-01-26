@@ -55,7 +55,7 @@ const RATIONAL_RE = /^[+-]?\d+\/\d+$/;
 const DECIMAL_RE = /^[+-]?\d*\.\d+$/;
 const DIV_BY_ZERO_RE = /^[+-]?\d+\/0+$/;
 const PLACEHOLDER_RE = /^\.{2,6}$/;
-const CHARACTER_SPECIAL_FORMS_RE = /^nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout$/;
+const CHARACTER_SPECIAL_FORMS_RE = /^#\\(nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout)$/;
 
 const ESCAPED_A = String.fromCharCode(7);
 const ESCAPED_B = String.fromCharCode(8);
@@ -134,7 +134,7 @@ class Lexer implements Stage<string, SExpr[]> {
       }
       return this.nextQuotedSExpr(true);
     } else if (ch === "\"") {
-      return this.nextString(this.lineno, this.colno - 1);
+      return this.nextString();
     } else if (ch === ",") {
       if (!SETTINGS.syntax.quasiquoting) {
         throw new StageError(
@@ -246,6 +246,9 @@ class Lexer implements Stage<string, SExpr[]> {
         new SourceSpan(poundLineno, poundColno, this.lineno, this.colno)
       );
     }
+    if (this.match("\\")) {
+      return this.nextCharacter();
+    }
     let name = "#";
     while (!this.atEnd && !this.peek().match(DELIMITER_RE)) {
       name += this.next();
@@ -259,28 +262,6 @@ class Lexer implements Stage<string, SExpr[]> {
     } else if (name.match(FALSE_LITERAL_RE)) {
       return new AtomSExpr(
         new Token(TokenType.False, name, sourceSpan),
-        sourceSpan
-      );
-    } else if (name.match(CHARACTER_LITERAL_RE)) {
-      if (name === "#\\") {
-        if (this.atEnd) {
-          throw new StageError(
-            RS_EXPECTED_CHARACTER_ERR,
-            sourceSpan
-          );
-        }
-        name += this.next();
-      } else {
-        const character = name.slice(2);
-        if (character.length !== 1 && !character.match(CHARACTER_SPECIAL_FORMS_RE)) {
-          throw new StageError(
-            RS_BAD_CHARACTER_CONSTANT_ERR(character),
-            sourceSpan
-          );
-        }
-      }
-      return new AtomSExpr(
-        new Token(TokenType.Character, name, sourceSpan),
         sourceSpan
       );
     } else {
@@ -339,7 +320,43 @@ class Lexer implements Stage<string, SExpr[]> {
     );
   }
 
-  private nextString(lineno: number, colno: number): AtomSExpr {
+  private nextCharacter(): AtomSExpr {
+    const lineno = this.lineno;
+    const colno = this.colno - 2;
+    let name = "#\\";
+    if (this.atEnd) {
+      throw new StageError(
+        RS_EXPECTED_CHARACTER_ERR,
+        new SourceSpan(lineno, colno, this.lineno, this.colno)
+      );
+    }
+    name += this.next();
+    if (name.match(/#\\[^a-z]/i)) {
+      const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
+      return new AtomSExpr(
+        new Token(TokenType.Character, name, sourceSpan),
+        sourceSpan
+      );
+    }
+    while (!this.atEnd && this.peek().match(/[a-z]/i)) {
+      name += this.next();
+    }
+    const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
+    if (!name.match(CHARACTER_SPECIAL_FORMS_RE)) {
+      throw new StageError(
+        RS_BAD_CHARACTER_CONSTANT_ERR(name),
+        sourceSpan
+      );
+    }
+    return new AtomSExpr(
+      new Token(TokenType.Character, name, sourceSpan),
+      sourceSpan
+    );
+  }
+
+  private nextString(): AtomSExpr {
+    const lineno = this.lineno;
+    const colno = this.colno - 1;
     let str = "\"";
     while (!this.atEnd) {
       const ch = this.next();
