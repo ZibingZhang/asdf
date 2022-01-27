@@ -16,6 +16,7 @@ declare let CodeMirror: any;
     const specialForm = /^(and|check-error|check-expect|check-member-of|check-random|check-range|check-satisfied|check-within|cond|define|define-struct|else|if|lambda|letrec|let\*|let|local|or|quasiquote|quote|require|unquote)$/;
     const numLiteral = /^[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
     const exactnessNumLiteral = /^[ei]?[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
+    const specialCharacter = /^(nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout)$/;
     const placeholder = /^\.{2,6}$/;
 
     function tokenBase(stream: any, state: any) {
@@ -54,11 +55,19 @@ declare let CodeMirror: any;
           state.tokenize = tokenComment(0);
           return state.tokenize(stream, state);
         } else if (ch === "\\") {
-          const characterName = stream.match(untilDelimiter)[0];
-          if (characterName === "" && !stream.eol() && stream.peek().match(/\S/)) {
-            stream.next();
+          if (stream.eol()) {
+            if (stream.lookAhead(1) === undefined) {
+              return "error";
+            } else {
+              return "character";
+            }
+          }
+          ch = stream.next();
+          if (!ch.match(/[a-z]/i)) {
             return "character";
-          } else if (characterName.match(/^(.|nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout)$/)) {
+          }
+          const characterName = ch + stream.match(/[a-z]*/)[0];
+          if (characterName.length === 1 || characterName.match(specialCharacter)) {
             return "character";
           } else {
             return "error";
