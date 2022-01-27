@@ -146,7 +146,9 @@ class Repl {
   }
 
   appendToRepl(text: string, className = "") {
-    this.cm.replaceRange(text, CodeMirror.Pos(this.cm.lastLine()), null, `ignore ${className} ${(text.match(/\n/g) || "").length}`);
+    const lastLine = this.cm.lastLine();
+    this.cm.replaceRange(text, CodeMirror.Pos(lastLine), null, `ignore ${className} ${(text.match(/\n/g) || "").length}`);
+    this.cm.scrollIntoView(lastLine);
   }
 
   resetRepl() {

@@ -64,7 +64,7 @@ class Controller {
       replOutput += "> ";
       this.repl.appendToRepl(replOutput);
     });
-    window.racket.pipeline.setTestResultsCallback(this.testOutput.handleTestResults);
+    window.racket.pipeline.setTestResultsCallback(this.testOutput.handleTestResults.bind(this.testOutput));
   }
 
   switchToTab(nextTab: Tab) {
