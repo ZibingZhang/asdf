@@ -107,7 +107,6 @@ class RPFString extends RPrimFun {
   }
 
   call(args: RValue[]): RValue {
-    // TODO: fix for special characters, e.g. #\newline
     return new RString((<RCharacter[]>args).map(arg => arg.val).join(""));
   }
 }

@@ -1,7 +1,14 @@
+import {
+  RBoolean,
+  RData,
+  RNumber
+} from "./rvalue";
+
 export{
   AnyProcedureType,
   AnyType,
   BooleanType,
+  BooleanLiteralType,
   CharacterType,
   EofObjectType,
   ErrorType,
@@ -11,6 +18,8 @@ export{
   ListType,
   NonNegativeRealType,
   NumberType,
+  NumberLiteralType,
+  OrType,
   PairType,
   ProcedureType,
   RationalType,
@@ -27,12 +36,40 @@ export{
 };
 
 abstract class Type {
-  abstract isSuperTypeOf(type: Type): boolean;
+  isSuperTypeOf(type: Type): boolean {
+    if (type instanceof LiteralType) {
+      if (type.literal) {
+        return this.isSuperTypeOf(type.literal.getType());
+      } else {
+        return false;
+      }
+    } else {
+      return this.isSuperTypeOfHelper(type);
+    }
+  }
+
+  abstract isSuperTypeOfHelper(type: Type): boolean;
+
   abstract stringify(): string;
 }
 
+abstract class LiteralType extends Type {
+  constructor(readonly literal: RData) {
+    super();
+  }
+
+  isSuperTypeOfHelper(type: Type): boolean {
+    return type instanceof LiteralType
+      && type.literal.equal(this.literal);
+  }
+
+  stringify(): string {
+    return this.literal.stringify();
+  }
+}
+
 class AnyProcedureType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof AnyProcedureType
       || type instanceof ProcedureType;
   }
@@ -43,7 +80,7 @@ class AnyProcedureType extends Type {
 }
 
 class AnyType extends Type {
-  isSuperTypeOf(_: Type): boolean {
+  isSuperTypeOfHelper(_: Type): boolean {
     return true;
   }
 
@@ -53,7 +90,7 @@ class AnyType extends Type {
 }
 
 class BooleanType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof BooleanType;
   }
 
@@ -62,8 +99,14 @@ class BooleanType extends Type {
   }
 }
 
+class BooleanLiteralType extends LiteralType {
+  constructor(readonly literal: RBoolean) {
+    super(literal);
+  }
+}
+
 class CharacterType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof CharacterType;
   }
 
@@ -73,7 +116,7 @@ class CharacterType extends Type {
 }
 
 class EofObjectType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof VoidType;
   }
 
@@ -83,7 +126,7 @@ class EofObjectType extends Type {
 }
 
 class ErrorType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof ErrorType;
   }
 
@@ -97,9 +140,9 @@ class ExactNonNegativeIntegerType extends Type {
     new ExactPositiveIntegerType()
   ];
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof ExactNonNegativeIntegerType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOfHelper(type));
   }
 
   stringify(): string {
@@ -108,7 +151,7 @@ class ExactNonNegativeIntegerType extends Type {
 }
 
 class ExactPositiveIntegerType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof ExactPositiveIntegerType;
   }
 
@@ -122,9 +165,9 @@ class IntegerType extends Type {
     new ExactNonNegativeIntegerType()
   ];
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof IntegerType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOfHelper(type));
   }
 
   stringify(): string {
@@ -137,7 +180,7 @@ class ListType extends Type {
     super();
   }
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return (
       type instanceof ListType
       && type.minLength >= this.minLength
@@ -163,9 +206,9 @@ class NonNegativeRealType extends Type {
     new ExactNonNegativeIntegerType()
   ];
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof NonNegativeRealType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOfHelper(type));
   }
 
   stringify(): string {
@@ -178,9 +221,9 @@ class NumberType extends Type {
     new RealType()
   ];
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof NumberType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOfHelper(type));
   }
 
   stringify(): string {
@@ -188,8 +231,31 @@ class NumberType extends Type {
   }
 }
 
+class NumberLiteralType extends LiteralType {
+  constructor(literal: RNumber) {
+    super(literal);
+  }
+}
+
+class OrType extends Type {
+  readonly subTypes: Type[];
+
+  constructor(...subTypes: Type[]) {
+    super();
+    this.subTypes = subTypes;
+  }
+
+  isSuperTypeOfHelper(type: Type): boolean {
+    return this.subTypes.some(subType => subType.isSuperTypeOfHelper(type));
+  }
+
+  stringify(): string {
+    return `(or/c ${this.subTypes.map(subType => subType.stringify()).join(" ")})`;
+  }
+}
+
 class PairType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof PairType
       || type instanceof ListType;
   }
@@ -207,23 +273,23 @@ class ProcedureType extends Type {
     super();
   }
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof ProcedureType
       && type.paramTypes.length === this.paramTypes.length
-      && this.paramTypes.every((paramType, idx) => paramType.isSuperTypeOf(type.paramTypes[idx]))
-      && this.outputType.isSuperTypeOf(type.outputType);
+      && this.paramTypes.every((paramType, idx) => paramType.isSuperTypeOfHelper(type.paramTypes[idx]))
+      && this.outputType.isSuperTypeOfHelper(type.outputType);
   }
 
   isCompatibleWith(type: Type): boolean {
     return type instanceof ProcedureType
       && type.paramTypes.length === this.paramTypes.length
       && this.paramTypes.every((paramType, idx) =>
-        paramType.isSuperTypeOf(type.paramTypes[idx])
-          || type.paramTypes[idx].isSuperTypeOf(paramType)
+        paramType.isSuperTypeOfHelper(type.paramTypes[idx])
+          || type.paramTypes[idx].isSuperTypeOfHelper(paramType)
       )
       && (
-        this.outputType.isSuperTypeOf(type.outputType)
-        || type.outputType.isSuperTypeOf(this.outputType)
+        this.outputType.isSuperTypeOfHelper(type.outputType)
+        || type.outputType.isSuperTypeOfHelper(this.outputType)
       );
   }
 
@@ -237,9 +303,9 @@ class RationalType extends Type {
     new IntegerType()
   ];
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof RationalType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOfHelper(type));
   }
 
   stringify(): string {
@@ -253,9 +319,9 @@ class RealType extends Type {
     new RationalType()
   ];
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof RealType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOfHelper(type));
   }
 
   stringify(): string {
@@ -264,7 +330,7 @@ class RealType extends Type {
 }
 
 class StringType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof StringType;
   }
 
@@ -278,7 +344,7 @@ class StructType extends Type {
     super();
   }
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof StructType
       && type.name === this.name;
   }
@@ -293,7 +359,7 @@ class StructTypeType extends Type {
     super();
   }
 
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof StructTypeType
       && type.name === this.name;
   }
@@ -304,7 +370,7 @@ class StructTypeType extends Type {
 }
 
 class SymbolType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof SymbolType;
   }
 
@@ -314,7 +380,7 @@ class SymbolType extends Type {
 }
 
 class VoidType extends Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof VoidType;
   }
 

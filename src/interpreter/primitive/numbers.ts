@@ -4,7 +4,9 @@ import {
   ExactNonNegativeIntegerType,
   ExactPositiveIntegerType,
   IntegerType,
+  NumberLiteralType,
   NumberType,
+  OrType,
   ProcedureType,
   RationalType,
   RealType,
@@ -702,8 +704,7 @@ class RPFSgn extends RPrimFun {
   }
 
   getType(): ProcedureType {
-    // output type should be (union 1 #i1.0 0 #i0.0 -1 #i-1.0), which is currently unsupported
-    return new ProcedureType([new RealType()], new IntegerType());
+    return new ProcedureType([new RealType()], new OrType(new NumberLiteralType(new RExactReal(1n)), new NumberLiteralType(new RInexactReal(1n)), new NumberLiteralType(new RExactReal(0n)), new NumberLiteralType(new RInexactReal(0n)), new NumberLiteralType(new RExactReal(-1n)), new NumberLiteralType(new RInexactReal(-1n))));
   }
 
   call(args: RValue[]): RValue {

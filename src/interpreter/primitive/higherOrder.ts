@@ -7,7 +7,9 @@ import {
   ProcedureType,
   RealType,
   Type,
-  isProcedureType
+  isProcedureType,
+  OrType,
+  BooleanLiteralType
 } from "../types";
 import {
   AtomNode,
@@ -31,7 +33,8 @@ import {
   isRFalse,
   isRProcedure,
   isRTrue,
-  toRBoolean
+  toRBoolean,
+  RBoolean
 } from "../rvalue";
 import {
   Environment
@@ -351,8 +354,7 @@ class RPFMemf extends RHigherOrderPrimFun {
   }
 
   getType(): ProcedureType {
-    // output type should be (union #false (listof X)), which is currently unsupported
-    return new ProcedureType([new ProcedureType([new AnyType()], new AnyType()), new ListType()], new AnyType());
+    return new ProcedureType([new ProcedureType([new AnyType()], new AnyType()), new ListType()], new OrType(new BooleanLiteralType(new RBoolean(false)), new ListType()));
   }
 
   call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {
