@@ -24,14 +24,14 @@ class Repl {
         tabSize: 2,
         value: "> ",
         mode: "racket",
-        theme: "racket"
+        theme: "racket",
+        styleSelectedText: true
         // extraKeys: {
         //   "Alt-I": () => {
         //     let element = document.createElement("canvas");
         //     const ctx = element.getContext('2d');
         //     ctx.fillStyle = 'green';
         //     ctx.fillRect(10, 10, 150, 100);
-
         //     REPL_DOC.addLineWidget(
         //       REPL_DOC.lastLine(),
         //       element
@@ -40,6 +40,10 @@ class Repl {
         // }
       }
     );
+    // https://stackoverflow.com/a/11999862
+    this.cm.getSelectedRange = () => {
+      return { from: this.cm.getCursor(true), to: this.cm.getCursor(false) };
+    };
     this.cm.on("change",
       (cm: any, changeObj: any) => {
         const match = changeObj.origin.match(/cm-highlight-error-message (\d+)/);
@@ -61,25 +65,56 @@ class Repl {
         }
       }
     );
-    this.cm.on("cursorActivity",
-      (cm: any) => cm.setCursor(cm.lineCount(), 0)
-    );
     this.cm.on("keydown",
       (cm: any, event: any) => {
         switch (event.key) {
           case "Backspace": {
-            const lastLine = cm.doc.getLine(cm.doc.lastLine());
-            if (lastLine === "> ") {
-              event.preventDefault();
+            if (!cm.somethingSelected()) {
+              const cursor = cm.getCursor();
+              const lineCount = cm.lineCount();
+              if (
+                cursor.line !== lineCount - 1
+                || cursor.ch <= 2
+              ) {
+                event.preventDefault();
+              }
+            } else {
+              const selection = cm.getSelection();
+              const selectedRange = cm.getSelectedRange();
+              if (
+                selection.includes("\n")
+                || selectedRange.from.line !== cm.lineCount() - 1
+                || selectedRange.from.ch < 2
+              ) {
+                event.preventDefault();
+              }
             }
             break;
           }
           case "Enter": {
+            cm.setCursor(cm.lineCount(), 0);
             event.preventDefault();
+            const code = cm.doc.getLine(cm.doc.lastLine()).slice(2);
             this.appendToRepl("\n");
-            const code = cm.doc.getLine(cm.doc.lastLine() - 1).slice(2);
             this.runCode(code);
             break;
+          }
+          case "ArrowUp":
+          case "ArrowDown":
+          case "ArrowLeft":
+          case "ArrowRight":
+          case "Control":
+          case "Shift": {
+            break;
+          }
+          default: {
+            const cursor = cm.getCursor();
+            if (
+              cursor.line !== cm.lineCount() - 1
+              || cursor.ch < 2
+            ) {
+              cm.setCursor(cm.lineCount(), 0);
+            }
           }
         }
       }
