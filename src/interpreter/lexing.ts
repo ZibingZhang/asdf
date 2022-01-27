@@ -8,6 +8,7 @@ import {
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
   RS_EXPECTED_CHARACTER_ERR,
+  RS_EXPECTED_CLOSING_BLOCK_COMMENT_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
   RS_EXPECTED_CLOSING_PIPE_ERR,
   RS_EXPECTED_CLOSING_QUOTE_ERR,
@@ -83,8 +84,8 @@ class Lexer implements Stage<string, SExpr[]> {
     this.quoting = false;
     this.quasiQuoting = false;
     const sexprs: SExpr[] = [];
-    const sexprCommentDepth = this.eatSpace();
     try {
+      const sexprCommentDepth = this.eatSpace();
       while (!this.atEnd) {
         const sexpr = this.nextSExpr();
         if (sexprCommentDepth.length > 0) {
@@ -545,6 +546,8 @@ class Lexer implements Stage<string, SExpr[]> {
       }
       return this.eatSpace();
     } else if (ch === "#" && this.match("#|")) {
+      const lineno = this.lineno;
+      const colno = this.colno - 2;
       let depth = 1;
       while(!this.atEnd && depth > 0) {
         const ch = this.next();
@@ -553,6 +556,12 @@ class Lexer implements Stage<string, SExpr[]> {
         } else if (ch === "|" && this.match("#")) {
           depth--;
         }
+      }
+      if (this.atEnd && depth > 0) {
+        throw new StageError(
+          RS_EXPECTED_CLOSING_BLOCK_COMMENT_ERR,
+          new SourceSpan(lineno, colno, this.lineno, this.colno)
+        );
       }
       return this.eatSpace();
     } else if (ch === "#" && this.match("#;")) {
