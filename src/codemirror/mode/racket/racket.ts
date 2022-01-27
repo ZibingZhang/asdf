@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 declare let CodeMirror: any;
+
+type State = {
+  tokenize: (stream: any, state: State) => string | null,
+  bracketStack: string[]
+}
 
 (function(mod) {
   // Plain browser env
@@ -19,15 +24,32 @@ declare let CodeMirror: any;
     const specialCharacter = /^(nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout)$/;
     const placeholder = /^\.{2,6}$/;
 
-    function tokenBase(stream: any, state: any) {
+    const bracketMap = new Map([
+      ["(", ")"],
+      ["[", "]"],
+      ["{", "}"]
+    ]);
+
+    function tokenBase(stream: any, state: State) {
       if (stream.eatSpace()) {
         return null;
       }
 
       let ch = stream.next();
 
-      if (openBrackets.includes(ch) || closeBrackets.includes(ch)) {
+      if (openBrackets.includes(ch)) {
+        state.bracketStack.push(ch);
         return "bracket";
+      } else if (closeBrackets.includes(ch)) {
+        if (state.bracketStack.length === 0) {
+          return "error";
+        } else {
+          if (ch === bracketMap.get(state.bracketStack.pop()!)) {
+            return "bracket";
+          } else {
+            return "error";
+          }
+        }
       } else if (ch === ";") {
         stream.skipToEnd();
         return "comment";
@@ -94,8 +116,8 @@ declare let CodeMirror: any;
       }
     }
 
-    function tokenComment(depth: number) {
-      return function(stream: any, state: any) {
+    function tokenComment(depth: number): ((stream: any, state: State) => string | null) {
+      return function(stream: any, state: State) {
         const m = stream.match(/^.*?(#\||\|#)/);
         if (!m) {
           stream.skipToEnd();
@@ -110,7 +132,7 @@ declare let CodeMirror: any;
       };
     }
 
-    function tokenString(stream: any, state: any) {
+    function tokenString(stream: any, state: State): string | null {
       if (stream.eatSpace()) {
         return null;
       }
@@ -128,7 +150,7 @@ declare let CodeMirror: any;
       return "string";
     }
 
-    function tokenEscapedCharacter(stream: any, state: any) {
+    function tokenEscapedCharacter(stream: any, state: State) {
       stream.next();
       if (stream.eol()) {
         state.tokenize = tokenString;
@@ -144,16 +166,19 @@ declare let CodeMirror: any;
     }
 
     return {
-      startState: function () {
-        return { tokenize: tokenBase };
+      startState: function (): State {
+        return {
+          tokenize: tokenBase,
+          bracketStack: []
+        };
       },
 
-      token: function (stream: any, state: any) {
+      token: function (stream: any, state: State): string | null {
         const style = state.tokenize(stream, state);
         return style;
       },
 
-      indent: function (_state: any, _textAfter: any) {
+      indent: function (_state: State, _textAfter: any): number {
         return 0;
       },
 
