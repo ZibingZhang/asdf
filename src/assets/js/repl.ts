@@ -91,6 +91,16 @@ class Repl {
             }
             break;
           }
+          case "Delete": {
+            const cursor = cm.getCursor();
+            if (
+              cursor.line !== cm.lineCount() - 1
+              || cursor.ch < 2
+            ) {
+              event.preventDefault();
+            }
+            break;
+          }
           case "Enter": {
             cm.setCursor(cm.lineCount(), 0);
             event.preventDefault();
