@@ -2,9 +2,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 declare let CodeMirror: any;
 
+type Bracket = {
+  ch: string,
+  col: number,
+  imm: string | null  // first name token following the open bracket
+}
+
 type State = {
   tokenize: (stream: any, state: State) => string | null,
-  bracketStack: string[]
+  bracketStack: Bracket[]
 }
 
 (function(mod) {
@@ -38,13 +44,17 @@ type State = {
       let ch = stream.next();
 
       if (openBrackets.includes(ch)) {
-        state.bracketStack.push(ch);
+        state.bracketStack.push({
+          ch,
+          col: stream.column(),
+          imm: null
+        });
         return "bracket";
       } else if (closeBrackets.includes(ch)) {
         if (state.bracketStack.length === 0) {
           return "error";
         } else {
-          if (ch === bracketMap.get(state.bracketStack.pop()!)) {
+          if (ch === bracketMap.get(state.bracketStack.pop()!.ch)) {
             return "bracket";
           } else {
             return "error";
@@ -178,8 +188,12 @@ type State = {
         return style;
       },
 
-      indent: function (_state: State, _textAfter: any): number {
-        return 0;
+      indent: function (state: State, _textAfter: any): number {
+        if (state.bracketStack.length === 0) {
+          return 0;
+        } else {
+          return state.bracketStack.at(-1)!.col + 1;
+        }
       },
 
       closeBrackets: { pairs: "()[]{}\"\"" },
