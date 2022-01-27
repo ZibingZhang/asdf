@@ -25,19 +25,23 @@ class Repl {
         value: "> ",
         mode: "racket",
         theme: "racket",
-        styleSelectedText: true
-        // extraKeys: {
-        //   "Alt-I": () => {
-        //     let element = document.createElement("canvas");
-        //     const ctx = element.getContext('2d');
-        //     ctx.fillStyle = 'green';
-        //     ctx.fillRect(10, 10, 150, 100);
-        //     REPL_DOC.addLineWidget(
-        //       REPL_DOC.lastLine(),
-        //       element
-        //     )
-        //   }
-        // }
+        styleSelectedText: true,
+        extraKeys: {
+          "Alt-I": () => {
+            let element = document.createElement("canvas");
+            element.width = 150;
+            element.height = 100;
+            const ctx = element.getContext('2d')!;
+            ctx.fillStyle = 'green';
+            ctx.fillRect(0, 0, 150, 100);
+            this.cm.addLineWidget(
+              this.cm.lastLine(),
+              element
+            );
+            this.cm.scrollIntoView(this.cm.lastLine());
+            this.appendToRepl("\n> ");
+          }
+        }
       }
     );
     // https://stackoverflow.com/a/11999862
