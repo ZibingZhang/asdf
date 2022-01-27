@@ -49,7 +49,6 @@ const LEFT_PAREN_RE = /^[([{]$/;
 const RIGHT_PAREN_RE = /^[)\]}]$/;
 const TRUE_LITERAL_RE = /^#(T|t|true)$/;
 const FALSE_LITERAL_RE = /^#(F|f|false)$/;
-const CHARACTER_LITERAL_RE = /^#\\.*$/;
 const INTEGER_RE = /^[+-]?\d+\.?$/;
 const RATIONAL_RE = /^[+-]?\d+\/\d+$/;
 const DECIMAL_RE = /^[+-]?\d*\.\d+$/;

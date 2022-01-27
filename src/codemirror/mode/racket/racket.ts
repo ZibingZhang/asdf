@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-declare var CodeMirror: any;
+declare let CodeMirror: any;
 
 (function(mod) {
   // Plain browser env

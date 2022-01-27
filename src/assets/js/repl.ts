@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   SourceSpan
 } from "../../interpreter/sourcespan";
@@ -28,11 +29,11 @@ class Repl {
         styleSelectedText: true,
         extraKeys: {
           "Alt-I": () => {
-            let element = document.createElement("canvas");
+            const element = document.createElement("canvas");
             element.width = 150;
             element.height = 100;
-            const ctx = element.getContext('2d')!;
-            ctx.fillStyle = 'green';
+            const ctx = element.getContext("2d")!;
+            ctx.fillStyle = "green";
             ctx.fillRect(0, 0, 150, 100);
             this.cm.addLineWidget(
               this.cm.lastLine(),
