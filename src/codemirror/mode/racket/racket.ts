@@ -71,9 +71,7 @@ type State = {
         state.tokenize = tokenString;
         return "string";
       } else if (ch === "#") {
-        if (stream.match(exactnessNumLiteral)) {
-          return "number";
-        } else if (stream.eol() || stream.peek().match(/^\s/)) {
+        if (stream.eol() || stream.peek().match(/^\s/)) {
           return "error";
         } else if (stream.match(/^![/ ]/)) {
           stream.skipToEnd();
@@ -109,6 +107,8 @@ type State = {
         const poundName = ch + stream.match(untilDelimiter)[0];
         if (poundName.match(booleanLiteral)) {
           return "boolean";
+        } else if (poundName.match(exactnessNumLiteral)) {
+          return "number";
         } else {
           return "error";
         }
