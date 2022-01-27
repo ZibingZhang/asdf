@@ -12,8 +12,8 @@ module.exports = {
   },
   entry: {
     interpreter: "./src/interpreter/main.ts",
-    codemirror: "./src/codemirror/main.js",
-    assets: "./src/assets/main.js"
+    codemirror: "./src/codemirror/main.ts",
+    assets: "./src/assets/main.ts"
   },
   module: {
     rules: [
