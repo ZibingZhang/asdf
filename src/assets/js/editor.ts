@@ -29,7 +29,8 @@ class Editor {
         theme: "racket",
         styleSelectedText: true,
         extraKeys: {
-          "Alt-Enter": () => this.runCode()
+          "Alt-Enter": () => this.runCode(),
+          "Ctrl-/": () => this.cm.execCommand("toggleComment")
         }
       }
     );
