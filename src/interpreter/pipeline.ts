@@ -18,6 +18,9 @@ import {
   RNG
 } from "./random";
 import {
+  RValue
+} from "./rvalue";
+import {
   SETTINGS
 } from "./settings";
 import {
@@ -83,10 +86,10 @@ class Pipeline {
   private lexingOutput: StageOutput<SExpr[]> = new StageOutput([]);
   private parsingOutput: StageOutput<Program> = new StageOutput(new Program([], []));
   private wellFormedOutput: StageOutput<Program> = new StageOutput(new Program([], []));
-  private evaluateCodeOutput: StageOutput<string[]> = new StageOutput([]);
+  private evaluateCodeOutput: StageOutput<RValue[]> = new StageOutput([]);
 
   private errorsCallback: (stageErrors: StageError[]) => void = () => { /* do nothing */ };
-  private successCallback: (output: string[]) => void = () => { /* do nothing */ };
+  private successCallback: (output: RValue[]) => void = () => { /* do nothing */ };
   private testResultsCallback: (testResults: StageTestResult[]) => void = () => { /* do nothing */ };
   private unusedCallback: ((sourceSpan: SourceSpan) => void) | null = null;
 
@@ -154,7 +157,7 @@ class Pipeline {
     this.errorsCallback = errorsCallback;
   }
 
-  setSuccessCallback(successCallback: (output: string[]) => void) {
+  setSuccessCallback(successCallback: (output: RValue[]) => void) {
     this.successCallback = successCallback;
   }
 

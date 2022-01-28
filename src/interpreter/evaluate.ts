@@ -1,5 +1,6 @@
 import {
   RTestResult,
+  RValue,
   R_VOID
 } from "./rvalue";
 import {
@@ -28,7 +29,7 @@ export {
   EvaluateCode
 };
 
-class EvaluateCode implements Stage<Program, string[]> {
+class EvaluateCode implements Stage<Program, RValue[]> {
   private globalEnv = new Environment();
   private env = new Environment();
   private testResults: StageTestResult[] = [];
@@ -38,7 +39,7 @@ class EvaluateCode implements Stage<Program, string[]> {
     this.env = new Environment();
   }
 
-  run(input: StageOutput<Program>): StageOutput<string[]> {
+  run(input: StageOutput<Program>): StageOutput<RValue[]> {
     this.testResults = [];
     try {
       return new StageOutput(this.runHelper(input.output), [], this.testResults);
@@ -62,9 +63,9 @@ class EvaluateCode implements Stage<Program, string[]> {
     }
   }
 
-  private runHelper(program: Program): string[] {
+  private runHelper(program: Program): RValue[] {
     program.defns.forEach(defn => { defn.eval(this.globalEnv); defn.used = false; });
-    const output: string[] = [];
+    const output: RValue[] = [];
     for (const node of program.nodes) {
       let result;
       if (isCheckNode(node)) {
@@ -79,7 +80,7 @@ class EvaluateCode implements Stage<Program, string[]> {
           result.sourceSpan
         ));
       } else if (result !== R_VOID) {
-        output.push(result.stringify());
+        output.push(result);
       }
     }
     return output;

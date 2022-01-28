@@ -70,7 +70,7 @@ class Editor {
         replOutput += stageError.msg + "\n";
       }
       replOutput += "> ";
-      this.controller.repl.appendToRepl(replOutput, "cm-highlight-error-message");
+      this.controller.repl.append(replOutput, "cm-highlight-error-message");
     });
     window.racket.pipeline.setUnusedCallback(sourceSpan => this.mark(sourceSpan, "cm-highlight-unused"));
     window.racket.pipeline.evaluateCode(this.cm.getValue());

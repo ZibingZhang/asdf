@@ -26,23 +26,7 @@ class Repl {
         value: "> ",
         mode: "racket",
         theme: "racket",
-        styleSelectedText: true,
-        extraKeys: {
-          "Alt-I": () => {
-            const element = document.createElement("canvas");
-            element.width = 150;
-            element.height = 100;
-            const ctx = element.getContext("2d")!;
-            ctx.fillStyle = "green";
-            ctx.fillRect(0, 0, 150, 100);
-            this.cm.addLineWidget(
-              this.cm.lastLine(),
-              element
-            );
-            this.cm.scrollIntoView(this.cm.lastLine());
-            this.appendToRepl("\n> ");
-          }
-        }
+        styleSelectedText: true
       }
     );
     // https://stackoverflow.com/a/11999862
@@ -110,7 +94,7 @@ class Repl {
             cm.setCursor(cm.lineCount(), 0);
             event.preventDefault();
             const code = cm.doc.getLine(cm.doc.lastLine()).slice(2);
-            this.appendToRepl("\n");
+            this.append("\n");
             this.runCode(code);
             break;
           }
@@ -154,13 +138,13 @@ class Repl {
         replOutput += stageError.msg + "\n";
       }
       replOutput += "> ";
-      this.appendToRepl(replOutput, "cm-highlight-error-message");
+      this.append(replOutput, "cm-highlight-error-message");
     });
     window.racket.pipeline.setUnusedCallback(null);
     window.racket.pipeline.evaluateCode(code);
   }
 
-  appendToRepl(text: string, className = "") {
+  append(text: string, className = "") {
     const lastLine = this.cm.lastLine();
     this.cm.replaceRange(text, CodeMirror.Pos(lastLine), null, `ignore ${className} ${(text.match(/\n/g) || "").length}`);
     this.cm.scrollIntoView(lastLine);

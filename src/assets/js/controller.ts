@@ -15,10 +15,15 @@ import {
 import {
   TestOutput
 } from "./test-output";
+import {
+  isRImage
+} from "../../interpreter/modules/htdp/image/rvalue";
 
 export {
   Controller
 };
+
+declare let CodeMirror: any;
 
 const enum Tab {
   Editor,
@@ -57,12 +62,24 @@ class Controller {
     document.getElementById("info-button")!.onclick = () => this.switchToTab(Tab.Info);
 
     window.racket.pipeline.setSuccessCallback(output => {
-      let replOutput = "";
-      for (const text of output) {
-        replOutput += text + "\n";
+      let noOutput = true;
+      for (const rval of output) {
+        if (isRImage(rval)) {
+          if (noOutput) {
+            this.repl.append("\n");
+          }
+          this.repl.cm.addLineWidget(
+            this.repl.cm.lastLine() - 1,
+            rval.canvas
+          );
+          this.repl.cm.scrollIntoView(this.repl.cm.lastLine());
+          noOutput = false;
+        } else {
+          noOutput = false;
+          this.repl.append(rval.stringify() + "\n");
+        }
       }
-      replOutput += "> ";
-      this.repl.appendToRepl(replOutput);
+      this.repl.append("> ");
     });
     window.racket.pipeline.setTestResultsCallback(this.testOutput.handleTestResults.bind(this.testOutput));
   }

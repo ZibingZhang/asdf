@@ -1034,7 +1034,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
           continue;
         }
       } else if (!isRProcedure(argVal)) {
-        const argType = argVal.getType();
+        const argType = argVal.getType(-1);
         if (paramType.isSuperTypeOf(argType)) {
           continue;
         }

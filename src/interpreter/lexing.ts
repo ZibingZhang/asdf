@@ -336,7 +336,7 @@ class Lexer implements Stage<string, SExpr[]> {
       name += this.next();
     }
     const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
-    if (!name.match(CHARACTER_SPECIAL_FORMS_RE)) {
+    if (name.length - 2 > 1 && !name.match(CHARACTER_SPECIAL_FORMS_RE)) {
       throw new StageError(
         RS_BAD_CHARACTER_CONSTANT_ERR(name),
         sourceSpan

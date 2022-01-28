@@ -1,15 +1,19 @@
 import {
+  RPrimProc,
+  RValue,
+} from "../../../rvalue";
+import {
   Environment
 } from "../../../environment";
 import {
-  RPrimProc,
-  RValue,
-  R_TRUE
-} from "../../../rvalue";
-import { SourceSpan } from "../../../sourcespan";
+  SourceSpan
+} from "../../../sourcespan";
 import {
   ProcedureType
 } from "../../../types";
+import {
+  RImage
+} from "./rvalue";
 import {
   ImageType
 } from "./types";
@@ -27,7 +31,15 @@ class RPFSquare extends RPrimProc {
     return new ProcedureType([], new ImageType());
   }
 
-  call(_: RValue[], __: SourceSpan, ___: Environment): RValue {
-    return R_TRUE;
+  call(_: RValue[]): RValue {
+    const element = <HTMLCanvasElement> document.createElement("canvas");
+    element.width = 150;
+    element.height = 100;
+    const ctx = element.getContext("2d")!;
+    ctx.fillStyle = "green";
+    ctx.fillRect(0, 0, 150, 100);
+    return new RImage(
+      150, 100, element
+    )
   }
 }

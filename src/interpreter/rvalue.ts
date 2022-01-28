@@ -31,9 +31,6 @@ import {
 import {
   SETTINGS
 } from "./settings";
-import {
-  Scope
-} from "./scope";
 
 export {
   R_EMPTY_LIST,
@@ -94,10 +91,6 @@ function gcd(a: bigint, b: bigint): bigint {
   return gcd(b, a % b);
 }
 
-type RValue =
-  | RProcedure
-  | RData
-  | RTestResult;
 type RData =
   | RAtomic
   | RList
@@ -121,13 +114,13 @@ abstract class RModule {
   ) {}
 };
 
-interface RValBase {
+interface RValue {
   stringify(): string;
 
   getType(args: number): Type;
 }
 
-class RTestResult implements RValBase {
+class RTestResult implements RValue {
   constructor(
     readonly passed: boolean,
     readonly msg: string = "",
@@ -143,7 +136,7 @@ class RTestResult implements RValBase {
   }
 }
 
-abstract class RDataBase implements RValBase {
+abstract class RDataBase implements RValue {
   abstract stringify(): string;
 
   abstract getType(): Type;
@@ -588,7 +581,7 @@ interface RPrimTestFunConfig {
   maxArity?: number
 }
 
-abstract class RProcedure implements RValBase {
+abstract class RProcedure implements RValue {
   constructor(readonly config: RProcedureConfig = {}) {}
 
   abstract stringify(): string;

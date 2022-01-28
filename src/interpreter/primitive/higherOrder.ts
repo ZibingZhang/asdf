@@ -80,7 +80,7 @@ abstract class RHigherOrdeRPrimProc extends RPrimProc {
         return;
       }
     } else if (!isRProcedure(receivedVal)) {
-      if (expectedType.isSuperTypeOf(receivedVal.getType())) {
+      if (expectedType.isSuperTypeOf(receivedVal.getType(-1))) {
         return;
       }
     }
