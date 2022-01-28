@@ -6,6 +6,9 @@ import {
   Global
 } from "./global";
 import {
+  RModule
+} from "./rvalue";
+import {
   SETTINGS
 } from "./settings";
 import {
@@ -14,7 +17,6 @@ import {
 import {
   StageError
 } from "./pipeline";
-import { RModule } from "./rvalue";
 
 export {
   Scope,

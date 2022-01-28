@@ -60,6 +60,9 @@ import {
   Environment
 } from "./environment";
 import {
+  Global
+} from "./global";
+import {
   Keyword
 } from "./keyword";
 import {
@@ -77,7 +80,6 @@ import {
 import {
   UserError
 } from "./primitive/misc";
-import { Global } from "./global";
 
 export {
   ASTNode,
@@ -753,6 +755,7 @@ class RequireNode extends ASTNodeBase {
   }
 
   evalHelper(env: Environment): RValue {
+    /* eslint-disable @typescript-eslint/no-non-null-assertion */
     env.addModule(this.global.modules.get(this.name)!);
     return R_VOID;
   }

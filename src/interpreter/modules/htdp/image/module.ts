@@ -2,7 +2,7 @@ import {
   RModule
 } from "../../../rvalue";
 import {
-  RPFSquare
+  RPFRectangle
 } from "./primitive";
 
 export {
@@ -12,7 +12,7 @@ export {
 class RModuleHtdpImage extends RModule {
   constructor() {
     super(new Map([
-      ["square", new RPFSquare()]
+      ["rectangle", new RPFRectangle()]
     ]));
   }
 }

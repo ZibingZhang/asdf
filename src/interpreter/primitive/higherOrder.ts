@@ -1,15 +1,15 @@
 import {
   AnyProcedureType,
   AnyType,
+  BooleanLiteralType,
   BooleanType,
   ExactNonNegativeIntegerType,
   ListType,
+  OrType,
   ProcedureType,
   RealType,
   Type,
-  isProcedureType,
-  OrType,
-  BooleanLiteralType
+  isProcedureType
 } from "../types";
 import {
   AtomNode,
@@ -21,6 +21,7 @@ import {
   HO_EXPECTED_LISTS_SAME_LENGTH_ERR
 } from "../error";
 import {
+  RBoolean,
   RList,
   RMath,
   RNumber,
@@ -33,8 +34,7 @@ import {
   isRFalse,
   isRProcedure,
   isRTrue,
-  toRBoolean,
-  RBoolean
+  toRBoolean
 } from "../rvalue";
 import {
   Environment

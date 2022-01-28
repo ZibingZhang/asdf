@@ -112,7 +112,7 @@ abstract class RModule {
   constructor(
     readonly procedures: Map<string, RPrimProc>
   ) {}
-};
+}
 
 interface RValue {
   stringify(): string;

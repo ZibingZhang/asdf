@@ -1,45 +1,60 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
-  RPrimProc,
-  RValue,
-} from "../../../rvalue";
-import {
-  Environment
-} from "../../../environment";
-import {
-  SourceSpan
-} from "../../../sourcespan";
-import {
+  NonNegativeRealType,
   ProcedureType
 } from "../../../types";
 import {
+  RNumber,
+  RPrimProc,
+  RSymbol,
+  RValue
+} from "../../../rvalue";
+import {
+  ImageType, ModeType
+} from "./types";
+import {
   RImage
 } from "./rvalue";
-import {
-  ImageType
-} from "./types";
 
 export {
-  RPFSquare
+  RPFRectangle
 };
 
-class RPFSquare extends RPrimProc {
+const OUTLINE_WIDTH = 2;
+
+class RPFRectangle extends RPrimProc {
   constructor() {
-    super("square");
+    super("rectangle");
   }
 
   getType(): ProcedureType {
-    return new ProcedureType([], new ImageType());
+    return new ProcedureType([new NonNegativeRealType(), new NonNegativeRealType(), new ModeType()], new ImageType());
   }
 
-  call(_: RValue[]): RValue {
+  call(args: RValue[]): RValue {
+    const width = Number((<RNumber>args[0]).numerator);
+    const height = Number((<RNumber>args[1]).numerator);
+    const mode = (<RSymbol>args[2]).val;
     const element = <HTMLCanvasElement> document.createElement("canvas");
-    element.width = 150;
-    element.height = 100;
+    element.width = width;
+    element.height = height;
     const ctx = element.getContext("2d")!;
     ctx.fillStyle = "green";
-    ctx.fillRect(0, 0, 150, 100);
+    ctx.beginPath();
+    ctx.rect(0, 0, width, height);
+    ctx.fill();
+    if (
+      mode === "outline"
+      && width > OUTLINE_WIDTH
+      && height > OUTLINE_WIDTH
+    ) {
+      ctx.beginPath();
+      ctx.rect(OUTLINE_WIDTH, OUTLINE_WIDTH, width - 2 * OUTLINE_WIDTH, height - 2 * OUTLINE_WIDTH);
+      ctx.fillStyle = "white";
+      ctx.fill();
+    }
     return new RImage(
-      150, 100, element
-    )
+      width, height, element
+    );
   }
 }

@@ -375,7 +375,7 @@ const RQ_EXPECTED_MODULE_NAME_ERR = (parts: number, found: SExpr) => {
 const RQ_MODULE_NOT_FOUND_ERR = (name: string) => {
   return `require: module not found: ${name}`;
 };
-const RQ_NOT_TOP_LEVEL_ERR = `require: found a module require that is not at the top level`;
+const RQ_NOT_TOP_LEVEL_ERR = "require: found a module require that is not at the top level";
 
 const RS_BAD_CHARACTER_CONSTANT_ERR = (found: string) => {
   return `read-syntax: bad character constant \`${found}\``;
@@ -386,7 +386,7 @@ const RS_BAD_SYNTAX_ERR = (syntax: string) => {
 const RS_DIV_BY_ZERO_ERR = (number: string) => {
   return `read-syntax: division by zero in \`${number}\``;
 };
-const RS_EOF_FOLLOWING_BACKSLASH_ERR = "read-syntax: end-of-file following `\` in symbol";
+const RS_EOF_FOLLOWING_BACKSLASH_ERR = "read-syntax: end-of-file following `\\` in symbol";
 const RS_EXPECTED_CHARACTER_ERR = "read-syntax: expected a character after `#\\`";
 const RS_EXPECTED_CLOSING_PAREN_ERR = (opening: string) => {
   if (opening === "(") {

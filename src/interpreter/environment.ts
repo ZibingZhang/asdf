@@ -1,10 +1,10 @@
 import {
-  Global
-} from "./global";
-import {
   RModule,
   RValue
 } from "./rvalue";
+import {
+  Global
+} from "./global";
 import {
   SC_USED_BEFORE_DEFINITION_ERR
 } from "./error";

@@ -1,7 +1,9 @@
 import {
   RBoolean,
   RData,
-  RNumber
+  RNumber,
+  RString,
+  RSymbol
 } from "./rvalue";
 
 export{
@@ -25,9 +27,11 @@ export{
   RationalType,
   RealType,
   StringType,
+  StringLiteralType,
   StructType,
   StructTypeType,
   SymbolType,
+  SymbolLiteralType,
   Type,
   VoidType,
   isAnyProcedureType,
@@ -37,9 +41,9 @@ export{
 
 abstract class Type {
   isSuperTypeOf(type: Type): boolean {
-    if (type instanceof LiteralType) {
-      if (type.literal) {
-        return this.isSuperTypeOf(type.literal.getType());
+    if (this instanceof LiteralType) {
+      if (this.literal) {
+        return this.literal.getType().isSuperTypeOf(type);
       } else {
         return false;
       }
@@ -142,7 +146,7 @@ class ExactNonNegativeIntegerType extends Type {
 
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof ExactNonNegativeIntegerType
-      || this.children.some(child => child.isSuperTypeOfHelper(type));
+      || this.children.some(child => child.isSuperTypeOf(type));
   }
 
   stringify(): string {
@@ -167,7 +171,7 @@ class IntegerType extends Type {
 
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof IntegerType
-      || this.children.some(child => child.isSuperTypeOfHelper(type));
+      || this.children.some(child => child.isSuperTypeOf(type));
   }
 
   stringify(): string {
@@ -208,7 +212,7 @@ class NonNegativeRealType extends Type {
 
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof NonNegativeRealType
-      || this.children.some(child => child.isSuperTypeOfHelper(type));
+      || this.children.some(child => child.isSuperTypeOf(type));
   }
 
   stringify(): string {
@@ -223,7 +227,7 @@ class NumberType extends Type {
 
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof NumberType
-      || this.children.some(child => child.isSuperTypeOfHelper(type));
+      || this.children.some(child => child.isSuperTypeOf(type));
   }
 
   stringify(): string {
@@ -305,7 +309,7 @@ class RationalType extends Type {
 
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof RationalType
-      || this.children.some(child => child.isSuperTypeOfHelper(type));
+      || this.children.some(child => child.isSuperTypeOf(type));
   }
 
   stringify(): string {
@@ -321,7 +325,7 @@ class RealType extends Type {
 
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof RealType
-      || this.children.some(child => child.isSuperTypeOfHelper(type));
+      || this.children.some(child => child.isSuperTypeOf(type));
   }
 
   stringify(): string {
@@ -336,6 +340,12 @@ class StringType extends Type {
 
   stringify(): string {
     return "string";
+  }
+}
+
+class StringLiteralType extends LiteralType {
+  constructor(literal: RString) {
+    super(literal);
   }
 }
 
@@ -376,6 +386,12 @@ class SymbolType extends Type {
 
   stringify(): string {
     return "string";
+  }
+}
+
+class SymbolLiteralType extends LiteralType {
+  constructor(literal: RSymbol) {
+    super(literal);
   }
 }
 

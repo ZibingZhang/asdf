@@ -149,8 +149,8 @@ class Lexer implements Stage<string, SExpr[]> {
     const lineno = this.lineno;
     this.position--;
     this.atEnd = false;
-    let colno = --this.colno;
-    let name = this.nextName();
+    const colno = --this.colno;
+    const name = this.nextName();
     const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
 
     let tokenType;

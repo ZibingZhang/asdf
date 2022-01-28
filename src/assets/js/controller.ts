@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
+  RImage,
+  isRImage
+} from "../../interpreter/modules/htdp/image/rvalue";
+import {
   Editor
 } from "./editor";
 import {
@@ -15,15 +19,10 @@ import {
 import {
   TestOutput
 } from "./test-output";
-import {
-  isRImage
-} from "../../interpreter/modules/htdp/image/rvalue";
 
 export {
   Controller
 };
-
-declare let CodeMirror: any;
 
 const enum Tab {
   Editor,
@@ -62,24 +61,32 @@ class Controller {
     document.getElementById("info-button")!.onclick = () => this.switchToTab(Tab.Info);
 
     window.racket.pipeline.setSuccessCallback(output => {
-      let noOutput = true;
+      const waitingImages: RImage[] = [];
       for (const rval of output) {
         if (isRImage(rval)) {
-          if (noOutput) {
-            this.repl.append("\n");
-          }
-          this.repl.cm.addLineWidget(
-            this.repl.cm.lastLine() - 1,
-            rval.canvas
-          );
-          this.repl.cm.scrollIntoView(this.repl.cm.lastLine());
-          noOutput = false;
+          waitingImages.push(rval);
         } else {
-          noOutput = false;
           this.repl.append(rval.stringify() + "\n");
+          while (waitingImages.length > 0) {
+            const image = waitingImages.shift()!;
+            this.repl.cm.addLineWidget(
+              this.repl.cm.lastLine() - 1,
+              image.canvas,
+              { above: true }
+            );
+          }
         }
       }
+      while (waitingImages.length > 0) {
+        const image = waitingImages.shift()!;
+        this.repl.cm.addLineWidget(
+          this.repl.cm.lastLine(),
+          image.canvas,
+          { above: true }
+        );
+      }
       this.repl.append("> ");
+      this.repl.cm.scrollIntoView(this.repl.cm.lastLine());
     });
     window.racket.pipeline.setTestResultsCallback(this.testOutput.handleTestResults.bind(this.testOutput));
   }
