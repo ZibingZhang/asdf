@@ -6,7 +6,7 @@ import {
   SymbolType
 } from "../types";
 import {
-  RPrimFun,
+  RPrimProc,
   RString,
   RSymbol,
   RValue,
@@ -20,7 +20,7 @@ export {
   RPFSymbolHuh
 };
 
-class RPFSymbolToString extends RPrimFun {
+class RPFSymbolToString extends RPrimProc {
   constructor() {
     super("symbol->string");
   }
@@ -34,7 +34,7 @@ class RPFSymbolToString extends RPrimFun {
   }
 }
 
-class RPFAreSymbolsEqual extends RPrimFun {
+class RPFAreSymbolsEqual extends RPrimProc {
   constructor() {
     super("symbol=?");
   }
@@ -48,7 +48,7 @@ class RPFAreSymbolsEqual extends RPrimFun {
   }
 }
 
-class RPFSymbolHuh extends RPrimFun {
+class RPFSymbolHuh extends RPrimProc {
   constructor() {
     super("symbol?");
   }

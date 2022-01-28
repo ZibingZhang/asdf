@@ -9,7 +9,7 @@ import {
 import {
   REofObject,
   RNumber,
-  RPrimFun,
+  RPrimProc,
   RValue,
   isRData,
   isREofObject,
@@ -37,7 +37,7 @@ class UserError extends Error {}
 
 const RPC_EOF = new REofObject();
 
-class RPFAreWithin extends RPrimFun {
+class RPFAreWithin extends RPrimProc {
   constructor() {
     super("=~");
   }
@@ -51,7 +51,7 @@ class RPFAreWithin extends RPrimFun {
   }
 }
 
-class RPFEofObjectHuh extends RPrimFun {
+class RPFEofObjectHuh extends RPrimProc {
   constructor() {
     super("eof-object?");
   }
@@ -65,7 +65,7 @@ class RPFEofObjectHuh extends RPrimFun {
   }
 }
 
-class RPFAreEq extends RPrimFun {
+class RPFAreEq extends RPrimProc {
   constructor() {
     super("eq?");
   }
@@ -79,7 +79,7 @@ class RPFAreEq extends RPrimFun {
   }
 }
 
-class RPFAreEqual extends RPrimFun {
+class RPFAreEqual extends RPrimProc {
   constructor() {
     super("equal?");
   }
@@ -93,7 +93,7 @@ class RPFAreEqual extends RPrimFun {
   }
 }
 
-class RPFAreEqualWithin extends RPrimFun {
+class RPFAreEqualWithin extends RPrimProc {
   constructor() {
     super("equal~?");
   }
@@ -108,7 +108,7 @@ class RPFAreEqualWithin extends RPrimFun {
   }
 }
 
-class RPFAreEqv extends RPrimFun {
+class RPFAreEqv extends RPrimProc {
   constructor() {
     super("eqv?");
   }
@@ -122,7 +122,7 @@ class RPFAreEqv extends RPrimFun {
   }
 }
 
-class RPFError extends RPrimFun {
+class RPFError extends RPrimProc {
   constructor() {
     super("error", {});
   }
@@ -146,7 +146,7 @@ class RPFError extends RPrimFun {
   }
 }
 
-class RPFIdentity extends RPrimFun {
+class RPFIdentity extends RPrimProc {
   constructor() {
     super("identity");
   }
@@ -160,7 +160,7 @@ class RPFIdentity extends RPrimFun {
   }
 }
 
-class RPFStructHuh extends RPrimFun {
+class RPFStructHuh extends RPrimProc {
   constructor() {
     super("struct?");
   }

@@ -24,7 +24,7 @@ import {
   RList,
   RMath,
   RNumber,
-  RPrimFun,
+  RPrimProc,
   RProcedure,
   RValue,
   R_FALSE,
@@ -62,7 +62,7 @@ export {
   RPFSort
 };
 
-abstract class RHigherOrderPrimFun extends RPrimFun {
+abstract class RHigherOrdeRPrimProc extends RPrimProc {
   assertBooleanType(receivedVal: RValue, procedure: RProcedure, sourceSpan: SourceSpan) {
     if (!isRBoolean(receivedVal)) {
       throw new StageError(
@@ -103,7 +103,7 @@ abstract class RHigherOrderPrimFun extends RPrimFun {
   }
 }
 
-class RPFAndmap extends RHigherOrderPrimFun {
+class RPFAndmap extends RHigherOrdeRPrimProc {
   constructor() {
     super("andmap", { minArityWithoutLists: 1 });
   }
@@ -131,7 +131,7 @@ class RPFAndmap extends RHigherOrderPrimFun {
   }
 }
 
-class RPFApply extends RHigherOrderPrimFun {
+class RPFApply extends RHigherOrdeRPrimProc {
   constructor() {
     super("apply");
   }
@@ -153,7 +153,7 @@ class RPFApply extends RHigherOrderPrimFun {
   }
 }
 
-class RPFArgmax extends RHigherOrderPrimFun {
+class RPFArgmax extends RHigherOrdeRPrimProc {
   constructor() {
     super("argmax");
   }
@@ -187,7 +187,7 @@ class RPFArgmax extends RHigherOrderPrimFun {
   }
 }
 
-class RPFArgmin extends RHigherOrderPrimFun {
+class RPFArgmin extends RHigherOrdeRPrimProc {
   constructor() {
     super("argmin");
   }
@@ -221,7 +221,7 @@ class RPFArgmin extends RHigherOrderPrimFun {
   }
 }
 
-class RPFBuildList extends RHigherOrderPrimFun {
+class RPFBuildList extends RHigherOrdeRPrimProc {
   constructor() {
     super("build-list");
   }
@@ -243,7 +243,7 @@ class RPFBuildList extends RHigherOrderPrimFun {
   }
 }
 
-class RPFFilter extends RHigherOrderPrimFun {
+class RPFFilter extends RHigherOrdeRPrimProc {
   constructor() {
     super("filter");
   }
@@ -271,7 +271,7 @@ class RPFFilter extends RHigherOrderPrimFun {
   }
 }
 
-class RPFFoldl extends RHigherOrderPrimFun {
+class RPFFoldl extends RHigherOrdeRPrimProc {
   constructor() {
     super("foldl", { minArityWithoutLists: 2 });
   }
@@ -297,7 +297,7 @@ class RPFFoldl extends RHigherOrderPrimFun {
   }
 }
 
-class RPFFoldr extends RHigherOrderPrimFun {
+class RPFFoldr extends RHigherOrdeRPrimProc {
   constructor() {
     super("foldr", { minArityWithoutLists: 2 });
   }
@@ -323,7 +323,7 @@ class RPFFoldr extends RHigherOrderPrimFun {
   }
 }
 
-class RPFMap extends RHigherOrderPrimFun {
+class RPFMap extends RHigherOrdeRPrimProc {
   constructor() {
     super("map", { minArityWithoutLists: 1 });
   }
@@ -348,7 +348,7 @@ class RPFMap extends RHigherOrderPrimFun {
   }
 }
 
-class RPFMemf extends RHigherOrderPrimFun {
+class RPFMemf extends RHigherOrdeRPrimProc {
   constructor() {
     super("memf");
   }
@@ -374,7 +374,7 @@ class RPFMemf extends RHigherOrderPrimFun {
   }
 }
 
-class RPFOrmap extends RHigherOrderPrimFun {
+class RPFOrmap extends RHigherOrdeRPrimProc {
   constructor() {
     super("ormap", { minArityWithoutLists: 1 });
   }
@@ -402,7 +402,7 @@ class RPFOrmap extends RHigherOrderPrimFun {
   }
 }
 
-class RPFProcedureHuh extends RPrimFun {
+class RPFProcedureHuh extends RPrimProc {
   constructor() {
     super("procedure?");
   }
@@ -416,7 +416,7 @@ class RPFProcedureHuh extends RPrimFun {
   }
 }
 
-class RPFSort extends RHigherOrderPrimFun {
+class RPFSort extends RHigherOrdeRPrimProc {
   constructor() {
     super("sort");
   }

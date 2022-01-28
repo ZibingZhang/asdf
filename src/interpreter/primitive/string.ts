@@ -13,7 +13,7 @@ import {
   RExactReal,
   RList,
   RNumber,
-  RPrimFun,
+  RPrimProc,
   RString,
   RSymbol,
   RValue,
@@ -53,7 +53,7 @@ export {
   RPFStringHuh
 };
 
-class RPFExplode extends RPrimFun {
+class RPFExplode extends RPrimProc {
   constructor() {
     super("explode");
   }
@@ -67,7 +67,7 @@ class RPFExplode extends RPrimFun {
   }
 }
 
-class RPFMakeString extends RPrimFun {
+class RPFMakeString extends RPrimProc {
   constructor() {
     super("make-string");
   }
@@ -82,7 +82,7 @@ class RPFMakeString extends RPrimFun {
   }
 }
 
-class RPFReplicate extends RPrimFun {
+class RPFReplicate extends RPrimProc {
   constructor() {
     super("replicate");
   }
@@ -97,7 +97,7 @@ class RPFReplicate extends RPrimFun {
   }
 }
 
-class RPFString extends RPrimFun {
+class RPFString extends RPrimProc {
   constructor() {
     super("string");
   }
@@ -111,7 +111,7 @@ class RPFString extends RPrimFun {
   }
 }
 
-class RPFStringToSymbol extends RPrimFun {
+class RPFStringToSymbol extends RPrimProc {
   constructor() {
     super("string->symbol");
   }
@@ -125,7 +125,7 @@ class RPFStringToSymbol extends RPrimFun {
   }
 }
 
-class RPFStringAlphabeticHuh extends RPrimFun {
+class RPFStringAlphabeticHuh extends RPrimProc {
   constructor() {
     super("string-alphabetic?");
   }
@@ -139,7 +139,7 @@ class RPFStringAlphabeticHuh extends RPrimFun {
   }
 }
 
-class RPFStringAppend extends RPrimFun {
+class RPFStringAppend extends RPrimProc {
   constructor() {
     super("string-append", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -153,7 +153,7 @@ class RPFStringAppend extends RPrimFun {
   }
 }
 
-class RPFStringCiLessEqualHuh extends RPrimFun {
+class RPFStringCiLessEqualHuh extends RPrimProc {
   constructor() {
     super("string-ci<=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -172,7 +172,7 @@ class RPFStringCiLessEqualHuh extends RPrimFun {
   }
 }
 
-class RPFStringCiLessHuh extends RPrimFun {
+class RPFStringCiLessHuh extends RPrimProc {
   constructor() {
     super("string-ci<?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -191,7 +191,7 @@ class RPFStringCiLessHuh extends RPrimFun {
   }
 }
 
-class RPFStringCiEqualHuh extends RPrimFun {
+class RPFStringCiEqualHuh extends RPrimProc {
   constructor() {
     super("string-ci=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -210,7 +210,7 @@ class RPFStringCiEqualHuh extends RPrimFun {
   }
 }
 
-class RPFStringCiGreaterEqualHuh extends RPrimFun {
+class RPFStringCiGreaterEqualHuh extends RPrimProc {
   constructor() {
     super("string-ci>=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -229,7 +229,7 @@ class RPFStringCiGreaterEqualHuh extends RPrimFun {
   }
 }
 
-class RPFStringCiGreaterHuh extends RPrimFun {
+class RPFStringCiGreaterHuh extends RPrimProc {
   constructor() {
     super("string-ci>?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -248,7 +248,7 @@ class RPFStringCiGreaterHuh extends RPrimFun {
   }
 }
 
-class RPFStringContainsCiHuh extends RPrimFun {
+class RPFStringContainsCiHuh extends RPrimProc {
   constructor() {
     super("string-contains-ci?");
   }
@@ -262,7 +262,7 @@ class RPFStringContainsCiHuh extends RPrimFun {
   }
 }
 
-class RPFStringContainsHuh extends RPrimFun {
+class RPFStringContainsHuh extends RPrimProc {
   constructor() {
     super("string-contains?");
   }
@@ -276,7 +276,7 @@ class RPFStringContainsHuh extends RPrimFun {
   }
 }
 
-class RPFStringCopy extends RPrimFun {
+class RPFStringCopy extends RPrimProc {
   constructor() {
     super("string-copy");
   }
@@ -290,7 +290,7 @@ class RPFStringCopy extends RPrimFun {
   }
 }
 
-class RPFStringDowncase extends RPrimFun {
+class RPFStringDowncase extends RPrimProc {
   constructor() {
     super("string-downcase");
   }
@@ -304,7 +304,7 @@ class RPFStringDowncase extends RPrimFun {
   }
 }
 
-class RPFStringLength extends RPrimFun {
+class RPFStringLength extends RPrimProc {
   constructor() {
     super("string-length");
   }
@@ -318,7 +318,7 @@ class RPFStringLength extends RPrimFun {
   }
 }
 
-class RPFStringLowerCaseHuh extends RPrimFun {
+class RPFStringLowerCaseHuh extends RPrimProc {
   constructor() {
     super("string-lower-case?");
   }
@@ -332,7 +332,7 @@ class RPFStringLowerCaseHuh extends RPrimFun {
   }
 }
 
-class RPFStringNumericHuh extends RPrimFun {
+class RPFStringNumericHuh extends RPrimProc {
   constructor() {
     super("string-numeric?");
   }
@@ -346,7 +346,7 @@ class RPFStringNumericHuh extends RPrimFun {
   }
 }
 
-class RPFStringUpcase extends RPrimFun {
+class RPFStringUpcase extends RPrimProc {
   constructor() {
     super("string-upcase");
   }
@@ -360,7 +360,7 @@ class RPFStringUpcase extends RPrimFun {
   }
 }
 
-class RPFStringUpperCaseHuh extends RPrimFun {
+class RPFStringUpperCaseHuh extends RPrimProc {
   constructor() {
     super("string-upper-case?");
   }
@@ -374,7 +374,7 @@ class RPFStringUpperCaseHuh extends RPrimFun {
   }
 }
 
-class RPFStringLessEqualHuh extends RPrimFun {
+class RPFStringLessEqualHuh extends RPrimProc {
   constructor() {
     super("string<=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -393,7 +393,7 @@ class RPFStringLessEqualHuh extends RPrimFun {
   }
 }
 
-class RPFStringLessHuh extends RPrimFun {
+class RPFStringLessHuh extends RPrimProc {
   constructor() {
     super("string<?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -412,7 +412,7 @@ class RPFStringLessHuh extends RPrimFun {
   }
 }
 
-class RPFStringEqualHuh extends RPrimFun {
+class RPFStringEqualHuh extends RPrimProc {
   constructor() {
     super("string=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -431,7 +431,7 @@ class RPFStringEqualHuh extends RPrimFun {
   }
 }
 
-class RPFStringGreaterEqualHuh extends RPrimFun {
+class RPFStringGreaterEqualHuh extends RPrimProc {
   constructor() {
     super("string>=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -450,7 +450,7 @@ class RPFStringGreaterEqualHuh extends RPrimFun {
   }
 }
 
-class RPFStringGreaterHuh extends RPrimFun {
+class RPFStringGreaterHuh extends RPrimProc {
   constructor() {
     super("string>?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -469,7 +469,7 @@ class RPFStringGreaterHuh extends RPrimFun {
   }
 }
 
-class RPFStringHuh extends RPrimFun {
+class RPFStringHuh extends RPrimProc {
   constructor() {
     super("string?");
   }

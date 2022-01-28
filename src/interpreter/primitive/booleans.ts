@@ -6,7 +6,7 @@ import {
 } from "../types";
 import {
   RBoolean,
-  RPrimFun,
+  RPrimProc,
   RString,
   RValue,
   isRBoolean,
@@ -21,7 +21,7 @@ export {
   RPFNot
 };
 
-class RPFBooleanToString extends RPrimFun {
+class RPFBooleanToString extends RPrimProc {
   constructor() {
     super("boolean->string");
   }
@@ -35,7 +35,7 @@ class RPFBooleanToString extends RPrimFun {
   }
 }
 
-class RPFAreBooleansEqual extends RPrimFun {
+class RPFAreBooleansEqual extends RPrimProc {
   constructor() {
     super("boolean=?");
   }
@@ -49,7 +49,7 @@ class RPFAreBooleansEqual extends RPrimFun {
   }
 }
 
-class RPFBooleanHuh extends RPrimFun {
+class RPFBooleanHuh extends RPrimProc {
   constructor() {
     super("boolean?");
   }
@@ -63,7 +63,7 @@ class RPFBooleanHuh extends RPrimFun {
   }
 }
 
-class RPFFalseHuh extends RPrimFun {
+class RPFFalseHuh extends RPrimProc {
   constructor() {
     super("false?");
   }
@@ -77,7 +77,7 @@ class RPFFalseHuh extends RPrimFun {
   }
 }
 
-class RPFNot extends RPrimFun {
+class RPFNot extends RPrimProc {
   constructor() {
     super("not");
   }

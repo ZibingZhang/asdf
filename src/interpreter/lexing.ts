@@ -7,6 +7,7 @@ import {
   RS_BAD_CHARACTER_CONSTANT_ERR,
   RS_BAD_SYNTAX_ERR,
   RS_DIV_BY_ZERO_ERR,
+  RS_EOF_FOLLOWING_BACKSLASH_ERR,
   RS_EXPECTED_CHARACTER_ERR,
   RS_EXPECTED_CLOSING_BLOCK_COMMENT_ERR,
   RS_EXPECTED_CLOSING_PAREN_ERR,
@@ -146,18 +147,11 @@ class Lexer implements Stage<string, SExpr[]> {
     }
 
     const lineno = this.lineno;
-    let colno;
-    let name;
-    if (ch === "\\" || ch === "|") {
-      this.position--;
-      this.atEnd = false;
-      colno = --this.colno;
-      name = this.nextName();
-    } else {
-      colno = this.colno;
-      name = ch + this.nextName();
-    }
-    const sourceSpan = new SourceSpan(lineno, colno - 1, this.lineno, this.colno);
+    this.position--;
+    this.atEnd = false;
+    let colno = --this.colno;
+    let name = this.nextName();
+    const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
 
     let tokenType;
     if (name === ".") {
@@ -487,12 +481,19 @@ class Lexer implements Stage<string, SExpr[]> {
   }
 
   private nextName(): string {
+    const lineno = this.lineno;
+    const colno = this.colno;
     let name = "";
     while (!this.atEnd && !this.peek().match(DELIMITER_RE)) {
       const ch = this.next();
       if (ch === "\\") {
         if (!this.atEnd) {
           name += this.next();
+        } else {
+          throw new StageError(
+            RS_EOF_FOLLOWING_BACKSLASH_ERR,
+            new SourceSpan(lineno, colno, this.lineno, this.colno)
+          );
         }
       } else if (ch === "|") {
         const lineno = this.lineno;

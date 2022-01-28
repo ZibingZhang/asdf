@@ -14,6 +14,7 @@ import {
 import {
   StageError
 } from "./pipeline";
+import { RModule } from "./rvalue";
 
 export {
   Scope,
@@ -72,6 +73,14 @@ class Scope {
         !SETTINGS.primitives.blackList.includes(name)
         && this.global.primitiveScope.variables.has(name)
       );
+  }
+
+  addModule(module: RModule) {
+    for (const name of module.procedures.keys()) {
+      if (!this.has(name)) {
+        this.set(name, VariableType.PrimitiveFunction);
+      }
+    }
   }
 }
 

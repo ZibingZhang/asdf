@@ -2,7 +2,8 @@ import {
   RData,
   RIsStructFun,
   RMakeStructFun,
-  RPrimFun,
+  RModule,
+  RPrimProc,
   RPrimTestFunConfig,
   RProcedure,
   RStructGetFun,
@@ -159,6 +160,9 @@ import {
 import {
   Keyword
 } from "./keyword";
+import {
+  RModuleHtdpImage
+} from "./modules/htdp/image/module";
 
 export {
   Global
@@ -170,8 +174,11 @@ class Global {
   primitiveEnvironment: Environment;
   primitiveDataNames: Set<string>;
   primitiveStructNames: Set<string>;
-  primitiveFunctions: Map<string, RProcedure>;
+  primitiveProcedures: Map<string, RProcedure>;
   primitiveTestFunctions: Map<string, RPrimTestFunConfig>;
+  modules: Map<string, RModule> = new Map([
+    ["htdp/image", new RModuleHtdpImage()]
+  ]);
 
   private static instance: Global;
   private higherOrderFunctions = new Set([
@@ -201,7 +208,7 @@ class Global {
     this.primitiveEnvironment = new Environment();
     this.primitiveDataNames = new Set();
     this.primitiveStructNames = new Set();
-    this.primitiveFunctions = new Map();
+    this.primitiveProcedures = new Map();
     this.primitiveTestFunctions = new Map();
 
     this.primitiveTestFunctions.set(Keyword.CheckError, { minArity: 1, maxArity: 2 });
@@ -360,7 +367,7 @@ class Global {
   disableHigherOrderFunctions() {
     this.higherOrderFunctions.forEach(fn => {
       this.primitiveEnvironment.delete(fn.name);
-      this.primitiveFunctions.delete(fn.name);
+      this.primitiveProcedures.delete(fn.name);
     });
     this.defineScopes();
   }
@@ -370,9 +377,9 @@ class Global {
     this.primitiveDataNames.add(name);
   }
 
-  private addFnToPrimEnv(val: RPrimFun) {
+  private addFnToPrimEnv(val: RPrimProc) {
     this.primitiveEnvironment.set(val.name, val);
-    this.primitiveFunctions.set(val.name, val);
+    this.primitiveProcedures.set(val.name, val);
   }
 
   private addStructToPrimEnv(name: string, fields: string[]) {
@@ -387,16 +394,16 @@ class Global {
       this.primitiveEnvironment.set(`${name}-${fun.fieldName}`, fun);
     });
     this.primitiveStructNames.add(name);
-    this.primitiveFunctions.set(`make-${name}`, makeStructFun);
-    this.primitiveFunctions.set(`${name}?`, isStructFun);
+    this.primitiveProcedures.set(`make-${name}`, makeStructFun);
+    this.primitiveProcedures.set(`${name}?`, isStructFun);
     structGetFuns.forEach(fun => {
-      this.primitiveFunctions.set(`${name}-${fun.fieldName}`, fun);
+      this.primitiveProcedures.set(`${name}-${fun.fieldName}`, fun);
     });
   }
 
   private defineScopes() {
     this.primitiveDataNames.forEach((name) => this.primitiveScope.set(name, VariableType.Data));
-    this.primitiveFunctions.forEach((procedure, name) => {
+    this.primitiveProcedures.forEach((procedure, name) => {
       if (procedure.config.relaxedMinArity !== undefined) {
         this.primitiveRelaxedScope.set(name, VariableType.PrimitiveFunction);
       }

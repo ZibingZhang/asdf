@@ -10,7 +10,7 @@ import {
   RList,
   RMath,
   RNumber,
-  RPrimFun,
+  RPrimProc,
   RValue,
   R_EMPTY_LIST,
   isRData,
@@ -48,7 +48,7 @@ export {
 
 const R_NULL = R_EMPTY_LIST;
 
-class RPFAppend extends RPrimFun {
+class RPFAppend extends RPrimProc {
   constructor() {
     super("append", { minArity: 2 });
   }
@@ -62,7 +62,7 @@ class RPFAppend extends RPrimFun {
   }
 }
 
-class RPFCar extends RPrimFun {
+class RPFCar extends RPrimProc {
   constructor() {
     super("car");
   }
@@ -76,7 +76,7 @@ class RPFCar extends RPrimFun {
   }
 }
 
-class RPFCdr extends RPrimFun {
+class RPFCdr extends RPrimProc {
   constructor() {
     super("cdr");
   }
@@ -90,7 +90,7 @@ class RPFCdr extends RPrimFun {
   }
 }
 
-class RPFCons extends RPrimFun {
+class RPFCons extends RPrimProc {
   constructor() {
     super("cons");
   }
@@ -104,7 +104,7 @@ class RPFCons extends RPrimFun {
   }
 }
 
-class RPFEighth extends RPrimFun {
+class RPFEighth extends RPrimProc {
   constructor() {
     super("eighth");
   }
@@ -118,7 +118,7 @@ class RPFEighth extends RPrimFun {
   }
 }
 
-class RPFEmptyHuh extends RPrimFun {
+class RPFEmptyHuh extends RPrimProc {
   constructor(alias?: string) {
     super(alias || "empty?");
   }
@@ -132,7 +132,7 @@ class RPFEmptyHuh extends RPrimFun {
   }
 }
 
-class RPFFifth extends RPrimFun {
+class RPFFifth extends RPrimProc {
   constructor() {
     super("fifth");
   }
@@ -146,7 +146,7 @@ class RPFFifth extends RPrimFun {
   }
 }
 
-class RPFFirst extends RPrimFun {
+class RPFFirst extends RPrimProc {
   constructor() {
     super("first");
   }
@@ -160,7 +160,7 @@ class RPFFirst extends RPrimFun {
   }
 }
 
-class RPFFourth extends RPrimFun {
+class RPFFourth extends RPrimProc {
   constructor() {
     super("fourth");
   }
@@ -174,7 +174,7 @@ class RPFFourth extends RPrimFun {
   }
 }
 
-class RPFLength extends RPrimFun {
+class RPFLength extends RPrimProc {
   constructor() {
     super("length");
   }
@@ -188,7 +188,7 @@ class RPFLength extends RPrimFun {
   }
 }
 
-class RPFList extends RPrimFun {
+class RPFList extends RPrimProc {
   constructor() {
     super("list", {});
   }
@@ -202,7 +202,7 @@ class RPFList extends RPrimFun {
   }
 }
 
-class RPFListStar extends RPrimFun {
+class RPFListStar extends RPrimProc {
   constructor() {
     super("list*", { minArity: 1 });
   }
@@ -216,7 +216,7 @@ class RPFListStar extends RPrimFun {
   }
 }
 
-class RPFListHuh extends RPrimFun {
+class RPFListHuh extends RPrimProc {
   constructor(alias?: string) {
     super(alias || "list?");
   }
@@ -230,7 +230,7 @@ class RPFListHuh extends RPrimFun {
   }
 }
 
-class RPFMakeList extends RPrimFun {
+class RPFMakeList extends RPrimProc {
   constructor() {
     super("make-list");
   }
@@ -244,7 +244,7 @@ class RPFMakeList extends RPrimFun {
   }
 }
 
-class RPFMember extends RPrimFun {
+class RPFMember extends RPrimProc {
   constructor(alias?: string) {
     super(alias || "member");
   }
@@ -259,7 +259,7 @@ class RPFMember extends RPrimFun {
   }
 }
 
-class RPFRemove extends RPrimFun {
+class RPFRemove extends RPrimProc {
   constructor() {
     super("remove");
   }
@@ -284,7 +284,7 @@ class RPFRemove extends RPrimFun {
   }
 }
 
-class RPFRemoveAll extends RPrimFun {
+class RPFRemoveAll extends RPrimProc {
   constructor() {
     super("remove-all");
   }
@@ -303,7 +303,7 @@ class RPFRemoveAll extends RPrimFun {
   }
 }
 
-class RPFRest extends RPrimFun {
+class RPFRest extends RPrimProc {
   constructor() {
     super("rest");
   }
@@ -317,7 +317,7 @@ class RPFRest extends RPrimFun {
   }
 }
 
-class RPFReverse extends RPrimFun {
+class RPFReverse extends RPrimProc {
   constructor() {
     super("reverse");
   }
@@ -331,7 +331,7 @@ class RPFReverse extends RPrimFun {
   }
 }
 
-class RPFSecond extends RPrimFun {
+class RPFSecond extends RPrimProc {
   constructor() {
     super("second");
   }
@@ -345,7 +345,7 @@ class RPFSecond extends RPrimFun {
   }
 }
 
-class RPFSeventh extends RPrimFun {
+class RPFSeventh extends RPrimProc {
   constructor() {
     super("seventh");
   }
@@ -359,7 +359,7 @@ class RPFSeventh extends RPrimFun {
   }
 }
 
-class RPFSixth extends RPrimFun {
+class RPFSixth extends RPrimProc {
   constructor() {
     super("sixth");
   }
@@ -373,7 +373,7 @@ class RPFSixth extends RPrimFun {
   }
 }
 
-class RPFThird extends RPrimFun {
+class RPFThird extends RPrimProc {
   constructor() {
     super("third");
   }

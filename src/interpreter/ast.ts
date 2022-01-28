@@ -25,7 +25,7 @@ import {
   RIsStructFun,
   RLambda,
   RMakeStructFun,
-  RPrimFun,
+  RPrimProc,
   RProcedureVisitor,
   RStruct,
   RStructGetFun,
@@ -77,6 +77,7 @@ import {
 import {
   UserError
 } from "./primitive/misc";
+import { Global } from "./global";
 
 export {
   ASTNode,
@@ -146,7 +147,12 @@ abstract class ASTNodeBase {
 
   abstract accept<T>(visitor: ASTNodeVisitor<T>): T;
 
-  abstract eval(env: Environment): RValue;
+  eval(env: Environment): RValue {
+    this.used = true;
+    return this.evalHelper(env);
+  }
+
+  abstract evalHelper(env: Environment): RValue;
 
   isTemplate(): boolean {
     return false;
@@ -169,8 +175,7 @@ class AndNode extends ASTNodeBase {
     return visitor.visitAndNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     let result: RValue = R_FALSE;
     for (const arg of this.args) {
       result = arg.eval(env);
@@ -202,8 +207,7 @@ class AtomNode extends ASTNodeBase {
     return visitor.visitAtomNode(this);
   }
 
-  eval(_: Environment) {
-    this.used = true;
+  evalHelper(_: Environment) {
     return this.rval;
   }
 }
@@ -221,8 +225,7 @@ class CheckNode extends ASTNodeBase {
     return visitor.visitCheckNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     switch (this.name) {
       case Keyword.CheckExpect:
       case Keyword.CheckRandom: {
@@ -276,8 +279,7 @@ class CheckErrorNode extends CheckNode {
     super(Keyword.CheckError, args, sourceSpan);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     let expectedErrMsg: RValue | null = null;
     if (this.args[1]) {
       expectedErrMsg = this.args[1].eval(env);
@@ -324,8 +326,7 @@ class CheckMemberOfNode extends CheckNode {
     super(Keyword.CheckMemberOf, [testValNode, ...testAgainstValNodes], sourceSpan);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     const testResult = this.arg.eval(env);
     if (isRFalse(testResult)) {
       return new RTestResult(
@@ -352,8 +353,7 @@ class CheckRangeNode extends CheckNode {
     super(Keyword.CheckRange, [testValNode, lowerBoundValNode, upperBoundValNode], sourceSpan);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     const testResult = this.arg.eval(env);
     if (isRFalse(testResult)) {
       return new RTestResult(
@@ -381,8 +381,7 @@ class CheckSatisfiedNode extends CheckNode {
     super(Keyword.CheckSatisfied, [testValNode, testFnNode], sourceSpan);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     const testResult = this.arg.eval(env);
     if (!isRBoolean(testResult)) {
       return new RTestResult(
@@ -419,8 +418,7 @@ class CheckWithinNode extends CheckNode {
     super(Keyword.CheckWithin, [actualNode, expectedNode, withinNode], sourceSpan);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     if (isRFalse(this.arg.eval(env))) {
       return new RTestResult(
         false,
@@ -448,8 +446,7 @@ class CondNode extends ASTNodeBase {
     return visitor.visitCondNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     for (const [question, answer] of this.questionAnswerClauses) {
       const questionResult = question.eval(env);
       if (!isRBoolean(questionResult)) {
@@ -483,7 +480,7 @@ class EllipsisFunAppNode extends ASTNodeBase {
     return visitor.visitEllipsisFunAllNode(this);
   }
 
-  eval(_: Environment): RValue {
+  evalHelper(_: Environment): RValue {
     throw new StageError(
       EL_EXPECTED_FINISHED_EXPR_ERR(this.placeholder.token.text),
       this.sourceSpan
@@ -507,7 +504,7 @@ class EllipsisNode extends ASTNodeBase {
     return visitor.visitEllipsisNode(this);
   }
 
-  eval(_: Environment): RValue {
+  evalHelper(_: Environment): RValue {
     throw new StageError(
       EL_EXPECTED_FINISHED_EXPR_ERR(this.placeholder.token.text),
       this.sourceSpan
@@ -532,8 +529,7 @@ class FunAppNode extends ASTNodeBase {
     return visitor.visitFunAppNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     let rval: RValue;
     if (isVarNode(this.fn)) {
       rval = env.get(
@@ -601,8 +597,7 @@ class IfNode extends ASTNodeBase {
     return visitor.visitIfNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     const questionResult = this.question.eval(env);
     if (!isRBoolean(questionResult)) {
       throw new StageError(
@@ -639,8 +634,7 @@ class LambdaNode extends ASTNodeBase {
     return visitor.visitLambdaNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     return new RLambda(this.name, env.copy(), this.params, this.body);
   }
 
@@ -663,8 +657,7 @@ class LetNode extends ASTNodeBase {
     return visitor.visitLetNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     switch (this.name) {
       case "letrec":
       case "let*": {
@@ -701,8 +694,7 @@ class LocalNode extends ASTNodeBase {
     return visitor.visitLocalNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     const childEnv = new Environment(env);
     this.defns.forEach(defn => defn.eval(childEnv));
     return this.body.eval(childEnv);
@@ -725,8 +717,7 @@ class OrNode extends ASTNodeBase {
     return visitor.visitOrNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     let result: RValue = R_TRUE;
     for (const arg of this.args) {
       result = arg.eval(env);
@@ -747,6 +738,8 @@ class OrNode extends ASTNodeBase {
 }
 
 class RequireNode extends ASTNodeBase {
+  global = new Global();
+
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,
@@ -759,9 +752,9 @@ class RequireNode extends ASTNodeBase {
     return visitor.visitRequireNode(this);
   }
 
-  eval(_: Environment): RValue {
-    this.used = true;
-    throw "illegal state: no possible modules to load";
+  evalHelper(env: Environment): RValue {
+    env.addModule(this.global.modules.get(this.name)!);
+    return R_VOID;
   }
 }
 
@@ -777,8 +770,7 @@ class VarNode extends ASTNodeBase {
     return visitor.visitVarNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     return env.get(
       this.name,
       this.sourceSpan
@@ -823,8 +815,7 @@ class DefnStructNode extends DefnNodeBase {
     return visitor.visitDefnStructNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     env.set(this.name, new RStructType(this.name));
     env.set(`make-${this.name}`, new RMakeStructFun(this.name, this.fields.length));
     env.set(`${this.name}?`, new RIsStructFun(this.name));
@@ -894,8 +885,7 @@ class DefnVarNode extends DefnNodeBase {
     return visitor.visitDefnVarNode(this);
   }
 
-  eval(env: Environment): RValue {
-    this.used = true;
+  evalHelper(env: Environment): RValue {
     env.set(this.name, this.value.eval(env));
     return R_VOID;
   }
@@ -998,7 +988,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
     return rval.body.eval(paramEnv);
   }
 
-  visitRPrimFun(rval: RPrimFun): RValue {
+  visitRPrimProc(rval: RPrimProc): RValue {
     const argsLength = this.args.length;
     if (rval.config.minArityWithoutLists !== undefined) {
       if (argsLength <= rval.config.minArityWithoutLists) {

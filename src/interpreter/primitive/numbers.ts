@@ -21,7 +21,7 @@ import {
   RInexactReal,
   RMath,
   RNumber,
-  RPrimFun,
+  RPrimProc,
   RString,
   RValue,
   R_FALSE,
@@ -90,7 +90,7 @@ export {
 const RPC_E = new RInexactReal(6121026514868073n, 2251799813685248n);
 const RPC_PI = new RInexactReal(884279719003555n, 281474976710656n);
 
-class RPFMultiply extends RPrimFun {
+class RPFMultiply extends RPrimProc {
   constructor() {
     super("*", { minArity: 2, relaxedMinArity: 0 });
   }
@@ -106,7 +106,7 @@ class RPFMultiply extends RPrimFun {
   }
 }
 
-class RPFPlus extends RPrimFun {
+class RPFPlus extends RPrimProc {
   constructor() {
     super("+", { minArity: 2, relaxedMinArity: 0 });
   }
@@ -122,7 +122,7 @@ class RPFPlus extends RPrimFun {
   }
 }
 
-class RPFMinus extends RPrimFun {
+class RPFMinus extends RPrimProc {
   constructor() {
     super("-", { minArity: 1 });
   }
@@ -141,7 +141,7 @@ class RPFMinus extends RPrimFun {
   }
 }
 
-class RPFDivide extends RPrimFun {
+class RPFDivide extends RPrimProc {
   constructor() {
     super("/", { minArity: 2, relaxedMinArity: 0 });
   }
@@ -176,7 +176,7 @@ class RPFDivide extends RPrimFun {
   }
 }
 
-class RPFLess extends RPrimFun {
+class RPFLess extends RPrimProc {
   constructor() {
     super("<", { minArity: 1 });
   }
@@ -195,7 +195,7 @@ class RPFLess extends RPrimFun {
   }
 }
 
-class RPFLessEqual extends RPrimFun {
+class RPFLessEqual extends RPrimProc {
   constructor() {
     super("<=", { minArity: 1 });
   }
@@ -214,7 +214,7 @@ class RPFLessEqual extends RPrimFun {
   }
 }
 
-class RPFEqual extends RPrimFun {
+class RPFEqual extends RPrimProc {
   constructor() {
     super("=", { minArity: 1 });
   }
@@ -233,7 +233,7 @@ class RPFEqual extends RPrimFun {
   }
 }
 
-class RPFGreater extends RPrimFun {
+class RPFGreater extends RPrimProc {
   constructor() {
     super(">", { minArity: 1 });
   }
@@ -252,7 +252,7 @@ class RPFGreater extends RPrimFun {
   }
 }
 
-class RPFGreaterEqual extends RPrimFun {
+class RPFGreaterEqual extends RPrimProc {
   constructor() {
     super(">=", { minArity: 1 });
   }
@@ -271,7 +271,7 @@ class RPFGreaterEqual extends RPrimFun {
   }
 }
 
-class RPFAbs extends RPrimFun {
+class RPFAbs extends RPrimProc {
   constructor() {
     super("abs");
   }
@@ -290,7 +290,7 @@ class RPFAbs extends RPrimFun {
   }
 }
 
-class RPFAdd1 extends RPrimFun {
+class RPFAdd1 extends RPrimProc {
   constructor() {
     super("add1");
   }
@@ -304,7 +304,7 @@ class RPFAdd1 extends RPrimFun {
   }
 }
 
-class RPFCeiling extends RPrimFun {
+class RPFCeiling extends RPrimProc {
   constructor() {
     super("ceiling");
   }
@@ -318,7 +318,7 @@ class RPFCeiling extends RPrimFun {
   }
 }
 
-class RPFCurrentSeconds extends RPrimFun {
+class RPFCurrentSeconds extends RPrimProc {
   constructor() {
     super("current-seconds");
   }
@@ -332,7 +332,7 @@ class RPFCurrentSeconds extends RPrimFun {
   }
 }
 
-class RPFDenominator extends RPrimFun {
+class RPFDenominator extends RPrimProc {
   constructor() {
     super("denominator");
   }
@@ -347,7 +347,7 @@ class RPFDenominator extends RPrimFun {
   }
 }
 
-class RPFEvenHuh extends RPrimFun {
+class RPFEvenHuh extends RPrimProc {
   constructor() {
     super("even?");
   }
@@ -361,7 +361,7 @@ class RPFEvenHuh extends RPrimFun {
   }
 }
 
-class RPFExactToInexact extends RPrimFun {
+class RPFExactToInexact extends RPrimProc {
   constructor() {
     super("exact->inexact");
   }
@@ -375,7 +375,7 @@ class RPFExactToInexact extends RPrimFun {
   }
 }
 
-class RPFExp extends RPrimFun {
+class RPFExp extends RPrimProc {
   constructor() {
     super("exp");
   }
@@ -389,7 +389,7 @@ class RPFExp extends RPrimFun {
   }
 }
 
-class RPFExpt extends RPrimFun {
+class RPFExpt extends RPrimProc {
   constructor() {
     super("expt");
   }
@@ -411,7 +411,7 @@ class RPFExpt extends RPrimFun {
   }
 }
 
-class RPFFloor extends RPrimFun {
+class RPFFloor extends RPrimProc {
   constructor() {
     super("floor");
   }
@@ -425,7 +425,7 @@ class RPFFloor extends RPrimFun {
   }
 }
 
-class RPFInexactToExact extends RPrimFun {
+class RPFInexactToExact extends RPrimProc {
   constructor() {
     super("inexact->exact");
   }
@@ -439,7 +439,7 @@ class RPFInexactToExact extends RPrimFun {
   }
 }
 
-class RPFInexactHuh extends RPrimFun {
+class RPFInexactHuh extends RPrimProc {
   constructor() {
     super("inexact?");
   }
@@ -453,7 +453,7 @@ class RPFInexactHuh extends RPrimFun {
   }
 }
 
-class RPFIntegerHuh extends RPrimFun {
+class RPFIntegerHuh extends RPrimProc {
   constructor() {
     super("integer?");
   }
@@ -467,7 +467,7 @@ class RPFIntegerHuh extends RPrimFun {
   }
 }
 
-class RPFMax extends RPrimFun {
+class RPFMax extends RPrimProc {
   constructor() {
     super("max", { minArity: 1 });
   }
@@ -483,7 +483,7 @@ class RPFMax extends RPrimFun {
   }
 }
 
-class RPFMin extends RPrimFun {
+class RPFMin extends RPrimProc {
   constructor() {
     super("min", { minArity: 1 });
   }
@@ -499,7 +499,7 @@ class RPFMin extends RPrimFun {
   }
 }
 
-class RPFModulo extends RPrimFun {
+class RPFModulo extends RPrimProc {
   constructor() {
     super("modulo");
   }
@@ -520,7 +520,7 @@ class RPFModulo extends RPrimFun {
   }
 }
 
-class RPFNegativeHuh extends RPrimFun {
+class RPFNegativeHuh extends RPrimProc {
   constructor() {
     super("negative?");
   }
@@ -534,7 +534,7 @@ class RPFNegativeHuh extends RPrimFun {
   }
 }
 
-class RPFNumberToString extends RPrimFun {
+class RPFNumberToString extends RPrimProc {
   constructor() {
     super("number->string");
   }
@@ -548,7 +548,7 @@ class RPFNumberToString extends RPrimFun {
   }
 }
 
-class RPFNumberHuh extends RPrimFun {
+class RPFNumberHuh extends RPrimProc {
   constructor(alias?: string) {
     super(alias || "number?");
   }
@@ -562,7 +562,7 @@ class RPFNumberHuh extends RPrimFun {
   }
 }
 
-class RPFNumerator extends RPrimFun {
+class RPFNumerator extends RPrimProc {
   constructor() {
     super("numerator");
   }
@@ -577,7 +577,7 @@ class RPFNumerator extends RPrimFun {
   }
 }
 
-class RPFOddHuh extends RPrimFun {
+class RPFOddHuh extends RPrimProc {
   constructor() {
     super("odd?");
   }
@@ -591,7 +591,7 @@ class RPFOddHuh extends RPrimFun {
   }
 }
 
-class RPFPositiveHuh extends RPrimFun {
+class RPFPositiveHuh extends RPrimProc {
   constructor() {
     super("positive?");
   }
@@ -606,7 +606,7 @@ class RPFPositiveHuh extends RPrimFun {
   }
 }
 
-class RPFQuotient extends RPrimFun {
+class RPFQuotient extends RPrimProc {
   constructor() {
     super("quotient");
   }
@@ -623,7 +623,7 @@ class RPFQuotient extends RPrimFun {
   }
 }
 
-class RPFRandom extends RPrimFun {
+class RPFRandom extends RPrimProc {
   constructor() {
     super("random");
   }
@@ -637,7 +637,7 @@ class RPFRandom extends RPrimFun {
   }
 }
 
-class RPFRemainder extends RPrimFun {
+class RPFRemainder extends RPrimProc {
   constructor() {
     super("remainder");
   }
@@ -654,7 +654,7 @@ class RPFRemainder extends RPrimFun {
   }
 }
 
-class RPFRound extends RPrimFun {
+class RPFRound extends RPrimProc {
   constructor() {
     super("round");
   }
@@ -682,7 +682,7 @@ class RPFRound extends RPrimFun {
   }
 }
 
-class RPFSqr extends RPrimFun {
+class RPFSqr extends RPrimProc {
   expt = new RExactReal(2n);
 
   constructor() {
@@ -698,7 +698,7 @@ class RPFSqr extends RPrimFun {
   }
 }
 
-class RPFSgn extends RPrimFun {
+class RPFSgn extends RPrimProc {
   constructor() {
     super("sgn");
   }
@@ -720,7 +720,7 @@ class RPFSgn extends RPrimFun {
   }
 }
 
-class RPFSqrt extends RPrimFun {
+class RPFSqrt extends RPrimProc {
   expt = new RExactReal(1n, 2n);
 
   constructor() {
@@ -743,7 +743,7 @@ class RPFSqrt extends RPrimFun {
   }
 }
 
-class RPFSub1 extends RPrimFun {
+class RPFSub1 extends RPrimProc {
   constructor() {
     super("sub1");
   }
@@ -757,7 +757,7 @@ class RPFSub1 extends RPrimFun {
   }
 }
 
-class RPFZeroHuh extends RPrimFun {
+class RPFZeroHuh extends RPrimProc {
   constructor() {
     super("zero?");
   }

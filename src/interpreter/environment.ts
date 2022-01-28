@@ -2,6 +2,7 @@ import {
   Global
 } from "./global";
 import {
+  RModule,
   RValue
 } from "./rvalue";
 import {
@@ -75,5 +76,22 @@ class Environment {
       }
     }
     return env;
+  }
+
+  has(name: string): boolean {
+    return this.map.has(name)
+      || (this.parentEnv && this.parentEnv.has(name))
+      || (
+        !SETTINGS.primitives.blackList.includes(name)
+        && this.global.primitiveEnvironment.map.has(name)
+      );
+  }
+
+  addModule(module: RModule) {
+    for (const [name, procedure] of module.procedures) {
+      if (!this.has(name)) {
+        this.map.set(name, procedure);
+      }
+    }
   }
 }

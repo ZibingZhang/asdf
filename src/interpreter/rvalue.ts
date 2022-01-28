@@ -31,6 +31,9 @@ import {
 import {
   SETTINGS
 } from "./settings";
+import {
+  Scope
+} from "./scope";
 
 export {
   R_EMPTY_LIST,
@@ -49,8 +52,9 @@ export {
   RList,
   RMakeStructFun,
   RMath,
+  RModule,
   RNumber,
-  RPrimFun,
+  RPrimProc,
   RProcedureConfig,
   RPrimTestFunConfig,
   RString,
@@ -72,7 +76,7 @@ export {
   isRInteger,
   isRList,
   isRNumber,
-  isRPrimFun,
+  isRPrimProc,
   isRString,
   isRStruct,
   isRStructType,
@@ -110,6 +114,12 @@ type RAtomic =
 type RNumber =
   | RExactReal
   | RInexactReal;
+
+abstract class RModule {
+  constructor(
+    readonly procedures: Map<string, RPrimProc>
+  ) {}
+};
 
 interface RValBase {
   stringify(): string;
@@ -654,7 +664,7 @@ class RLambda extends RProcedure {
   }
 }
 
-abstract class RPrimFun extends RProcedure {
+abstract class RPrimProc extends RProcedure {
   constructor(
     readonly name: string,
     readonly config: RProcedureConfig = {}
@@ -663,7 +673,7 @@ abstract class RPrimFun extends RProcedure {
   }
 
   accept<T>(visitor: RProcedureVisitor<T>): T {
-    return visitor.visitRPrimFun(this);
+    return visitor.visitRPrimProc(this);
   }
 
   stringify(): string {
@@ -750,8 +760,8 @@ function isRNumber(rval: RValue): rval is RNumber {
   return rval instanceof RNumberBase;
 }
 
-function isRPrimFun(rval: RProcedure): rval is RPrimFun {
-  return rval instanceof RPrimFun;
+function isRPrimProc(rval: RProcedure): rval is RPrimProc {
+  return rval instanceof RPrimProc;
 }
 
 function isRString(rval: RValue): rval is RString {
@@ -940,6 +950,6 @@ interface RProcedureVisitor<T> {
   visitRIsStructFun(rval: RIsStructFun): T;
   visitRMakeStructFun(rval: RMakeStructFun): T;
   visitRLambda(rval: RLambda): T;
-  visitRPrimFun(rval: RPrimFun): T;
+  visitRPrimProc(rval: RPrimProc): T;
   visitRStructGetFun(rval: RStructGetFun): T;
 }

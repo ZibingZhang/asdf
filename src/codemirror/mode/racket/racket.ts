@@ -26,7 +26,7 @@ type State = {
     const booleanLiteral = /^(T|t|true|F|f|false)$/;
     const specialForm = /^(and|check-error|check-expect|check-member-of|check-random|check-range|check-satisfied|check-within|cond|define|define-struct|else|if|lambda|letrec|let\*|let|local|or|quasiquote|quote|require|unquote)$/;
     const numLiteral = /^[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
-    const exactnessNumLiteral = /^[ei]?[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
+    const exactnessNumLiteral = /^[ei][+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
     const specialCharacter = /^(nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout)$/;
     const placeholder = /^\.{2,6}$/;
 
