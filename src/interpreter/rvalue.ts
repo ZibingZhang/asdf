@@ -40,6 +40,7 @@ export {
   RBoolean,
   RProcedure,
   RCharacter,
+  RComposedProcedure,
   RData,
   REofObject,
   RExactReal,
@@ -571,11 +572,40 @@ interface RPrimTestFunConfig {
 abstract class RProcedure implements RValue {
   constructor(readonly config: RProcedureConfig = {}) {}
 
+  abstract accept<T>(visitor: RProcedureVisitor<T>): T;
+
   abstract stringify(): string;
 
   abstract getType(args: number): ProcedureType;
+}
 
-  abstract accept<T>(visitor: RProcedureVisitor<T>): T;
+class RComposedProcedure extends RProcedure {
+  procedures: RProcedure[];
+
+  constructor(...procedures: RProcedure[]) {
+    super();
+    this.procedures = procedures;
+  }
+
+  accept<T>(visitor: RProcedureVisitor<T>): T {
+    return visitor.visitRComposedProcedure(this);
+  }
+
+  stringify(): string {
+    const first = this.procedures[0];
+    if (
+      first.config.minArity
+      || first.config.minArityWithoutLists
+    ) {
+      return "(lambda args ...)";
+    } else {
+      return `(lambda (${first.getType(-1).paramTypes.map((_, idx) => `a${idx + 1}`)}) ...)`;
+    }
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(this.procedures[0].getType(args).paramTypes, new AnyType());
+  }
 }
 
 class RIsStructFun extends RProcedure {
@@ -927,6 +957,7 @@ const R_FALSE = new RBoolean(false);
 const R_EMPTY_LIST = new RList([]);
 
 interface RProcedureVisitor<T> {
+  visitRComposedProcedure(rval: RComposedProcedure): T;
   visitRIsStructFun(rval: RIsStructFun): T;
   visitRMakeStructFun(rval: RMakeStructFun): T;
   visitRLambda(rval: RLambda): T;

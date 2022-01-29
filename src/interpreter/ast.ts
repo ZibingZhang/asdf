@@ -44,7 +44,8 @@ import {
   isRStructType,
   isRTrue,
   isRSymbol,
-  isRStruct
+  isRStruct,
+  RComposedProcedure
 } from "./rvalue";
 import {
   Scope,
@@ -965,6 +966,14 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
     readonly env: Environment,
     readonly sourceSpan: SourceSpan
   ) {}
+
+  visitRComposedProcedure(rval: RComposedProcedure): RValue {
+    let result = rval.procedures[0].accept(this);
+    for (const procedure of rval.procedures.slice(1)) {
+      result = procedure.accept(new EvaluateRProcedureVisitor([new AtomNode(result, this.sourceSpan)], this.env, this.sourceSpan))
+    }
+    return result;
+  }
 
   visitRIsStructFun(rval: RIsStructFun): RValue {
     if (this.args.length !== 1) {

@@ -34,7 +34,8 @@ import {
   isRFalse,
   isRProcedure,
   isRTrue,
-  toRBoolean
+  toRBoolean,
+  RComposedProcedure
 } from "../rvalue";
 import {
   Environment
@@ -52,6 +53,7 @@ export {
   RPPArgmax,
   RPPArgmin,
   RPPBuildList,
+  RPPCompose,
   RPPFilter,
   RPPFoldl,
   RPPFoldr,
@@ -240,6 +242,24 @@ class RPPBuildList extends RHigherOrdeRPrimProc {
       listVals.push(procedure.accept(evaluator));
     }
     return new RList(listVals);
+  }
+}
+
+class RPPCompose extends RHigherOrdeRPrimProc {
+  constructor() {
+    super("compose");
+  }
+
+  getType(args: number): ProcedureType {
+    return new ProcedureType(new Array(Math.max(1, args)).fill(new AnyProcedureType()), new AnyProcedureType());
+  }
+
+  call(args: RValue[], _: SourceSpan, __: Environment): RValue {
+    if (args.length === 1) {
+      return args[0];
+    } else {
+      return new RComposedProcedure(...<RProcedure[]>args.reverse())
+    }
   }
 }
 
