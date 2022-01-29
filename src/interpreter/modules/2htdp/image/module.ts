@@ -1,11 +1,12 @@
 import {
-  RModule,
-  RStructType
+  RModule
 } from "../../../rvalue";
 import {
-  RPPCircle,
+  RPPCircle
+} from "./primitive/basicImages";
+import {
   RPPRectangle
-} from "./primitive";
+} from "./primitive/polygons";
 
 export {
   R2HtdpImageModule
