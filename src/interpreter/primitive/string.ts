@@ -24,36 +24,36 @@ import {
 } from "../rvalue";
 
 export {
-  RPFExplode,
-  RPFMakeString,
-  RPFReplicate,
-  RPFString,
-  RPFStringToSymbol,
-  RPFStringAlphabeticHuh,
-  RPFStringAppend,
-  RPFStringCiLessEqualHuh,
-  RPFStringCiLessHuh,
-  RPFStringCiEqualHuh,
-  RPFStringCiGreaterEqualHuh,
-  RPFStringCiGreaterHuh,
-  RPFStringContainsCiHuh,
-  RPFStringContainsHuh,
-  RPFStringCopy,
-  RPFStringDowncase,
-  RPFStringLength,
-  RPFStringLowerCaseHuh,
-  RPFStringNumericHuh,
-  RPFStringUpcase,
-  RPFStringUpperCaseHuh,
-  RPFStringLessEqualHuh,
-  RPFStringLessHuh,
-  RPFStringEqualHuh,
-  RPFStringGreaterEqualHuh,
-  RPFStringGreaterHuh,
-  RPFStringHuh
+  RPPExplode,
+  RPPMakeString,
+  RPPReplicate,
+  RPPString,
+  RPPStringToSymbol,
+  RPPStringAlphabeticHuh,
+  RPPStringAppend,
+  RPPStringCiLessEqualHuh,
+  RPPStringCiLessHuh,
+  RPPStringCiEqualHuh,
+  RPPStringCiGreaterEqualHuh,
+  RPPStringCiGreaterHuh,
+  RPPStringContainsCiHuh,
+  RPPStringContainsHuh,
+  RPPStringCopy,
+  RPPStringDowncase,
+  RPPStringLength,
+  RPPStringLowerCaseHuh,
+  RPPStringNumericHuh,
+  RPPStringUpcase,
+  RPPStringUpperCaseHuh,
+  RPPStringLessEqualHuh,
+  RPPStringLessHuh,
+  RPPStringEqualHuh,
+  RPPStringGreaterEqualHuh,
+  RPPStringGreaterHuh,
+  RPPStringHuh
 };
 
-class RPFExplode extends RPrimProc {
+class RPPExplode extends RPrimProc {
   constructor() {
     super("explode");
   }
@@ -67,7 +67,7 @@ class RPFExplode extends RPrimProc {
   }
 }
 
-class RPFMakeString extends RPrimProc {
+class RPPMakeString extends RPrimProc {
   constructor() {
     super("make-string");
   }
@@ -82,7 +82,7 @@ class RPFMakeString extends RPrimProc {
   }
 }
 
-class RPFReplicate extends RPrimProc {
+class RPPReplicate extends RPrimProc {
   constructor() {
     super("replicate");
   }
@@ -97,7 +97,7 @@ class RPFReplicate extends RPrimProc {
   }
 }
 
-class RPFString extends RPrimProc {
+class RPPString extends RPrimProc {
   constructor() {
     super("string");
   }
@@ -111,7 +111,7 @@ class RPFString extends RPrimProc {
   }
 }
 
-class RPFStringToSymbol extends RPrimProc {
+class RPPStringToSymbol extends RPrimProc {
   constructor() {
     super("string->symbol");
   }
@@ -125,7 +125,7 @@ class RPFStringToSymbol extends RPrimProc {
   }
 }
 
-class RPFStringAlphabeticHuh extends RPrimProc {
+class RPPStringAlphabeticHuh extends RPrimProc {
   constructor() {
     super("string-alphabetic?");
   }
@@ -139,7 +139,7 @@ class RPFStringAlphabeticHuh extends RPrimProc {
   }
 }
 
-class RPFStringAppend extends RPrimProc {
+class RPPStringAppend extends RPrimProc {
   constructor() {
     super("string-append", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -153,7 +153,7 @@ class RPFStringAppend extends RPrimProc {
   }
 }
 
-class RPFStringCiLessEqualHuh extends RPrimProc {
+class RPPStringCiLessEqualHuh extends RPrimProc {
   constructor() {
     super("string-ci<=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -172,7 +172,7 @@ class RPFStringCiLessEqualHuh extends RPrimProc {
   }
 }
 
-class RPFStringCiLessHuh extends RPrimProc {
+class RPPStringCiLessHuh extends RPrimProc {
   constructor() {
     super("string-ci<?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -191,7 +191,7 @@ class RPFStringCiLessHuh extends RPrimProc {
   }
 }
 
-class RPFStringCiEqualHuh extends RPrimProc {
+class RPPStringCiEqualHuh extends RPrimProc {
   constructor() {
     super("string-ci=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -210,7 +210,7 @@ class RPFStringCiEqualHuh extends RPrimProc {
   }
 }
 
-class RPFStringCiGreaterEqualHuh extends RPrimProc {
+class RPPStringCiGreaterEqualHuh extends RPrimProc {
   constructor() {
     super("string-ci>=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -229,7 +229,7 @@ class RPFStringCiGreaterEqualHuh extends RPrimProc {
   }
 }
 
-class RPFStringCiGreaterHuh extends RPrimProc {
+class RPPStringCiGreaterHuh extends RPrimProc {
   constructor() {
     super("string-ci>?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -248,7 +248,7 @@ class RPFStringCiGreaterHuh extends RPrimProc {
   }
 }
 
-class RPFStringContainsCiHuh extends RPrimProc {
+class RPPStringContainsCiHuh extends RPrimProc {
   constructor() {
     super("string-contains-ci?");
   }
@@ -262,7 +262,7 @@ class RPFStringContainsCiHuh extends RPrimProc {
   }
 }
 
-class RPFStringContainsHuh extends RPrimProc {
+class RPPStringContainsHuh extends RPrimProc {
   constructor() {
     super("string-contains?");
   }
@@ -276,7 +276,7 @@ class RPFStringContainsHuh extends RPrimProc {
   }
 }
 
-class RPFStringCopy extends RPrimProc {
+class RPPStringCopy extends RPrimProc {
   constructor() {
     super("string-copy");
   }
@@ -290,7 +290,7 @@ class RPFStringCopy extends RPrimProc {
   }
 }
 
-class RPFStringDowncase extends RPrimProc {
+class RPPStringDowncase extends RPrimProc {
   constructor() {
     super("string-downcase");
   }
@@ -304,7 +304,7 @@ class RPFStringDowncase extends RPrimProc {
   }
 }
 
-class RPFStringLength extends RPrimProc {
+class RPPStringLength extends RPrimProc {
   constructor() {
     super("string-length");
   }
@@ -318,7 +318,7 @@ class RPFStringLength extends RPrimProc {
   }
 }
 
-class RPFStringLowerCaseHuh extends RPrimProc {
+class RPPStringLowerCaseHuh extends RPrimProc {
   constructor() {
     super("string-lower-case?");
   }
@@ -332,7 +332,7 @@ class RPFStringLowerCaseHuh extends RPrimProc {
   }
 }
 
-class RPFStringNumericHuh extends RPrimProc {
+class RPPStringNumericHuh extends RPrimProc {
   constructor() {
     super("string-numeric?");
   }
@@ -346,7 +346,7 @@ class RPFStringNumericHuh extends RPrimProc {
   }
 }
 
-class RPFStringUpcase extends RPrimProc {
+class RPPStringUpcase extends RPrimProc {
   constructor() {
     super("string-upcase");
   }
@@ -360,7 +360,7 @@ class RPFStringUpcase extends RPrimProc {
   }
 }
 
-class RPFStringUpperCaseHuh extends RPrimProc {
+class RPPStringUpperCaseHuh extends RPrimProc {
   constructor() {
     super("string-upper-case?");
   }
@@ -374,7 +374,7 @@ class RPFStringUpperCaseHuh extends RPrimProc {
   }
 }
 
-class RPFStringLessEqualHuh extends RPrimProc {
+class RPPStringLessEqualHuh extends RPrimProc {
   constructor() {
     super("string<=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -393,7 +393,7 @@ class RPFStringLessEqualHuh extends RPrimProc {
   }
 }
 
-class RPFStringLessHuh extends RPrimProc {
+class RPPStringLessHuh extends RPrimProc {
   constructor() {
     super("string<?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -412,7 +412,7 @@ class RPFStringLessHuh extends RPrimProc {
   }
 }
 
-class RPFStringEqualHuh extends RPrimProc {
+class RPPStringEqualHuh extends RPrimProc {
   constructor() {
     super("string=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -431,7 +431,7 @@ class RPFStringEqualHuh extends RPrimProc {
   }
 }
 
-class RPFStringGreaterEqualHuh extends RPrimProc {
+class RPPStringGreaterEqualHuh extends RPrimProc {
   constructor() {
     super("string>=?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -450,7 +450,7 @@ class RPFStringGreaterEqualHuh extends RPrimProc {
   }
 }
 
-class RPFStringGreaterHuh extends RPrimProc {
+class RPPStringGreaterHuh extends RPrimProc {
   constructor() {
     super("string>?", { minArity: 2, relaxedMinArity: 1 });
   }
@@ -469,7 +469,7 @@ class RPFStringGreaterHuh extends RPrimProc {
   }
 }
 
-class RPFStringHuh extends RPrimProc {
+class RPPStringHuh extends RPrimProc {
   constructor() {
     super("string?");
   }

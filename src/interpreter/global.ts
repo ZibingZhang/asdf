@@ -15,140 +15,140 @@ import {
 import {
   RPC_E,
   RPC_PI,
-  RPFAbs,
-  RPFAdd1,
-  RPFCeiling,
-  RPFCurrentSeconds,
-  RPFDenominator,
-  RPFDivide,
-  RPFEqual,
-  RPFEvenHuh,
-  RPFExactToInexact,
-  RPFExp,
-  RPFExpt,
-  RPFFloor,
-  RPFGreater,
-  RPFGreaterEqual,
-  RPFInexactHuh,
-  RPFInexactToExact,
-  RPFIntegerHuh,
-  RPFLess,
-  RPFLessEqual,
-  RPFMax,
-  RPFMin,
-  RPFMinus,
-  RPFModulo,
-  RPFMultiply,
-  RPFNegativeHuh,
-  RPFNumberHuh,
-  RPFNumberToString,
-  RPFNumerator,
-  RPFOddHuh,
-  RPFPlus,
-  RPFPositiveHuh,
-  RPFQuotient,
-  RPFRandom,
-  RPFRemainder,
-  RPFRound,
-  RPFSgn,
-  RPFSqr,
-  RPFSqrt,
-  RPFSub1,
-  RPFZeroHuh
+  RPPAbs,
+  RPPAdd1,
+  RPPCeiling,
+  RPPCurrentSeconds,
+  RPPDenominator,
+  RPPDivide,
+  RPPEqual,
+  RPPEvenHuh,
+  RPPExactToInexact,
+  RPPExp,
+  RPPExpt,
+  RPPFloor,
+  RPPGreater,
+  RPPGreaterEqual,
+  RPPInexactHuh,
+  RPPInexactToExact,
+  RPPIntegerHuh,
+  RPPLess,
+  RPPLessEqual,
+  RPPMax,
+  RPPMin,
+  RPPMinus,
+  RPPModulo,
+  RPPMultiply,
+  RPPNegativeHuh,
+  RPPNumberHuh,
+  RPPNumberToString,
+  RPPNumerator,
+  RPPOddHuh,
+  RPPPlus,
+  RPPPositiveHuh,
+  RPPQuotient,
+  RPPRandom,
+  RPPRemainder,
+  RPPRound,
+  RPPSgn,
+  RPPSqr,
+  RPPSqrt,
+  RPPSub1,
+  RPPZeroHuh
 } from "./primitive/numbers";
 import {
   RPC_EOF,
-  RPFAreEq,
-  RPFAreEqual,
-  RPFAreEqualWithin,
-  RPFAreEqv,
-  RPFAreWithin,
-  RPFEofObjectHuh,
-  RPFError,
-  RPFIdentity,
-  RPFStructHuh
+  RPPAreEq,
+  RPPAreEqual,
+  RPPAreEqualWithin,
+  RPPAreEqv,
+  RPPAreWithin,
+  RPPEofObjectHuh,
+  RPPError,
+  RPPIdentity,
+  RPPStructHuh
 } from "./primitive/misc";
 import {
-  RPFAndmap,
-  RPFApply,
-  RPFArgmax,
-  RPFArgmin,
-  RPFBuildList,
-  RPFFilter,
-  RPFFoldl,
-  RPFFoldr,
-  RPFMap,
-  RPFMemf,
-  RPFOrmap,
-  RPFProcedureHuh,
-  RPFSort
+  RPPAndmap,
+  RPPApply,
+  RPPArgmax,
+  RPPArgmin,
+  RPPBuildList,
+  RPPFilter,
+  RPPFoldl,
+  RPPFoldr,
+  RPPMap,
+  RPPMemf,
+  RPPOrmap,
+  RPPProcedureHuh,
+  RPPSort
 } from "./primitive/higherOrder";
 import {
-  RPFAppend,
-  RPFCar,
-  RPFCdr,
-  RPFCons,
-  RPFEighth,
-  RPFEmptyHuh,
-  RPFFifth,
-  RPFFirst,
-  RPFFourth,
-  RPFLength,
-  RPFList,
-  RPFListHuh,
-  RPFListStar,
-  RPFMakeList,
-  RPFMember,
-  RPFRemove,
-  RPFRemoveAll,
-  RPFRest,
-  RPFReverse,
-  RPFSecond,
-  RPFSeventh,
-  RPFSixth,
-  RPFThird,
+  RPPAppend,
+  RPPCar,
+  RPPCdr,
+  RPPCons,
+  RPPEighth,
+  RPPEmptyHuh,
+  RPPFifth,
+  RPPFirst,
+  RPPFourth,
+  RPPLength,
+  RPPList,
+  RPPListHuh,
+  RPPListStar,
+  RPPMakeList,
+  RPPMember,
+  RPPRemove,
+  RPPRemoveAll,
+  RPPRest,
+  RPPReverse,
+  RPPSecond,
+  RPPSeventh,
+  RPPSixth,
+  RPPThird,
   R_NULL
 } from "./primitive/lists";
 import {
-  RPFAreBooleansEqual,
-  RPFBooleanHuh,
-  RPFBooleanToString,
-  RPFFalseHuh,
-  RPFNot
+  RPPAreBooleansEqual,
+  RPPBooleanHuh,
+  RPPBooleanToString,
+  RPPFalseHuh,
+  RPPNot
 } from "./primitive/booleans";
 import {
-  RPFAreSymbolsEqual,
-  RPFSymbolHuh,
-  RPFSymbolToString
+  RPPAreSymbolsEqual,
+  RPPSymbolHuh,
+  RPPSymbolToString
 } from "./primitive/symbols";
 import {
-  RPFExplode,
-  RPFMakeString,
-  RPFReplicate,
-  RPFString,
-  RPFStringAlphabeticHuh,
-  RPFStringAppend,
-  RPFStringCiEqualHuh,
-  RPFStringCiGreaterEqualHuh,
-  RPFStringCiGreaterHuh,
-  RPFStringCiLessEqualHuh,
-  RPFStringCiLessHuh,
-  RPFStringContainsCiHuh,
-  RPFStringContainsHuh,
-  RPFStringCopy,
-  RPFStringDowncase,
-  RPFStringEqualHuh,
-  RPFStringGreaterEqualHuh,
-  RPFStringGreaterHuh,
-  RPFStringHuh,
-  RPFStringLength,
-  RPFStringLessEqualHuh,
-  RPFStringLessHuh,
-  RPFStringLowerCaseHuh,
-  RPFStringNumericHuh,
-  RPFStringToSymbol,
-  RPFStringUpcase,
-  RPFStringUpperCaseHuh
+  RPPExplode,
+  RPPMakeString,
+  RPPReplicate,
+  RPPString,
+  RPPStringAlphabeticHuh,
+  RPPStringAppend,
+  RPPStringCiEqualHuh,
+  RPPStringCiGreaterEqualHuh,
+  RPPStringCiGreaterHuh,
+  RPPStringCiLessEqualHuh,
+  RPPStringCiLessHuh,
+  RPPStringContainsCiHuh,
+  RPPStringContainsHuh,
+  RPPStringCopy,
+  RPPStringDowncase,
+  RPPStringEqualHuh,
+  RPPStringGreaterEqualHuh,
+  RPPStringGreaterHuh,
+  RPPStringHuh,
+  RPPStringLength,
+  RPPStringLessEqualHuh,
+  RPPStringLessHuh,
+  RPPStringLowerCaseHuh,
+  RPPStringNumericHuh,
+  RPPStringToSymbol,
+  RPPStringUpcase,
+  RPPStringUpperCaseHuh
 } from "./primitive/string";
 import {
   Scope,
@@ -182,19 +182,19 @@ class Global {
 
   private static instance: Global;
   private higherOrderFunctions = new Set([
-    new RPFAndmap(),
-    new RPFApply(),
-    new RPFArgmax(),
-    new RPFArgmin(),
-    new RPFBuildList(),
-    new RPFFilter(),
-    new RPFFoldl(),
-    new RPFFoldr(),
-    new RPFMap(),
-    new RPFMemf(),
-    new RPFOrmap(),
-    new RPFProcedureHuh(),
-    new RPFSort()
+    new RPPAndmap(),
+    new RPPApply(),
+    new RPPArgmax(),
+    new RPPArgmin(),
+    new RPPBuildList(),
+    new RPPFilter(),
+    new RPPFoldl(),
+    new RPPFoldr(),
+    new RPPMap(),
+    new RPPMemf(),
+    new RPPOrmap(),
+    new RPPProcedureHuh(),
+    new RPPSort()
   ]);
 
   constructor() {
@@ -225,135 +225,135 @@ class Global {
     this.addDataToPrimEnv("false", R_FALSE);
 
     // numbers
-    this.addFnToPrimEnv(new RPFMultiply());
-    this.addFnToPrimEnv(new RPFPlus());
-    this.addFnToPrimEnv(new RPFMinus());
-    this.addFnToPrimEnv(new RPFDivide());
-    this.addFnToPrimEnv(new RPFLess());
-    this.addFnToPrimEnv(new RPFLessEqual());
-    this.addFnToPrimEnv(new RPFEqual());
-    this.addFnToPrimEnv(new RPFGreater());
-    this.addFnToPrimEnv(new RPFGreaterEqual());
-    this.addFnToPrimEnv(new RPFAbs());
-    this.addFnToPrimEnv(new RPFAdd1());
-    this.addFnToPrimEnv(new RPFCeiling());
-    this.addFnToPrimEnv(new RPFCurrentSeconds());
-    this.addFnToPrimEnv(new RPFDenominator());
-    this.addFnToPrimEnv(new RPFEvenHuh());
-    this.addFnToPrimEnv(new RPFExactToInexact());
+    this.addFnToPrimEnv(new RPPMultiply());
+    this.addFnToPrimEnv(new RPPPlus());
+    this.addFnToPrimEnv(new RPPMinus());
+    this.addFnToPrimEnv(new RPPDivide());
+    this.addFnToPrimEnv(new RPPLess());
+    this.addFnToPrimEnv(new RPPLessEqual());
+    this.addFnToPrimEnv(new RPPEqual());
+    this.addFnToPrimEnv(new RPPGreater());
+    this.addFnToPrimEnv(new RPPGreaterEqual());
+    this.addFnToPrimEnv(new RPPAbs());
+    this.addFnToPrimEnv(new RPPAdd1());
+    this.addFnToPrimEnv(new RPPCeiling());
+    this.addFnToPrimEnv(new RPPCurrentSeconds());
+    this.addFnToPrimEnv(new RPPDenominator());
+    this.addFnToPrimEnv(new RPPEvenHuh());
+    this.addFnToPrimEnv(new RPPExactToInexact());
     this.addDataToPrimEnv("e", RPC_E);
-    this.addFnToPrimEnv(new RPFExp());
-    this.addFnToPrimEnv(new RPFExpt());
-    this.addFnToPrimEnv(new RPFFloor());
-    this.addFnToPrimEnv(new RPFInexactToExact());
-    this.addFnToPrimEnv(new RPFInexactHuh());
-    this.addFnToPrimEnv(new RPFIntegerHuh());
-    this.addFnToPrimEnv(new RPFMax());
-    this.addFnToPrimEnv(new RPFMin());
-    this.addFnToPrimEnv(new RPFModulo());
-    this.addFnToPrimEnv(new RPFNegativeHuh());
-    this.addFnToPrimEnv(new RPFNumberToString());
-    this.addFnToPrimEnv(new RPFNumberHuh());
-    this.addFnToPrimEnv(new RPFNumerator());
-    this.addFnToPrimEnv(new RPFOddHuh());
+    this.addFnToPrimEnv(new RPPExp());
+    this.addFnToPrimEnv(new RPPExpt());
+    this.addFnToPrimEnv(new RPPFloor());
+    this.addFnToPrimEnv(new RPPInexactToExact());
+    this.addFnToPrimEnv(new RPPInexactHuh());
+    this.addFnToPrimEnv(new RPPIntegerHuh());
+    this.addFnToPrimEnv(new RPPMax());
+    this.addFnToPrimEnv(new RPPMin());
+    this.addFnToPrimEnv(new RPPModulo());
+    this.addFnToPrimEnv(new RPPNegativeHuh());
+    this.addFnToPrimEnv(new RPPNumberToString());
+    this.addFnToPrimEnv(new RPPNumberHuh());
+    this.addFnToPrimEnv(new RPPNumerator());
+    this.addFnToPrimEnv(new RPPOddHuh());
     this.addDataToPrimEnv("pi", RPC_PI);
-    this.addFnToPrimEnv(new RPFPositiveHuh());
-    this.addFnToPrimEnv(new RPFQuotient());
-    this.addFnToPrimEnv(new RPFRandom());
-    this.addFnToPrimEnv(new RPFRemainder());
-    this.addFnToPrimEnv(new RPFNumberHuh("rational?"));
-    this.addFnToPrimEnv(new RPFNumberHuh("real?"));
-    this.addFnToPrimEnv(new RPFRound());
-    this.addFnToPrimEnv(new RPFSgn());
-    this.addFnToPrimEnv(new RPFSqr());
-    this.addFnToPrimEnv(new RPFSqrt());
-    this.addFnToPrimEnv(new RPFSub1());
-    this.addFnToPrimEnv(new RPFZeroHuh());
+    this.addFnToPrimEnv(new RPPPositiveHuh());
+    this.addFnToPrimEnv(new RPPQuotient());
+    this.addFnToPrimEnv(new RPPRandom());
+    this.addFnToPrimEnv(new RPPRemainder());
+    this.addFnToPrimEnv(new RPPNumberHuh("rational?"));
+    this.addFnToPrimEnv(new RPPNumberHuh("real?"));
+    this.addFnToPrimEnv(new RPPRound());
+    this.addFnToPrimEnv(new RPPSgn());
+    this.addFnToPrimEnv(new RPPSqr());
+    this.addFnToPrimEnv(new RPPSqrt());
+    this.addFnToPrimEnv(new RPPSub1());
+    this.addFnToPrimEnv(new RPPZeroHuh());
 
     // booleans
-    this.addFnToPrimEnv(new RPFBooleanToString());
-    this.addFnToPrimEnv(new RPFAreBooleansEqual());
-    this.addFnToPrimEnv(new RPFBooleanHuh());
-    this.addFnToPrimEnv(new RPFFalseHuh());
-    this.addFnToPrimEnv(new RPFNot());
+    this.addFnToPrimEnv(new RPPBooleanToString());
+    this.addFnToPrimEnv(new RPPAreBooleansEqual());
+    this.addFnToPrimEnv(new RPPBooleanHuh());
+    this.addFnToPrimEnv(new RPPFalseHuh());
+    this.addFnToPrimEnv(new RPPNot());
 
     // symbols
-    this.addFnToPrimEnv(new RPFSymbolToString());
-    this.addFnToPrimEnv(new RPFAreSymbolsEqual());
-    this.addFnToPrimEnv(new RPFSymbolHuh());
+    this.addFnToPrimEnv(new RPPSymbolToString());
+    this.addFnToPrimEnv(new RPPAreSymbolsEqual());
+    this.addFnToPrimEnv(new RPPSymbolHuh());
 
     // lists
-    this.addFnToPrimEnv(new RPFAppend());
-    this.addFnToPrimEnv(new RPFCar());
-    this.addFnToPrimEnv(new RPFCdr());
-    this.addFnToPrimEnv(new RPFCons());
-    this.addFnToPrimEnv(new RPFListHuh("cons?"));
-    this.addFnToPrimEnv(new RPFEighth());
-    this.addFnToPrimEnv(new RPFEmptyHuh());
-    this.addFnToPrimEnv(new RPFFifth());
-    this.addFnToPrimEnv(new RPFFirst());
-    this.addFnToPrimEnv(new RPFFourth());
-    this.addFnToPrimEnv(new RPFLength());
-    this.addFnToPrimEnv(new RPFList());
-    this.addFnToPrimEnv(new RPFListStar());
-    this.addFnToPrimEnv(new RPFListHuh());
-    this.addFnToPrimEnv(new RPFMakeList());
-    this.addFnToPrimEnv(new RPFMember());
-    this.addFnToPrimEnv(new RPFMember("member?"));
+    this.addFnToPrimEnv(new RPPAppend());
+    this.addFnToPrimEnv(new RPPCar());
+    this.addFnToPrimEnv(new RPPCdr());
+    this.addFnToPrimEnv(new RPPCons());
+    this.addFnToPrimEnv(new RPPListHuh("cons?"));
+    this.addFnToPrimEnv(new RPPEighth());
+    this.addFnToPrimEnv(new RPPEmptyHuh());
+    this.addFnToPrimEnv(new RPPFifth());
+    this.addFnToPrimEnv(new RPPFirst());
+    this.addFnToPrimEnv(new RPPFourth());
+    this.addFnToPrimEnv(new RPPLength());
+    this.addFnToPrimEnv(new RPPList());
+    this.addFnToPrimEnv(new RPPListStar());
+    this.addFnToPrimEnv(new RPPListHuh());
+    this.addFnToPrimEnv(new RPPMakeList());
+    this.addFnToPrimEnv(new RPPMember());
+    this.addFnToPrimEnv(new RPPMember("member?"));
     this.addDataToPrimEnv("null", R_NULL);
-    this.addFnToPrimEnv(new RPFEmptyHuh("null?"));
-    this.addFnToPrimEnv(new RPFRemove());
-    this.addFnToPrimEnv(new RPFRemoveAll());
-    this.addFnToPrimEnv(new RPFRest());
-    this.addFnToPrimEnv(new RPFReverse());
-    this.addFnToPrimEnv(new RPFSecond());
-    this.addFnToPrimEnv(new RPFSeventh());
-    this.addFnToPrimEnv(new RPFSixth());
-    this.addFnToPrimEnv(new RPFThird());
+    this.addFnToPrimEnv(new RPPEmptyHuh("null?"));
+    this.addFnToPrimEnv(new RPPRemove());
+    this.addFnToPrimEnv(new RPPRemoveAll());
+    this.addFnToPrimEnv(new RPPRest());
+    this.addFnToPrimEnv(new RPPReverse());
+    this.addFnToPrimEnv(new RPPSecond());
+    this.addFnToPrimEnv(new RPPSeventh());
+    this.addFnToPrimEnv(new RPPSixth());
+    this.addFnToPrimEnv(new RPPThird());
 
     // posns
     this.addStructToPrimEnv("posn", ["x", "y"]);
 
     // strings
-    this.addFnToPrimEnv(new RPFExplode());
-    this.addFnToPrimEnv(new RPFMakeString());
-    this.addFnToPrimEnv(new RPFReplicate());
-    this.addFnToPrimEnv(new RPFString());
-    this.addFnToPrimEnv(new RPFStringToSymbol());
-    this.addFnToPrimEnv(new RPFStringAlphabeticHuh());
-    this.addFnToPrimEnv(new RPFStringAppend());
-    this.addFnToPrimEnv(new RPFStringCiLessEqualHuh());
-    this.addFnToPrimEnv(new RPFStringCiLessHuh());
-    this.addFnToPrimEnv(new RPFStringCiEqualHuh());
-    this.addFnToPrimEnv(new RPFStringCiGreaterEqualHuh());
-    this.addFnToPrimEnv(new RPFStringCiGreaterHuh());
-    this.addFnToPrimEnv(new RPFStringContainsCiHuh());
-    this.addFnToPrimEnv(new RPFStringContainsHuh());
-    this.addFnToPrimEnv(new RPFStringCopy());
-    this.addFnToPrimEnv(new RPFStringDowncase());
-    this.addFnToPrimEnv(new RPFStringLength());
-    this.addFnToPrimEnv(new RPFStringLowerCaseHuh());
-    this.addFnToPrimEnv(new RPFStringNumericHuh());
-    this.addFnToPrimEnv(new RPFStringUpcase());
-    this.addFnToPrimEnv(new RPFStringUpperCaseHuh());
-    this.addFnToPrimEnv(new RPFStringLessEqualHuh());
-    this.addFnToPrimEnv(new RPFStringLessHuh());
-    this.addFnToPrimEnv(new RPFStringEqualHuh());
-    this.addFnToPrimEnv(new RPFStringGreaterEqualHuh());
-    this.addFnToPrimEnv(new RPFStringGreaterHuh());
-    this.addFnToPrimEnv(new RPFStringHuh());
+    this.addFnToPrimEnv(new RPPExplode());
+    this.addFnToPrimEnv(new RPPMakeString());
+    this.addFnToPrimEnv(new RPPReplicate());
+    this.addFnToPrimEnv(new RPPString());
+    this.addFnToPrimEnv(new RPPStringToSymbol());
+    this.addFnToPrimEnv(new RPPStringAlphabeticHuh());
+    this.addFnToPrimEnv(new RPPStringAppend());
+    this.addFnToPrimEnv(new RPPStringCiLessEqualHuh());
+    this.addFnToPrimEnv(new RPPStringCiLessHuh());
+    this.addFnToPrimEnv(new RPPStringCiEqualHuh());
+    this.addFnToPrimEnv(new RPPStringCiGreaterEqualHuh());
+    this.addFnToPrimEnv(new RPPStringCiGreaterHuh());
+    this.addFnToPrimEnv(new RPPStringContainsCiHuh());
+    this.addFnToPrimEnv(new RPPStringContainsHuh());
+    this.addFnToPrimEnv(new RPPStringCopy());
+    this.addFnToPrimEnv(new RPPStringDowncase());
+    this.addFnToPrimEnv(new RPPStringLength());
+    this.addFnToPrimEnv(new RPPStringLowerCaseHuh());
+    this.addFnToPrimEnv(new RPPStringNumericHuh());
+    this.addFnToPrimEnv(new RPPStringUpcase());
+    this.addFnToPrimEnv(new RPPStringUpperCaseHuh());
+    this.addFnToPrimEnv(new RPPStringLessEqualHuh());
+    this.addFnToPrimEnv(new RPPStringLessHuh());
+    this.addFnToPrimEnv(new RPPStringEqualHuh());
+    this.addFnToPrimEnv(new RPPStringGreaterEqualHuh());
+    this.addFnToPrimEnv(new RPPStringGreaterHuh());
+    this.addFnToPrimEnv(new RPPStringHuh());
 
     // misc
-    this.addFnToPrimEnv(new RPFAreWithin());
+    this.addFnToPrimEnv(new RPPAreWithin());
     this.addDataToPrimEnv("eof", RPC_EOF);
-    this.addFnToPrimEnv(new RPFEofObjectHuh());
-    this.addFnToPrimEnv(new RPFAreEq());
-    this.addFnToPrimEnv(new RPFAreEqual());
-    this.addFnToPrimEnv(new RPFAreEqualWithin());
-    this.addFnToPrimEnv(new RPFAreEqv());
-    this.addFnToPrimEnv(new RPFError());
-    this.addFnToPrimEnv(new RPFIdentity());
-    this.addFnToPrimEnv(new RPFStructHuh());
+    this.addFnToPrimEnv(new RPPEofObjectHuh());
+    this.addFnToPrimEnv(new RPPAreEq());
+    this.addFnToPrimEnv(new RPPAreEqual());
+    this.addFnToPrimEnv(new RPPAreEqualWithin());
+    this.addFnToPrimEnv(new RPPAreEqv());
+    this.addFnToPrimEnv(new RPPError());
+    this.addFnToPrimEnv(new RPPIdentity());
+    this.addFnToPrimEnv(new RPPStructHuh());
 
     this.defineScopes();
   }

@@ -20,35 +20,35 @@ import {
 } from "../rvalue";
 
 export {
-  RPFAppend,
-  RPFCar,
-  RPFCdr,
-  RPFCons,
-  RPFEighth,
-  RPFEmptyHuh,
-  RPFFifth,
-  RPFFirst,
-  RPFFourth,
-  RPFLength,
-  RPFList,
-  RPFListStar,
-  RPFListHuh,
-  RPFMakeList,
-  RPFMember,
+  RPPAppend,
+  RPPCar,
+  RPPCdr,
+  RPPCons,
+  RPPEighth,
+  RPPEmptyHuh,
+  RPPFifth,
+  RPPFirst,
+  RPPFourth,
+  RPPLength,
+  RPPList,
+  RPPListStar,
+  RPPListHuh,
+  RPPMakeList,
+  RPPMember,
   R_NULL,
-  RPFRemove,
-  RPFRemoveAll,
-  RPFRest,
-  RPFReverse,
-  RPFSecond,
-  RPFSeventh,
-  RPFSixth,
-  RPFThird
+  RPPRemove,
+  RPPRemoveAll,
+  RPPRest,
+  RPPReverse,
+  RPPSecond,
+  RPPSeventh,
+  RPPSixth,
+  RPPThird
 };
 
 const R_NULL = R_EMPTY_LIST;
 
-class RPFAppend extends RPrimProc {
+class RPPAppend extends RPrimProc {
   constructor() {
     super("append", { minArity: 2 });
   }
@@ -62,7 +62,7 @@ class RPFAppend extends RPrimProc {
   }
 }
 
-class RPFCar extends RPrimProc {
+class RPPCar extends RPrimProc {
   constructor() {
     super("car");
   }
@@ -76,7 +76,7 @@ class RPFCar extends RPrimProc {
   }
 }
 
-class RPFCdr extends RPrimProc {
+class RPPCdr extends RPrimProc {
   constructor() {
     super("cdr");
   }
@@ -90,7 +90,7 @@ class RPFCdr extends RPrimProc {
   }
 }
 
-class RPFCons extends RPrimProc {
+class RPPCons extends RPrimProc {
   constructor() {
     super("cons");
   }
@@ -104,7 +104,7 @@ class RPFCons extends RPrimProc {
   }
 }
 
-class RPFEighth extends RPrimProc {
+class RPPEighth extends RPrimProc {
   constructor() {
     super("eighth");
   }
@@ -118,7 +118,7 @@ class RPFEighth extends RPrimProc {
   }
 }
 
-class RPFEmptyHuh extends RPrimProc {
+class RPPEmptyHuh extends RPrimProc {
   constructor(alias?: string) {
     super(alias || "empty?");
   }
@@ -132,7 +132,7 @@ class RPFEmptyHuh extends RPrimProc {
   }
 }
 
-class RPFFifth extends RPrimProc {
+class RPPFifth extends RPrimProc {
   constructor() {
     super("fifth");
   }
@@ -146,7 +146,7 @@ class RPFFifth extends RPrimProc {
   }
 }
 
-class RPFFirst extends RPrimProc {
+class RPPFirst extends RPrimProc {
   constructor() {
     super("first");
   }
@@ -160,7 +160,7 @@ class RPFFirst extends RPrimProc {
   }
 }
 
-class RPFFourth extends RPrimProc {
+class RPPFourth extends RPrimProc {
   constructor() {
     super("fourth");
   }
@@ -174,7 +174,7 @@ class RPFFourth extends RPrimProc {
   }
 }
 
-class RPFLength extends RPrimProc {
+class RPPLength extends RPrimProc {
   constructor() {
     super("length");
   }
@@ -188,7 +188,7 @@ class RPFLength extends RPrimProc {
   }
 }
 
-class RPFList extends RPrimProc {
+class RPPList extends RPrimProc {
   constructor() {
     super("list", {});
   }
@@ -202,7 +202,7 @@ class RPFList extends RPrimProc {
   }
 }
 
-class RPFListStar extends RPrimProc {
+class RPPListStar extends RPrimProc {
   constructor() {
     super("list*", { minArity: 1 });
   }
@@ -216,7 +216,7 @@ class RPFListStar extends RPrimProc {
   }
 }
 
-class RPFListHuh extends RPrimProc {
+class RPPListHuh extends RPrimProc {
   constructor(alias?: string) {
     super(alias || "list?");
   }
@@ -230,7 +230,7 @@ class RPFListHuh extends RPrimProc {
   }
 }
 
-class RPFMakeList extends RPrimProc {
+class RPPMakeList extends RPrimProc {
   constructor() {
     super("make-list");
   }
@@ -244,7 +244,7 @@ class RPFMakeList extends RPrimProc {
   }
 }
 
-class RPFMember extends RPrimProc {
+class RPPMember extends RPrimProc {
   constructor(alias?: string) {
     super(alias || "member");
   }
@@ -259,7 +259,7 @@ class RPFMember extends RPrimProc {
   }
 }
 
-class RPFRemove extends RPrimProc {
+class RPPRemove extends RPrimProc {
   constructor() {
     super("remove");
   }
@@ -284,7 +284,7 @@ class RPFRemove extends RPrimProc {
   }
 }
 
-class RPFRemoveAll extends RPrimProc {
+class RPPRemoveAll extends RPrimProc {
   constructor() {
     super("remove-all");
   }
@@ -303,7 +303,7 @@ class RPFRemoveAll extends RPrimProc {
   }
 }
 
-class RPFRest extends RPrimProc {
+class RPPRest extends RPrimProc {
   constructor() {
     super("rest");
   }
@@ -317,7 +317,7 @@ class RPFRest extends RPrimProc {
   }
 }
 
-class RPFReverse extends RPrimProc {
+class RPPReverse extends RPrimProc {
   constructor() {
     super("reverse");
   }
@@ -331,7 +331,7 @@ class RPFReverse extends RPrimProc {
   }
 }
 
-class RPFSecond extends RPrimProc {
+class RPPSecond extends RPrimProc {
   constructor() {
     super("second");
   }
@@ -345,7 +345,7 @@ class RPFSecond extends RPrimProc {
   }
 }
 
-class RPFSeventh extends RPrimProc {
+class RPPSeventh extends RPrimProc {
   constructor() {
     super("seventh");
   }
@@ -359,7 +359,7 @@ class RPFSeventh extends RPrimProc {
   }
 }
 
-class RPFSixth extends RPrimProc {
+class RPPSixth extends RPrimProc {
   constructor() {
     super("sixth");
   }
@@ -373,7 +373,7 @@ class RPFSixth extends RPrimProc {
   }
 }
 
-class RPFThird extends RPrimProc {
+class RPPThird extends RPrimProc {
   constructor() {
     super("third");
   }

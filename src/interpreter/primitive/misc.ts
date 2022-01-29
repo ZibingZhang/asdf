@@ -20,16 +20,16 @@ import {
 } from "../rvalue";
 
 export {
-  RPFAreWithin,
+  RPPAreWithin,
   RPC_EOF,
-  RPFEofObjectHuh,
-  RPFAreEq,
-  RPFAreEqual,
-  RPFAreEqualWithin,
-  RPFAreEqv,
-  RPFError,
-  RPFIdentity,
-  RPFStructHuh,
+  RPPEofObjectHuh,
+  RPPAreEq,
+  RPPAreEqual,
+  RPPAreEqualWithin,
+  RPPAreEqv,
+  RPPError,
+  RPPIdentity,
+  RPPStructHuh,
   UserError
 };
 
@@ -37,7 +37,7 @@ class UserError extends Error {}
 
 const RPC_EOF = new REofObject();
 
-class RPFAreWithin extends RPrimProc {
+class RPPAreWithin extends RPrimProc {
   constructor() {
     super("=~");
   }
@@ -51,7 +51,7 @@ class RPFAreWithin extends RPrimProc {
   }
 }
 
-class RPFEofObjectHuh extends RPrimProc {
+class RPPEofObjectHuh extends RPrimProc {
   constructor() {
     super("eof-object?");
   }
@@ -65,7 +65,7 @@ class RPFEofObjectHuh extends RPrimProc {
   }
 }
 
-class RPFAreEq extends RPrimProc {
+class RPPAreEq extends RPrimProc {
   constructor() {
     super("eq?");
   }
@@ -79,7 +79,7 @@ class RPFAreEq extends RPrimProc {
   }
 }
 
-class RPFAreEqual extends RPrimProc {
+class RPPAreEqual extends RPrimProc {
   constructor() {
     super("equal?");
   }
@@ -93,7 +93,7 @@ class RPFAreEqual extends RPrimProc {
   }
 }
 
-class RPFAreEqualWithin extends RPrimProc {
+class RPPAreEqualWithin extends RPrimProc {
   constructor() {
     super("equal~?");
   }
@@ -108,7 +108,7 @@ class RPFAreEqualWithin extends RPrimProc {
   }
 }
 
-class RPFAreEqv extends RPrimProc {
+class RPPAreEqv extends RPrimProc {
   constructor() {
     super("eqv?");
   }
@@ -122,7 +122,7 @@ class RPFAreEqv extends RPrimProc {
   }
 }
 
-class RPFError extends RPrimProc {
+class RPPError extends RPrimProc {
   constructor() {
     super("error", {});
   }
@@ -146,7 +146,7 @@ class RPFError extends RPrimProc {
   }
 }
 
-class RPFIdentity extends RPrimProc {
+class RPPIdentity extends RPrimProc {
   constructor() {
     super("identity");
   }
@@ -160,7 +160,7 @@ class RPFIdentity extends RPrimProc {
   }
 }
 
-class RPFStructHuh extends RPrimProc {
+class RPPStructHuh extends RPrimProc {
   constructor() {
     super("struct?");
   }

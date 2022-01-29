@@ -15,12 +15,12 @@ import {
 } from "../rvalue";
 
 export {
-  RPFSymbolToString,
-  RPFAreSymbolsEqual,
-  RPFSymbolHuh
+  RPPSymbolToString,
+  RPPAreSymbolsEqual,
+  RPPSymbolHuh
 };
 
-class RPFSymbolToString extends RPrimProc {
+class RPPSymbolToString extends RPrimProc {
   constructor() {
     super("symbol->string");
   }
@@ -34,7 +34,7 @@ class RPFSymbolToString extends RPrimProc {
   }
 }
 
-class RPFAreSymbolsEqual extends RPrimProc {
+class RPPAreSymbolsEqual extends RPrimProc {
   constructor() {
     super("symbol=?");
   }
@@ -48,7 +48,7 @@ class RPFAreSymbolsEqual extends RPrimProc {
   }
 }
 
-class RPFSymbolHuh extends RPrimProc {
+class RPPSymbolHuh extends RPrimProc {
   constructor() {
     super("symbol?");
   }

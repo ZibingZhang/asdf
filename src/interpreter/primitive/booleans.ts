@@ -14,14 +14,14 @@ import {
 } from "../rvalue";
 
 export {
-  RPFBooleanToString,
-  RPFAreBooleansEqual,
-  RPFBooleanHuh,
-  RPFFalseHuh,
-  RPFNot
+  RPPBooleanToString,
+  RPPAreBooleansEqual,
+  RPPBooleanHuh,
+  RPPFalseHuh,
+  RPPNot
 };
 
-class RPFBooleanToString extends RPrimProc {
+class RPPBooleanToString extends RPrimProc {
   constructor() {
     super("boolean->string");
   }
@@ -35,7 +35,7 @@ class RPFBooleanToString extends RPrimProc {
   }
 }
 
-class RPFAreBooleansEqual extends RPrimProc {
+class RPPAreBooleansEqual extends RPrimProc {
   constructor() {
     super("boolean=?");
   }
@@ -49,7 +49,7 @@ class RPFAreBooleansEqual extends RPrimProc {
   }
 }
 
-class RPFBooleanHuh extends RPrimProc {
+class RPPBooleanHuh extends RPrimProc {
   constructor() {
     super("boolean?");
   }
@@ -63,7 +63,7 @@ class RPFBooleanHuh extends RPrimProc {
   }
 }
 
-class RPFFalseHuh extends RPrimProc {
+class RPPFalseHuh extends RPrimProc {
   constructor() {
     super("false?");
   }
@@ -77,7 +77,7 @@ class RPFFalseHuh extends RPrimProc {
   }
 }
 
-class RPFNot extends RPrimProc {
+class RPPNot extends RPrimProc {
   constructor() {
     super("not");
   }

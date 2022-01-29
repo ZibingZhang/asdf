@@ -43,54 +43,54 @@ import {
 } from "../pipeline";
 
 export {
-  RPFMultiply,
-  RPFPlus,
-  RPFMinus,
-  RPFDivide,
-  RPFLess,
-  RPFLessEqual,
-  RPFEqual,
-  RPFGreater,
-  RPFGreaterEqual,
-  RPFAbs,
-  RPFAdd1,
-  RPFCeiling,
-  RPFCurrentSeconds,
-  RPFDenominator,
+  RPPMultiply,
+  RPPPlus,
+  RPPMinus,
+  RPPDivide,
+  RPPLess,
+  RPPLessEqual,
+  RPPEqual,
+  RPPGreater,
+  RPPGreaterEqual,
+  RPPAbs,
+  RPPAdd1,
+  RPPCeiling,
+  RPPCurrentSeconds,
+  RPPDenominator,
   RPC_E,
-  RPFEvenHuh,
-  RPFExactToInexact,
-  RPFExp,
-  RPFExpt,
-  RPFFloor,
-  RPFInexactToExact,
-  RPFInexactHuh,
-  RPFIntegerHuh,
-  RPFMax,
-  RPFMin,
-  RPFModulo,
-  RPFNegativeHuh,
-  RPFNumberToString,
-  RPFNumerator,
-  RPFNumberHuh,
-  RPFOddHuh,
+  RPPEvenHuh,
+  RPPExactToInexact,
+  RPPExp,
+  RPPExpt,
+  RPPFloor,
+  RPPInexactToExact,
+  RPPInexactHuh,
+  RPPIntegerHuh,
+  RPPMax,
+  RPPMin,
+  RPPModulo,
+  RPPNegativeHuh,
+  RPPNumberToString,
+  RPPNumerator,
+  RPPNumberHuh,
+  RPPOddHuh,
   RPC_PI,
-  RPFPositiveHuh,
-  RPFQuotient,
-  RPFRandom,
-  RPFRemainder,
-  RPFRound,
-  RPFSgn,
-  RPFSqr,
-  RPFSqrt,
-  RPFSub1,
-  RPFZeroHuh
+  RPPPositiveHuh,
+  RPPQuotient,
+  RPPRandom,
+  RPPRemainder,
+  RPPRound,
+  RPPSgn,
+  RPPSqr,
+  RPPSqrt,
+  RPPSub1,
+  RPPZeroHuh
 };
 
 const RPC_E = new RInexactReal(6121026514868073n, 2251799813685248n);
 const RPC_PI = new RInexactReal(884279719003555n, 281474976710656n);
 
-class RPFMultiply extends RPrimProc {
+class RPPMultiply extends RPrimProc {
   constructor() {
     super("*", { minArity: 2, relaxedMinArity: 0 });
   }
@@ -106,7 +106,7 @@ class RPFMultiply extends RPrimProc {
   }
 }
 
-class RPFPlus extends RPrimProc {
+class RPPPlus extends RPrimProc {
   constructor() {
     super("+", { minArity: 2, relaxedMinArity: 0 });
   }
@@ -122,7 +122,7 @@ class RPFPlus extends RPrimProc {
   }
 }
 
-class RPFMinus extends RPrimProc {
+class RPPMinus extends RPrimProc {
   constructor() {
     super("-", { minArity: 1 });
   }
@@ -141,7 +141,7 @@ class RPFMinus extends RPrimProc {
   }
 }
 
-class RPFDivide extends RPrimProc {
+class RPPDivide extends RPrimProc {
   constructor() {
     super("/", { minArity: 2, relaxedMinArity: 0 });
   }
@@ -176,7 +176,7 @@ class RPFDivide extends RPrimProc {
   }
 }
 
-class RPFLess extends RPrimProc {
+class RPPLess extends RPrimProc {
   constructor() {
     super("<", { minArity: 1 });
   }
@@ -195,7 +195,7 @@ class RPFLess extends RPrimProc {
   }
 }
 
-class RPFLessEqual extends RPrimProc {
+class RPPLessEqual extends RPrimProc {
   constructor() {
     super("<=", { minArity: 1 });
   }
@@ -214,7 +214,7 @@ class RPFLessEqual extends RPrimProc {
   }
 }
 
-class RPFEqual extends RPrimProc {
+class RPPEqual extends RPrimProc {
   constructor() {
     super("=", { minArity: 1 });
   }
@@ -233,7 +233,7 @@ class RPFEqual extends RPrimProc {
   }
 }
 
-class RPFGreater extends RPrimProc {
+class RPPGreater extends RPrimProc {
   constructor() {
     super(">", { minArity: 1 });
   }
@@ -252,7 +252,7 @@ class RPFGreater extends RPrimProc {
   }
 }
 
-class RPFGreaterEqual extends RPrimProc {
+class RPPGreaterEqual extends RPrimProc {
   constructor() {
     super(">=", { minArity: 1 });
   }
@@ -271,7 +271,7 @@ class RPFGreaterEqual extends RPrimProc {
   }
 }
 
-class RPFAbs extends RPrimProc {
+class RPPAbs extends RPrimProc {
   constructor() {
     super("abs");
   }
@@ -290,7 +290,7 @@ class RPFAbs extends RPrimProc {
   }
 }
 
-class RPFAdd1 extends RPrimProc {
+class RPPAdd1 extends RPrimProc {
   constructor() {
     super("add1");
   }
@@ -304,7 +304,7 @@ class RPFAdd1 extends RPrimProc {
   }
 }
 
-class RPFCeiling extends RPrimProc {
+class RPPCeiling extends RPrimProc {
   constructor() {
     super("ceiling");
   }
@@ -318,7 +318,7 @@ class RPFCeiling extends RPrimProc {
   }
 }
 
-class RPFCurrentSeconds extends RPrimProc {
+class RPPCurrentSeconds extends RPrimProc {
   constructor() {
     super("current-seconds");
   }
@@ -332,7 +332,7 @@ class RPFCurrentSeconds extends RPrimProc {
   }
 }
 
-class RPFDenominator extends RPrimProc {
+class RPPDenominator extends RPrimProc {
   constructor() {
     super("denominator");
   }
@@ -347,7 +347,7 @@ class RPFDenominator extends RPrimProc {
   }
 }
 
-class RPFEvenHuh extends RPrimProc {
+class RPPEvenHuh extends RPrimProc {
   constructor() {
     super("even?");
   }
@@ -361,7 +361,7 @@ class RPFEvenHuh extends RPrimProc {
   }
 }
 
-class RPFExactToInexact extends RPrimProc {
+class RPPExactToInexact extends RPrimProc {
   constructor() {
     super("exact->inexact");
   }
@@ -375,7 +375,7 @@ class RPFExactToInexact extends RPrimProc {
   }
 }
 
-class RPFExp extends RPrimProc {
+class RPPExp extends RPrimProc {
   constructor() {
     super("exp");
   }
@@ -389,7 +389,7 @@ class RPFExp extends RPrimProc {
   }
 }
 
-class RPFExpt extends RPrimProc {
+class RPPExpt extends RPrimProc {
   constructor() {
     super("expt");
   }
@@ -411,7 +411,7 @@ class RPFExpt extends RPrimProc {
   }
 }
 
-class RPFFloor extends RPrimProc {
+class RPPFloor extends RPrimProc {
   constructor() {
     super("floor");
   }
@@ -425,7 +425,7 @@ class RPFFloor extends RPrimProc {
   }
 }
 
-class RPFInexactToExact extends RPrimProc {
+class RPPInexactToExact extends RPrimProc {
   constructor() {
     super("inexact->exact");
   }
@@ -439,7 +439,7 @@ class RPFInexactToExact extends RPrimProc {
   }
 }
 
-class RPFInexactHuh extends RPrimProc {
+class RPPInexactHuh extends RPrimProc {
   constructor() {
     super("inexact?");
   }
@@ -453,7 +453,7 @@ class RPFInexactHuh extends RPrimProc {
   }
 }
 
-class RPFIntegerHuh extends RPrimProc {
+class RPPIntegerHuh extends RPrimProc {
   constructor() {
     super("integer?");
   }
@@ -467,7 +467,7 @@ class RPFIntegerHuh extends RPrimProc {
   }
 }
 
-class RPFMax extends RPrimProc {
+class RPPMax extends RPrimProc {
   constructor() {
     super("max", { minArity: 1 });
   }
@@ -483,7 +483,7 @@ class RPFMax extends RPrimProc {
   }
 }
 
-class RPFMin extends RPrimProc {
+class RPPMin extends RPrimProc {
   constructor() {
     super("min", { minArity: 1 });
   }
@@ -499,7 +499,7 @@ class RPFMin extends RPrimProc {
   }
 }
 
-class RPFModulo extends RPrimProc {
+class RPPModulo extends RPrimProc {
   constructor() {
     super("modulo");
   }
@@ -520,7 +520,7 @@ class RPFModulo extends RPrimProc {
   }
 }
 
-class RPFNegativeHuh extends RPrimProc {
+class RPPNegativeHuh extends RPrimProc {
   constructor() {
     super("negative?");
   }
@@ -534,7 +534,7 @@ class RPFNegativeHuh extends RPrimProc {
   }
 }
 
-class RPFNumberToString extends RPrimProc {
+class RPPNumberToString extends RPrimProc {
   constructor() {
     super("number->string");
   }
@@ -548,7 +548,7 @@ class RPFNumberToString extends RPrimProc {
   }
 }
 
-class RPFNumberHuh extends RPrimProc {
+class RPPNumberHuh extends RPrimProc {
   constructor(alias?: string) {
     super(alias || "number?");
   }
@@ -562,7 +562,7 @@ class RPFNumberHuh extends RPrimProc {
   }
 }
 
-class RPFNumerator extends RPrimProc {
+class RPPNumerator extends RPrimProc {
   constructor() {
     super("numerator");
   }
@@ -577,7 +577,7 @@ class RPFNumerator extends RPrimProc {
   }
 }
 
-class RPFOddHuh extends RPrimProc {
+class RPPOddHuh extends RPrimProc {
   constructor() {
     super("odd?");
   }
@@ -591,7 +591,7 @@ class RPFOddHuh extends RPrimProc {
   }
 }
 
-class RPFPositiveHuh extends RPrimProc {
+class RPPPositiveHuh extends RPrimProc {
   constructor() {
     super("positive?");
   }
@@ -606,7 +606,7 @@ class RPFPositiveHuh extends RPrimProc {
   }
 }
 
-class RPFQuotient extends RPrimProc {
+class RPPQuotient extends RPrimProc {
   constructor() {
     super("quotient");
   }
@@ -623,7 +623,7 @@ class RPFQuotient extends RPrimProc {
   }
 }
 
-class RPFRandom extends RPrimProc {
+class RPPRandom extends RPrimProc {
   constructor() {
     super("random");
   }
@@ -637,7 +637,7 @@ class RPFRandom extends RPrimProc {
   }
 }
 
-class RPFRemainder extends RPrimProc {
+class RPPRemainder extends RPrimProc {
   constructor() {
     super("remainder");
   }
@@ -654,7 +654,7 @@ class RPFRemainder extends RPrimProc {
   }
 }
 
-class RPFRound extends RPrimProc {
+class RPPRound extends RPrimProc {
   constructor() {
     super("round");
   }
@@ -682,7 +682,7 @@ class RPFRound extends RPrimProc {
   }
 }
 
-class RPFSqr extends RPrimProc {
+class RPPSqr extends RPrimProc {
   expt = new RExactReal(2n);
 
   constructor() {
@@ -698,7 +698,7 @@ class RPFSqr extends RPrimProc {
   }
 }
 
-class RPFSgn extends RPrimProc {
+class RPPSgn extends RPrimProc {
   constructor() {
     super("sgn");
   }
@@ -720,7 +720,7 @@ class RPFSgn extends RPrimProc {
   }
 }
 
-class RPFSqrt extends RPrimProc {
+class RPPSqrt extends RPrimProc {
   expt = new RExactReal(1n, 2n);
 
   constructor() {
@@ -743,7 +743,7 @@ class RPFSqrt extends RPrimProc {
   }
 }
 
-class RPFSub1 extends RPrimProc {
+class RPPSub1 extends RPrimProc {
   constructor() {
     super("sub1");
   }
@@ -757,7 +757,7 @@ class RPFSub1 extends RPrimProc {
   }
 }
 
-class RPFZeroHuh extends RPrimProc {
+class RPPZeroHuh extends RPrimProc {
   constructor() {
     super("zero?");
   }

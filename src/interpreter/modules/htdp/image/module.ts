@@ -3,7 +3,8 @@ import {
   RStructType
 } from "../../../rvalue";
 import {
-  RPFRectangle
+  RPPCircle,
+  RPPRectangle
 } from "./primitive";
 
 export {
@@ -17,7 +18,8 @@ class RModuleHtdpImage extends RModule {
         ["color", ["red", "green", "blue"]]
       ],
       [
-        new RPFRectangle()
+        new RPPCircle(),
+        new RPPRectangle()
       ]
     );
   }

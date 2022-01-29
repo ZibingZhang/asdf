@@ -47,19 +47,19 @@ import {
 } from "../pipeline";
 
 export {
-  RPFAndmap,
-  RPFApply,
-  RPFArgmax,
-  RPFArgmin,
-  RPFBuildList,
-  RPFFilter,
-  RPFFoldl,
-  RPFFoldr,
-  RPFMap,
-  RPFMemf,
-  RPFOrmap,
-  RPFProcedureHuh,
-  RPFSort
+  RPPAndmap,
+  RPPApply,
+  RPPArgmax,
+  RPPArgmin,
+  RPPBuildList,
+  RPPFilter,
+  RPPFoldl,
+  RPPFoldr,
+  RPPMap,
+  RPPMemf,
+  RPPOrmap,
+  RPPProcedureHuh,
+  RPPSort
 };
 
 abstract class RHigherOrdeRPrimProc extends RPrimProc {
@@ -103,7 +103,7 @@ abstract class RHigherOrdeRPrimProc extends RPrimProc {
   }
 }
 
-class RPFAndmap extends RHigherOrdeRPrimProc {
+class RPPAndmap extends RHigherOrdeRPrimProc {
   constructor() {
     super("andmap", { minArityWithoutLists: 1 });
   }
@@ -131,7 +131,7 @@ class RPFAndmap extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFApply extends RHigherOrdeRPrimProc {
+class RPPApply extends RHigherOrdeRPrimProc {
   constructor() {
     super("apply");
   }
@@ -153,7 +153,7 @@ class RPFApply extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFArgmax extends RHigherOrdeRPrimProc {
+class RPPArgmax extends RHigherOrdeRPrimProc {
   constructor() {
     super("argmax");
   }
@@ -187,7 +187,7 @@ class RPFArgmax extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFArgmin extends RHigherOrdeRPrimProc {
+class RPPArgmin extends RHigherOrdeRPrimProc {
   constructor() {
     super("argmin");
   }
@@ -221,7 +221,7 @@ class RPFArgmin extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFBuildList extends RHigherOrdeRPrimProc {
+class RPPBuildList extends RHigherOrdeRPrimProc {
   constructor() {
     super("build-list");
   }
@@ -243,7 +243,7 @@ class RPFBuildList extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFFilter extends RHigherOrdeRPrimProc {
+class RPPFilter extends RHigherOrdeRPrimProc {
   constructor() {
     super("filter");
   }
@@ -271,7 +271,7 @@ class RPFFilter extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFFoldl extends RHigherOrdeRPrimProc {
+class RPPFoldl extends RHigherOrdeRPrimProc {
   constructor() {
     super("foldl", { minArityWithoutLists: 2 });
   }
@@ -297,7 +297,7 @@ class RPFFoldl extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFFoldr extends RHigherOrdeRPrimProc {
+class RPPFoldr extends RHigherOrdeRPrimProc {
   constructor() {
     super("foldr", { minArityWithoutLists: 2 });
   }
@@ -323,7 +323,7 @@ class RPFFoldr extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFMap extends RHigherOrdeRPrimProc {
+class RPPMap extends RHigherOrdeRPrimProc {
   constructor() {
     super("map", { minArityWithoutLists: 1 });
   }
@@ -348,7 +348,7 @@ class RPFMap extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFMemf extends RHigherOrdeRPrimProc {
+class RPPMemf extends RHigherOrdeRPrimProc {
   constructor() {
     super("memf");
   }
@@ -374,7 +374,7 @@ class RPFMemf extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFOrmap extends RHigherOrdeRPrimProc {
+class RPPOrmap extends RHigherOrdeRPrimProc {
   constructor() {
     super("ormap", { minArityWithoutLists: 1 });
   }
@@ -402,7 +402,7 @@ class RPFOrmap extends RHigherOrdeRPrimProc {
   }
 }
 
-class RPFProcedureHuh extends RPrimProc {
+class RPPProcedureHuh extends RPrimProc {
   constructor() {
     super("procedure?");
   }
@@ -416,7 +416,7 @@ class RPFProcedureHuh extends RPrimProc {
   }
 }
 
-class RPFSort extends RHigherOrdeRPrimProc {
+class RPPSort extends RHigherOrdeRPrimProc {
   constructor() {
     super("sort");
   }
