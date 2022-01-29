@@ -55,7 +55,7 @@ class Controller {
     this.editor.cm.focus();
     this.settings.updateSettings();
 
-    document.getElementById("run-button")!.onclick = this.editor.runCode;
+    document.getElementById("run-button")!.onclick = this.editor.runCode.bind(this.editor);
     document.getElementById("editor-button")!.onclick = () => this.switchToTab(Tab.Editor);
     document.getElementById("settings-button")!.onclick = () => this.switchToTab(Tab.Settings);
     document.getElementById("info-button")!.onclick = () => this.switchToTab(Tab.Info);
