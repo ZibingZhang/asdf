@@ -1,5 +1,6 @@
 import {
-  RModule
+  RModule,
+  RStructType
 } from "../../../rvalue";
 import {
   RPFRectangle
@@ -11,8 +12,13 @@ export {
 
 class RModuleHtdpImage extends RModule {
   constructor() {
-    super(new Map([
-      ["rectangle", new RPFRectangle()]
-    ]));
+    super(
+      [
+        ["color", ["red", "green", "blue"]]
+      ],
+      [
+        new RPFRectangle()
+      ]
+    );
   }
 }

@@ -110,7 +110,8 @@ type RNumber =
 
 abstract class RModule {
   constructor(
-    readonly procedures: Map<string, RPrimProc>
+    readonly structures: [[string, string[]]],
+    readonly procedures: RPrimProc[]
   ) {}
 }
 

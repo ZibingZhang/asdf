@@ -1,5 +1,9 @@
 import {
+  RIsStructFun,
+  RMakeStructFun,
   RModule,
+  RStructGetFun,
+  RStructType,
   RValue
 } from "./rvalue";
 import {
@@ -88,9 +92,25 @@ class Environment {
   }
 
   addModule(module: RModule) {
-    for (const [name, procedure] of module.procedures) {
+    for (const [name, fields] of module.structures) {
       if (!this.has(name)) {
-        this.map.set(name, procedure);
+        this.set(name, new RStructType(name));
+      }
+      for (const [idx, field] of fields.entries()) {
+        if (!this.has(`${name}-${field}`)) {
+          this.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
+        }
+      }
+      if (!this.has(`make-${name}`)) {
+        this.set(`make-${name}`, new RMakeStructFun(name, fields.length));
+      }
+      if (!this.has(`${name}?`)) {
+        this.set(`${name}?`, new RIsStructFun(name));
+      }
+    }
+    for (const procedure of module.procedures) {
+      if (!this.has(procedure.name)) {
+        this.map.set(procedure.name, procedure);
       }
     }
   }

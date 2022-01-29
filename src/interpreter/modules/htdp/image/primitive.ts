@@ -4,8 +4,10 @@ import {
   ProcedureType
 } from "../../../types";
 import {
+  isRStruct,
   RNumber,
   RPrimProc,
+  RString,
   RSymbol,
   RValue
 } from "../../../rvalue";
@@ -44,10 +46,14 @@ class RPFRectangle extends RPrimProc {
     const width = Number((<RNumber>args[0]).numerator);
     const height = Number((<RNumber>args[1]).numerator);
     const mode = (<RSymbol>args[2]).val;
-    const color = (<RSymbol>args[3]).val.toLowerCase();
+    const color = args[3];
     const canvas = newCanvas(width, height);
     const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = `rgb(${COLOR_NAMES.get(color)!.join(", ")})`;
+    if (isRStruct(color)) {
+      ctx.fillStyle = `rgb(${color.vals[0].stringify()}, ${color.vals[1].stringify()}, ${color.vals[2].stringify()})`;
+    } else {
+      ctx.fillStyle = `rgb(${COLOR_NAMES.get((<RString>color).val)!.join(", ")})`;
+    }
     ctx.beginPath();
     ctx.rect(0, 0, width, height);
     ctx.fill();

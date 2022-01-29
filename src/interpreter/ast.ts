@@ -43,7 +43,8 @@ import {
   isRString,
   isRStructType,
   isRTrue,
-  isRSymbol
+  isRSymbol,
+  isRStruct
 } from "./rvalue";
 import {
   Scope,
@@ -89,6 +90,7 @@ import {
 import {
   UserError
 } from "./primitive/misc";
+import { isRExact8BitNumber } from "./modules/htdp/image/rvalue";
 
 export {
   ASTNode,
@@ -1051,17 +1053,25 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
           continue;
         }
       }
-      if (
-        isColorType(paramType)
-        && (isRString(argVal) || isRSymbol(argVal))
-      ) {
-        if (isValidColorName(argVal)) {
-          continue;
-        } else {
-          throw new StageError(
-            HI_NOT_VALID_COLOR_ERR(rval.name, argVal.stringify()),
-            this.sourceSpan
-          );
+      if (isColorType(paramType)) {
+        if (isRString(argVal) || isRSymbol(argVal)) {
+          if (isValidColorName(argVal)) {
+            continue;
+          } else {
+            throw new StageError(
+              HI_NOT_VALID_COLOR_ERR(rval.name, argVal.stringify()),
+              this.sourceSpan
+            );
+          }
+        } else if (isRStruct(argVal)) {
+          if (
+            argVal.vals.length === 3
+            && isRExact8BitNumber(argVal.vals[0])
+            && isRExact8BitNumber(argVal.vals[1])
+            && isRExact8BitNumber(argVal.vals[2])
+          ) {
+            continue;
+          }
         }
       }
       if (funType.paramTypes.length === 1) {
