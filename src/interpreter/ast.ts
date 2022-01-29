@@ -42,24 +42,13 @@ import {
   isRInexactReal,
   isRProcedure,
   isRString,
-  isRStruct,
   isRStructType,
-  isRSymbol,
   isRTrue
 } from "./rvalue";
 import {
   Scope,
   VariableType
 } from "./scope";
-import {
-  isAnyProcedureType,
-  isAnyType,
-  isProcedureType
-} from "./types";
-import {
-  isColorType,
-  isValidColorName
-} from "./modules/2htdp/image/types";
 import {
   AtomSExpr
 } from "./sexpr";
@@ -69,9 +58,6 @@ import {
 import {
   Global
 } from "./global";
-import {
-  HI_NOT_VALID_COLOR_ERR
-} from "./modules/2htdp/image/error";
 import {
   Keyword
 } from "./keyword";
@@ -90,9 +76,6 @@ import {
 import {
   UserError
 } from "./primitive/misc";
-import {
-  isRExact8BitNumber
-} from "./modules/2htdp/image/rvalue";
 
 export {
   ASTNode,
@@ -1047,42 +1030,8 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
     const argVals = this.args.map(arg => arg.eval(this.env));
     for (const [idx, paramType] of funType.paramTypes.entries()) {
       const argVal = argVals[idx];
-      if (
-        (isAnyType(paramType) || isAnyProcedureType(paramType))
-        && isRProcedure(argVal)
-      ) {
+      if (paramType.isCompatibleWith(argVal, rval.name, this.sourceSpan)) {
         continue;
-      } else if (isProcedureType(paramType)) {
-        const argType = argVal.getType(paramType.paramTypes.length);
-        if (paramType.isCompatibleWith(argType, argVal)) {
-          continue;
-        }
-      } else if (!isRProcedure(argVal)) {
-        const argType = argVal.getType(-1);
-        if (paramType.isSuperTypeOf(argType, argVal)) {
-          continue;
-        }
-      }
-      if (isColorType(paramType)) {
-        if (isRString(argVal) || isRSymbol(argVal)) {
-          if (isValidColorName(argVal)) {
-            continue;
-          } else {
-            throw new StageError(
-              HI_NOT_VALID_COLOR_ERR(rval.name, argVal.stringify()),
-              this.sourceSpan
-            );
-          }
-        } else if (isRStruct(argVal)) {
-          if (
-            argVal.vals.length === 3
-            && isRExact8BitNumber(argVal.vals[0])
-            && isRExact8BitNumber(argVal.vals[1])
-            && isRExact8BitNumber(argVal.vals[2])
-          ) {
-            continue;
-          }
-        }
       }
       if (funType.paramTypes.length === 1) {
         throw new StageError(

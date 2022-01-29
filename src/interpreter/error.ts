@@ -279,7 +279,7 @@ const HO_CONTRACT_VIOLATION_ERR = (name: string, expected: string, received: str
   return `${name}: contract violation\n  expected: ${expected}\n  received: ${received}`;
 };
 const HO_EXPECTED_BOOLEAN_ERR = (name: string, procedure: string, received: string) => {
-  return `${name}: expected a boolean from ${procedure} (the function given to filter), but received ${received}`;
+  return `${name}: expected a boolean from ${procedure} (the function given to ${name}), but received ${received}`;
 };
 const HO_EXPECTED_LIST_ARGUMENT_ERR = (name: string) => {
   return `${name}: expects (at least) one list argument, given none`;

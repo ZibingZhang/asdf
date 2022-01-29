@@ -4,8 +4,12 @@ import {
   RNumber,
   RString,
   RSymbol,
-  RValue
+  RValue,
+  isRProcedure
 } from "./rvalue";
+import {
+  SourceSpan
+} from "./sourcespan";
 
 export{
   AnyProcedureType,
@@ -54,6 +58,10 @@ abstract class Type {
     }
   }
 
+  isCompatibleWith(rval: RValue, _name: string , _sourceSpan: SourceSpan): boolean {
+    return this.isSuperTypeOf(rval.getType(-1), rval);
+  }
+
   abstract isSuperTypeOfHelper(type: Type, rval: RValue): boolean;
 
   abstract stringify(): string;
@@ -74,7 +82,25 @@ abstract class LiteralType extends Type {
   }
 }
 
+class AnyType extends Type {
+  isCompatibleWith(): boolean {
+    return true;
+  }
+
+  isSuperTypeOfHelper(_: Type): boolean {
+    return true;
+  }
+
+  stringify(): string {
+    return "any/c";
+  }
+}
+
 class AnyProcedureType extends Type {
+  isCompatibleWith(rval: RValue): boolean {
+    return isRProcedure(rval);
+  }
+
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof AnyProcedureType
       || type instanceof ProcedureType;
@@ -82,16 +108,6 @@ class AnyProcedureType extends Type {
 
   stringify(): string {
     return "procedure";
-  }
-}
-
-class AnyType extends Type {
-  isSuperTypeOfHelper(_: Type): boolean {
-    return true;
-  }
-
-  stringify(): string {
-    return "any/c";
   }
 }
 
@@ -286,9 +302,12 @@ class ProcedureType extends Type {
       && this.outputType.isSuperTypeOf(type.outputType, rval);
   }
 
-  isCompatibleWith(type: Type, rval: RValue): boolean {
-    return type instanceof ProcedureType
-      && type.paramTypes.length === this.paramTypes.length
+  isCompatibleWith(rval: RValue): boolean {
+    if (!isRProcedure(rval)) {
+      return false;
+    }
+    const type = rval.getType(this.paramTypes.length);
+    return type.paramTypes.length === this.paramTypes.length
       && this.paramTypes.every((paramType, idx) =>
         paramType.isSuperTypeOf(type.paramTypes[idx], rval)
           || type.paramTypes[idx].isSuperTypeOf(paramType, rval)

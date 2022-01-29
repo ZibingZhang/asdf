@@ -78,7 +78,7 @@ abstract class RHigherOrdeRPrimProc extends RPrimProc {
     let receivedType;
     if (isProcedureType(expectedType)) {
       receivedType = receivedVal.getType(expectedType.paramTypes.length);
-      if (expectedType.isCompatibleWith(receivedType, receivedVal)) {
+      if (expectedType.isCompatibleWith(receivedVal)) {
         return;
       }
     } else if (!isRProcedure(receivedVal)) {
@@ -135,7 +135,7 @@ class RPPAndmap extends RHigherOrdeRPrimProc {
 
 class RPPApply extends RHigherOrdeRPrimProc {
   constructor() {
-    super("apply");
+    super("apply", { minArity: 2 });
   }
 
   getType(args: number): ProcedureType {

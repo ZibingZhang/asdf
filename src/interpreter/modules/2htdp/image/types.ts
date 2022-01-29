@@ -1,13 +1,28 @@
 import {
   RString,
   RSymbol,
-  RValue
+  RValue,
+  isRString,
+  isRStruct,
+  isRSymbol
 } from "../../../rvalue";
 import {
   StringLiteralType,
   SymbolLiteralType,
   Type
 } from "../../../types";
+import {
+  HI_NOT_VALID_COLOR_ERR
+} from "./error";
+import {
+  SourceSpan
+} from "../../../sourcespan";
+import {
+  StageError
+} from "../../../pipeline";
+import {
+  isRExact8BitNumber
+} from "./rvalue";
 
 export {
   COLOR_NAMES,
@@ -203,6 +218,29 @@ const COLOR_NAMES: Map<string, [number, number, number]> = new Map([
 ]);
 
 class ColorType extends Type {
+  isCompatibleWith(rval: RValue, name: string, sourceSpan: SourceSpan): boolean {
+    if (isRString(rval) || isRSymbol(rval)) {
+      if (isValidColorName(rval)) {
+        return true;
+      } else {
+        throw new StageError(
+          HI_NOT_VALID_COLOR_ERR(name, rval.stringify()),
+          sourceSpan
+        );
+      }
+    } else if (isRStruct(rval)) {
+      if (
+        rval.vals.length === 3
+        && isRExact8BitNumber(rval.vals[0])
+        && isRExact8BitNumber(rval.vals[1])
+        && isRExact8BitNumber(rval.vals[2])
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof ColorType;
   }
