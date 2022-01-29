@@ -42,7 +42,8 @@ import {
   isRProcedure,
   isRString,
   isRStructType,
-  isRTrue
+  isRTrue,
+  isRSymbol
 } from "./rvalue";
 import {
   Scope,
@@ -54,6 +55,11 @@ import {
   isProcedureType
 } from "./types";
 import {
+  ColorType,
+  isColorType,
+  isValidColorName
+} from "./modules/htdp/image/types";
+import {
   AtomSExpr
 } from "./sexpr";
 import {
@@ -62,6 +68,9 @@ import {
 import {
   Global
 } from "./global";
+import {
+  HI_NOT_VALID_COLOR_ERR
+} from "./modules/htdp/image/error";
 import {
   Keyword
 } from "./keyword";
@@ -1040,6 +1049,19 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
         const argType = argVal.getType(-1);
         if (paramType.isSuperTypeOf(argType)) {
           continue;
+        }
+      }
+      if (
+        isColorType(paramType)
+        && (isRString(argVal) || isRSymbol(argVal))
+      ) {
+        if (isValidColorName(argVal)) {
+          continue;
+        } else {
+          throw new StageError(
+            HI_NOT_VALID_COLOR_ERR(rval.name, argVal.stringify()),
+            this.sourceSpan
+          );
         }
       }
       if (funType.paramTypes.length === 1) {

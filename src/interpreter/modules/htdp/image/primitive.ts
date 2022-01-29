@@ -10,6 +10,8 @@ import {
   RValue
 } from "../../../rvalue";
 import {
+  ColorType,
+  COLOR_NAMES,
   ImageType, ModeType
 } from "./types";
 import {
@@ -22,24 +24,30 @@ export {
 
 const OUTLINE_WIDTH = 2;
 
+function newCanvas(width: number, height: number): HTMLCanvasElement {
+  const element = <HTMLCanvasElement> document.createElement("canvas");
+  element.width = width;
+  element.height = height;
+  return element;
+}
+
 class RPFRectangle extends RPrimProc {
   constructor() {
     super("rectangle");
   }
 
   getType(): ProcedureType {
-    return new ProcedureType([new NonNegativeRealType(), new NonNegativeRealType(), new ModeType()], new ImageType());
+    return new ProcedureType([new NonNegativeRealType(), new NonNegativeRealType(), new ModeType(), new ColorType()], new ImageType());
   }
 
   call(args: RValue[]): RValue {
     const width = Number((<RNumber>args[0]).numerator);
     const height = Number((<RNumber>args[1]).numerator);
     const mode = (<RSymbol>args[2]).val;
-    const element = <HTMLCanvasElement> document.createElement("canvas");
-    element.width = width;
-    element.height = height;
-    const ctx = element.getContext("2d")!;
-    ctx.fillStyle = "green";
+    const color = (<RSymbol>args[3]).val.toLowerCase();
+    const canvas = newCanvas(width, height);
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = `rgb(${COLOR_NAMES.get(color)!.join(", ")})`;
     ctx.beginPath();
     ctx.rect(0, 0, width, height);
     ctx.fill();
@@ -54,7 +62,7 @@ class RPFRectangle extends RPrimProc {
       ctx.fill();
     }
     return new RImage(
-      width, height, element
+      width, height, canvas
     );
   }
 }
