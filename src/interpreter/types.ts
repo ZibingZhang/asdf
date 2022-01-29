@@ -336,7 +336,7 @@ class RealType extends Type {
 }
 
 class StringType extends Type {
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
+  isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof StringType;
   }
 

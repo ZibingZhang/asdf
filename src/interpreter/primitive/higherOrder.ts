@@ -22,6 +22,7 @@ import {
 } from "../error";
 import {
   RBoolean,
+  RComposedProcedure,
   RList,
   RMath,
   RNumber,
@@ -34,8 +35,7 @@ import {
   isRFalse,
   isRProcedure,
   isRTrue,
-  toRBoolean,
-  RComposedProcedure
+  toRBoolean
 } from "../rvalue";
 import {
   Environment
@@ -258,7 +258,7 @@ class RPPCompose extends RHigherOrdeRPrimProc {
     if (args.length === 1) {
       return args[0];
     } else {
-      return new RComposedProcedure(...<RProcedure[]>args.reverse())
+      return new RComposedProcedure(...<RProcedure[]>args.reverse());
     }
   }
 }

@@ -1,9 +1,10 @@
 import {
+  RPPCircle,
+  RPPEllipse
+} from "./primitive/basicImages";
+import {
   RModule
 } from "../../../rvalue";
-import {
-  RPPCircle, RPPEllipse
-} from "./primitive/basicImages";
 import {
   RPPRectangle
 } from "./primitive/polygons";

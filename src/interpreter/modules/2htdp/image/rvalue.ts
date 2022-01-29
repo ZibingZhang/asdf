@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
-  isRExactReal,
   RData,
   RExactReal,
-  RValue
+  RValue,
+  isRExactReal
 } from "../../../rvalue";
 import {
   ImageType

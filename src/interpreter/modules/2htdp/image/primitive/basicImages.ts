@@ -1,17 +1,17 @@
 import {
+  BACKGROUND_COLOR,
+  HALF_OUTLINE_WIDTH,
+  OUTLINE_MODE,
+  OUTLINE_WIDTH,
+  TAU,
+  newCanvas,
+  toRgb
+} from "./common";
+import {
   ColorType,
   ImageType,
   ModeType
 } from "../types";
-import {
-  BACKGROUND_COLOR,
-  HALF_OUTLINE_WIDTH,
-  newCanvas,
-  OUTLINE_MODE,
-  OUTLINE_WIDTH,
-  TAU,
-  toRgb
-} from "./common";
 import {
   NonNegativeRealType,
   ProcedureType
@@ -30,8 +30,6 @@ export {
   RPPCircle,
   RPPEllipse
 };
-
-
 
 class RPPCircle extends RPrimProc {
   constructor() {

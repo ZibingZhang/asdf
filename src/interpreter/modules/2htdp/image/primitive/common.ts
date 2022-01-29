@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
-  isRStruct,
   RString,
-  RValue
+  RValue,
+  isRStruct
 } from "../../../../rvalue";
 import {
   COLOR_NAMES

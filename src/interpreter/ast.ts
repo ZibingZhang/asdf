@@ -22,6 +22,7 @@ import {
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error";
 import {
+  RComposedProcedure,
   RIsStructFun,
   RLambda,
   RMakeStructFun,
@@ -41,11 +42,10 @@ import {
   isRInexactReal,
   isRProcedure,
   isRString,
-  isRStructType,
-  isRTrue,
-  isRSymbol,
   isRStruct,
-  RComposedProcedure
+  isRStructType,
+  isRSymbol,
+  isRTrue
 } from "./rvalue";
 import {
   Scope,
@@ -57,7 +57,6 @@ import {
   isProcedureType
 } from "./types";
 import {
-  ColorType,
   isColorType,
   isValidColorName
 } from "./modules/2htdp/image/types";
@@ -91,7 +90,9 @@ import {
 import {
   UserError
 } from "./primitive/misc";
-import { isRExact8BitNumber } from "./modules/2htdp/image/rvalue";
+import {
+  isRExact8BitNumber
+} from "./modules/2htdp/image/rvalue";
 
 export {
   ASTNode,
@@ -970,7 +971,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
   visitRComposedProcedure(rval: RComposedProcedure): RValue {
     let result = rval.procedures[0].accept(this);
     for (const procedure of rval.procedures.slice(1)) {
-      result = procedure.accept(new EvaluateRProcedureVisitor([new AtomNode(result, this.sourceSpan)], this.env, this.sourceSpan))
+      result = procedure.accept(new EvaluateRProcedureVisitor([new AtomNode(result, this.sourceSpan)], this.env, this.sourceSpan));
     }
     return result;
   }

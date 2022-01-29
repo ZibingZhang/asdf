@@ -1,6 +1,4 @@
 import {
-  isRString,
-  isRSymbol,
   RString,
   RSymbol,
   RValue
@@ -230,7 +228,7 @@ class ModeType extends Type {
     new StringLiteralType(new RString("solid")),
     new SymbolLiteralType(new RSymbol("outline")),
     new StringLiteralType(new RString("outline"))
-  ]
+  ];
 
   isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof ModeType

@@ -1,9 +1,9 @@
 import {
   BACKGROUND_COLOR,
   HALF_OUTLINE_WIDTH,
-  newCanvas,
   OUTLINE_MODE,
   OUTLINE_WIDTH,
+  newCanvas,
   toRgb
 } from "./common";
 import {
