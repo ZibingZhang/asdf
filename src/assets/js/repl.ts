@@ -13,6 +13,7 @@ declare let CodeMirror: any;
 class Repl {
   marked = false;
   cm: any;
+  history: string[] = [];
 
   constructor(elementId: string) {
     const textArea = document.getElementById(elementId) || new Element();
@@ -26,7 +27,10 @@ class Repl {
         value: "> ",
         mode: "racket",
         theme: "racket",
-        styleSelectedText: true
+        styleSelectedText: true,
+        extraKeys: {
+          "Alt-P": () => this.cm.replaceRange("> " + (this.history.at(-1) || ""), { line: this.cm.lastLine(), ch: 0 }, { line: this.cm.lastLine() })
+        }
       }
     );
     // https://stackoverflow.com/a/11999862
@@ -35,7 +39,7 @@ class Repl {
     };
     this.cm.on("change",
       (cm: any, changeObj: any) => {
-        const match = changeObj.origin.match(/cm-highlight-error-message (\d+)/);
+        const match = changeObj.origin?.match(/cm-highlight-error-message (\d+)/);
         if (match) {
           const lines = Number(match[1]);
           for (let i = 0; i < lines; i++) {
@@ -93,9 +97,12 @@ class Repl {
           case "Enter": {
             cm.setCursor(cm.lineCount(), 0);
             event.preventDefault();
-            const code = cm.doc.getLine(cm.doc.lastLine()).slice(2);
+            const code: string = cm.doc.getLine(cm.doc.lastLine()).slice(2);
             this.append("\n");
             this.runCode(code);
+            if (code.trim() !== "") {
+              this.history.push(code);
+            }
             break;
           }
           case "ArrowUp":
