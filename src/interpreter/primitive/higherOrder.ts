@@ -76,11 +76,11 @@ abstract class RHigherOrdeRPrimProc extends RPrimProc {
     let receivedType;
     if (isProcedureType(expectedType)) {
       receivedType = receivedVal.getType(expectedType.paramTypes.length);
-      if (expectedType.isCompatibleWith(receivedType)) {
+      if (expectedType.isCompatibleWith(receivedType, receivedVal)) {
         return;
       }
     } else if (!isRProcedure(receivedVal)) {
-      if (expectedType.isSuperTypeOf(receivedVal.getType(-1))) {
+      if (expectedType.isSuperTypeOf(receivedVal.getType(-1), receivedVal)) {
         return;
       }
     }

@@ -232,9 +232,9 @@ class ModeType extends Type {
     new StringLiteralType(new RString("outline"))
   ]
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof ModeType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOf(type, rval));
   }
 
   stringify(): string {

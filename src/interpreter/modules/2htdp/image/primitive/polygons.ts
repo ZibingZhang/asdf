@@ -1,5 +1,6 @@
 import {
   BACKGROUND_COLOR,
+  HALF_OUTLINE_WIDTH,
   newCanvas,
   OUTLINE_MODE,
   OUTLINE_WIDTH,
@@ -45,16 +46,19 @@ class RPPRectangle extends RPrimProc {
     const [canvas, ctx] = newCanvas(width, height);
     ctx.fillStyle = toRgb(color);
     ctx.beginPath();
-    ctx.rect(0, 0, width, height);
-    ctx.fill();
     if (
       mode === OUTLINE_MODE
       && width > OUTLINE_WIDTH
       && height > OUTLINE_WIDTH
     ) {
+      ctx.rect(-HALF_OUTLINE_WIDTH, -HALF_OUTLINE_WIDTH, width + HALF_OUTLINE_WIDTH, height + HALF_OUTLINE_WIDTH);
+      ctx.fill();
       ctx.fillStyle = BACKGROUND_COLOR;
       ctx.beginPath();
-      ctx.rect(OUTLINE_WIDTH, OUTLINE_WIDTH, width - 2 * OUTLINE_WIDTH, height - 2 * OUTLINE_WIDTH);
+      ctx.rect(HALF_OUTLINE_WIDTH, HALF_OUTLINE_WIDTH, width - OUTLINE_WIDTH, height - OUTLINE_WIDTH);
+      ctx.fill();
+    } else {
+      ctx.rect(0, 0, width, height);
       ctx.fill();
     }
     return new RImage(canvas);

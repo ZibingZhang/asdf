@@ -3,7 +3,8 @@ import {
   RData,
   RNumber,
   RString,
-  RSymbol
+  RSymbol,
+  RValue
 } from "./rvalue";
 
 export{
@@ -40,19 +41,20 @@ export{
 };
 
 abstract class Type {
-  isSuperTypeOf(type: Type): boolean {
+  isSuperTypeOf(type: Type, rval: RValue): boolean {
     if (this instanceof LiteralType) {
       if (this.literal) {
-        return this.literal.getType().isSuperTypeOf(type);
+        return this.literal.getType().isSuperTypeOf(type, rval)
+          && this.literal.equal(rval);
       } else {
         return false;
       }
     } else {
-      return this.isSuperTypeOfHelper(type);
+      return this.isSuperTypeOfHelper(type, rval);
     }
   }
 
-  abstract isSuperTypeOfHelper(type: Type): boolean;
+  abstract isSuperTypeOfHelper(type: Type, rval: RValue): boolean;
 
   abstract stringify(): string;
 }
@@ -144,9 +146,9 @@ class ExactNonNegativeIntegerType extends Type {
     new ExactPositiveIntegerType()
   ];
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof ExactNonNegativeIntegerType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOf(type, rval));
   }
 
   stringify(): string {
@@ -169,9 +171,9 @@ class IntegerType extends Type {
     new ExactNonNegativeIntegerType()
   ];
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof IntegerType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOf(type, rval));
   }
 
   stringify(): string {
@@ -210,9 +212,9 @@ class NonNegativeRealType extends Type {
     new ExactNonNegativeIntegerType()
   ];
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof NonNegativeRealType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOf(type, rval));
   }
 
   stringify(): string {
@@ -225,9 +227,9 @@ class NumberType extends Type {
     new RealType()
   ];
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof NumberType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOf(type, rval));
   }
 
   stringify(): string {
@@ -249,8 +251,8 @@ class OrType extends Type {
     this.subTypes = subTypes;
   }
 
-  isSuperTypeOfHelper(type: Type): boolean {
-    return this.subTypes.some(subType => subType.isSuperTypeOfHelper(type));
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
+    return this.subTypes.some(subType => subType.isSuperTypeOfHelper(type, rval));
   }
 
   stringify(): string {
@@ -277,23 +279,23 @@ class ProcedureType extends Type {
     super();
   }
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof ProcedureType
       && type.paramTypes.length === this.paramTypes.length
-      && this.paramTypes.every((paramType, idx) => paramType.isSuperTypeOfHelper(type.paramTypes[idx]))
-      && this.outputType.isSuperTypeOfHelper(type.outputType);
+      && this.paramTypes.every((paramType, idx) => paramType.isSuperTypeOf(type.paramTypes[idx], rval))
+      && this.outputType.isSuperTypeOf(type.outputType, rval);
   }
 
-  isCompatibleWith(type: Type): boolean {
+  isCompatibleWith(type: Type, rval: RValue): boolean {
     return type instanceof ProcedureType
       && type.paramTypes.length === this.paramTypes.length
       && this.paramTypes.every((paramType, idx) =>
-        paramType.isSuperTypeOfHelper(type.paramTypes[idx])
-          || type.paramTypes[idx].isSuperTypeOfHelper(paramType)
+        paramType.isSuperTypeOf(type.paramTypes[idx], rval)
+          || type.paramTypes[idx].isSuperTypeOf(paramType, rval)
       )
       && (
-        this.outputType.isSuperTypeOfHelper(type.outputType)
-        || type.outputType.isSuperTypeOfHelper(this.outputType)
+        this.outputType.isSuperTypeOf(type.outputType, rval)
+        || type.outputType.isSuperTypeOf(this.outputType, rval)
       );
   }
 
@@ -307,9 +309,9 @@ class RationalType extends Type {
     new IntegerType()
   ];
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof RationalType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOf(type, rval));
   }
 
   stringify(): string {
@@ -323,9 +325,9 @@ class RealType extends Type {
     new RationalType()
   ];
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof RealType
-      || this.children.some(child => child.isSuperTypeOf(type));
+      || this.children.some(child => child.isSuperTypeOf(type, rval));
   }
 
   stringify(): string {
@@ -334,7 +336,7 @@ class RealType extends Type {
 }
 
 class StringType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
     return type instanceof StringType;
   }
 

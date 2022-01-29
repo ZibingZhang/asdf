@@ -11,6 +11,7 @@ import {
 export {
   OUTLINE_MODE,
   OUTLINE_WIDTH,
+  HALF_OUTLINE_WIDTH,
   BACKGROUND_COLOR,
   TAU,
   newCanvas,
@@ -19,6 +20,7 @@ export {
 
 const OUTLINE_MODE = "outline";
 const OUTLINE_WIDTH = 2;
+const HALF_OUTLINE_WIDTH = OUTLINE_WIDTH / 2;
 const BACKGROUND_COLOR = "white";
 const TAU = 2 * Math.PI;
 

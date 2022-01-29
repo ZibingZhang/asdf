@@ -2,7 +2,7 @@ import {
   RModule
 } from "../../../rvalue";
 import {
-  RPPCircle
+  RPPCircle, RPPEllipse
 } from "./primitive/basicImages";
 import {
   RPPRectangle
@@ -20,7 +20,11 @@ class R2HtdpImageModule extends RModule {
         ["color", ["red", "green", "blue"]]
       ],
       [
+        // basic images
         new RPPCircle(),
+        new RPPEllipse(),
+
+        // polygons
         new RPPRectangle()
       ]
     );

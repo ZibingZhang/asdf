@@ -5,6 +5,7 @@ import {
 } from "../types";
 import {
   BACKGROUND_COLOR,
+  HALF_OUTLINE_WIDTH,
   newCanvas,
   OUTLINE_MODE,
   OUTLINE_WIDTH,
@@ -26,7 +27,8 @@ import {
 } from "../rvalue";
 
 export {
-  RPPCircle
+  RPPCircle,
+  RPPEllipse
 };
 
 
@@ -47,16 +49,57 @@ class RPPCircle extends RPrimProc {
     const [canvas, ctx] = newCanvas(2 * radius, 2 * radius);
     ctx.fillStyle = toRgb(color);
     ctx.beginPath();
-    ctx.arc(radius, radius, radius, 0, TAU);
-    ctx.fill();
     if (
       mode === OUTLINE_MODE
       && radius > OUTLINE_WIDTH
     ) {
+      ctx.arc(radius, radius, radius + HALF_OUTLINE_WIDTH, 0, TAU);
+      ctx.fill();
       ctx.fillStyle = BACKGROUND_COLOR;
       ctx.beginPath();
-      const adjRadius = radius - OUTLINE_WIDTH;
-      ctx.arc(radius, radius, adjRadius, 0, TAU);
+      ctx.arc(radius, radius, radius - HALF_OUTLINE_WIDTH, 0, TAU);
+      ctx.fill();
+    } else {
+      ctx.arc(radius, radius, radius, 0, TAU);
+      ctx.fill();
+    }
+    return new RImage(canvas);
+  }
+}
+
+class RPPEllipse extends RPrimProc {
+  constructor() {
+    super("ellipse");
+  }
+
+  getType(): ProcedureType {
+    return new ProcedureType([new NonNegativeRealType(), new NonNegativeRealType(), new ModeType(), new ColorType()], new ImageType());
+  }
+
+  call(args: RValue[]): RValue {
+    const width = Number((<RNumber>args[0]).numerator);
+    const height = Number((<RNumber>args[1]).numerator);
+    const mode = (<RSymbol>args[2]).val;
+    const color = args[3];
+    const [canvas, ctx] = newCanvas(width, height);
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+    ctx.fillStyle = toRgb(color);
+    ctx.beginPath();
+
+    if (
+      mode === OUTLINE_MODE
+      && width > OUTLINE_WIDTH
+      && height > OUTLINE_WIDTH
+    ) {
+      ctx.ellipse(halfWidth, halfHeight, halfWidth + HALF_OUTLINE_WIDTH, halfHeight + HALF_OUTLINE_WIDTH, 0, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = BACKGROUND_COLOR;
+      ctx.beginPath();
+      ctx.ellipse(halfWidth, halfHeight, halfWidth - HALF_OUTLINE_WIDTH, halfHeight - HALF_OUTLINE_WIDTH, 0, 0, TAU);
+      ctx.fill();
+    } else {
+      ctx.ellipse(halfWidth, halfHeight, halfWidth, halfHeight, 0, 0, TAU);
       ctx.fill();
     }
     return new RImage(canvas);

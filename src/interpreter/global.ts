@@ -208,6 +208,7 @@ class Global {
     this.primitiveStructNames = new Set();
     this.primitiveProcedures = new Map();
     this.primitiveTestFunctions = new Map();
+    this.modules = new Map();
 
     this.primitiveTestFunctions.set(Keyword.CheckError, { minArity: 1, maxArity: 2 });
     this.primitiveTestFunctions.set(Keyword.CheckExpect, { arity: 2 });
