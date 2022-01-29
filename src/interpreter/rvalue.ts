@@ -91,23 +91,6 @@ function gcd(a: bigint, b: bigint): bigint {
   return gcd(b, a % b);
 }
 
-type RData =
-  | RAtomic
-  | RList
-  | RStruct;
-type RAtomic =
-  | RBoolean
-  | RCharacter
-  | REofObject
-  | RNumber
-  | RString
-  | RStructType
-  | RSymbol
-  | RVoid;
-type RNumber =
-  | RExactReal
-  | RInexactReal;
-
 abstract class RModule {
   constructor(
     readonly structures: [[string, string[]]],
@@ -137,7 +120,7 @@ class RTestResult implements RValue {
   }
 }
 
-abstract class RDataBase implements RValue {
+abstract class RData implements RValue {
   abstract stringify(): string;
 
   abstract getType(): Type;
@@ -157,7 +140,9 @@ abstract class RDataBase implements RValue {
   }
 }
 
-class RBoolean extends RDataBase {
+abstract class RAtomic extends RData {}
+
+class RBoolean extends RAtomic {
   constructor(readonly val: boolean) {
     super();
   }
@@ -176,7 +161,7 @@ class RBoolean extends RDataBase {
   }
 }
 
-class RCharacter extends RDataBase {
+class RCharacter extends RAtomic {
   static NULL_CHAR = String.fromCharCode(0);
   static BACKSPACE_CHAR = String.fromCharCode(8);
   static TAB_CHAR = String.fromCharCode(9);
@@ -234,7 +219,7 @@ class RCharacter extends RDataBase {
   }
 }
 
-class REofObject extends RDataBase {
+class REofObject extends RAtomic {
   stringify(): string {
     return "#<eof>";
   }
@@ -248,47 +233,7 @@ class REofObject extends RDataBase {
   }
 }
 
-class RList extends RDataBase {
-  constructor(readonly vals: RValue[]) {
-    super();
-  }
-
-  stringify(): string {
-    if (this.vals.length === 0) {
-      return "'()";
-    } else if (SETTINGS.stringify.abbreviatedList) {
-      return `(list ${this.vals.map(val => val.stringify()).join(" ")})`;
-    } else {
-      let output = `(cons ${this.vals[0].stringify()}`;
-      for (const val of this.vals.slice(1)) {
-        output += ` (cons ${val.stringify()}`;
-      }
-      output += " '()" + ")".repeat(this.vals.length);
-      return output;
-    }
-  }
-
-  getType(): Type {
-    return new ListType(this.vals.length);
-  }
-
-  equalWithin(rval: RValue, ep: number): boolean {
-    return isRList(rval)
-      && rval.vals.length === this.vals.length
-      && rval.vals.every((rval, idx) => {
-        const val = this.vals[idx];
-        return isRData(rval)
-          && isRData(val)
-          && rval.equalWithin(val, ep);
-      });
-  }
-
-  eqv(rval: RValue): boolean {
-    return rval === this;
-  }
-}
-
-class RString extends RDataBase {
+class RString extends RAtomic {
   ESCAPED_A = String.fromCharCode(7);
   ESCAPED_B = String.fromCharCode(8);
   ESCAPED_T = String.fromCharCode(9);
@@ -364,43 +309,7 @@ class RString extends RDataBase {
   }
 }
 
-class RStruct extends RDataBase {
-  constructor(
-    readonly name: string,
-    readonly vals: RValue[]
-  ) {
-    super();
-  }
-
-  stringify(): string {
-    if (this.vals.length === 0) {
-      return `(make-${this.name})`;
-    } else {
-      return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
-    }
-  }
-
-  getType(): Type {
-    return new StructType(this.name);
-  }
-
-  equalWithin(rval: RValue, ep: number): boolean {
-    return isRStruct(rval)
-      && rval.name === this.name
-      && rval.vals.every((rval, idx) => {
-        const val = this.vals[idx];
-        return isRData(rval)
-          && isRData(val)
-          && rval.equalWithin(val, ep);
-      });
-  }
-
-  eqv(rval: RValue): boolean {
-    return rval === this;
-  }
-}
-
-class RStructType extends RDataBase {
+class RStructType extends RAtomic {
   constructor(readonly name: string) {
     super();
   }
@@ -419,7 +328,7 @@ class RStructType extends RDataBase {
   }
 }
 
-class RSymbol extends RDataBase {
+class RSymbol extends RAtomic {
   constructor(readonly val: string) {
     super();
   }
@@ -442,7 +351,7 @@ class RSymbol extends RDataBase {
   }
 }
 
-class RVoid extends RDataBase {
+class RVoid extends RAtomic {
   stringify(): string {
     return "(void)";
   }
@@ -456,7 +365,7 @@ class RVoid extends RDataBase {
   }
 }
 
-abstract class RNumberBase extends RDataBase {
+abstract class RNumber extends RAtomic {
   constructor(
     readonly numerator: bigint,
     readonly denominator: bigint = 1n
@@ -518,7 +427,7 @@ abstract class RNumberBase extends RDataBase {
   abstract negate(): RNumber;
 }
 
-class RExactReal extends RNumberBase {
+class RExactReal extends RNumber {
   getType(): Type {
     if (this.denominator === 1n) {
       if (this.numerator > 0) {
@@ -546,7 +455,7 @@ class RExactReal extends RNumberBase {
   }
 }
 
-class RInexactReal extends RNumberBase {
+class RInexactReal extends RNumber {
   stringify(): string {
     return `#i${super.stringify()}`;
   }
@@ -567,6 +476,82 @@ class RInexactReal extends RNumberBase {
 
   negate(): RInexactReal {
     return new RInexactReal(-1n * this.numerator, this.denominator);
+  }
+}
+
+class RList extends RData {
+  constructor(readonly vals: RValue[]) {
+    super();
+  }
+
+  stringify(): string {
+    if (this.vals.length === 0) {
+      return "'()";
+    } else if (SETTINGS.stringify.abbreviatedList) {
+      return `(list ${this.vals.map(val => val.stringify()).join(" ")})`;
+    } else {
+      let output = `(cons ${this.vals[0].stringify()}`;
+      for (const val of this.vals.slice(1)) {
+        output += ` (cons ${val.stringify()}`;
+      }
+      output += " '()" + ")".repeat(this.vals.length);
+      return output;
+    }
+  }
+
+  getType(): Type {
+    return new ListType(this.vals.length);
+  }
+
+  equalWithin(rval: RValue, ep: number): boolean {
+    return isRList(rval)
+      && rval.vals.length === this.vals.length
+      && rval.vals.every((rval, idx) => {
+        const val = this.vals[idx];
+        return isRData(rval)
+          && isRData(val)
+          && rval.equalWithin(val, ep);
+      });
+  }
+
+  eqv(rval: RValue): boolean {
+    return rval === this;
+  }
+}
+
+class RStruct extends RData {
+  constructor(
+    readonly name: string,
+    readonly vals: RValue[]
+  ) {
+    super();
+  }
+
+  stringify(): string {
+    if (this.vals.length === 0) {
+      return `(make-${this.name})`;
+    } else {
+      return `(make-${this.name} ${this.vals.map(val => val.stringify()).join(" ")})`;
+    }
+  }
+
+  getType(): Type {
+    return new StructType(this.name);
+  }
+
+  equalWithin(rval: RValue, ep: number): boolean {
+    return isRStruct(rval)
+      && rval.name === this.name
+      && rval.vals.every((rval, idx) => {
+        const val = this.vals[idx];
+        return isRData(rval)
+          && isRData(val)
+          && rval.equalWithin(val, ep);
+      });
+  }
+
+  eqv(rval: RValue): boolean {
+    return rval === this;
   }
 }
 
@@ -714,7 +699,7 @@ function isRCharacter(rval: RValue): rval is RCharacter {
 }
 
 function isRData(rval: RValue): rval is RData {
-  return rval instanceof RDataBase;
+  return rval instanceof RData;
 }
 
 function isREofObject(rval: RValue): rval is REofObject {
@@ -751,7 +736,7 @@ function isRList(rval: RValue): rval is RList {
 }
 
 function isRNumber(rval: RValue): rval is RNumber {
-  return rval instanceof RNumberBase;
+  return rval instanceof RNumber;
 }
 
 function isRPrimProc(rval: RProcedure): rval is RPrimProc {
