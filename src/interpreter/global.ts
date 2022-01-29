@@ -161,8 +161,8 @@ import {
   Keyword
 } from "./keyword";
 import {
-  RModuleHtdpImage
-} from "./modules/htdp/image/module";
+  R2HtdpImageModule
+} from "./modules/2htdp/image/module";
 
 export {
   Global
@@ -176,9 +176,7 @@ class Global {
   primitiveStructNames: Set<string>;
   primitiveProcedures: Map<string, RProcedure>;
   primitiveTestFunctions: Map<string, RPrimTestFunConfig>;
-  modules: Map<string, RModule> = new Map([
-    ["htdp/image", new RModuleHtdpImage()]
-  ]);
+  modules: Map<string, RModule>;
 
   private static instance: Global;
   private higherOrderFunctions = new Set([
@@ -356,6 +354,9 @@ class Global {
     this.addFnToPrimEnv(new RPPStructHuh());
 
     this.defineScopes();
+
+    // modules
+    this.addModule(new R2HtdpImageModule());
   }
 
   enableHigherOrderFunctions() {
@@ -372,14 +373,14 @@ class Global {
     this.defineScopes();
   }
 
-  private addDataToPrimEnv(name: string, val: RData) {
-    this.primitiveEnvironment.set(name, val);
+  private addDataToPrimEnv(name: string, rval: RData) {
+    this.primitiveEnvironment.set(name, rval);
     this.primitiveDataNames.add(name);
   }
 
-  private addFnToPrimEnv(val: RPrimProc) {
-    this.primitiveEnvironment.set(val.name, val);
-    this.primitiveProcedures.set(val.name, val);
+  private addFnToPrimEnv(rval: RPrimProc) {
+    this.primitiveEnvironment.set(rval.name, rval);
+    this.primitiveProcedures.set(rval.name, rval);
   }
 
   private addStructToPrimEnv(name: string, fields: string[]) {
@@ -410,5 +411,9 @@ class Global {
       this.primitiveScope.set(name, VariableType.PrimitiveFunction);
     });
     this.primitiveStructNames.forEach((name) => this.primitiveScope.set(name, VariableType.StructureType));
+  }
+
+  private addModule(rval: RModule) {
+    this.modules.set(rval.name, rval);
   }
 }

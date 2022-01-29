@@ -93,6 +93,7 @@ function gcd(a: bigint, b: bigint): bigint {
 
 abstract class RModule {
   constructor(
+    readonly name: string,
     readonly structures: [[string, string[]]],
     readonly procedures: RPrimProc[]
   ) {}

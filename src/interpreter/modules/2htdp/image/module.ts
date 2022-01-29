@@ -8,12 +8,13 @@ import {
 } from "./primitive";
 
 export {
-  RModuleHtdpImage
+  R2HtdpImageModule
 };
 
-class RModuleHtdpImage extends RModule {
+class R2HtdpImageModule extends RModule {
   constructor() {
     super(
+      "2htdp/image",
       [
         ["color", ["red", "green", "blue"]]
       ],

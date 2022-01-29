@@ -3,7 +3,7 @@
 import {
   RImage,
   isRImage
-} from "../../interpreter/modules/htdp/image/rvalue";
+} from "../../interpreter/modules/2htdp/image/rvalue";
 import {
   Editor
 } from "./editor";

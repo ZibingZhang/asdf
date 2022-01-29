@@ -59,7 +59,7 @@ import {
   ColorType,
   isColorType,
   isValidColorName
-} from "./modules/htdp/image/types";
+} from "./modules/2htdp/image/types";
 import {
   AtomSExpr
 } from "./sexpr";
@@ -71,7 +71,7 @@ import {
 } from "./global";
 import {
   HI_NOT_VALID_COLOR_ERR
-} from "./modules/htdp/image/error";
+} from "./modules/2htdp/image/error";
 import {
   Keyword
 } from "./keyword";
@@ -90,7 +90,7 @@ import {
 import {
   UserError
 } from "./primitive/misc";
-import { isRExact8BitNumber } from "./modules/htdp/image/rvalue";
+import { isRExact8BitNumber } from "./modules/2htdp/image/rvalue";
 
 export {
   ASTNode,
