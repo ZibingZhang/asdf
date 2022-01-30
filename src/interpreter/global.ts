@@ -367,7 +367,6 @@ class Global {
   }
 
   enableHigherOrderFunctions() {
-    // higher-order
     this.higherOrderFunctions.forEach(fn => this.addFnToPrimEnv(fn));
     this.defineScopes();
   }

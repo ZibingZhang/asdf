@@ -658,6 +658,9 @@ class LetNode extends ASTNodeBase {
   }
 
   evalHelper(env: Environment): RValue {
+    this.bindings.forEach(([variable, _]) => {
+      variable.used = true;
+    });
     switch (this.name) {
       case "letrec":
       case "let*": {
