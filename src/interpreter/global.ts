@@ -373,10 +373,7 @@ class Global {
   }
 
   disableHigherOrderFunctions() {
-    this.higherOrderFunctions.forEach(fn => {
-      this.primitiveEnvironment.delete(fn.name);
-      this.primitiveProcedures.delete(fn.name);
-    });
+    this.higherOrderFunctions.forEach(fn => this.deleteFnFormPrimEnv(fn));
     this.defineScopes();
   }
 
@@ -388,6 +385,11 @@ class Global {
   private addFnToPrimEnv(rval: RPrimProc) {
     this.primitiveEnvironment.set(rval.name, rval);
     this.primitiveProcedures.set(rval.name, rval);
+  }
+
+  private deleteFnFormPrimEnv(rval: RPrimProc) {
+    this.primitiveEnvironment.delete(rval.name);
+    this.primitiveProcedures.delete(rval.name);
   }
 
   private addStructToPrimEnv(name: string, fields: string[]) {
