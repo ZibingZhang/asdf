@@ -1,9 +1,9 @@
 import {
   BACKGROUND_COLOR,
   HALF_OUTLINE_WIDTH,
-  OUTLINE_MODE,
   OUTLINE_WIDTH,
   TAU,
+  isOutlineMode,
   newCanvas,
   toRgb
 } from "./common";
@@ -17,14 +17,14 @@ import {
   ProcedureType
 } from "../../../../types";
 import {
+  RImage,
+  RMode
+} from "../rvalue";
+import {
   RNumber,
   RPrimProc,
-  RSymbol,
   RValue
 } from "../../../../rvalue";
-import {
-  RImage
-} from "../rvalue";
 
 export {
   RPC_EMPTY_IMAGE,
@@ -45,13 +45,13 @@ class RPPCircle extends RPrimProc {
 
   call(args: RValue[]): RValue {
     const radius = Number((<RNumber>args[0]).numerator);
-    const mode = (<RSymbol>args[1]).val;
+    const mode = <RMode>args[1];
     const color = args[2];
     const [canvas, ctx] = newCanvas(2 * radius, 2 * radius);
-    ctx.fillStyle = toRgb(color);
+    ctx.fillStyle = toRgb(color, mode);
     ctx.beginPath();
     if (
-      mode === OUTLINE_MODE
+      isOutlineMode(mode)
       && radius > OUTLINE_WIDTH
     ) {
       ctx.arc(radius, radius, radius + HALF_OUTLINE_WIDTH, 0, TAU);
@@ -80,16 +80,16 @@ class RPPEllipse extends RPrimProc {
   call(args: RValue[]): RValue {
     const width = Number((<RNumber>args[0]).numerator);
     const height = Number((<RNumber>args[1]).numerator);
-    const mode = (<RSymbol>args[2]).val;
+    const mode = <RMode>args[2];
     const color = args[3];
     const [canvas, ctx] = newCanvas(width, height);
     const halfWidth = width / 2;
     const halfHeight = height / 2;
-    ctx.fillStyle = toRgb(color);
+    ctx.fillStyle = toRgb(color, mode);
     ctx.beginPath();
 
     if (
-      mode === OUTLINE_MODE
+      isOutlineMode(mode)
       && width > OUTLINE_WIDTH
       && height > OUTLINE_WIDTH
     ) {

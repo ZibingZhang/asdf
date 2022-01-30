@@ -2,6 +2,7 @@ import {
   RString,
   RSymbol,
   RValue,
+  isRExactReal,
   isRString,
   isRStruct,
   isRSymbol
@@ -250,6 +251,22 @@ class ColorType extends Type {
   }
 }
 
+class Exact8BitNumberType extends Type {
+  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
+    return type instanceof Exact8BitNumberType
+      || (
+        isRExactReal(rval)
+        && rval.denominator === 1n
+        && rval.numerator >= 0
+        && rval.numerator < 256
+      );
+  }
+
+  stringify(): string {
+    throw "illegal state";
+  }
+}
+
 class ImageType extends Type {
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof ImageType;
@@ -265,7 +282,8 @@ class ModeType extends Type {
     new SymbolLiteralType(new RSymbol("solid")),
     new StringLiteralType(new RString("solid")),
     new SymbolLiteralType(new RSymbol("outline")),
-    new StringLiteralType(new RString("outline"))
+    new StringLiteralType(new RString("outline")),
+    new Exact8BitNumberType()
   ];
 
   isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
@@ -274,7 +292,7 @@ class ModeType extends Type {
   }
 
   stringify(): string {
-    return "'solid \"solid\" 'outline or \"outline\"";
+    return "mode";
   }
 }
 

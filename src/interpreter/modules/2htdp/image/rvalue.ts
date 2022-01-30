@@ -2,6 +2,8 @@
 import {
   RData,
   RExactReal,
+  RString,
+  RSymbol,
   RValue,
   isRExactReal
 } from "../../../rvalue";
@@ -14,10 +16,16 @@ import {
 
 export {
   RImage,
+  RMode,
   isREmptyImage,
   isRExact8BitNumber,
   isRImage
 };
+
+type RMode =
+  | RString
+  | RSymbol
+  | RExactReal;
 
 class RImage extends RData {
   constructor(
@@ -27,7 +35,7 @@ class RImage extends RData {
   }
 
   stringify(): string {
-    return "<image>";
+    return "#image";
   }
 
   getType(): Type {

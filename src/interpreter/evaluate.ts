@@ -10,6 +10,10 @@ import {
   StageTestResult
 } from "./pipeline";
 import {
+  isCheckNode,
+  isDefnNode
+} from "./ast";
+import {
   Environment
 } from "./environment";
 import {
@@ -21,9 +25,6 @@ import {
 import {
   RT_MAX_CALL_STACK_SIZE_ERR
 } from "./error";
-import {
-  isCheckNode
-} from "./ast";
 
 export {
   EvaluateCode
@@ -64,7 +65,12 @@ class EvaluateCode implements Stage<Program, RValue[]> {
   }
 
   private runHelper(program: Program): RValue[] {
-    program.defns.forEach(defn => { defn.eval(this.globalEnv); defn.used = false; });
+    program.defns.forEach(defn => {
+      defn.eval(this.globalEnv);
+      if (isDefnNode(defn)) {
+        defn.used = false;
+      }
+    });
     const output: RValue[] = [];
     for (const node of program.nodes) {
       let result;

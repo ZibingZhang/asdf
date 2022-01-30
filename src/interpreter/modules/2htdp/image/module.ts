@@ -8,11 +8,19 @@ import {
   RPPBeside
 } from "./primitive/overlayingImages";
 import {
+  RPPImageHeight,
+  RPPImageWidth
+} from "./primitive/imageProperties";
+import {
+  RPPRectangle,
+  RPPSquare
+} from "./primitive/polygons";
+import {
   RModule
 } from "../../../rvalue";
 import {
-  RPPRectangle
-} from "./primitive/polygons";
+  RPPImageHuh
+} from "./primitive/imagePredicates";
 
 export {
   R2HtdpImageModule
@@ -31,11 +39,19 @@ class R2HtdpImageModule extends RModule {
         new RPPEllipse(),
 
         // polygons
+        new RPPSquare(),
         new RPPRectangle(),
 
         // overlaying images
         new RPPBeside(),
-        new RPPAbove()
+        new RPPAbove(),
+
+        // image properties
+        new RPPImageWidth(),
+        new RPPImageHeight(),
+
+        // image predicates
+        new RPPImageHuh()
       ],
       new Map([
         ["empty-image", RPC_EMPTY_IMAGE]
