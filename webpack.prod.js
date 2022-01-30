@@ -9,6 +9,9 @@ module.exports = {
     codemirror: "./src/codemirror/main.ts",
     assets: "./src/assets/main.ts"
   },
+  optimization: {
+    runtimeChunk: 'single'
+  },
   module: {
     rules: [
       {
