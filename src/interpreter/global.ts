@@ -164,6 +164,9 @@ import {
 import {
   R2HtdpImageModule
 } from "./modules/2htdp/image/module";
+import {
+  R2HtdpUniverseModule
+} from "./modules/2htdp/universe/module";
 
 export {
   Global
@@ -360,6 +363,7 @@ class Global {
 
     // modules
     this.addModule(new R2HtdpImageModule());
+    this.addModule(new R2HtdpUniverseModule());
   }
 
   enableHigherOrderFunctions() {
