@@ -1,12 +1,12 @@
 import {
   RData,
-  RIsStructFun,
   RMakeStructFun,
   RModule,
   RPrimProc,
   RPrimTestFunConfig,
   RProcedure,
-  RStructGetFun,
+  RStructGetProc,
+  RStructHuhProc,
   RStructType,
   R_EMPTY_LIST,
   R_FALSE,
@@ -389,8 +389,8 @@ class Global {
   private addStructToPrimEnv(name: string, fields: string[]) {
     const structType = new RStructType(name);
     const makeStructFun = new RMakeStructFun(name, fields.length);
-    const isStructFun = new RIsStructFun(name);
-    const structGetFuns = fields.map((field, idx) => new RStructGetFun(name, field, idx));
+    const isStructFun = new RStructHuhProc(name);
+    const structGetFuns = fields.map((field, idx) => new RStructGetProc(name, field, idx));
     this.primitiveEnvironment.set(name, structType);
     this.primitiveEnvironment.set(`make-${name}`, makeStructFun);
     this.primitiveEnvironment.set(`${name}?`, isStructFun);

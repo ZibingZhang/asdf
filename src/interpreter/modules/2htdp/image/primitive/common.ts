@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   RString,
   RValue,
   isRExactReal,
-  isRStruct
+  isRStruct,
+  RNumber
 } from "../../../../rvalue";
 import {
   COLOR_NAMES
@@ -34,13 +34,14 @@ function newCanvas(width: number, height: number): [HTMLCanvasElement, CanvasRen
   return [element, element.getContext("2d")!];
 }
 
-function toRgb(rval: RValue, mode: RMode): string {
-
-  const a = isRExactReal(mode) ? Number(mode.numerator) / 255 : 1;
-  if (isRStruct(rval)) {
-    return `rgba(${rval.vals[0].stringify()}, ${rval.vals[1].stringify()}, ${rval.vals[2].stringify()}, ${a})`;
+function toRgb(color: RValue, mode: RMode): string {
+  let a = isRExactReal(mode) ? Number(mode.numerator) / 255 : 1;
+  if (isRStruct(color)) {
+    a *= Number((<RNumber>color.vals[3]).numerator) / 255;
+    return `rgba(${color.vals[0].stringify()}, ${color.vals[1].stringify()}, ${color.vals[2].stringify()}, ${a})`;
   } else {
-    return `rgba(${COLOR_NAMES.get((<RString>rval).val)!.join(", ")}, ${a})`;
+    /* eslint-disable @typescript-eslint/no-non-null-assertion */
+    return `rgba(${COLOR_NAMES.get((<RString>color).val)!.join(", ")}, ${a})`;
   }
 }
 

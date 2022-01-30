@@ -24,13 +24,13 @@ import {
 } from "./error";
 import {
   RComposedProcedure,
-  RIsStructFun,
   RLambda,
   RMakeStructFun,
   RPrimProc,
   RProcedureVisitor,
   RStruct,
-  RStructGetFun,
+  RStructGetProc,
+  RStructHuhProc,
   RStructType,
   RTestResult,
   RValue,
@@ -755,25 +755,9 @@ class RequireNode extends ASTNodeBase {
   evalHelper(env: Environment): RValue {
     /* eslint-disable @typescript-eslint/no-non-null-assertion */
     const module = this.global.modules.get(this.name)!;
-    for (const [name, fields] of module.structures) {
-      if (!env.has(name)) {
-        env.set(name, new RStructType(name));
-      }
-      for (const [idx, field] of fields.entries()) {
-        if (!env.has(`${name}-${field}`)) {
-          env.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
-        }
-      }
-      if (!env.has(`make-${name}`)) {
-        env.set(`make-${name}`, new RMakeStructFun(name, fields.length));
-      }
-      if (!env.has(`${name}?`)) {
-        env.set(`${name}?`, new RIsStructFun(name));
-      }
-    }
     for (const procedure of module.procedures) {
-      if (!env.has(procedure.name)) {
-        env.set(procedure.name, procedure);
+      if (!env.has(procedure.getName())) {
+        env.set(procedure.getName(), procedure);
       }
     }
     for (const [name, rval] of module.data) {
@@ -792,25 +776,9 @@ class RequireNode extends ASTNodeBase {
         this.nameSourceSpan
       );
     }
-    for (const [name, fields] of module.structures) {
-      if (!scope.has(name)) {
-        scope.set(name, VariableType.StructureType);
-      }
-      for (const field of fields) {
-        if (!scope.has(`${name}-${field}`)) {
-          scope.set(`${name}-${field}`, VariableType.PrimitiveFunction);
-        }
-      }
-      if (!scope.has(`make-${name}`)) {
-        scope.set(`make-${name}`, VariableType.PrimitiveFunction);
-      }
-      if (!scope.has(`${name}?`)) {
-        scope.set(`${name}?`, VariableType.PrimitiveFunction);
-      }
-    }
     for (const procedure of module.procedures) {
-      if (!scope.has(procedure.name)) {
-        scope.set(procedure.name, VariableType.PrimitiveFunction);
+      if (!scope.has(procedure.getName())) {
+        scope.set(procedure.getName(), VariableType.PrimitiveFunction);
       }
     }
     for (const name of module.data.keys()) {
@@ -881,9 +849,9 @@ class DefnStructNode extends DefnNodeBase {
   evalHelper(env: Environment): RValue {
     env.set(this.name, new RStructType(this.name));
     env.set(`make-${this.name}`, new RMakeStructFun(this.name, this.fields.length));
-    env.set(`${this.name}?`, new RIsStructFun(this.name));
+    env.set(`${this.name}?`, new RStructHuhProc(this.name));
     this.fields.forEach((field, idx) => {
-      env.set(`${this.name}-${field}`, new RStructGetFun(this.name, field, idx));
+      env.set(`${this.name}-${field}`, new RStructGetProc(this.name, field, idx));
     });
     return R_VOID;
   }
@@ -1027,7 +995,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
     return result;
   }
 
-  visitRIsStructFun(rval: RIsStructFun): RValue {
+  visitRStructHuhProc(rval: RStructHuhProc): RValue {
     if (this.args.length !== 1) {
       throw new StageError(
         FA_ARITY_ERR(`${rval.name}?`, 1, this.args.length),
@@ -1116,7 +1084,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
     return rval.call(argVals, this.sourceSpan, this.env);
   }
 
-  visitRStructGetFun(rval: RStructGetFun): RValue {
+  visitRStructGetProc(rval: RStructGetProc): RValue {
     if (this.args.length !== 1) {
       throw new StageError(
         FA_ARITY_ERR(`${rval.name}-${rval.fieldName}`, 1, this.args.length),

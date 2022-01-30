@@ -28,6 +28,7 @@ import {
 export {
   COLOR_NAMES,
   ColorType,
+  Exact8BitNumberType,
   ImageType,
   ModeType,
   isColorType,
@@ -230,10 +231,13 @@ class ColorType extends Type {
         );
       }
     } else if (isRStruct(rval)) {
+      // should actually check for exact struct type defined by module
       if (
-        rval.vals.length === 3
+        rval.name === "color"
+        && rval.vals.length === 4
         && isRExact8BitNumber(rval.vals[0])
         && isRExact8BitNumber(rval.vals[1])
+        && isRExact8BitNumber(rval.vals[2])
         && isRExact8BitNumber(rval.vals[2])
       ) {
         return true;
@@ -263,7 +267,7 @@ class Exact8BitNumberType extends Type {
   }
 
   stringify(): string {
-    throw "illegal state";
+    return "integer between 0 and 255";
   }
 }
 

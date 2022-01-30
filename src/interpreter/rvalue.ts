@@ -45,7 +45,7 @@ export {
   REofObject,
   RExactReal,
   RInexactReal,
-  RIsStructFun,
+  RStructHuhProc,
   RLambda,
   RList,
   RMakeStructFun,
@@ -57,7 +57,7 @@ export {
   RPrimTestFunConfig,
   RString,
   RStruct,
-  RStructGetFun,
+  RStructGetProc,
   RStructType,
   RSymbol,
   RTestResult,
@@ -95,8 +95,7 @@ function gcd(a: bigint, b: bigint): bigint {
 abstract class RModule {
   constructor(
     readonly name: string,
-    readonly structures: [[string, string[]]],
-    readonly procedures: RPrimProc[],
+    readonly procedures: RProcedure[],
     readonly data: Map<string, RValue>
   ) {}
 }
@@ -578,6 +577,10 @@ abstract class RProcedure implements RValue {
   abstract stringify(): string;
 
   abstract getType(args: number): ProcedureType;
+
+  getName(): string {
+    throw "illegal state: asking name of anonymous procedure";
+  }
 }
 
 class RComposedProcedure extends RProcedure {
@@ -609,13 +612,13 @@ class RComposedProcedure extends RProcedure {
   }
 }
 
-class RIsStructFun extends RProcedure {
+class RStructHuhProc extends RProcedure {
   constructor(readonly name: string) {
     super();
   }
 
   accept<T>(visitor: RProcedureVisitor<T>): T {
-    return visitor.visitRIsStructFun(this);
+    return visitor.visitRStructHuhProc(this);
   }
 
   stringify(): string {
@@ -624,6 +627,10 @@ class RIsStructFun extends RProcedure {
 
   getType(): ProcedureType {
     return new ProcedureType([new AnyType()], new BooleanType());
+  }
+
+  getName(): string {
+    return `${this.name}?`;
   }
 }
 
@@ -645,6 +652,10 @@ class RMakeStructFun extends RProcedure {
 
   getType(): ProcedureType {
     return new ProcedureType(new Array(this.arity).fill(new AnyType()), new StructType(this.name));
+  }
+
+  getName(): string {
+    return `make-${this.name}`;
   }
 }
 
@@ -694,9 +705,13 @@ abstract class RPrimProc extends RProcedure {
   call(_: RValue[], __: SourceSpan, ___: Environment): RValue {
     throw "illegal state: not implemented";
   }
+
+  getName(): string {
+    return this.name;
+  }
 }
 
-class RStructGetFun extends RProcedure {
+class RStructGetProc extends RProcedure {
   constructor(
     readonly name: string,
     readonly fieldName: string,
@@ -706,7 +721,7 @@ class RStructGetFun extends RProcedure {
   }
 
   accept<T>(visitor: RProcedureVisitor<T>): T {
-    return visitor.visitRStructGetFun(this);
+    return visitor.visitRStructGetProc(this);
   }
 
   stringify(): string {
@@ -715,6 +730,10 @@ class RStructGetFun extends RProcedure {
 
   getType(): ProcedureType {
     return new ProcedureType([new StructType(this.name)], new AnyType());
+  }
+
+  getName(): string {
+    return `${this.name}-${this.fieldName}`;
   }
 }
 
@@ -959,9 +978,9 @@ const R_EMPTY_LIST = new RList([]);
 
 interface RProcedureVisitor<T> {
   visitRComposedProcedure(rval: RComposedProcedure): T;
-  visitRIsStructFun(rval: RIsStructFun): T;
+  visitRStructHuhProc(rval: RStructHuhProc): T;
   visitRMakeStructFun(rval: RMakeStructFun): T;
   visitRLambda(rval: RLambda): T;
   visitRPrimProc(rval: RPrimProc): T;
-  visitRStructGetFun(rval: RStructGetFun): T;
+  visitRStructGetProc(rval: RStructGetProc): T;
 }
