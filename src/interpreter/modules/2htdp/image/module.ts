@@ -1,12 +1,12 @@
 import {
-  RPPAbove,
-  RPPBeside
-} from "./primitive/overlayingImages";
-import {
   RPC_EMPTY_IMAGE,
   RPPCircle,
   RPPEllipse
 } from "./primitive/basicImages";
+import {
+  RPPAbove,
+  RPPBeside
+} from "./primitive/overlayingImages";
 import {
   RModule
 } from "../../../rvalue";

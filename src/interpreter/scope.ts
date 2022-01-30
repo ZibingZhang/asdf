@@ -6,9 +6,6 @@ import {
   Global
 } from "./global";
 import {
-  RModule
-} from "./rvalue";
-import {
   SETTINGS
 } from "./settings";
 import {

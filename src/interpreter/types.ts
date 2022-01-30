@@ -58,7 +58,7 @@ abstract class Type {
     }
   }
 
-  isCompatibleWith(rval: RValue, _name: string , _sourceSpan: SourceSpan): boolean {
+  isCompatibleWith(rval: RValue, _name: string, _sourceSpan: SourceSpan): boolean {
     return this.isSuperTypeOf(rval.getType(-1), rval);
   }
 

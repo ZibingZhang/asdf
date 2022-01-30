@@ -21,7 +21,6 @@ import {
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
   LT_ALREADY_DEFINED_LOCALLY_ERR,
-  RQ_MODULE_NOT_FOUND_ERR,
   RQ_NOT_TOP_LEVEL_ERR,
   SC_UNDEFINED_VARIABLE_ERR,
   WF_EXPECTED_FUNCTION_CALL_ERR,
@@ -38,9 +37,6 @@ import {
   StageOutput
 } from "./pipeline";
 import {
-  Global
-} from "./global";
-import {
   Keyword
 } from "./keyword";
 import {
@@ -55,7 +51,6 @@ export {
 };
 
 class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
-  private global = new Global();
   private level = 0;
   private scope: Scope = new Scope();
 

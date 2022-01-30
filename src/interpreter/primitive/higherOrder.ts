@@ -75,9 +75,7 @@ abstract class RHigherOrdeRPrimProc extends RPrimProc {
   }
 
   assertCorrectType(expectedType: Type, receivedVal: RValue, sourceSpan: SourceSpan) {
-    let receivedType;
     if (isProcedureType(expectedType)) {
-      receivedType = receivedVal.getType(expectedType.paramTypes.length);
       if (expectedType.isCompatibleWith(receivedVal)) {
         return;
       }

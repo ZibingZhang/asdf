@@ -1,19 +1,19 @@
 import {
+  RImage,
+  isREmptyImage
+} from "../rvalue";
+import {
   RPrimProc,
   RValue
 } from "../../../../rvalue";
 import {
-  ImageType,
+  ImageType
 } from "../types";
 import {
   ProcedureType
 } from "../../../../types";
 import {
-  isREmptyImage,
-  RImage
-} from "../rvalue";
-import {
-  newCanvas,
+  newCanvas
 } from "./common";
 
 export {
@@ -61,7 +61,7 @@ class RPPAbove extends RPrimProc {
     let width = 0;
     let height = 0;
     for (const image of <RImage[]>args) {
-      width = Math.max(width, image.canvas.width)
+      width = Math.max(width, image.canvas.width);
       height += image.canvas.height;
     }
     const [canvas, ctx] = newCanvas(width, height);

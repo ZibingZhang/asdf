@@ -1,14 +1,9 @@
 import {
-  RIsStructFun,
-  RMakeStructFun,
-  RModule,
-  RStructGetFun,
-  RStructType,
-  RValue
-} from "./rvalue";
-import {
   Global
 } from "./global";
+import {
+  RValue
+} from "./rvalue";
 import {
   SC_USED_BEFORE_DEFINITION_ERR
 } from "./error";
@@ -50,7 +45,7 @@ class Environment {
       ) {
         return this.global.primitiveEnvironment.get(name, sourceSpan);
       } else {
-        console.log(this)
+        console.log(this);
         throw new StageError(
           SC_USED_BEFORE_DEFINITION_ERR(name),
           sourceSpan

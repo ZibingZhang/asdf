@@ -24,8 +24,8 @@ import {
   VarNode,
   isDefnNode,
   isLambdaNode,
-  isVarNode,
-  isRequireNode
+  isRequireNode,
+  isVarNode
 } from "./ast";
 import {
   AtomSExpr,
