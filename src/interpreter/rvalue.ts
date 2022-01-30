@@ -96,7 +96,8 @@ abstract class RModule {
   constructor(
     readonly name: string,
     readonly structures: [[string, string[]]],
-    readonly procedures: RPrimProc[]
+    readonly procedures: RPrimProc[],
+    readonly data: Map<string, RValue>
   ) {}
 }
 
@@ -737,11 +738,11 @@ function isREofObject(rval: RValue): rval is REofObject {
   return rval instanceof REofObject;
 }
 
-function isREmptyList(rval: RValue): rval is RList {
+function isREmptyList(rval: RValue): boolean {
   return isRList(rval) && rval.vals.length === 0;
 }
 
-function isRExactPositiveInteger(rval: RValue): rval is RExactReal {
+function isRExactPositiveInteger(rval: RValue): boolean {
   return isRExactReal(rval) && rval.denominator === 1n && rval.numerator > 0n;
 }
 
@@ -758,7 +759,7 @@ function isRInexactReal(rval: RValue): rval is RInexactReal {
   return rval instanceof RInexactReal;
 }
 
-function isRInteger(rval: RValue): rval is RNumber {
+function isRInteger(rval: RValue): boolean {
   return isRNumber(rval) && rval.denominator === 1n;
 }
 

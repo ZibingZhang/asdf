@@ -1,4 +1,9 @@
 import {
+  RPPAbove,
+  RPPBeside
+} from "./primitive/overlayingImages";
+import {
+  RPC_EMPTY_IMAGE,
   RPPCircle,
   RPPEllipse
 } from "./primitive/basicImages";
@@ -26,8 +31,15 @@ class R2HtdpImageModule extends RModule {
         new RPPEllipse(),
 
         // polygons
-        new RPPRectangle()
-      ]
+        new RPPRectangle(),
+
+        // overlaying images
+        new RPPBeside(),
+        new RPPAbove()
+      ],
+      new Map([
+        ["empty-image", RPC_EMPTY_IMAGE]
+      ])
     );
   }
 }

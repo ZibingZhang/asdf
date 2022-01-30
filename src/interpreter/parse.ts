@@ -24,7 +24,8 @@ import {
   VarNode,
   isDefnNode,
   isLambdaNode,
-  isVarNode
+  isVarNode,
+  isRequireNode
 } from "./ast";
 import {
   AtomSExpr,
@@ -134,11 +135,11 @@ class ParseSExpr implements Stage<SExpr[], Program> {
   }
 
   private processSExprs(sexprs: SExpr[]): Program {
-    const defns: DefnNode[] = [];
+    const defns: (DefnNode | RequireNode)[] = [];
     const nodes: ASTNode[] = [];
     for (const sexpr of sexprs) {
       const node = this.toNode(sexpr);
-      if (isDefnNode(node)) { defns.push(node); }
+      if (isDefnNode(node) || isRequireNode(node)) { defns.push(node); }
       nodes.push(node);
     }
     return new Program(defns, nodes);

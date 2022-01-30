@@ -249,14 +249,6 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         node.sourceSpan
       );
     }
-    const module = this.global.modules.get(node.name);
-    if (!module) {
-      throw new StageError(
-        RQ_MODULE_NOT_FOUND_ERR(node.name),
-        node.nameSourceSpan
-      );
-    }
-    this.scope.addModule(module);
   }
 
   visitVarNode(node: VarNode): void {
@@ -295,7 +287,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
     });
   }
 
-  private addDefinitionsToScope(defns: DefnNode[]) {
+  private addDefinitionsToScope(defns: (DefnNode | RequireNode)[]) {
     for (const defn of defns) {
       defn.addToScope(this.scope);
     }

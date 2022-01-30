@@ -14,6 +14,7 @@ import {
 
 export {
   RImage,
+  isREmptyImage,
   isRExact8BitNumber,
   isRImage
 };
@@ -26,7 +27,7 @@ class RImage extends RData {
   }
 
   stringify(): string {
-    throw "illegal state: cannot stringify an image";
+    return "<image>";
   }
 
   getType(): Type {
@@ -45,6 +46,12 @@ class RImage extends RData {
     const imgData2 = rval.canvas.getContext("2d")!.getImageData(0, 0, rval.canvas.width, rval.canvas.height).data;
     return imgData1.every((rgba, idx) => rgba === imgData2[idx]);
   }
+}
+
+function isREmptyImage(rval: RValue): boolean {
+  return rval instanceof RImage
+    && rval.canvas.width === 0
+    && rval.canvas.height === 0;
 }
 
 function isRExact8BitNumber(rval: RValue): rval is RExactReal {

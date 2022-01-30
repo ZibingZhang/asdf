@@ -27,9 +27,12 @@ import {
 } from "../rvalue";
 
 export {
+  RPC_EMPTY_IMAGE,
   RPPCircle,
   RPPEllipse
 };
+
+const RPC_EMPTY_IMAGE = new RImage(newCanvas(0, 0)[0]);
 
 class RPPCircle extends RPrimProc {
   constructor() {

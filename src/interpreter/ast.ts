@@ -19,6 +19,7 @@ import {
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   HO_EXPECTED_LIST_ARGUMENT_ERR,
+  RQ_MODULE_NOT_FOUND_ERR,
   WF_QUESTION_NOT_BOOL_ERR
 } from "./error";
 import {
@@ -106,6 +107,7 @@ export {
   isCheckNode,
   isDefnNode,
   isLambdaNode,
+  isRequireNode,
   isVarNode,
   ASTNodeVisitor,
   EvaluateRProcedureVisitor
@@ -752,8 +754,70 @@ class RequireNode extends ASTNodeBase {
 
   evalHelper(env: Environment): RValue {
     /* eslint-disable @typescript-eslint/no-non-null-assertion */
-    env.addModule(this.global.modules.get(this.name)!);
+    const module = this.global.modules.get(this.name)!;
+    for (const [name, fields] of module.structures) {
+      if (!env.has(name)) {
+        env.set(name, new RStructType(name));
+      }
+      for (const [idx, field] of fields.entries()) {
+        if (!env.has(`${name}-${field}`)) {
+          env.set(`${name}-${field}`, new RStructGetFun(name, field, idx));
+        }
+      }
+      if (!env.has(`make-${name}`)) {
+        env.set(`make-${name}`, new RMakeStructFun(name, fields.length));
+      }
+      if (!env.has(`${name}?`)) {
+        env.set(`${name}?`, new RIsStructFun(name));
+      }
+    }
+    for (const procedure of module.procedures) {
+      if (!env.has(procedure.name)) {
+        env.set(procedure.name, procedure);
+      }
+    }
+    for (const [name, rval] of module.data) {
+      if (!env.has(name)) {
+        env.set(name, rval);
+      }
+    }
     return R_VOID;
+  }
+
+  addToScope(scope: Scope): void {
+    const module = this.global.modules.get(this.name);
+    if (!module) {
+      throw new StageError(
+        RQ_MODULE_NOT_FOUND_ERR(this.name),
+        this.nameSourceSpan
+      );
+    }
+    for (const [name, fields] of module.structures) {
+      if (!scope.has(name)) {
+        scope.set(name, VariableType.StructureType);
+      }
+      for (const field of fields) {
+        if (!scope.has(`${name}-${field}`)) {
+          scope.set(`${name}-${field}`, VariableType.PrimitiveFunction);
+        }
+      }
+      if (!scope.has(`make-${name}`)) {
+        scope.set(`make-${name}`, VariableType.PrimitiveFunction);
+      }
+      if (!scope.has(`${name}?`)) {
+        scope.set(`${name}?`, VariableType.PrimitiveFunction);
+      }
+    }
+    for (const procedure of module.procedures) {
+      if (!scope.has(procedure.name)) {
+        scope.set(procedure.name, VariableType.PrimitiveFunction);
+      }
+    }
+    for (const name of module.data.keys()) {
+      if (!scope.has(name)) {
+        scope.set(name, VariableType.Data);
+      }
+    }
   }
 }
 
@@ -919,6 +983,10 @@ function isDefnNode(node: ASTNode): node is DefnNode {
 
 function isLambdaNode(node: ASTNode): node is LambdaNode {
   return node instanceof LambdaNode;
+}
+
+function isRequireNode(node: ASTNode): node is RequireNode {
+  return node instanceof RequireNode;
 }
 
 function isVarNode(node: ASTNode): node is VarNode {

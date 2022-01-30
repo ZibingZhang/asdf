@@ -97,7 +97,7 @@ class Controller {
         return;
       }
     }
-    for (const [tab, [element, cmWrapper]] of this.tabs.entries()) {
+    for (const [tab, [element, cmWrapper]] of this.tabs) {
       if (tab !== nextTab) {
         element.style.display = "none";
       } else {

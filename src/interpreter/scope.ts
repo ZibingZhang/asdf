@@ -76,30 +76,6 @@ class Scope {
         && this.global.primitiveScope.variables.has(name)
       );
   }
-
-  addModule(module: RModule) {
-    for (const [name, fields] of module.structures) {
-      if (!this.has(name)) {
-        this.set(name, VariableType.StructureType);
-      }
-      for (const field of fields) {
-        if (!this.has(`${name}-${field}`)) {
-          this.set(`${name}-${field}`, VariableType.PrimitiveFunction);
-        }
-      }
-      if (!this.has(`make-${name}`)) {
-        this.set(`make-${name}`, VariableType.PrimitiveFunction);
-      }
-      if (!this.has(`${name}?`)) {
-        this.set(`${name}?`, VariableType.PrimitiveFunction);
-      }
-    }
-    for (const procedure of module.procedures) {
-      if (!this.has(procedure.name)) {
-        this.set(procedure.name, VariableType.PrimitiveFunction);
-      }
-    }
-  }
 }
 
 enum VariableType {
