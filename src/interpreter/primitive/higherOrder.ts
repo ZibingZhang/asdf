@@ -1,7 +1,6 @@
 import {
   AnyProcedureType,
   AnyType,
-  BooleanLiteralType,
   BooleanType,
   ExactNonNegativeIntegerType,
   ListType,
@@ -372,7 +371,7 @@ class RPPMemf extends RHigherOrdeRPrimProc {
   }
 
   getType(): ProcedureType {
-    return new ProcedureType([new ProcedureType([new AnyType()], new AnyType()), new ListType()], new OrType(new BooleanLiteralType(new RBoolean(false)), new ListType()));
+    return new ProcedureType([new ProcedureType([new AnyType()], new AnyType()), new ListType()], new OrType([new ListType()], [new RBoolean(false)]));
   }
 
   call(args: RValue[], sourceSpan: SourceSpan, env: Environment): RValue {

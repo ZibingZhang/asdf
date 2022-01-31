@@ -1,9 +1,4 @@
 import {
-  RBoolean,
-  RData,
-  RNumber,
-  RString,
-  RSymbol,
   RValue,
   isRProcedure
 } from "./rvalue";
@@ -15,7 +10,6 @@ export{
   AnyProcedureType,
   AnyType,
   BooleanType,
-  BooleanLiteralType,
   CharacterType,
   EofObjectType,
   ErrorType,
@@ -25,18 +19,15 @@ export{
   ListType,
   NonNegativeRealType,
   NumberType,
-  NumberLiteralType,
   OrType,
   PairType,
   ProcedureType,
   RationalType,
   RealType,
   StringType,
-  StringLiteralType,
   StructType,
   StructTypeType,
   SymbolType,
-  SymbolLiteralType,
   Type,
   VoidType,
   isAnyProcedureType,
@@ -45,101 +36,70 @@ export{
 };
 
 abstract class Type {
-  isSuperTypeOf(type: Type, rval: RValue): boolean {
-    if (this instanceof LiteralType) {
-      if (this.literal) {
-        return this.literal.getType().isSuperTypeOf(type, rval)
-          && this.literal.equal(rval);
-      } else {
-        return false;
-      }
-    } else {
-      return this.isSuperTypeOfHelper(type, rval);
-    }
-  }
+  constructor(
+    readonly children: Type[] = [],
+    readonly literals: RValue[] = []
+  ) {}
+
+  abstract stringify(): string;
 
   isCompatibleWith(rval: RValue, _name: string, _sourceSpan: SourceSpan): boolean {
     return this.isSuperTypeOf(rval.getType(-1), rval);
   }
 
-  abstract isSuperTypeOfHelper(type: Type, rval: RValue): boolean;
-
-  abstract stringify(): string;
-}
-
-abstract class LiteralType extends Type {
-  constructor(readonly literal: RData) {
-    super();
-  }
-
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof LiteralType
-      && type.literal.equal(this.literal);
-  }
-
-  stringify(): string {
-    return this.literal.stringify();
+  isSuperTypeOf(type: Type, rval: RValue): boolean {
+    return type instanceof this.constructor
+      || this.children.some(child => child.isSuperTypeOf(type, rval))
+      || this.literals.some(literal => literal.equal(rval));
   }
 }
 
 class AnyType extends Type {
+  stringify(): string {
+    return "any/c";
+  }
+
   isCompatibleWith(): boolean {
     return true;
   }
 
-  isSuperTypeOfHelper(_: Type): boolean {
+  isSuperTypeOf(): boolean {
     return true;
-  }
-
-  stringify(): string {
-    return "any/c";
   }
 }
 
 class AnyProcedureType extends Type {
+  stringify(): string {
+    return "procedure";
+  }
+
   isCompatibleWith(rval: RValue): boolean {
     return isRProcedure(rval);
   }
 
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOf(type: Type): boolean {
     return type instanceof AnyProcedureType
       || type instanceof ProcedureType;
-  }
-
-  stringify(): string {
-    return "procedure";
   }
 }
 
 class BooleanType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof BooleanType;
-  }
-
   stringify(): string {
     return "boolean";
   }
 }
 
-class BooleanLiteralType extends LiteralType {
-  constructor(readonly literal: RBoolean) {
-    super(literal);
-  }
-}
-
 class CharacterType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof CharacterType;
-  }
-
   stringify(): string {
     return "character";
   }
 }
 
 class EofObjectType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof VoidType;
+  constructor() {
+    super(
+      [new VoidType()]
+    );
   }
 
   stringify(): string {
@@ -148,23 +108,16 @@ class EofObjectType extends Type {
 }
 
 class ErrorType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof ErrorType;
-  }
-
   stringify(): string {
     return "error";
   }
 }
 
 class ExactNonNegativeIntegerType extends Type {
-  children: Type[] = [
-    new ExactPositiveIntegerType()
-  ];
-
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return type instanceof ExactNonNegativeIntegerType
-      || this.children.some(child => child.isSuperTypeOf(type, rval));
+  constructor() {
+    super(
+      [new ExactPositiveIntegerType()]
+    );
   }
 
   stringify(): string {
@@ -173,23 +126,16 @@ class ExactNonNegativeIntegerType extends Type {
 }
 
 class ExactPositiveIntegerType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof ExactPositiveIntegerType;
-  }
-
   stringify(): string {
     return "exact-positive-integer";
   }
 }
 
 class IntegerType extends Type {
-  children: Type[] = [
-    new ExactNonNegativeIntegerType()
-  ];
-
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return type instanceof IntegerType
-      || this.children.some(child => child.isSuperTypeOf(type, rval));
+  constructor() {
+    super(
+      [new ExactNonNegativeIntegerType()]
+    );
   }
 
   stringify(): string {
@@ -202,16 +148,6 @@ class ListType extends Type {
     super();
   }
 
-  isSuperTypeOfHelper(type: Type): boolean {
-    return (
-      type instanceof ListType
-      && type.minLength >= this.minLength
-    ) || (
-      this.minLength === 0
-      && type instanceof PairType
-    );
-  }
-
   stringify(): string {
     if (this.minLength === 0) {
       return "list";
@@ -221,16 +157,23 @@ class ListType extends Type {
       return `list with ${this.minLength} or more elements`;
     }
   }
+
+  isSuperTypeOf(type: Type): boolean {
+    return (
+      type instanceof ListType
+      && type.minLength >= this.minLength
+    ) || (
+      this.minLength === 0
+      && type instanceof PairType
+    );
+  }
 }
 
 class NonNegativeRealType extends Type {
-  children: Type[] = [
-    new ExactNonNegativeIntegerType()
-  ];
-
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return type instanceof NonNegativeRealType
-      || this.children.some(child => child.isSuperTypeOf(type, rval));
+  constructor() {
+    super(
+      [new ExactNonNegativeIntegerType()]
+    );
   }
 
   stringify(): string {
@@ -239,13 +182,10 @@ class NonNegativeRealType extends Type {
 }
 
 class NumberType extends Type {
-  children: Type[] = [
-    new RealType()
-  ];
-
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return type instanceof NumberType
-      || this.children.some(child => child.isSuperTypeOf(type, rval));
+  constructor() {
+    super(
+      [new RealType()]
+    );
   }
 
   stringify(): string {
@@ -253,31 +193,24 @@ class NumberType extends Type {
   }
 }
 
-class NumberLiteralType extends LiteralType {
-  constructor(literal: RNumber) {
-    super(literal);
-  }
-}
-
 class OrType extends Type {
-  readonly subTypes: Type[];
-
-  constructor(...subTypes: Type[]) {
-    super();
-    this.subTypes = subTypes;
-  }
-
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return this.subTypes.some(subType => subType.isSuperTypeOfHelper(type, rval));
+  constructor(
+    types: Type[],
+    literals: RValue[]
+  ) {
+    super(
+      types,
+      literals
+    );
   }
 
   stringify(): string {
-    return `(or/c ${this.subTypes.map(subType => subType.stringify()).join(" ")})`;
+    return `(or/c ${this.children.map(subType => subType.stringify()).join(" ")})`;
   }
 }
 
 class PairType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
+  isSuperTypeOf(type: Type): boolean {
     return type instanceof PairType
       || type instanceof ListType;
   }
@@ -295,7 +228,7 @@ class ProcedureType extends Type {
     super();
   }
 
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
+  isSuperTypeOf(type: Type, rval: RValue): boolean {
     return type instanceof ProcedureType
       && type.paramTypes.length === this.paramTypes.length
       && this.paramTypes.every((paramType, idx) => paramType.isSuperTypeOf(type.paramTypes[idx], rval))
@@ -324,13 +257,10 @@ class ProcedureType extends Type {
 }
 
 class RationalType extends Type {
-  children: Type[] = [
-    new IntegerType()
-  ];
-
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return type instanceof RationalType
-      || this.children.some(child => child.isSuperTypeOf(type, rval));
+  constructor() {
+    super(
+      [new IntegerType()]
+    );
   }
 
   stringify(): string {
@@ -339,14 +269,13 @@ class RationalType extends Type {
 }
 
 class RealType extends Type {
-  children: Type[] = [
-    new NonNegativeRealType(),
-    new RationalType()
-  ];
-
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return type instanceof RealType
-      || this.children.some(child => child.isSuperTypeOf(type, rval));
+  constructor() {
+    super(
+      [
+        new NonNegativeRealType(),
+        new RationalType()
+      ]
+    );
   }
 
   stringify(): string {
@@ -355,18 +284,8 @@ class RealType extends Type {
 }
 
 class StringType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof StringType;
-  }
-
   stringify(): string {
     return "string";
-  }
-}
-
-class StringLiteralType extends LiteralType {
-  constructor(literal: RString) {
-    super(literal);
   }
 }
 
@@ -375,13 +294,13 @@ class StructType extends Type {
     super();
   }
 
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof StructType
-      && type.name === this.name;
+  stringify(): string {
+    return "illegal state: should not have to stringify a structure type";
   }
 
-  stringify(): string {
-    return this.name;
+  isSuperTypeOf(type: Type): boolean {
+    return type instanceof StructType
+      && type.name === this.name;
   }
 }
 
@@ -390,37 +309,23 @@ class StructTypeType extends Type {
     super();
   }
 
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof StructTypeType
-      && type.name === this.name;
-  }
-
   stringify(): string {
     return this.name;
+  }
+
+  isSuperTypeOf(type: Type): boolean {
+    return type instanceof StructTypeType
+      && type.name === this.name;
   }
 }
 
 class SymbolType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof SymbolType;
-  }
-
   stringify(): string {
     return "string";
   }
 }
 
-class SymbolLiteralType extends LiteralType {
-  constructor(literal: RSymbol) {
-    super(literal);
-  }
-}
-
 class VoidType extends Type {
-  isSuperTypeOfHelper(type: Type): boolean {
-    return type instanceof VoidType;
-  }
-
   stringify(): string {
     return "void";
   }

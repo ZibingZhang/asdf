@@ -18,7 +18,7 @@ export {
   RImage,
   RMode,
   isREmptyImage,
-  isRExact8BitNumber,
+  isRExact8BitInteger,
   isRImage
 };
 
@@ -62,7 +62,7 @@ function isREmptyImage(rval: RValue): boolean {
     && rval.canvas.height === 0;
 }
 
-function isRExact8BitNumber(rval: RValue): rval is RExactReal {
+function isRExact8BitInteger(rval: RValue): boolean {
   return isRExactReal(rval)
     && rval.denominator === 1n
     && rval.numerator >= 0n

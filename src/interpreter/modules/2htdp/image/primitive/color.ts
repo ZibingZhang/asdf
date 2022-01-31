@@ -1,6 +1,6 @@
 import {
   ColorType,
-  Exact8BitNumberType
+  Exact8BitIntegerType
 } from "../types";
 import {
   RMath,
@@ -23,7 +23,7 @@ class RPPMakeColor extends RPrimProc {
   }
 
   getType(args: number): ProcedureType {
-    return new ProcedureType(new Array(Math.max(3, Math.min(4, args))).fill(new Exact8BitNumberType()), new ColorType());
+    return new ProcedureType(new Array(Math.max(3, Math.min(4, args))).fill(new Exact8BitIntegerType()), new ColorType());
   }
 
   call(args: RValue[]): RValue {

@@ -4,7 +4,6 @@ import {
   ExactNonNegativeIntegerType,
   ExactPositiveIntegerType,
   IntegerType,
-  NumberLiteralType,
   NumberType,
   OrType,
   ProcedureType,
@@ -704,7 +703,7 @@ class RPPSgn extends RPrimProc {
   }
 
   getType(): ProcedureType {
-    return new ProcedureType([new RealType()], new OrType(new NumberLiteralType(new RExactReal(1n)), new NumberLiteralType(new RInexactReal(1n)), new NumberLiteralType(new RExactReal(0n)), new NumberLiteralType(new RInexactReal(0n)), new NumberLiteralType(new RExactReal(-1n)), new NumberLiteralType(new RInexactReal(-1n))));
+    return new ProcedureType([new RealType()], new OrType([], [new RExactReal(1n), new RInexactReal(1n), new RExactReal(0n), new RInexactReal(0n), new RExactReal(-1n), new RInexactReal(-1n)]));
   }
 
   call(args: RValue[]): RValue {

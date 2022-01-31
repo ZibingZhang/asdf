@@ -1,6 +1,6 @@
 import {
   ColorType,
-  Exact8BitNumberType
+  Exact8BitIntegerType
 } from "./types";
 import {
   RMakeStructFun,
@@ -42,7 +42,7 @@ export {
 class R2HtdpImageModule extends RModule {
   constructor() {
     const makeColor = new RMakeStructFun("color", 3);
-    makeColor.getType = () => new ProcedureType(new Array(3).fill(new Exact8BitNumberType()), new ColorType());
+    makeColor.getType = () => new ProcedureType(new Array(3).fill(new Exact8BitIntegerType()), new ColorType());
     super(
       "2htdp/image",
       [

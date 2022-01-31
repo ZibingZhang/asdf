@@ -8,11 +8,6 @@ import {
   isRSymbol
 } from "../../../rvalue";
 import {
-  StringLiteralType,
-  SymbolLiteralType,
-  Type
-} from "../../../types";
-import {
   HI_NOT_VALID_COLOR_ERR
 } from "./error";
 import {
@@ -22,21 +17,28 @@ import {
   StageError
 } from "../../../pipeline";
 import {
+  Type
+} from "../../../types";
+import {
   isValidColorName
 } from "./primitive/common";
 import {
-  isRExact8BitNumber
+  isRExact8BitInteger
 } from "./rvalue";
 
 export {
   ColorType,
-  Exact8BitNumberType,
+  Exact8BitIntegerType,
   ImageType,
   ModeType,
   isColorType
 };
 
 class ColorType extends Type {
+  stringify(): string {
+    return "image-color";
+  }
+
   isCompatibleWith(rval: RValue, name: string, sourceSpan: SourceSpan): boolean {
     if (isRString(rval) || isRSymbol(rval)) {
       if (isValidColorName(rval)) {
@@ -52,10 +54,10 @@ class ColorType extends Type {
       if (
         rval.name === "color"
         && rval.vals.length === 4
-        && isRExact8BitNumber(rval.vals[0])
-        && isRExact8BitNumber(rval.vals[1])
-        && isRExact8BitNumber(rval.vals[2])
-        && isRExact8BitNumber(rval.vals[2])
+        && isRExact8BitInteger(rval.vals[0])
+        && isRExact8BitInteger(rval.vals[1])
+        && isRExact8BitInteger(rval.vals[2])
+        && isRExact8BitInteger(rval.vals[2])
       ) {
         return true;
       }
@@ -66,25 +68,21 @@ class ColorType extends Type {
   isSuperTypeOfHelper(type: Type): boolean {
     return type instanceof ColorType;
   }
-
-  stringify(): string {
-    return "image-color";
-  }
 }
 
-class Exact8BitNumberType extends Type {
+class Exact8BitIntegerType extends Type {
+  stringify(): string {
+    return "integer between 0 and 255";
+  }
+
   isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return type instanceof Exact8BitNumberType
+    return type instanceof Exact8BitIntegerType
       || (
         isRExactReal(rval)
         && rval.denominator === 1n
         && rval.numerator >= 0
         && rval.numerator < 256
       );
-  }
-
-  stringify(): string {
-    return "integer between 0 and 255";
   }
 }
 
@@ -99,17 +97,16 @@ class ImageType extends Type {
 }
 
 class ModeType extends Type {
-  children: Type[] = [
-    new SymbolLiteralType(new RSymbol("solid")),
-    new StringLiteralType(new RString("solid")),
-    new SymbolLiteralType(new RSymbol("outline")),
-    new StringLiteralType(new RString("outline")),
-    new Exact8BitNumberType()
-  ];
-
-  isSuperTypeOfHelper(type: Type, rval: RValue): boolean {
-    return type instanceof ModeType
-      || this.children.some(child => child.isSuperTypeOf(type, rval));
+  constructor() {
+    super(
+      [new Exact8BitIntegerType()],
+      [
+        new RString("solid"),
+        new RSymbol("solid"),
+        new RString("outline"),
+        new RSymbol("outline")
+      ]
+    );
   }
 
   stringify(): string {

@@ -100,18 +100,24 @@ abstract class RModule {
   ) {}
 }
 
-interface RValue {
-  stringify(): string;
+abstract class RValue {
+  abstract stringify(): string;
 
-  getType(args: number): Type;
+  abstract getType(args: number): Type;
+
+  equal(_rval: RValue) {
+    return false;
+  }
 }
 
-class RTestResult implements RValue {
+class RTestResult extends RValue {
   constructor(
     readonly passed: boolean,
     readonly msg: string = "",
     readonly sourceSpan: SourceSpan = NO_SOURCE_SPAN
-  ) {}
+  ) {
+    super();
+  }
 
   stringify(): string {
     throw "illegal state: cannot stringify a test result";
@@ -122,7 +128,7 @@ class RTestResult implements RValue {
   }
 }
 
-abstract class RData implements RValue {
+abstract class RData extends RValue {
   abstract stringify(): string;
 
   abstract getType(): Type;
@@ -569,8 +575,10 @@ interface RPrimTestFunConfig {
   maxArity?: number
 }
 
-abstract class RProcedure implements RValue {
-  constructor(readonly config: RProcedureConfig = {}) {}
+abstract class RProcedure extends RValue {
+  constructor(readonly config: RProcedureConfig = {}) {
+    super();
+  }
 
   abstract accept<T>(visitor: RProcedureVisitor<T>): T;
 
