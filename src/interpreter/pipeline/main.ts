@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  StageError,
+  StageOutput,
+  StageTestResult
+} from "../data/stage";
+import {
   EvaluateCode
 } from "./evaluate";
 import {
   Global
-} from "./global";
+} from "../global";
 import {
   Lexer
 } from "./lexing";
@@ -13,22 +18,22 @@ import {
 } from "./parse";
 import {
   Program
-} from "./program";
+} from "../ir/program";
 import {
   RNG
-} from "./random";
+} from "../random";
 import {
   RValue
-} from "./rvalue";
+} from "../values/rvalue";
 import {
   SETTINGS
-} from "./settings";
+} from "../settings";
 import {
   SExpr
-} from "./sexpr";
+} from "../ir/sexpr";
 import {
   SourceSpan
-} from "./sourcespan";
+} from "../data/sourcespan";
 import {
   UnusedCode
 } from "./unused";
@@ -37,41 +42,8 @@ import {
 } from "./well-formed";
 
 export {
-  Pipeline,
-  Stage,
-  StageError,
-  StageOutput,
-  StageTestResult
+  Pipeline
 };
-
-class StageError extends Error {
-  constructor(
-    readonly msg: string,
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(msg);
-  }
-}
-
-class StageTestResult {
-  constructor(
-    readonly passed: boolean,
-    readonly errMsg: string,
-    readonly sourceSpan: SourceSpan
-  ) {}
-}
-
-class StageOutput<T> {
-  constructor(
-    readonly output: T,
-    readonly errors: StageError[] = [],
-    readonly tests: StageTestResult[] = []
-  ) {}
-}
-
-interface Stage<S, T> {
-  run(input: StageOutput<S>): StageOutput<T>;
-}
 
 class Pipeline {
   private global = new Global();

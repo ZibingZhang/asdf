@@ -5,7 +5,7 @@ import {
   NonNegativeRealType,
   NumberType,
   ProcedureType
-} from "../types";
+} from "../values/types";
 import {
   REofObject,
   RNumber,
@@ -17,7 +17,7 @@ import {
   isRStruct,
   isRSymbol,
   toRBoolean
-} from "../rvalue";
+} from "../values/rvalue";
 
 export {
   RPPAreWithin,

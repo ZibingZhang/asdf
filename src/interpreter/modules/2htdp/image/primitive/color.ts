@@ -8,10 +8,10 @@ import {
   RPrimProc,
   RStruct,
   RValue
-} from "../../../../rvalue";
+} from "../../../../values/rvalue";
 import {
   ProcedureType
-} from "../../../../types";
+} from "../../../../values/types";
 
 export {
   RPPMakeColor

@@ -2,29 +2,29 @@ import {
   RTestResult,
   RValue,
   R_VOID
-} from "./rvalue";
+} from "../values/rvalue";
 import {
   Stage,
   StageError,
   StageOutput,
   StageTestResult
-} from "./pipeline";
+} from "../data/stage";
 import {
   isCheckNode,
   isDefnNode
-} from "./ast";
+} from "../ir/ast";
 import {
   Environment
-} from "./environment";
+} from "../data/environment";
 import {
   NO_SOURCE_SPAN
-} from "./sourcespan";
+} from "../data/sourcespan";
 import {
   Program
-} from "./program";
+} from "../ir/program";
 import {
   RT_MAX_CALL_STACK_SIZE_ERR
-} from "./error";
+} from "../error";
 
 export {
   EvaluateCode

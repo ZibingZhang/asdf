@@ -2,10 +2,10 @@ import {
   SExpr,
   isAtomSExpr,
   isListSExpr
-} from "./sexpr";
+} from "./ir/sexpr";
 import {
   TokenType
-} from "./token";
+} from "./ir/token";
 import {
   ordinalSuffixOf
 } from "./utils";

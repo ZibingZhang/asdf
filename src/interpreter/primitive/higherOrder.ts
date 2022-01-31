@@ -9,11 +9,11 @@ import {
   RealType,
   Type,
   isProcedureType
-} from "../types";
+} from "../values/types";
 import {
   AtomNode,
   EvaluateRProcedureVisitor
-} from "../ast";
+} from "../ir/ast";
 import {
   HO_CONTRACT_VIOLATION_ERR,
   HO_EXPECTED_BOOLEAN_ERR,
@@ -35,16 +35,16 @@ import {
   isRProcedure,
   isRTrue,
   toRBoolean
-} from "../rvalue";
+} from "../values/rvalue";
 import {
   Environment
-} from "../environment";
+} from "../data/environment";
 import {
   SourceSpan
-} from "../sourcespan";
+} from "../data/sourcespan";
 import {
   StageError
-} from "../pipeline";
+} from "../data/stage";
 
 export {
   RPPAndmap,

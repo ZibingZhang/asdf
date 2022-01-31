@@ -1,6 +1,6 @@
 import {
   SourceSpan
-} from "./sourcespan";
+} from "../data/sourcespan";
 
 export {
   Token,

@@ -1,6 +1,6 @@
 import {
   Pipeline
-} from "./pipeline";
+} from "./pipeline/main";
 import {
   updateSettings
 } from "./settings";

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   SourceSpan
-} from "../../interpreter/sourcespan";
+} from "../../interpreter/data/sourcespan";
 
 export {
   Repl

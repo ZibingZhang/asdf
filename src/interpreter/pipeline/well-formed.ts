@@ -17,7 +17,7 @@ import {
   OrNode,
   RequireNode,
   VarNode
-} from "./ast";
+} from "../ir/ast";
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
   LT_ALREADY_DEFINED_LOCALLY_ERR,
@@ -26,25 +26,25 @@ import {
   WF_EXPECTED_FUNCTION_CALL_ERR,
   WF_NOT_TOP_LEVEL_DEFN_ERR,
   WF_STRUCTURE_TYPE_ERR
-} from "./error";
+} from "../error";
 import {
   Scope,
   VariableType
-} from "./scope";
+} from "../data/scope";
 import {
   Stage,
   StageError,
   StageOutput
-} from "./pipeline";
+} from "../data/stage";
 import {
   Keyword
-} from "./keyword";
+} from "../data/keyword";
 import {
   Program
-} from "./program";
+} from "../ir/program";
 import {
   SETTINGS
-} from "./settings";
+} from "../settings";
 
 export {
   WellFormedProgram

@@ -4,7 +4,7 @@ import {
 } from "./rvalue";
 import {
   SourceSpan
-} from "./sourcespan";
+} from "../data/sourcespan";
 
 export{
   AnyProcedureType,

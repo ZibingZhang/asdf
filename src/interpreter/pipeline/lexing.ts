@@ -2,7 +2,7 @@ import {
   AtomSExpr,
   ListSExpr,
   SExpr
-} from "./sexpr";
+} from "../ir/sexpr";
 import {
   RS_BAD_CHARACTER_CONSTANT_ERR,
   RS_BAD_SYNTAX_ERR,
@@ -22,25 +22,25 @@ import {
   RS_UNEXPECTED_ERR,
   RS_UNKNOWN_ESCAPE_SEQUENCE_ERR,
   UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR
-} from "./error";
+} from "../error";
 import {
   Stage,
   StageError,
   StageOutput
-} from "./pipeline";
+} from "../data/stage";
 import {
   Token,
   TokenType
-} from "./token";
+} from "../ir/token";
 import {
   Keyword
-} from "./keyword";
+} from "../data/keyword";
 import {
   SETTINGS
-} from "./settings";
+} from "../settings";
 import {
   SourceSpan
-} from "./sourcespan";
+} from "../data/sourcespan";
 
 export {
   Lexer

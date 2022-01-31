@@ -11,7 +11,7 @@ import {
   R_EMPTY_LIST,
   R_FALSE,
   R_TRUE
-} from "./rvalue";
+} from "./values/rvalue";
 import {
   RPC_E,
   RPC_PI,
@@ -154,13 +154,13 @@ import {
 import {
   Scope,
   VariableType
-} from "./scope";
+} from "./data/scope";
 import {
   Environment
-} from "./environment";
+} from "./data/environment";
 import {
   Keyword
-} from "./keyword";
+} from "./data/keyword";
 import {
   R2HtdpImageModule
 } from "./modules/2htdp/image/module";

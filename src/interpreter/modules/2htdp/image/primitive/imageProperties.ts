@@ -1,12 +1,12 @@
 import {
   NonNegativeRealType,
   ProcedureType
-} from "../../../../types";
+} from "../../../../values/types";
 import {
   RMath,
   RPrimProc,
   RValue
-} from "../../../../rvalue";
+} from "../../../../values/rvalue";
 import {
   ImageType
 } from "../types";

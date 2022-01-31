@@ -5,13 +5,13 @@ import {
 import {
   RPrimProc,
   RValue
-} from "../../../../rvalue";
+} from "../../../../values/rvalue";
 import {
   ImageType
 } from "../types";
 import {
   ProcedureType
-} from "../../../../types";
+} from "../../../../values/types";
 import {
   newCanvas
 } from "./common";

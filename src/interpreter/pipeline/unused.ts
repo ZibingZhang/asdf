@@ -16,17 +16,17 @@ import {
   OrNode,
   RequireNode,
   VarNode
-} from "./ast";
+} from "../ir/ast";
 import {
   Stage,
   StageOutput
-} from "./pipeline";
+} from "../data/stage";
 import {
   Program
-} from "./program";
+} from "../ir/program";
 import {
   SourceSpan
-} from "./sourcespan";
+} from "../data/sourcespan";
 
 export {
   UnusedCode

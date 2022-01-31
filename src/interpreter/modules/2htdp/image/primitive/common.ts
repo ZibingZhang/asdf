@@ -5,7 +5,7 @@ import {
   isRStruct,
   RNumber,
   RSymbol
-} from "../../../../rvalue";
+} from "../../../../values/rvalue";
 import {
   RMode
 } from "../rvalue";

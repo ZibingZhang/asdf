@@ -1,6 +1,6 @@
 import {
   RModule
-} from "../../../rvalue";
+} from "../../../values/rvalue";
 
 export {
   R2HtdpUniverseModule

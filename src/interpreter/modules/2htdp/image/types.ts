@@ -6,19 +6,19 @@ import {
   isRString,
   isRStruct,
   isRSymbol
-} from "../../../rvalue";
+} from "../../../values/rvalue";
 import {
   HI_NOT_VALID_COLOR_ERR
 } from "./error";
 import {
   SourceSpan
-} from "../../../sourcespan";
+} from "../../../data/sourcespan";
 import {
   StageError
-} from "../../../pipeline";
+} from "../../../data/stage";
 import {
   Type
-} from "../../../types";
+} from "../../../values/types";
 import {
   isValidColorName
 } from "./primitive/common";

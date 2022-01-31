@@ -1,6 +1,6 @@
 import {
   SourceSpan
-} from "./sourcespan";
+} from "../data/sourcespan";
 import {
   Token
 } from "./token";

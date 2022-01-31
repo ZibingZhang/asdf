@@ -4,7 +4,7 @@ import {
   ProcedureType,
   StringType,
   SymbolType
-} from "../types";
+} from "../values/types";
 import {
   RPrimProc,
   RString,
@@ -12,7 +12,7 @@ import {
   RValue,
   isRSymbol,
   toRBoolean
-} from "../rvalue";
+} from "../values/rvalue";
 
 export {
   RPPSymbolToString,

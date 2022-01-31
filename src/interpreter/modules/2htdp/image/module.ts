@@ -7,7 +7,7 @@ import {
   RModule,
   RStructGetProc,
   RStructHuhProc
-} from "../../../rvalue";
+} from "../../../values/rvalue";
 import {
   RPC_EMPTY_IMAGE,
   RPPCircle,
@@ -27,7 +27,7 @@ import {
 } from "./primitive/polygons";
 import {
   ProcedureType
-} from "../../../types";
+} from "../../../values/types";
 import {
   RPPImageHuh
 } from "./primitive/imagePredicates";

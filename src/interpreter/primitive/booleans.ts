@@ -3,7 +3,7 @@ import {
   BooleanType,
   ProcedureType,
   StringType
-} from "../types";
+} from "../values/types";
 import {
   RBoolean,
   RPrimProc,
@@ -11,7 +11,7 @@ import {
   RValue,
   isRBoolean,
   toRBoolean
-} from "../rvalue";
+} from "../values/rvalue";
 
 export {
   RPPBooleanToString,

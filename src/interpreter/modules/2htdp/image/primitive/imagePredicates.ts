@@ -2,12 +2,12 @@ import {
   AnyType,
   BooleanType,
   ProcedureType
-} from "../../../../types";
+} from "../../../../values/types";
 import {
   RPrimProc,
   RValue,
   toRBoolean
-} from "../../../../rvalue";
+} from "../../../../values/rvalue";
 import {
   isRImage
 } from "../rvalue";

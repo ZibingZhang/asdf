@@ -6,13 +6,13 @@ import {
   RSymbol,
   RValue,
   isRExactReal
-} from "../../../rvalue";
+} from "../../../values/rvalue";
 import {
   ImageType
 } from "./types";
 import {
   Type
-} from "../../../types";
+} from "../../../values/types";
 
 export {
   RImage,

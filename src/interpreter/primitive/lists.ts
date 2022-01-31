@@ -5,7 +5,7 @@ import {
   ListType,
   PairType,
   ProcedureType
-} from "../types";
+} from "../values/types";
 import {
   RList,
   RMath,
@@ -17,7 +17,7 @@ import {
   isREmptyList,
   isRList,
   toRBoolean
-} from "../rvalue";
+} from "../values/rvalue";
 
 export {
   RPPAppend,

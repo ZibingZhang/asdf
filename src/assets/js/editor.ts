@@ -4,7 +4,7 @@ import {
 } from "./controller";
 import {
   SourceSpan
-} from "../../interpreter/sourcespan";
+} from "../../interpreter/data/sourcespan";
 
 export {
   Editor

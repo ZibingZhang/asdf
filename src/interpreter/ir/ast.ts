@@ -21,7 +21,7 @@ import {
   HO_EXPECTED_LIST_ARGUMENT_ERR,
   RQ_MODULE_NOT_FOUND_ERR,
   WF_QUESTION_NOT_BOOL_ERR
-} from "./error";
+} from "../error";
 import {
   RComposedProcedure,
   RLambda,
@@ -45,38 +45,38 @@ import {
   isRString,
   isRStructType,
   isRTrue
-} from "./rvalue";
+} from "../values/rvalue";
 import {
   Scope,
   VariableType
-} from "./scope";
+} from "../data/scope";
 import {
   AtomSExpr
 } from "./sexpr";
 import {
   Environment
-} from "./environment";
+} from "../data/environment";
 import {
   Global
-} from "./global";
+} from "../global";
 import {
   Keyword
-} from "./keyword";
+} from "../data/keyword";
 import {
   RNG
-} from "./random";
+} from "../random";
 import {
   SETTINGS
-} from "./settings";
+} from "../settings";
 import {
   SourceSpan
-} from "./sourcespan";
+} from "../data/sourcespan";
 import {
   StageError
-} from "./pipeline";
+} from "../data/stage";
 import {
   UserError
-} from "./primitive/misc";
+} from "../primitive/misc";
 
 export {
   ASTNode,

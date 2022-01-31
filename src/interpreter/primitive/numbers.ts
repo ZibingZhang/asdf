@@ -10,7 +10,7 @@ import {
   RationalType,
   RealType,
   StringType
-} from "../types";
+} from "../values/types";
 import {
   FA_COMPLEX_NUMBERS_UNSUPPORTED_ERR,
   FA_DIV_BY_ZERO_ERR
@@ -30,16 +30,16 @@ import {
   isRInteger,
   isRNumber,
   toRBoolean
-} from "../rvalue";
+} from "../values/rvalue";
 import {
   RNG
 } from "../random";
 import {
   SourceSpan
-} from "../sourcespan";
+} from "../data/sourcespan";
 import {
   StageError
-} from "../pipeline";
+} from "../data/stage";
 
 export {
   RPPMultiply,

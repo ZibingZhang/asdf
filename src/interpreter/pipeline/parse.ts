@@ -26,14 +26,14 @@ import {
   isLambdaNode,
   isRequireNode,
   isVarNode
-} from "./ast";
+} from "../ir/ast";
 import {
   AtomSExpr,
   ListSExpr,
   SExpr,
   isAtomSExpr,
   isListSExpr
-} from "./sexpr";
+} from "../ir/sexpr";
 import {
   CN_ELSE_NOT_LAST_CLAUSE_ERR,
   CN_EXPECTED_TWO_PART_CLAUSE_ERR,
@@ -80,7 +80,7 @@ import {
   SX_EXPECTED_OPEN_PAREN_ERR,
   UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR,
   UQ_MISUSE_UNDER_BACKQUOTE_ERR
-} from "./error";
+} from "../error";
 import {
   RCharacter,
   RExactReal,
@@ -90,28 +90,28 @@ import {
   R_EMPTY_LIST,
   R_FALSE,
   R_TRUE
-} from "./rvalue";
+} from "../values/rvalue";
 import {
   Stage,
   StageError,
   StageOutput
-} from "./pipeline";
+} from "../data/stage";
 import {
   Token,
   TokenType
-} from "./token";
+} from "../ir/token";
 import {
   Global
-} from "./global";
+} from "../global";
 import {
   Keyword
-} from "./keyword";
+} from "../data/keyword";
 import {
   Program
-} from "./program";
+} from "../ir/program";
 import {
   SETTINGS
-} from "./settings";
+} from "../settings";
 
 export {
   ParseSExpr

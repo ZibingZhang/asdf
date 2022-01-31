@@ -21,16 +21,16 @@ import {
 import {
   NO_SOURCE_SPAN,
   SourceSpan
-} from "./sourcespan";
+} from "../data/sourcespan";
 import {
   ASTNode
-} from "./ast";
+} from "../ir/ast";
 import {
   Environment
-} from "./environment";
+} from "../data/environment";
 import {
   SETTINGS
-} from "./settings";
+} from "../settings";
 
 export {
   R_EMPTY_LIST,

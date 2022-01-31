@@ -1,21 +1,21 @@
 import {
   Global
-} from "./global";
+} from "../global";
 import {
   RValue
-} from "./rvalue";
+} from "../values/rvalue";
 import {
   SC_USED_BEFORE_DEFINITION_ERR
-} from "./error";
+} from "../error";
 import {
   SETTINGS
-} from "./settings";
+} from "../settings";
 import {
   SourceSpan
 } from "./sourcespan";
 import {
   StageError
-} from "./pipeline";
+} from "./stage";
 
 export {
   Environment

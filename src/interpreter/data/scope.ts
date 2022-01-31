@@ -1,19 +1,19 @@
 import {
   SC_UNDEFINED_FUNCTION_ERR,
   SC_UNDEFINED_VARIABLE_ERR
-} from "./error";
+} from "../error";
 import {
   Global
-} from "./global";
+} from "../global";
 import {
   SETTINGS
-} from "./settings";
+} from "../settings";
 import {
   SourceSpan
 } from "./sourcespan";
 import {
   StageError
-} from "./pipeline";
+} from "./stage";
 
 export {
   Scope,

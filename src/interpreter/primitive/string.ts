@@ -7,7 +7,7 @@ import {
   ProcedureType,
   StringType,
   SymbolType
-} from "../types";
+} from "../values/types";
 import {
   RCharacter,
   RExactReal,
@@ -21,7 +21,7 @@ import {
   R_TRUE,
   isRString,
   toRBoolean
-} from "../rvalue";
+} from "../values/rvalue";
 
 export {
   RPPExplode,

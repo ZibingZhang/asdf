@@ -14,7 +14,7 @@ import {
 import {
   NonNegativeRealType,
   ProcedureType
-} from "../../../../types";
+} from "../../../../values/types";
 import {
   RImage,
   RMode
@@ -23,7 +23,7 @@ import {
   RNumber,
   RPrimProc,
   RValue
-} from "../../../../rvalue";
+} from "../../../../values/rvalue";
 
 export {
   RPPSquare,

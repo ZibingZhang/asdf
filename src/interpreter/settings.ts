@@ -1,6 +1,6 @@
 import {
   ALL_KEYWORDS
-} from "./keyword";
+} from "./data/keyword";
 
 export {
   SETTINGS,
