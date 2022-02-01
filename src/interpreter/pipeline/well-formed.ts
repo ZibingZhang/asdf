@@ -159,7 +159,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         node.bindings.forEach(([variable, _]) => {
           if (names.has(variable.name)) {
             throw new StageError(
-              LT_ALREADY_DEFINED_LOCALLY_ERR(node.name),
+              LT_ALREADY_DEFINED_LOCALLY_ERR(variable.name),
               variable.sourceSpan
             );
           }
@@ -175,7 +175,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         node.bindings.forEach(([variable, expr]) => {
           if (names.has(variable.name)) {
             throw new StageError(
-              LT_ALREADY_DEFINED_LOCALLY_ERR(node.name),
+              LT_ALREADY_DEFINED_LOCALLY_ERR(variable.name),
               variable.sourceSpan
             );
           }
@@ -189,7 +189,7 @@ class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program>
         node.bindings.forEach(([variable, _]) => {
           if (names.has(variable.name)) {
             throw new StageError(
-              LT_ALREADY_DEFINED_LOCALLY_ERR(node.name),
+              LT_ALREADY_DEFINED_LOCALLY_ERR(variable.name),
               variable.sourceSpan
             );
           }
