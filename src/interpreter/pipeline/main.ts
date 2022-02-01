@@ -71,7 +71,7 @@ class Pipeline {
     }
   };
 
-  evaluateCode(code: string): StageOutput<any> {
+  evaluateCode(code: string): void {
     if (this.higherOrderFunctions !== SETTINGS.higherOrderFunctions) {
       this.higherOrderFunctions = SETTINGS.higherOrderFunctions;
       if (this.higherOrderFunctions) {
@@ -81,17 +81,15 @@ class Pipeline {
       }
     }
     try {
-      return this.evaluateCodeHelper(code);
+      this.evaluateCodeHelper(code);
     } catch (e) {
-      if (e instanceof Pipeline.ShortCircuitPipeline) {
-        return e.stageOutput;
-      } else {
+      if (!(e instanceof Pipeline.ShortCircuitPipeline)) {
         throw e;
       }
     }
   }
 
-  evaluateCodeHelper(code: string): StageOutput<any> {
+  evaluateCodeHelper(code: string): void {
     const initOutput: StageOutput<string> = new StageOutput(code);
     this.lexingOutput = this.LEXING_STAGE.run(initOutput);
     this.handleErrors(this.lexingOutput);
@@ -104,7 +102,6 @@ class Pipeline {
     this.successCallback(this.evaluateCodeOutput.output);
     this.testResultsCallback(this.evaluateCodeOutput.tests);
     if (this.unusedCallback) { this.UNUSED_CODE_STAGE.run(this.parsingOutput); }
-    return this.evaluateCodeOutput;
   }
 
   handleErrors(
