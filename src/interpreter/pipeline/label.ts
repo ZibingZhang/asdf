@@ -19,7 +19,8 @@ import {
 } from "../ir/ast";
 import {
   Stage,
-  StageOutput
+  StageResult,
+  makeStageResult
 } from "../data/stage";
 import {
   Global
@@ -32,14 +33,14 @@ export {
   GenerateLabels
 };
 
-class GenerateLabels extends ASTNodeVisitor<void> implements Stage<Program, void> {
+class GenerateLabels implements ASTNodeVisitor<void>, Stage<Program, void> {
   global = new Global();
   currentInt = 0;
 
-  run(input: StageOutput<Program>): StageOutput<void> {
+  run(result: StageResult<Program>): StageResult<void> {
     this.currentInt = 0;
-    input.output.nodes.forEach(node => node.accept(this));
-    return new StageOutput(void null);
+    result.output.nodes.forEach(node => node.accept(this));
+    return makeStageResult(void null);
   }
 
   visitAndNode(node: AndNode): void {

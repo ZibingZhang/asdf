@@ -1,6 +1,6 @@
 import {
   ASTNode,
-  ASTNodeVisitor,
+  ASTNodeExtendedVisitor,
   AndNode,
   AtomNode,
   CheckErrorNode,
@@ -78,8 +78,10 @@ import {
 import {
   Stage,
   StageError,
-  StageOutput,
-  StageTestResult
+  StageResult,
+  StageTestResult,
+  makeStageResult,
+  makeStageTestResult
 } from "../data/stage";
 import {
   Environment
@@ -105,7 +107,7 @@ export {
   EvaluateRProcedureVisitor
 };
 
-class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RValue[]> {
+class EvaluateCode implements ASTNodeExtendedVisitor<RValue>, Stage<Program, RValue[]> {
   env = new Environment();
 
   private globalEnv = new Environment();
@@ -117,9 +119,9 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     this.execEnv = new Environment();
   }
 
-  run(input: StageOutput<Program>): StageOutput<RValue[]> {
+  run(result: StageResult<Program>): StageResult<RValue[]> {
     this.testResults = [];
-    const program = input.output;
+    const program = result.output;
     this.env = this.globalEnv;
     try {
       program.defns.forEach(defn => {
@@ -139,7 +141,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
           result = node.accept(this);
         }
         if (result instanceof RTestResult) {
-          this.testResults.push(new StageTestResult(
+          this.testResults.push(makeStageTestResult(
             result.passed,
             result.msg,
             result.sourceSpan
@@ -148,12 +150,12 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
           output.push(result);
         }
       }
-      return new StageOutput(output, [], this.testResults);
+      return makeStageResult(output, [], this.testResults);
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput([], [e], this.testResults);
+        return makeStageResult([], [e], this.testResults);
       } else if (e instanceof Error && e.message === "too much recursion") {
-        return new StageOutput(
+        return makeStageResult(
           [],
           [
             new StageError(

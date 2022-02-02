@@ -19,7 +19,8 @@ import {
 } from "../ir/ast";
 import {
   Stage,
-  StageOutput
+  StageResult,
+  makeStageResult
 } from "../data/stage";
 import {
   Program
@@ -32,16 +33,14 @@ export {
   UnusedCode
 };
 
-class UnusedCode extends ASTNodeVisitor<void> implements Stage<Program, void> {
-  constructor(readonly unusedCallback: (sourceSpan: SourceSpan) => void) {
-    super();
-  }
+class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
+  constructor(readonly unusedCallback: (sourceSpan: SourceSpan) => void) {}
 
-  run(input: StageOutput<Program>): StageOutput<void> {
-    for (const node of input.output.nodes) {
+  run(result: StageResult<Program>): StageResult<void> {
+    for (const node of result.output.nodes) {
       node.accept(this);
     }
-    return new StageOutput(void(0));
+    return makeStageResult(void(0));
   }
 
   visitAndNode(node: AndNode): void {

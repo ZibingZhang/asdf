@@ -1,25 +1,28 @@
 export {
   NO_SOURCE_SPAN,
-  SourceSpan
+  SourceSpan,
+  makeSourceSpan
 };
 
+const NO_SOURCE_SPAN = makeSourceSpan(0, 0, 0, 0);
 
-class SourceSpan {
-  constructor(
-    readonly startLineno: number,
-    readonly startColno: number,
-    readonly endLineno: number,
-    readonly endColno: number
-  ) {}
-
-  stringify(): string {
-    return `<${this.startLineno}:${this.startColno}-${this.endLineno}:${this.endColno}>`;
-  }
-
-  comesAfter(sourceSpan: SourceSpan): boolean {
-    return this.startLineno > sourceSpan.startLineno
-      || (this.startLineno === sourceSpan.startLineno && this.startColno > sourceSpan.startColno);
-  }
+type SourceSpan = {
+  readonly startLineno: number;
+  readonly startColno: number;
+  readonly endLineno: number;
+  readonly endColno: number;
 }
 
-const NO_SOURCE_SPAN = new SourceSpan(0, 0, 0, 0);
+function makeSourceSpan(
+  startLineno: number,
+  startColno: number,
+  endLineno: number,
+  endColno: number
+): SourceSpan {
+  return {
+    startLineno,
+    startColno,
+    endLineno,
+    endColno
+  };
+}

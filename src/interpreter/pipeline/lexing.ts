@@ -1,7 +1,9 @@
 import {
   AtomSExpr,
   ListSExpr,
-  SExpr
+  SExpr,
+  makeAtomSExpr,
+  makeListSExpr
 } from "../ir/sexpr";
 import {
   RS_BAD_CHARACTER_CONSTANT_ERR,
@@ -24,9 +26,14 @@ import {
   UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR
 } from "../error";
 import {
+  SourceSpan,
+  makeSourceSpan
+} from "../data/sourcespan";
+import {
   Stage,
   StageError,
-  StageOutput
+  StageResult,
+  makeStageResult
 } from "../data/stage";
 import {
   Token,
@@ -38,9 +45,6 @@ import {
 import {
   SETTINGS
 } from "../settings";
-import {
-  SourceSpan
-} from "../data/sourcespan";
 
 export {
   Lexer
@@ -76,11 +80,11 @@ class Lexer implements Stage<string, SExpr[]> {
   private quoting = false;
   private quasiQuoting = false;
 
-  run(input: StageOutput<string>): StageOutput<SExpr[]> {
+  run(result: StageResult<string>): StageResult<SExpr[]> {
     this.position = 0;
     this.lineno = 1;
     this.colno = 0;
-    this.input = input.output;
+    this.input = result.output;
     this.atEnd = this.input.length === 0;
     this.quoting = false;
     this.quasiQuoting = false;
@@ -102,10 +106,10 @@ class Lexer implements Stage<string, SExpr[]> {
           <SourceSpan>sexprCommentDepth.pop()
         );
       }
-      return new StageOutput(sexprs);
+      return makeStageResult(sexprs);
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput([], [e]);
+        return makeStageResult([], [e]);
       } else {
         throw e;
       }
@@ -120,7 +124,7 @@ class Lexer implements Stage<string, SExpr[]> {
     } else if (ch.match(RIGHT_PAREN_RE)) {
       throw new StageError(
         RS_UNEXPECTED_ERR(ch),
-        new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
+        makeSourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
       );
     } else if (ch === "#") {
       return this.nextPoundSExpr();
@@ -130,7 +134,7 @@ class Lexer implements Stage<string, SExpr[]> {
       if (!SETTINGS.syntax.quasiquoting) {
         throw new StageError(
           RS_ILLEGAL_USE_ERR("`"),
-          new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
+          makeSourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
         );
       }
       return this.nextQuotedSExpr(true);
@@ -140,7 +144,7 @@ class Lexer implements Stage<string, SExpr[]> {
       if (!SETTINGS.syntax.quasiquoting) {
         throw new StageError(
           RS_ILLEGAL_USE_ERR(","),
-          new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
+          makeSourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
         );
       }
       return this.nextUnquotedSExpr();
@@ -151,7 +155,7 @@ class Lexer implements Stage<string, SExpr[]> {
     this.atEnd = false;
     const colno = --this.colno;
     const name = this.nextName();
-    const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
+    const sourceSpan = makeSourceSpan(lineno, colno, this.lineno, this.colno);
 
     let tokenType;
     if (name === ".") {
@@ -178,7 +182,7 @@ class Lexer implements Stage<string, SExpr[]> {
     } else {
       tokenType = TokenType.Name;
     }
-    return new AtomSExpr(
+    return makeAtomSExpr(
       new Token(tokenType, name, sourceSpan),
       sourceSpan
     );
@@ -201,32 +205,32 @@ class Lexer implements Stage<string, SExpr[]> {
     if (this.atEnd) {
       throw new StageError(
         RS_EXPECTED_CLOSING_PAREN_ERR(opening),
-        new SourceSpan(openingLineno, openingColno, openingLineno, openingColno + 1)
+        makeSourceSpan(openingLineno, openingColno, openingLineno, openingColno + 1)
       );
     }
     const closing = this.next();
     if (sexprCommentDepth.length > 0) {
       throw new StageError(
         RS_UNEXPECTED_ERR(closing),
-        new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
+        makeSourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
       );
     }
     if (!this.parenMatches(opening, closing)) {
       throw new StageError(
         RS_EXPECTED_CORRECT_CLOSING_PAREN_ERR(opening, closing),
-        new SourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
+        makeSourceSpan(this.lineno, this.colno - 1, this.lineno, this.colno)
       );
     }
-    return new ListSExpr(
+    return makeListSExpr(
       sexprs,
-      new SourceSpan(openingLineno, openingColno, this.lineno, this.colno)
+      makeSourceSpan(openingLineno, openingColno, this.lineno, this.colno)
     );
   }
 
   private nextPoundSExpr(): AtomSExpr {
     const poundLineno = this.lineno;
     const poundColno = this.colno - 1;
-    const poundSourceSpan = new SourceSpan(poundLineno, poundColno, poundLineno, poundColno + 1);
+    const poundSourceSpan = makeSourceSpan(poundLineno, poundColno, poundLineno, poundColno + 1);
     if (this.atEnd) {
       throw new StageError(
         RS_BAD_SYNTAX_ERR("#"),
@@ -237,7 +241,7 @@ class Lexer implements Stage<string, SExpr[]> {
       const ch = this.next();
       throw new StageError(
         RS_BAD_SYNTAX_ERR("#" + ch),
-        new SourceSpan(poundLineno, poundColno, this.lineno, this.colno)
+        makeSourceSpan(poundLineno, poundColno, this.lineno, this.colno)
       );
     }
     if (this.match("\\")) {
@@ -247,14 +251,14 @@ class Lexer implements Stage<string, SExpr[]> {
     while (!this.atEnd && !this.peek().match(DELIMITER_RE)) {
       name += this.next();
     }
-    const sourceSpan = new SourceSpan(poundLineno, poundColno, this.lineno, this.colno);
+    const sourceSpan = makeSourceSpan(poundLineno, poundColno, this.lineno, this.colno);
     if (name.match(TRUE_LITERAL_RE)) {
-      return new AtomSExpr(
+      return makeAtomSExpr(
         new Token(TokenType.True, name, sourceSpan),
         sourceSpan
       );
     } else if (name.match(FALSE_LITERAL_RE)) {
-      return new AtomSExpr(
+      return makeAtomSExpr(
         new Token(TokenType.False, name, sourceSpan),
         sourceSpan
       );
@@ -269,7 +273,7 @@ class Lexer implements Stage<string, SExpr[]> {
   private nextQuotedSExpr(quasiquote = false): ListSExpr {
     const quoteLineno = this.lineno;
     const quoteColno = this.colno - 1;
-    const quoteSourceSpan = new SourceSpan(quoteLineno, quoteColno, quoteLineno, quoteColno + 1);
+    const quoteSourceSpan = makeSourceSpan(quoteLineno, quoteColno, quoteLineno, quoteColno + 1);
     if (this.quoting || this.quasiQuoting) {
       throw new StageError(
         RS_NESTED_QUOTES_UNSUPPORTED_ERR,
@@ -302,15 +306,15 @@ class Lexer implements Stage<string, SExpr[]> {
     const sexpr = this.nextSExpr();
     this.quoting = false;
     this.quasiQuoting = false;
-    return new ListSExpr(
+    return makeListSExpr(
       [
-        new AtomSExpr(
+        makeAtomSExpr(
           new Token(TokenType.Keyword, quasiquote ? Keyword.Quasiquote : Keyword.Quote, quoteSourceSpan),
           quoteSourceSpan
         ),
         sexpr
       ],
-      new SourceSpan(quoteLineno, quoteColno, this.lineno, this.colno)
+      makeSourceSpan(quoteLineno, quoteColno, this.lineno, this.colno)
     );
   }
 
@@ -321,13 +325,13 @@ class Lexer implements Stage<string, SExpr[]> {
     if (this.atEnd) {
       throw new StageError(
         RS_EXPECTED_CHARACTER_ERR,
-        new SourceSpan(lineno, colno, this.lineno, this.colno)
+        makeSourceSpan(lineno, colno, this.lineno, this.colno)
       );
     }
     name += this.next();
     if (name.match(/#\\[^a-z]/i)) {
-      const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
-      return new AtomSExpr(
+      const sourceSpan = makeSourceSpan(lineno, colno, this.lineno, this.colno);
+      return makeAtomSExpr(
         new Token(TokenType.Character, name, sourceSpan),
         sourceSpan
       );
@@ -335,14 +339,14 @@ class Lexer implements Stage<string, SExpr[]> {
     while (!this.atEnd && this.peek().match(/[a-z]/i)) {
       name += this.next();
     }
-    const sourceSpan = new SourceSpan(lineno, colno, this.lineno, this.colno);
+    const sourceSpan = makeSourceSpan(lineno, colno, this.lineno, this.colno);
     if (name.length - 2 > 1 && !name.match(CHARACTER_SPECIAL_FORMS_RE)) {
       throw new StageError(
         RS_BAD_CHARACTER_CONSTANT_ERR(name),
         sourceSpan
       );
     }
-    return new AtomSExpr(
+    return makeAtomSExpr(
       new Token(TokenType.Character, name, sourceSpan),
       sourceSpan
     );
@@ -356,20 +360,20 @@ class Lexer implements Stage<string, SExpr[]> {
       const ch = this.next();
       switch (ch) {
         case "\"": {
-          return new AtomSExpr(
+          return makeAtomSExpr(
             new Token(
               TokenType.String,
               str + "\"",
-              new SourceSpan(lineno, colno, this.lineno, this.colno)
+              makeSourceSpan(lineno, colno, this.lineno, this.colno)
             ),
-            new SourceSpan(lineno, colno, this.lineno, this.colno)
+            makeSourceSpan(lineno, colno, this.lineno, this.colno)
           );
         }
         case "\\": {
           if (this.atEnd) {
             throw new StageError(
               RS_EXPECTED_CLOSING_QUOTE_ERR,
-              new SourceSpan(lineno, colno, this.lineno, this.colno)
+              makeSourceSpan(lineno, colno, this.lineno, this.colno)
             );
           }
           const ch = this.next();
@@ -422,7 +426,7 @@ class Lexer implements Stage<string, SExpr[]> {
             default: {
               throw new StageError(
                 RS_UNKNOWN_ESCAPE_SEQUENCE_ERR(ch),
-                new SourceSpan(this.lineno, this.colno - 2, this.lineno, this.colno)
+                makeSourceSpan(this.lineno, this.colno - 2, this.lineno, this.colno)
               );
             }
           }
@@ -435,14 +439,14 @@ class Lexer implements Stage<string, SExpr[]> {
     }
     throw new StageError(
       RS_EXPECTED_CLOSING_QUOTE_ERR,
-      new SourceSpan(lineno, colno, this.lineno, this.colno)
+      makeSourceSpan(lineno, colno, this.lineno, this.colno)
     );
   }
 
   private nextUnquotedSExpr(): ListSExpr {
     const unquoteLineno = this.lineno;
     const unquoteColno = this.colno - 1;
-    const unquoteSourceSpan = new SourceSpan(unquoteLineno, unquoteColno, unquoteLineno, unquoteColno + 1);
+    const unquoteSourceSpan = makeSourceSpan(unquoteLineno, unquoteColno, unquoteLineno, unquoteColno + 1);
     if (!this.quasiQuoting) {
       throw new StageError(
         UQ_MISUSE_NOT_UNDER_BACKQUOTE_ERR("unquote", "comma"),
@@ -468,15 +472,15 @@ class Lexer implements Stage<string, SExpr[]> {
       );
     }
     const sexpr = this.nextSExpr();
-    return new ListSExpr(
+    return makeListSExpr(
       [
-        new AtomSExpr(
+        makeAtomSExpr(
           new Token(TokenType.Keyword, Keyword.Unquote, unquoteSourceSpan),
           unquoteSourceSpan
         ),
         sexpr
       ],
-      new SourceSpan(unquoteLineno, unquoteColno, this.lineno, this.colno)
+      makeSourceSpan(unquoteLineno, unquoteColno, this.lineno, this.colno)
     );
   }
 
@@ -492,7 +496,7 @@ class Lexer implements Stage<string, SExpr[]> {
         } else {
           throw new StageError(
             RS_EOF_FOLLOWING_BACKSLASH_ERR,
-            new SourceSpan(lineno, colno, this.lineno, this.colno)
+            makeSourceSpan(lineno, colno, this.lineno, this.colno)
           );
         }
       } else if (ch === "|") {
@@ -502,7 +506,7 @@ class Lexer implements Stage<string, SExpr[]> {
           if (this.atEnd) {
             throw new StageError(
               RS_EXPECTED_CLOSING_PIPE_ERR,
-              new SourceSpan(lineno, colno, this.lineno, this.colno)
+              makeSourceSpan(lineno, colno, this.lineno, this.colno)
             );
           }
           const ch = this.next();
@@ -561,12 +565,12 @@ class Lexer implements Stage<string, SExpr[]> {
       if (this.atEnd && depth > 0) {
         throw new StageError(
           RS_EXPECTED_CLOSING_BLOCK_COMMENT_ERR,
-          new SourceSpan(lineno, colno, this.lineno, this.colno)
+          makeSourceSpan(lineno, colno, this.lineno, this.colno)
         );
       }
       return this.eatSpace();
     } else if (ch === "#" && this.match("#;")) {
-      return [new SourceSpan(this.lineno, this.colno - 2, this.lineno, this.colno)].concat(this.eatSpace());
+      return [makeSourceSpan(this.lineno, this.colno - 2, this.lineno, this.colno)].concat(this.eatSpace());
     } else {
       return [];
     }

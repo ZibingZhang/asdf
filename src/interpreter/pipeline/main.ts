@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   StageError,
-  StageOutput,
-  StageTestResult
+  StageResult,
+  StageTestResult,
+  makeStageResult
 } from "../data/stage";
 import {
   EvaluateCode
@@ -56,7 +57,7 @@ class Pipeline {
   private EVALUATE_CODE_STAGE = new EvaluateCode();
   private UNUSED_CODE_STAGE = new UnusedCode(() => { /* do nothing */ });
 
-  private parsingOutput: StageOutput<Program> = new StageOutput(new Program([], []));
+  private parsingOutput: StageResult<Program> = makeStageResult(new Program([], []));
 
   private errorsCallback: (stageErrors: StageError[]) => void = () => { /* do nothing */ };
   private successCallback: (output: RValue[]) => void = () => { /* do nothing */ };
@@ -64,7 +65,7 @@ class Pipeline {
   private unusedCallback: ((sourceSpan: SourceSpan) => void) | null = null;
 
   private static ShortCircuitPipeline = class extends Error {
-    constructor(readonly stageOutput: StageOutput<any>) {
+    constructor(readonly StageResult: StageResult<any>) {
       super();
     }
   };
@@ -88,7 +89,7 @@ class Pipeline {
   }
 
   evaluateCodeHelper(code: string): void {
-    const initOutput: StageOutput<string> = new StageOutput(code);
+    const initOutput: StageResult<string> = makeStageResult(code);
     const lexingOutput = this.LEXING_STAGE.run(initOutput);
     this.handleErrors(lexingOutput);
     this.parsingOutput = this.PARSING_SEXPRS_STAGE.run(lexingOutput);
@@ -104,14 +105,14 @@ class Pipeline {
   }
 
   handleErrors(
-    stageOutput: StageOutput<any>,
+    StageResult: StageResult<any>,
     runUnusedCallback = false
   ) {
-    if (stageOutput.errors.length > 0) {
-      this.errorsCallback(stageOutput.errors);
-      this.testResultsCallback(stageOutput.tests);
+    if (StageResult.errors.length > 0) {
+      this.errorsCallback(StageResult.errors);
+      this.testResultsCallback(StageResult.tests);
       if (this.unusedCallback && runUnusedCallback) { this.UNUSED_CODE_STAGE.run(this.parsingOutput); }
-      throw new Pipeline.ShortCircuitPipeline(stageOutput);
+      throw new Pipeline.ShortCircuitPipeline(StageResult);
     }
   }
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export {
   ALL_KEYWORDS,
   Keyword
@@ -33,5 +32,6 @@ enum Keyword {
 const ALL_KEYWORDS: string[] = [];
 
 for (const keyword in Keyword) {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   ALL_KEYWORDS.push((<any>Keyword.valueOf())[keyword]);
 }

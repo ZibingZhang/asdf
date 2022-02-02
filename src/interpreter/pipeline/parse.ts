@@ -28,13 +28,6 @@ import {
   isVarNode
 } from "../ir/ast";
 import {
-  AtomSExpr,
-  ListSExpr,
-  SExpr,
-  isAtomSExpr,
-  isListSExpr
-} from "../ir/sexpr";
-import {
   CN_ELSE_NOT_LAST_CLAUSE_ERR,
   CN_EXPECTED_TWO_PART_CLAUSE_ERR,
   DF_DUPLICATE_VARIABLE_ERR,
@@ -82,6 +75,14 @@ import {
   UQ_MISUSE_UNDER_BACKQUOTE_ERR
 } from "../error";
 import {
+  ListSExpr,
+  SExpr,
+  isAtomSExpr,
+  isListSExpr,
+  makeAtomSExpr,
+  makeListSExpr
+} from "../ir/sexpr";
+import {
   RCharacter,
   RExactReal,
   RPrimTestFunConfig,
@@ -94,7 +95,8 @@ import {
 import {
   Stage,
   StageError,
-  StageOutput
+  StageResult,
+  makeStageResult
 } from "../data/stage";
 import {
   Token,
@@ -117,17 +119,25 @@ export {
   ParseSExpr
 };
 
+function stringifySExpr(sexpr: SExpr): string {
+  if (isAtomSExpr(sexpr)) {
+    return sexpr.token.text;
+  } else {
+    return `(${sexpr.subSExprs.map(sexpr => stringifySExpr(sexpr)).join(" ")})`;
+  }
+}
+
 class ParseSExpr implements Stage<SExpr[], Program> {
   private global = new Global();
   private inFunDef = false;
 
-  run(input: StageOutput<SExpr[]>): StageOutput<Program> {
+  run(result: StageResult<SExpr[]>): StageResult<Program> {
     this.inFunDef = false;
     try {
-      return new StageOutput(this.processSExprs(input.output));
+      return makeStageResult(this.processSExprs(result.output));
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput(<Program><unknown>null, [e]);
+        return makeStageResult(<Program><unknown>null, [e]);
       } else {
         throw e;
       }
@@ -424,16 +434,16 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       case Keyword.CheckMemberOf: {
         return new CheckMemberOfNode(
           this.toNode(
-            new ListSExpr(
+            makeListSExpr(
               [
-                new AtomSExpr(
+                makeAtomSExpr(
                   new Token(TokenType.Name, "member", sexpr.sourceSpan),
                   sexpr.sourceSpan
                 ),
                 sexpr.subSExprs[1],
-                new ListSExpr(
+                makeListSExpr(
                   [
-                    new AtomSExpr(
+                    makeAtomSExpr(
                       new Token(TokenType.Name, "list", sexpr.sourceSpan),
                       sexpr.sourceSpan
                     ),
@@ -456,15 +466,15 @@ class ParseSExpr implements Stage<SExpr[], Program> {
         const upperBoundValSExpr = sexpr.subSExprs[3];
         return new CheckRangeNode(
           this.toNode(
-            new ListSExpr(
+            makeListSExpr(
               [
-                new AtomSExpr(
+                makeAtomSExpr(
                   new Token(TokenType.Keyword, Keyword.And, sexpr.sourceSpan),
                   sexpr.sourceSpan
                 ),
-                new ListSExpr(
+                makeListSExpr(
                   [
-                    new AtomSExpr(
+                    makeAtomSExpr(
                       new Token(TokenType.Name, "<=", sexpr.sourceSpan),
                       sexpr.sourceSpan
                     ),
@@ -473,9 +483,9 @@ class ParseSExpr implements Stage<SExpr[], Program> {
                   ],
                   sexpr.sourceSpan
                 ),
-                new ListSExpr(
+                makeListSExpr(
                   [
-                    new AtomSExpr(
+                    makeAtomSExpr(
                       new Token(TokenType.Name, "<=", sexpr.sourceSpan),
                       sexpr.sourceSpan
                     ),
@@ -497,7 +507,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       case Keyword.CheckSatisfied: {
         return new CheckSatisfiedNode(
           this.toNode(
-            new ListSExpr(
+            makeListSExpr(
               [
                 sexpr.subSExprs[2],
                 sexpr.subSExprs[1]
@@ -507,16 +517,16 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           ),
           this.toNode(sexpr.subSExprs[1]),
           this.toNode(sexpr.subSExprs[2]),
-          sexpr.subSExprs[2].stringify(),
+          stringifySExpr(sexpr.subSExprs[2]),
           sexpr.sourceSpan
         );
       }
       case Keyword.CheckWithin: {
         return new CheckWithinNode(
           this.toNode(
-            new ListSExpr(
+            makeListSExpr(
               [
-                new AtomSExpr(
+                makeAtomSExpr(
                   new Token(TokenType.Name, "equal~?", sexpr.sourceSpan),
                   sexpr.sourceSpan
                 ),

@@ -34,7 +34,8 @@ import {
 import {
   Stage,
   StageError,
-  StageOutput
+  StageResult,
+  makeStageResult
 } from "../data/stage";
 import {
   Keyword
@@ -50,7 +51,7 @@ export {
   WellFormedProgram
 };
 
-class WellFormedProgram extends ASTNodeVisitor<void> implements Stage<Program, Program> {
+class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
   private level = 0;
   private scope: Scope = new Scope();
 
@@ -58,13 +59,13 @@ class WellFormedProgram extends ASTNodeVisitor<void> implements Stage<Program, P
     this.scope = new Scope();
   }
 
-  run(input: StageOutput<Program>): StageOutput<Program> {
+  run(result: StageResult<Program>): StageResult<Program> {
     try {
-      this.assertWellFormedProgram(input.output);
-      return input;
+      this.assertWellFormedProgram(result.output);
+      return result;
     } catch (e) {
       if (e instanceof StageError) {
-        return new StageOutput(<Program><unknown>null, [e]);
+        return makeStageResult(<Program><unknown>null, [e]);
       } else {
         throw e;
       }

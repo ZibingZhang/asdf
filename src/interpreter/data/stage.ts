@@ -4,10 +4,22 @@ import {
 
 export {
   Stage,
+  StageResult,
   StageError,
-  StageOutput,
-  StageTestResult
+  StageTestResult,
+  makeStageResult,
+  makeStageTestResult
 };
+
+type Stage<S, T> = {
+  run(result: StageResult<S>): StageResult<T>;
+}
+
+type StageResult<T> = {
+  readonly output: T;
+  readonly errors: StageError[];
+  readonly tests: StageTestResult[];
+}
 
 class StageError extends Error {
   constructor(
@@ -18,22 +30,32 @@ class StageError extends Error {
   }
 }
 
-class StageTestResult {
-  constructor(
-    readonly passed: boolean,
-    readonly errMsg: string,
-    readonly sourceSpan: SourceSpan
-  ) {}
+type StageTestResult = {
+  readonly passed: boolean;
+  readonly errMsg: string;
+  readonly sourceSpan: SourceSpan;
 }
 
-class StageOutput<T> {
-  constructor(
-    readonly output: T,
-    readonly errors: StageError[] = [],
-    readonly tests: StageTestResult[] = []
-  ) {}
+function makeStageResult<T>(
+  output: T,
+  errors: StageError[] = [],
+  tests: StageTestResult[] = []
+): StageResult<T> {
+  return {
+    output,
+    errors,
+    tests
+  };
 }
 
-interface Stage<S, T> {
-  run(input: StageOutput<S>): StageOutput<T>;
+function makeStageTestResult(
+  passed: boolean,
+  errMsg: string,
+  sourceSpan: SourceSpan
+): StageTestResult {
+  return {
+    passed,
+    errMsg,
+    sourceSpan
+  };
 }

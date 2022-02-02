@@ -6,51 +6,53 @@ import {
 } from "./token";
 
 export {
+  SExpr,
   AtomSExpr,
   ListSExpr,
-  SExpr,
+  makeAtomSExpr,
+  makeListSExpr,
   isAtomSExpr,
   isListSExpr
 };
 
-type SExpr = AtomSExpr | ListSExpr;
+type SExpr =
+  | AtomSExpr
+  | ListSExpr;
 
-abstract class SExprBase {
-  constructor(readonly sourceSpan: SourceSpan) {}
-
-  abstract stringify(): string;
+type AtomSExpr = {
+  readonly token: Token;
+  readonly sourceSpan: SourceSpan;
 }
 
-class AtomSExpr extends SExprBase {
-  constructor(
-    readonly token: Token,
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
-
-  stringify(): string {
-    return this.token.text;
-  }
+type ListSExpr = {
+  readonly subSExprs: SExpr[];
+  readonly sourceSpan: SourceSpan;
 }
 
-class ListSExpr extends SExprBase {
-  constructor(
-    readonly subSExprs: SExpr[],
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
+function makeAtomSExpr(
+  token: Token,
+  sourceSpan: SourceSpan
+): AtomSExpr {
+  return {
+    token,
+    sourceSpan
+  };
+}
 
-  stringify(): string {
-    return `(${this.subSExprs.map(sexpr => sexpr.stringify()).join(" ")})`;
-  }
+function makeListSExpr(
+  subSExprs: SExpr[],
+  sourceSpan: SourceSpan
+): ListSExpr {
+  return {
+    subSExprs,
+    sourceSpan
+  };
 }
 
 function isAtomSExpr(sexpr: SExpr): sexpr is AtomSExpr {
-  return sexpr instanceof AtomSExpr;
+  return "token" in sexpr;
 }
 
 function isListSExpr(sexpr: SExpr): sexpr is ListSExpr {
-  return sexpr instanceof ListSExpr;
+  return "subSExprs" in sexpr;
 }
