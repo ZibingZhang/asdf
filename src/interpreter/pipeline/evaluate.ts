@@ -12,14 +12,14 @@ import {
   CondNode,
   DefnStructNode,
   DefnVarNode,
-  EllipsisProcAppNode,
   EllipsisNode,
-  ProcAppNode,
+  EllipsisProcAppNode,
   IfNode,
   LambdaNode,
   LetNode,
   LocalNode,
   OrNode,
+  ProcAppNode,
   RequireNode,
   VarNode,
   isCheckNode,
@@ -164,11 +164,11 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     }
   }
 
-  visitAndNode(node: AndNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitAndNode(node: AndNode, _: Environment): RValue {
     node.used = true;
     let result: RValue = R_FALSE;
     for (const arg of node.args) {
-      result = arg.accept(this, env);
+      result = arg.accept(this);
       if (isRFalse(result)) { return result; }
     }
     if (!isRBoolean(result)) {
@@ -180,7 +180,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return result;
   }
 
-  visitAtomNode(node: AtomNode): RValue {
+  visitAtomNode(node: AtomNode, [_, ...__]: [Environment, never[]]): RValue {
     node.used = true;
     return node.rval;
   }
@@ -363,29 +363,29 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
 
   visitDefnStructNode(node: DefnStructNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
-    env.set(node.nameLabel, new RStructType(node.name));
-    env.set(node.makeStructLabel, new RMakeStructFun(node.name, node.fields.length));
-    env.set(node.structHuhLabel, new RStructHuhProc(node.name));
+    env.set(node.name, new RStructType(node.name));
+    env.set(`make-${node.name}`, new RMakeStructFun(node.name, node.fields.length));
+    env.set(`${node.name}?`, new RStructHuhProc(node.name));
     node.fields.forEach((field, idx) => {
-      env.set(node.fieldLabels[idx], new RStructGetProc(node.name, field, idx));
+      env.set(`${node.name}-${field}`, new RStructGetProc(node.name, field, idx));
     });
     return R_VOID;
   }
 
   visitDefnVarNode(node: DefnVarNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
-    env.set(node.nameLabel, node.value.accept(this, env));
+    env.set(node.name, node.value.accept(this, env));
     return R_VOID;
   }
 
-  visitEllipsisProcAppNode(node: EllipsisProcAppNode): RValue {
+  visitEllipsisProcAppNode(node: EllipsisProcAppNode, _: Environment): RValue {
     throw new StageError(
       EL_EXPECTED_FINISHED_EXPR_ERR(node.placeholder.token.text),
       node.sourceSpan
     );
   }
 
-  visitEllipsisNode(node: EllipsisNode): RValue {
+  visitEllipsisNode(node: EllipsisNode, _: Environment): RValue {
     throw new StageError(
       EL_EXPECTED_FINISHED_EXPR_ERR(node.placeholder.token.text),
       node.sourceSpan
@@ -410,7 +410,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
 
   visitLambdaNode(node: LambdaNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
-    return new RLambda(node.name, new Environment(env), node.params, node.paramLabels, node.body);
+    return new RLambda(node.name, env.copy(), node.params, node.body);
   }
 
   visitLetNode(node: LetNode, [env, ..._]: [Environment, never[]]): RValue {
@@ -420,12 +420,19 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     });
     switch (node.name) {
       case "letrec":
-      case "let*":
-      case "let": {
+      case "let*": {
+        const childEnv = new Environment(env);
         node.bindings.forEach(([variable, expr]) => {
-          env.set(variable.label, expr.accept(this, env));
+          childEnv.set(variable.name, expr.accept(this, childEnv));
         });
-        return node.body.accept(this, env);
+        return node.body.accept(this, childEnv);
+      }
+      case "let": {
+        const childEnv = new Environment(env);
+        node.bindings.forEach(([variable, expr]) => {
+          childEnv.set(variable.name, expr.accept(this, env));
+        });
+        return node.body.accept(this, childEnv);
       }
       default: {
         throw "illegal state: unsupported let-style expression";
@@ -435,8 +442,9 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
 
   visitLocalNode(node: LocalNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
-    node.defns.forEach(defn => defn.accept(this, env));
-    return node.body.accept(this, env);
+    const childEnv = new Environment(env);
+    node.defns.forEach(defn => defn.accept(this, childEnv));
+    return node.body.accept(this, childEnv);
   }
 
   visitOrNode(node: OrNode, [env, ..._]: [Environment, never[]]): RValue {
@@ -461,7 +469,6 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     if (isVarNode(node.fn)) {
       rval = env.get(
         node.fn.name,
-        node.fn.label,
         node.fn.sourceSpan
       );
       if (!isRProcedure(rval)) {
@@ -481,7 +488,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
       try {
         return rval.accept(new EvaluateRProcedureVisitor(
           node.args,
-          new Environment(env),
+          env,
           node.sourceSpan
         ));
       } catch (e) {
@@ -527,7 +534,6 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     node.used = true;
     return env.get(
       node.name,
-      node.label,
       node.sourceSpan
     );
   }
@@ -583,18 +589,13 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
   }
 
   visitRLambda(rval: RLambda): RValue {
-    if (rval.params.length !== this.args.length) {
-      throw new StageError(
-        FA_ARITY_ERR(rval.getName(), rval.params.length, this.args.length),
-        this.sourceSpan
-      );
+    const paramEnv = new Environment();
+    for (let idx = 0; idx < this.args.length; idx++) {
+      paramEnv.set(rval.params[idx], this.args[idx].accept(this.evaluator, this.env));
     }
     const closureCopy = rval.closure.copy();
     closureCopy.parentEnv = this.env;
-    const paramEnv = new Environment(closureCopy);
-    for (let idx = 0; idx < this.args.length; idx++) {
-      paramEnv.set(rval.paramLabels[idx], this.args[idx].accept(this.evaluator, this.env));
-    }
+    paramEnv.parentEnv = closureCopy;
     return rval.body.accept(this.evaluator, paramEnv);
   }
 

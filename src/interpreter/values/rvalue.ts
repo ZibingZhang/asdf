@@ -672,7 +672,6 @@ class RLambda extends RProcedure {
     readonly name: string | null,
     readonly closure: Environment,
     readonly params: string[],
-    readonly paramLabels: string[] = [],
     readonly body: ASTNode
   ) {
     super();

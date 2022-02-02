@@ -8,6 +8,9 @@ import {
   EvaluateCode
 } from "./evaluate";
 import {
+  GenerateLabels
+} from "./label";
+import {
   Global
 } from "../global";
 import {
@@ -37,7 +40,6 @@ import {
 import {
   WellFormedProgram
 } from "./well-formed";
-import { GenerateLabels } from "./label";
 
 export {
   Pipeline

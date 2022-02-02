@@ -7,14 +7,14 @@ import {
   DefnNode,
   DefnStructNode,
   DefnVarNode,
-  EllipsisProcAppNode,
   EllipsisNode,
-  ProcAppNode,
+  EllipsisProcAppNode,
   IfNode,
   LambdaNode,
   LetNode,
   LocalNode,
   OrNode,
+  ProcAppNode,
   RequireNode,
   VarNode
 } from "../ir/ast";

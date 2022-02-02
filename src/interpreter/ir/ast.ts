@@ -296,8 +296,6 @@ class IfNode extends ASTNodeBase {
 
 class LambdaNode extends ASTNodeBase {
   name: string | null;
-  nameLabel = "";
-  paramLabels: string[] = [];
 
   constructor(
     name: string | null,
@@ -436,8 +434,6 @@ class VarNode extends ASTNodeBase {
 }
 
 abstract class DefnNodeBase extends ASTNodeBase {
-  nameLabel = "";
-
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,
@@ -457,10 +453,6 @@ abstract class DefnNodeBase extends ASTNodeBase {
 }
 
 class DefnStructNode extends DefnNodeBase {
-  makeStructLabel = "";
-  structHuhLabel = "";
-  fieldLabels: string[] = []
-
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,

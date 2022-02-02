@@ -12,21 +12,20 @@ import {
   DefnNode,
   DefnStructNode,
   DefnVarNode,
-  EllipsisProcAppNode,
   EllipsisNode,
-  ProcAppNode,
+  EllipsisProcAppNode,
   IfNode,
   LambdaNode,
   LetNode,
   LocalNode,
   OrNode,
+  ProcAppNode,
   RequireNode,
   VarNode,
   isDefnNode,
   isLambdaNode,
   isRequireNode,
-  isVarNode,
-  isCheckNode
+  isVarNode
 } from "../ir/ast";
 import {
   AtomSExpr,
