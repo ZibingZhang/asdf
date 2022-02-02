@@ -383,14 +383,14 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return R_VOID;
   }
 
-  visitEllipsisProcAppNode(node: EllipsisProcAppNode, _: Environment): RValue {
+  visitEllipsisProcAppNode(node: EllipsisProcAppNode): RValue {
     throw new StageError(
       EL_EXPECTED_FINISHED_EXPR_ERR(node.placeholder.token.text),
       node.sourceSpan
     );
   }
 
-  visitEllipsisNode(node: EllipsisNode, _: Environment): RValue {
+  visitEllipsisNode(node: EllipsisNode): RValue {
     throw new StageError(
       EL_EXPECTED_FINISHED_EXPR_ERR(node.placeholder.token.text),
       node.sourceSpan
@@ -576,7 +576,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
         this.sourceSpan
       );
     }
-    const argVal = this.args[0].accept(this.evaluator, this.env);
+    const argVal = this.args[0].accept(this.evaluator);
     if (argVal instanceof RStruct && argVal.name === rval.name) {
       return R_TRUE;
     } else {
@@ -591,18 +591,22 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
         this.sourceSpan
       );
     }
-    return new RStruct(rval.name, this.args.map(node => node.accept(this.evaluator, this.env)));
+    return new RStruct(rval.name, this.args.map(node => node.accept(this.evaluator)));
   }
 
   visitRLambda(rval: RLambda): RValue {
     const paramEnv = new Environment();
     for (let idx = 0; idx < this.args.length; idx++) {
-      paramEnv.set(rval.params[idx], this.args[idx].accept(this.evaluator, this.env));
+      paramEnv.set(rval.params[idx], this.args[idx].accept(this.evaluator));
     }
     const closureCopy = rval.closure.copy();
     closureCopy.parentEnv = this.env;
     paramEnv.parentEnv = closureCopy;
-    return rval.body.accept(this.evaluator, paramEnv);
+    const env = this.evaluator.env;
+    this.evaluator.env = paramEnv;
+    const result = rval.body.accept(this.evaluator);
+    this.evaluator.env = env;
+    return result;
   }
 
   visitRPrimProc(rval: RPrimProc): RValue {
@@ -665,7 +669,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
         this.sourceSpan
       );
     }
-    const argVal = this.args[0].accept(this.evaluator, this.env);
+    const argVal = this.args[0].accept(this.evaluator);
     if (!(argVal instanceof RStruct) || argVal.name != rval.name) {
       throw new StageError(
         FA_WRONG_TYPE_ERR(`${rval.name}-${rval.fieldName}`, rval.name, argVal.stringify()),

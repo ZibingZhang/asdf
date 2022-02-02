@@ -93,7 +93,7 @@ abstract class ASTNodeBase {
     readonly sourceSpan: SourceSpan
   ) {}
 
-  abstract accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T;
+  abstract accept<T>(visitor: ASTNodeVisitor<T>): T;
 
   isTemplate(): boolean {
     return false;
@@ -112,8 +112,8 @@ class AndNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitAndNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitAndNode(this);
   }
 
   isTemplate(): boolean {
@@ -129,8 +129,8 @@ class AtomNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitAtomNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitAtomNode(this);
   }
 }
 
@@ -143,8 +143,8 @@ class CheckNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitCheckNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCheckNode(this);
   }
 }
 
@@ -156,8 +156,8 @@ class CheckErrorNode extends CheckNode {
     super(Keyword.CheckError, args, sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitCheckErrorNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCheckErrorNode(this);
   }
 }
 
@@ -171,8 +171,8 @@ class CheckMemberOfNode extends CheckNode {
     super(Keyword.CheckMemberOf, [testValNode, ...testAgainstValNodes], sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitCheckMemberOfNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCheckMemberOfNode(this);
   }
 }
 
@@ -187,8 +187,8 @@ class CheckRangeNode extends CheckNode {
     super(Keyword.CheckRange, [testValNode, lowerBoundValNode, upperBoundValNode], sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitCheckRangeNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCheckRangeNode(this);
   }
 }
 
@@ -203,8 +203,8 @@ class CheckSatisfiedNode extends CheckNode {
     super(Keyword.CheckSatisfied, [testValNode, testFnNode], sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitCheckSatisfiedNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCheckSatisfiedNode(this);
   }
 }
 
@@ -219,8 +219,8 @@ class CheckWithinNode extends CheckNode {
     super(Keyword.CheckWithin, [actualNode, expectedNode, withinNode], sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitCheckWithinNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCheckWithinNode(this);
   }
 }
 
@@ -232,8 +232,8 @@ class CondNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitCondNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitCondNode(this);
   }
 
   isTemplate(): boolean {
@@ -249,8 +249,8 @@ class EllipsisProcAppNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitEllipsisProcAppNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitEllipsisProcAppNode(this);
   }
 
   isTemplate(): boolean {
@@ -266,8 +266,8 @@ class EllipsisNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitEllipsisNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitEllipsisNode(this);
   }
 
   isTemplate(): boolean {
@@ -285,8 +285,8 @@ class IfNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitIfNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitIfNode(this);
   }
 
   isTemplate(): boolean {
@@ -307,8 +307,8 @@ class LambdaNode extends ASTNodeBase {
     this.name = name;
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitLambdaNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitLambdaNode(this);
   }
 
   isTemplate(): boolean {
@@ -326,8 +326,8 @@ class LetNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitLetNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitLetNode(this);
   }
 }
 
@@ -340,8 +340,8 @@ class LocalNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitLocalNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitLocalNode(this);
   }
 
   isTemplate(): boolean {
@@ -357,8 +357,8 @@ class OrNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitOrNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitOrNode(this);
   }
 
   isTemplate(): boolean {
@@ -375,8 +375,8 @@ class ProcAppNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitProcAppNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitProcAppNode(this);
   }
 
   isTemplate(): boolean {
@@ -395,8 +395,8 @@ class RequireNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitRequireNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitRequireNode(this);
   }
 
   addToScope(scope: Scope): void {
@@ -428,8 +428,8 @@ class VarNode extends ASTNodeBase {
     super(sourceSpan);
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitVarNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitVarNode(this);
   }
 }
 
@@ -466,8 +466,8 @@ class DefnStructNode extends DefnNodeBase {
     );
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitDefnStructNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitDefnStructNode(this);
   }
 
   addToScope(scope: Scope, allowShadow = false): void {
@@ -526,8 +526,8 @@ class DefnVarNode extends DefnNodeBase {
     );
   }
 
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitDefnVarNode(this, args);
+  accept<T>(visitor: ASTNodeVisitor<T>): T {
+    return visitor.visitDefnVarNode(this);
   }
 
   isTemplate(): boolean {
@@ -571,35 +571,35 @@ function isVarNode(node: ASTNode): node is VarNode {
 }
 
 abstract class ASTNodeVisitor<T> {
-  abstract visitAndNode(node: AndNode, ...args: any[]): T;
-  abstract visitAtomNode(node: AtomNode, ...args: any[]): T;
-  abstract visitCheckNode(node: CheckNode, ...args: any[]): T;
-  visitCheckErrorNode(node: CheckErrorNode, ..._: any[]): T {
+  abstract visitAndNode(node: AndNode): T;
+  abstract visitAtomNode(node: AtomNode): T;
+  abstract visitCheckNode(node: CheckNode): T;
+  visitCheckErrorNode(node: CheckErrorNode): T {
     return this.visitCheckNode(node);
   }
-  visitCheckMemberOfNode(node: CheckMemberOfNode, ..._: any[]): T {
+  visitCheckMemberOfNode(node: CheckMemberOfNode): T {
     return this.visitCheckNode(node);
   }
-  visitCheckRangeNode(node: CheckRangeNode, ..._: any[]): T {
+  visitCheckRangeNode(node: CheckRangeNode): T {
     return this.visitCheckNode(node);
   }
-  visitCheckSatisfiedNode(node: CheckSatisfiedNode, ..._: any[]): T {
+  visitCheckSatisfiedNode(node: CheckSatisfiedNode): T {
     return this.visitCheckNode(node);
   }
-  visitCheckWithinNode(node: CheckWithinNode, ..._: any[]): T {
+  visitCheckWithinNode(node: CheckWithinNode): T {
     return this.visitCheckNode(node);
   }
-  abstract visitCondNode(node: CondNode, ...args: any[]): T;
-  abstract visitDefnVarNode(node: DefnVarNode, ...args: any[]): T;
-  abstract visitDefnStructNode(node: DefnStructNode, ...args: any[]): T;
-  abstract visitEllipsisProcAppNode(node: EllipsisProcAppNode, ...args: any[]): T;
-  abstract visitEllipsisNode(node: EllipsisNode, ...args: any[]): T;
-  abstract visitIfNode(node: IfNode, ...args: any[]): T;
-  abstract visitLambdaNode(node: LambdaNode, ...args: any[]): T;
-  abstract visitLetNode(node: LetNode, ...args: any[]): T;
-  abstract visitLocalNode(node: LocalNode, ...args: any[]): T;
-  abstract visitOrNode(node: OrNode, ...args: any[]): T;
-  abstract visitProcAppNode(node: ProcAppNode, ...args: any[]): T;
-  abstract visitRequireNode(node: RequireNode, ...args: any[]): T;
-  abstract visitVarNode(node: VarNode, ...args: any[]): T;
+  abstract visitCondNode(node: CondNode): T;
+  abstract visitDefnVarNode(node: DefnVarNode): T;
+  abstract visitDefnStructNode(node: DefnStructNode): T;
+  abstract visitEllipsisProcAppNode(node: EllipsisProcAppNode): T;
+  abstract visitEllipsisNode(node: EllipsisNode): T;
+  abstract visitIfNode(node: IfNode): T;
+  abstract visitLambdaNode(node: LambdaNode): T;
+  abstract visitLetNode(node: LetNode): T;
+  abstract visitLocalNode(node: LocalNode): T;
+  abstract visitOrNode(node: OrNode): T;
+  abstract visitProcAppNode(node: ProcAppNode): T;
+  abstract visitRequireNode(node: RequireNode): T;
+  abstract visitVarNode(node: VarNode): T;
 }
