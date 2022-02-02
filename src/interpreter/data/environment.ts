@@ -45,7 +45,6 @@ class Environment {
       ) {
         return this.global.primitiveEnvironment.get(name, sourceSpan);
       } else {
-        console.trace();
         throw new StageError(
           SC_USED_BEFORE_DEFINITION_ERR(name),
           sourceSpan

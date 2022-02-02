@@ -106,21 +106,24 @@ export {
 };
 
 class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RValue[]> {
+  env = new Environment();
+
   private globalEnv = new Environment();
-  private env = new Environment();
+  private execEnv = new Environment();
   private testResults: StageTestResult[] = [];
 
   reset() {
     this.globalEnv = new Environment();
-    this.env = new Environment();
+    this.execEnv = new Environment();
   }
 
   run(input: StageOutput<Program>): StageOutput<RValue[]> {
     this.testResults = [];
+    const program = input.output;
+    this.env = this.globalEnv;
     try {
-      const program = input.output;
       program.defns.forEach(defn => {
-        defn.accept(this, this.globalEnv);
+        defn.accept(this);
         if (isDefnNode(defn)) {
           defn.used = false;
         }
@@ -129,9 +132,11 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
       for (const node of program.nodes) {
         let result;
         if (isCheckNode(node)) {
-          result = node.accept(this, this.globalEnv);
+          this.env = this.globalEnv;
+          result = node.accept(this);
         } else {
-          result = node.accept(this, this.env);
+          this.env = this.execEnv;
+          result = node.accept(this);
         }
         if (result instanceof RTestResult) {
           this.testResults.push(new StageTestResult(
@@ -164,7 +169,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     }
   }
 
-  visitAndNode(node: AndNode, _: Environment): RValue {
+  visitAndNode(node: AndNode): RValue {
     node.used = true;
     let result: RValue = R_FALSE;
     for (const arg of node.args) {
@@ -180,12 +185,12 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return result;
   }
 
-  visitAtomNode(node: AtomNode, [_, ...__]: [Environment, never[]]): RValue {
+  visitAtomNode(node: AtomNode): RValue {
     node.used = true;
     return node.rval;
   }
 
-  visitCheckNode(node: CheckNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitCheckNode(node: CheckNode): RValue {
     node.used = true;
     switch (node.name) {
       case Keyword.CheckExpect:
@@ -193,14 +198,14 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
         let actualVal;
         let expectedVal;
         if (node.name === Keyword.CheckExpect) {
-          actualVal = node.args[0].accept(this, env);
-          expectedVal = node.args[1].accept(this, env);
+          actualVal = node.args[0].accept(this);
+          expectedVal = node.args[1].accept(this);
         } else {
           const seed = new Date().toString() + new Date().getMilliseconds();
           RNG.reset(seed);
-          actualVal = node.args[0].accept(this, env);
+          actualVal = node.args[0].accept(this);
           RNG.reset(seed);
-          expectedVal = node.args[1].accept(this, env);
+          expectedVal = node.args[1].accept(this);
         }
         if (isRInexactReal(actualVal) || isRInexactReal(expectedVal)) {
           return new RTestResult(
@@ -231,11 +236,11 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     }
   }
 
-  visitCheckErrorNode(node: CheckErrorNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitCheckErrorNode(node: CheckErrorNode): RValue {
     node.used = true;
     let expectedErrMsg: RValue | null = null;
     if (node.args[1]) {
-      expectedErrMsg = node.args[1].accept(this, env);
+      expectedErrMsg = node.args[1].accept(this);
       if (!isRString(expectedErrMsg)) {
         throw new StageError(
           CE_EXPECTED_ERROR_MESSAGE_ERR(expectedErrMsg.stringify()),
@@ -246,7 +251,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     try {
       return new RTestResult(
         false,
-        CE_EXPECTED_AN_ERROR_ERR(node.args[0].accept(this, env).stringify()),
+        CE_EXPECTED_AN_ERROR_ERR(node.args[0].accept(this).stringify()),
         node.sourceSpan
       );
     } catch (e) {
@@ -268,15 +273,15 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     }
   }
 
-  visitCheckMemberOfNode(node: CheckMemberOfNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitCheckMemberOfNode(node: CheckMemberOfNode): RValue {
     node.used = true;
-    const testResult = node.arg.accept(this, env);
+    const testResult = node.arg.accept(this);
     if (isRFalse(testResult)) {
       return new RTestResult(
         false,
         CE_NOT_MEMBER_OF_ERR(
-          node.testValNode.accept(this, env).stringify(),
-          node.testAgainstValNodes.map(node => node.accept(this, env).stringify())
+          node.testValNode.accept(this).stringify(),
+          node.testAgainstValNodes.map(node => node.accept(this).stringify())
         ),
         node.sourceSpan
       );
@@ -284,16 +289,16 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return new RTestResult(true);
   }
 
-  visitCheckRangeNode(node: CheckRangeNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitCheckRangeNode(node: CheckRangeNode): RValue {
     node.used = true;
-    const testResult = node.arg.accept(this, env);
+    const testResult = node.arg.accept(this);
     if (isRFalse(testResult)) {
       return new RTestResult(
         false,
         CE_NOT_IN_RANGE_ERR(
-          node.testValNode.accept(this, env).stringify(),
-          node.lowerBoundValNode.accept(this, env).stringify(),
-          node.upperBoundValNode.accept(this, env).stringify()
+          node.testValNode.accept(this).stringify(),
+          node.lowerBoundValNode.accept(this).stringify(),
+          node.upperBoundValNode.accept(this).stringify()
         ),
         node.sourceSpan
       );
@@ -301,9 +306,9 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return new RTestResult(true);
   }
 
-  visitCheckSatisfiedNode(node: CheckSatisfiedNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitCheckSatisfiedNode(node: CheckSatisfiedNode): RValue {
     node.used = true;
-    const testResult = node.arg.accept(this, env);
+    const testResult = node.arg.accept(this);
     if (!isRBoolean(testResult)) {
       return new RTestResult(
         false,
@@ -319,7 +324,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
         false,
         CE_NOT_SATISFIED_ERR(
           node.testFnName,
-          node.testValNode.accept(this, env).stringify()
+          node.testValNode.accept(this).stringify()
         ),
         node.sourceSpan
       );
@@ -327,15 +332,15 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return new RTestResult(true);
   }
 
-  visitCheckWithinNode(node: CheckWithinNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitCheckWithinNode(node: CheckWithinNode): RValue {
     node.used = true;
-    if (isRFalse(node.arg.accept(this, env))) {
+    if (isRFalse(node.arg.accept(this))) {
       return new RTestResult(
         false,
         CE_NOT_WITHIN_ERR(
-          node.actualNode.accept(this, env).stringify(),
-          node.expectedNode.accept(this, env).stringify(),
-          node.withinNode.accept(this, env).stringify()
+          node.actualNode.accept(this).stringify(),
+          node.expectedNode.accept(this).stringify(),
+          node.withinNode.accept(this).stringify()
         ),
         node.sourceSpan
       );
@@ -343,17 +348,17 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return new RTestResult(true);
   }
 
-  visitCondNode(node: CondNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitCondNode(node: CondNode): RValue {
     node.used = true;
     for (const [question, answer] of node.questionAnswerClauses) {
-      const questionResult = question.accept(this, env);
+      const questionResult = question.accept(this);
       if (!isRBoolean(questionResult)) {
         throw new StageError(
           WF_QUESTION_NOT_BOOL_ERR(Keyword.Cond, questionResult.stringify()),
           node.sourceSpan
         );
       }
-      if (questionResult === R_TRUE) { return answer.accept(this, env); }
+      if (questionResult === R_TRUE) { return answer.accept(this); }
     }
     throw new StageError(
       CN_ALL_QUESTION_RESULTS_FALSE_ERR,
@@ -361,20 +366,20 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     );
   }
 
-  visitDefnStructNode(node: DefnStructNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitDefnStructNode(node: DefnStructNode): RValue {
     node.used = true;
-    env.set(node.name, new RStructType(node.name));
-    env.set(`make-${node.name}`, new RMakeStructFun(node.name, node.fields.length));
-    env.set(`${node.name}?`, new RStructHuhProc(node.name));
+    this.env.set(node.name, new RStructType(node.name));
+    this.env.set(`make-${node.name}`, new RMakeStructFun(node.name, node.fields.length));
+    this.env.set(`${node.name}?`, new RStructHuhProc(node.name));
     node.fields.forEach((field, idx) => {
-      env.set(`${node.name}-${field}`, new RStructGetProc(node.name, field, idx));
+      this.env.set(`${node.name}-${field}`, new RStructGetProc(node.name, field, idx));
     });
     return R_VOID;
   }
 
-  visitDefnVarNode(node: DefnVarNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitDefnVarNode(node: DefnVarNode): RValue {
     node.used = true;
-    env.set(node.name, node.value.accept(this, env));
+    this.env.set(node.name, node.value.accept(this));
     return R_VOID;
   }
 
@@ -392,9 +397,9 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     );
   }
 
-  visitIfNode(node: IfNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitIfNode(node: IfNode): RValue {
     node.used = true;
-    const questionResult = node.question.accept(this, env);
+    const questionResult = node.question.accept(this);
     if (!isRBoolean(questionResult)) {
       throw new StageError(
         WF_QUESTION_NOT_BOOL_ERR(Keyword.If, questionResult.stringify()),
@@ -402,37 +407,34 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
       );
     }
     if (isRTrue(questionResult)) {
-      return node.trueAnswer.accept(this, env);
+      return node.trueAnswer.accept(this);
     } else {
-      return node.falseAnswer.accept(this, env);
+      return node.falseAnswer.accept(this);
     }
   }
 
-  visitLambdaNode(node: LambdaNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitLambdaNode(node: LambdaNode): RValue {
     node.used = true;
-    return new RLambda(node.name, env.copy(), node.params, node.body);
+    return new RLambda(node.name, this.env.copy(), node.params, node.body);
   }
 
-  visitLetNode(node: LetNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitLetNode(node: LetNode): RValue {
     node.used = true;
     node.bindings.forEach(([variable, _]) => {
       variable.used = true;
     });
     switch (node.name) {
       case "letrec":
-      case "let*": {
-        const childEnv = new Environment(env);
-        node.bindings.forEach(([variable, expr]) => {
-          childEnv.set(variable.name, expr.accept(this, childEnv));
-        });
-        return node.body.accept(this, childEnv);
-      }
+      case "let*":
       case "let": {
-        const childEnv = new Environment(env);
+        const parent = this.env;
+        this.env = new Environment(this.env);
         node.bindings.forEach(([variable, expr]) => {
-          childEnv.set(variable.name, expr.accept(this, env));
+          this.env.set(variable.name, expr.accept(this));
         });
-        return node.body.accept(this, childEnv);
+        const result = node.body.accept(this);
+        this.env = parent;
+        return result;
       }
       default: {
         throw "illegal state: unsupported let-style expression";
@@ -440,18 +442,21 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     }
   }
 
-  visitLocalNode(node: LocalNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitLocalNode(node: LocalNode): RValue {
     node.used = true;
-    const childEnv = new Environment(env);
-    node.defns.forEach(defn => defn.accept(this, childEnv));
-    return node.body.accept(this, childEnv);
+    const parent = this.env;
+    this.env = new Environment(this.env);
+    node.defns.forEach(defn => defn.accept(this));
+    const result = node.body.accept(this);
+    this.env = parent;
+    return result;
   }
 
-  visitOrNode(node: OrNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitOrNode(node: OrNode): RValue {
     node.used = true;
     let result: RValue = R_TRUE;
     for (const arg of node.args) {
-      result = arg.accept(this, env);
+      result = arg.accept(this);
       if (result !== R_FALSE) { break; }
     }
     if (!isRBoolean(result)) {
@@ -463,11 +468,11 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return result;
   }
 
-  visitProcAppNode(node: ProcAppNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitProcAppNode(node: ProcAppNode): RValue {
     node.used = true;
     let rval: RValue;
     if (isVarNode(node.fn)) {
-      rval = env.get(
+      rval = this.env.get(
         node.fn.name,
         node.fn.sourceSpan
       );
@@ -482,13 +487,13 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
         );
       }
     } else {
-      rval = node.fn.accept(this, env);
+      rval = node.fn.accept(this);
     }
     if (isRProcedure(rval)) {
       try {
         return rval.accept(new EvaluateRProcedureVisitor(
           node.args,
-          env,
+          this.env,
           node.sourceSpan
         ));
       } catch (e) {
@@ -513,26 +518,26 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     }
   }
 
-  visitRequireNode(node: RequireNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitRequireNode(node: RequireNode): RValue {
     node.used = true;
     /* eslint-disable @typescript-eslint/no-non-null-assertion */
     const module = node.global.modules.get(node.name)!;
     for (const procedure of module.procedures) {
-      if (!env.has(procedure.getName())) {
-        env.set(procedure.getName(), procedure);
+      if (!this.env.has(procedure.getName())) {
+        this.env.set(procedure.getName(), procedure);
       }
     }
     for (const [name, rval] of module.data) {
-      if (!env.has(name)) {
-        env.set(name, rval);
+      if (!this.env.has(name)) {
+        this.env.set(name, rval);
       }
     }
     return R_VOID;
   }
 
-  visitVarNode(node: VarNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitVarNode(node: VarNode): RValue {
     node.used = true;
-    return env.get(
+    return this.env.get(
       node.name,
       node.sourceSpan
     );
@@ -549,6 +554,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
     readonly sourceSpan: SourceSpan
   ) {
     this.evaluator = new EvaluateCode();
+    this.evaluator.env = env;
   }
 
   visitRComposedProcedure(rval: RComposedProcedure): RValue {
@@ -631,7 +637,7 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
         this.sourceSpan
       );
     }
-    const argVals = this.args.map(arg => arg.accept(this.evaluator, this.env));
+    const argVals = this.args.map(arg => arg.accept(this.evaluator));
     for (const [idx, paramType] of funType.paramTypes.entries()) {
       const argVal = argVals[idx];
       if (paramType.isCompatibleWith(argVal, rval.name, this.sourceSpan)) {
