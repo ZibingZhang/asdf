@@ -1,10 +1,10 @@
 import {
+  RNumber,
   RString,
+  RSymbol,
   RValue,
   isRExactReal,
-  isRStruct,
-  RNumber,
-  RSymbol
+  isRStruct
 } from "../../../../values/rvalue";
 import {
   RMode
@@ -31,6 +31,7 @@ function newCanvas(width: number, height: number): [HTMLCanvasElement, CanvasRen
   const element = <HTMLCanvasElement> document.createElement("canvas");
   element.width = width;
   element.height = height;
+  /* eslint-disable @typescript-eslint/no-non-null-assertion */
   return [element, element.getContext("2d")!];
 }
 

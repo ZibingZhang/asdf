@@ -32,8 +32,10 @@ export {
   UnusedCode
 };
 
-class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
-  constructor(readonly unusedCallback: (sourceSpan: SourceSpan) => void) {}
+class UnusedCode extends ASTNodeVisitor<void> implements Stage<Program, void> {
+  constructor(readonly unusedCallback: (sourceSpan: SourceSpan) => void) {
+    super();
+  }
 
   run(input: StageOutput<Program>): StageOutput<void> {
     for (const node of input.output.nodes) {

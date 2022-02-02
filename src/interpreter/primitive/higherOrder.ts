@@ -11,10 +11,6 @@ import {
   isProcedureType
 } from "../values/types";
 import {
-  AtomNode,
-  EvaluateRProcedureVisitor
-} from "../ir/ast";
-import {
   HO_CONTRACT_VIOLATION_ERR,
   HO_EXPECTED_BOOLEAN_ERR,
   HO_EXPECTED_LISTS_SAME_LENGTH_ERR
@@ -37,8 +33,14 @@ import {
   toRBoolean
 } from "../values/rvalue";
 import {
+  AtomNode
+} from "../ir/ast";
+import {
   Environment
 } from "../data/environment";
+import {
+  EvaluateRProcedureVisitor
+} from "../pipeline/evaluate";
 import {
   SourceSpan
 } from "../data/sourcespan";
@@ -67,7 +69,7 @@ abstract class RHigherOrdeRPrimProc extends RPrimProc {
   assertBooleanType(receivedVal: RValue, procedure: RProcedure, sourceSpan: SourceSpan) {
     if (!isRBoolean(receivedVal)) {
       throw new StageError(
-        HO_EXPECTED_BOOLEAN_ERR(this.name, procedure.stringify(), receivedVal.stringify()),
+        HO_EXPECTED_BOOLEAN_ERR(super.name, procedure.stringify(), receivedVal.stringify()),
         sourceSpan
       );
     }

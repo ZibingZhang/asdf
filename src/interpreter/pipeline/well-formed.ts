@@ -50,7 +50,7 @@ export {
   WellFormedProgram
 };
 
-class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
+class WellFormedProgram extends ASTNodeVisitor<void> implements Stage<Program, Program> {
   private level = 0;
   private scope: Scope = new Scope();
 

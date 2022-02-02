@@ -20,11 +20,11 @@ import {
   Type
 } from "../../../values/types";
 import {
-  isValidColorName
-} from "./primitive/common";
-import {
   isRExact8BitInteger
 } from "./rvalue";
+import {
+  isValidColorName
+} from "./primitive/common";
 
 export {
   ColorType,
