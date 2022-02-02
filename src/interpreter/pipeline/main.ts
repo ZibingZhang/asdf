@@ -29,9 +29,6 @@ import {
   SETTINGS
 } from "../settings";
 import {
-  SExpr
-} from "../ir/sexpr";
-import {
   SourceSpan
 } from "../data/sourcespan";
 import {
@@ -55,10 +52,7 @@ class Pipeline {
   private EVALUATE_CODE_STAGE = new EvaluateCode();
   private UNUSED_CODE_STAGE = new UnusedCode(() => { /* do nothing */ });
 
-  private lexingOutput: StageOutput<SExpr[]> = new StageOutput([]);
   private parsingOutput: StageOutput<Program> = new StageOutput(new Program([], []));
-  private wellFormedOutput: StageOutput<Program> = new StageOutput(new Program([], []));
-  private evaluateCodeOutput: StageOutput<RValue[]> = new StageOutput([]);
 
   private errorsCallback: (stageErrors: StageError[]) => void = () => { /* do nothing */ };
   private successCallback: (output: RValue[]) => void = () => { /* do nothing */ };
@@ -91,16 +85,16 @@ class Pipeline {
 
   evaluateCodeHelper(code: string): void {
     const initOutput: StageOutput<string> = new StageOutput(code);
-    this.lexingOutput = this.LEXING_STAGE.run(initOutput);
-    this.handleErrors(this.lexingOutput);
-    this.parsingOutput = this.PARSING_SEXPRS_STAGE.run(this.lexingOutput);
+    const lexingOutput = this.LEXING_STAGE.run(initOutput);
+    this.handleErrors(lexingOutput);
+    this.parsingOutput = this.PARSING_SEXPRS_STAGE.run(lexingOutput);
     this.handleErrors(this.parsingOutput);
-    this.wellFormedOutput = this.WELL_FORMED_PROGRAM_STAGE.run(this.parsingOutput);
-    this.handleErrors(this.wellFormedOutput);
-    this.evaluateCodeOutput = this.EVALUATE_CODE_STAGE.run(this.wellFormedOutput);
-    this.handleErrors(this.evaluateCodeOutput, true);
-    this.successCallback(this.evaluateCodeOutput.output);
-    this.testResultsCallback(this.evaluateCodeOutput.tests);
+    const wellFormedOutput = this.WELL_FORMED_PROGRAM_STAGE.run(this.parsingOutput);
+    this.handleErrors(wellFormedOutput);
+    const evaluateCodeOutput = this.EVALUATE_CODE_STAGE.run(wellFormedOutput);
+    this.handleErrors(evaluateCodeOutput, true);
+    this.successCallback(evaluateCodeOutput.output);
+    this.testResultsCallback(evaluateCodeOutput.tests);
     if (this.unusedCallback) { this.UNUSED_CODE_STAGE.run(this.parsingOutput); }
   }
 
