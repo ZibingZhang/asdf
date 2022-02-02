@@ -6,9 +6,9 @@ import {
   CondNode,
   DefnStructNode,
   DefnVarNode,
-  EllipsisFunAppNode,
+  EllipsisProcAppNode,
   EllipsisNode,
-  FunAppNode,
+  ProcAppNode,
   IfNode,
   LambdaNode,
   LetNode,
@@ -93,22 +93,12 @@ class UnusedCode extends ASTNodeVisitor<void> implements Stage<Program, void> {
     // always used
   }
 
-  visitEllipsisFunAllNode(_: EllipsisFunAppNode): void {
+  visitEllipsisProcAppNode(_: EllipsisProcAppNode): void {
     // never used, yet always used
   }
 
   visitEllipsisNode(_: EllipsisNode): void {
     // never used, yet always used
-  }
-
-  visitFunAppNode(node: FunAppNode): void {
-    if (!node.used) {
-      if (!node.isTemplate()) {
-        this.unusedCallback(node.sourceSpan);
-      }
-    } else {
-      node.args.forEach(arg => arg.accept(this));
-    }
   }
 
   visitIfNode(node: IfNode): void {
@@ -159,6 +149,16 @@ class UnusedCode extends ASTNodeVisitor<void> implements Stage<Program, void> {
   }
 
   visitOrNode(node: OrNode): void {
+    if (!node.used) {
+      if (!node.isTemplate()) {
+        this.unusedCallback(node.sourceSpan);
+      }
+    } else {
+      node.args.forEach(arg => arg.accept(this));
+    }
+  }
+
+  visitProcAppNode(node: ProcAppNode): void {
     if (!node.used) {
       if (!node.isTemplate()) {
         this.unusedCallback(node.sourceSpan);

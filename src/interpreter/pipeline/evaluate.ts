@@ -12,9 +12,9 @@ import {
   CondNode,
   DefnStructNode,
   DefnVarNode,
-  EllipsisFunAppNode,
+  EllipsisProcAppNode,
   EllipsisNode,
-  FunAppNode,
+  ProcAppNode,
   IfNode,
   LambdaNode,
   LetNode,
@@ -164,11 +164,11 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     }
   }
 
-  visitAndNode(node: AndNode, _: Environment): RValue {
+  visitAndNode(node: AndNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
     let result: RValue = R_FALSE;
     for (const arg of node.args) {
-      result = arg.accept(this);
+      result = arg.accept(this, env);
       if (isRFalse(result)) { return result; }
     }
     if (!isRBoolean(result)) {
@@ -180,7 +180,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     return result;
   }
 
-  visitAtomNode(node: AtomNode, [_, ...__]: [Environment, never[]]): RValue {
+  visitAtomNode(node: AtomNode): RValue {
     node.used = true;
     return node.rval;
   }
@@ -363,41 +363,105 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
 
   visitDefnStructNode(node: DefnStructNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
-    env.set(node.name, new RStructType(node.name));
-    env.set(`make-${node.name}`, new RMakeStructFun(node.name, node.fields.length));
-    env.set(`${node.name}?`, new RStructHuhProc(node.name));
+    env.set(node.nameLabel, new RStructType(node.name));
+    env.set(node.makeStructLabel, new RMakeStructFun(node.name, node.fields.length));
+    env.set(node.structHuhLabel, new RStructHuhProc(node.name));
     node.fields.forEach((field, idx) => {
-      env.set(`${node.name}-${field}`, new RStructGetProc(node.name, field, idx));
+      env.set(node.fieldLabels[idx], new RStructGetProc(node.name, field, idx));
     });
     return R_VOID;
   }
 
   visitDefnVarNode(node: DefnVarNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
-    env.set(node.name, node.value.accept(this, env));
+    env.set(node.nameLabel, node.value.accept(this, env));
     return R_VOID;
   }
 
-  visitEllipsisFunAllNode(node: EllipsisFunAppNode, _: Environment): RValue {
+  visitEllipsisProcAppNode(node: EllipsisProcAppNode): RValue {
     throw new StageError(
       EL_EXPECTED_FINISHED_EXPR_ERR(node.placeholder.token.text),
       node.sourceSpan
     );
   }
 
-  visitEllipsisNode(node: EllipsisNode, _: Environment): RValue {
+  visitEllipsisNode(node: EllipsisNode): RValue {
     throw new StageError(
       EL_EXPECTED_FINISHED_EXPR_ERR(node.placeholder.token.text),
       node.sourceSpan
     );
   }
 
-  visitFunAppNode(node: FunAppNode, [env, ..._]: [Environment, never[]]): RValue {
+  visitIfNode(node: IfNode, [env, ..._]: [Environment, never[]]): RValue {
+    node.used = true;
+    const questionResult = node.question.accept(this, env);
+    if (!isRBoolean(questionResult)) {
+      throw new StageError(
+        WF_QUESTION_NOT_BOOL_ERR(Keyword.If, questionResult.stringify()),
+        node.sourceSpan
+      );
+    }
+    if (isRTrue(questionResult)) {
+      return node.trueAnswer.accept(this, env);
+    } else {
+      return node.falseAnswer.accept(this, env);
+    }
+  }
+
+  visitLambdaNode(node: LambdaNode, [env, ..._]: [Environment, never[]]): RValue {
+    node.used = true;
+    return new RLambda(node.name, new Environment(env), node.params, node.paramLabels, node.body);
+  }
+
+  visitLetNode(node: LetNode, [env, ..._]: [Environment, never[]]): RValue {
+    node.used = true;
+    node.bindings.forEach(([variable, _]) => {
+      variable.used = true;
+    });
+    switch (node.name) {
+      case "letrec":
+      case "let*":
+      case "let": {
+        node.bindings.forEach(([variable, expr]) => {
+          env.set(variable.label, expr.accept(this, env));
+        });
+        return node.body.accept(this, env);
+      }
+      default: {
+        throw "illegal state: unsupported let-style expression";
+      }
+    }
+  }
+
+  visitLocalNode(node: LocalNode, [env, ..._]: [Environment, never[]]): RValue {
+    node.used = true;
+    node.defns.forEach(defn => defn.accept(this, env));
+    return node.body.accept(this, env);
+  }
+
+  visitOrNode(node: OrNode, [env, ..._]: [Environment, never[]]): RValue {
+    node.used = true;
+    let result: RValue = R_TRUE;
+    for (const arg of node.args) {
+      result = arg.accept(this, env);
+      if (result !== R_FALSE) { break; }
+    }
+    if (!isRBoolean(result)) {
+      throw new StageError(
+        WF_QUESTION_NOT_BOOL_ERR(Keyword.Or, result.stringify()),
+        node.sourceSpan
+      );
+    }
+    return result;
+  }
+
+  visitProcAppNode(node: ProcAppNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
     let rval: RValue;
     if (isVarNode(node.fn)) {
       rval = env.get(
         node.fn.name,
+        node.fn.label,
         node.fn.sourceSpan
       );
       if (!isRProcedure(rval)) {
@@ -417,7 +481,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
       try {
         return rval.accept(new EvaluateRProcedureVisitor(
           node.args,
-          env,
+          new Environment(env),
           node.sourceSpan
         ));
       } catch (e) {
@@ -442,77 +506,6 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     }
   }
 
-  visitIfNode(node: IfNode, [env, ..._]: [Environment, never[]]): RValue {
-    node.used = true;
-    const questionResult = node.question.accept(this, env);
-    if (!isRBoolean(questionResult)) {
-      throw new StageError(
-        WF_QUESTION_NOT_BOOL_ERR(Keyword.If, questionResult.stringify()),
-        node.sourceSpan
-      );
-    }
-    if (isRTrue(questionResult)) {
-      return node.trueAnswer.accept(this, env);
-    } else {
-      return node.falseAnswer.accept(this, env);
-    }
-  }
-
-  visitLambdaNode(node: LambdaNode, [env, ..._]: [Environment, never[]]): RValue {
-    node.used = true;
-    return new RLambda(node.name, env.copy(), node.params, node.body);
-  }
-
-  visitLetNode(node: LetNode, [env, ..._]: [Environment, never[]]): RValue {
-    node.used = true;
-    node.bindings.forEach(([variable, _]) => {
-      variable.used = true;
-    });
-    switch (node.name) {
-      case "letrec":
-      case "let*": {
-        const childEnv = new Environment(env);
-        node.bindings.forEach(([variable, expr]) => {
-          childEnv.set(variable.name, expr.accept(this, childEnv));
-        });
-        return node.body.accept(this, childEnv);
-      }
-      case "let": {
-        const childEnv = new Environment(env);
-        node.bindings.forEach(([variable, expr]) => {
-          childEnv.set(variable.name, expr.accept(this, env));
-        });
-        return node.body.accept(this, childEnv);
-      }
-      default: {
-        throw "illegal state: unsupported let-style expression";
-      }
-    }
-  }
-
-  visitLocalNode(node: LocalNode, [env, ..._]: [Environment, never[]]): RValue {
-    node.used = true;
-    const childEnv = new Environment(env);
-    node.defns.forEach(defn => defn.accept(this, childEnv));
-    return node.body.accept(this, childEnv);
-  }
-
-  visitOrNode(node: OrNode, [env, ..._]: [Environment, never[]]): RValue {
-    node.used = true;
-    let result: RValue = R_TRUE;
-    for (const arg of node.args) {
-      result = arg.accept(this, env);
-      if (result !== R_FALSE) { break; }
-    }
-    if (!isRBoolean(result)) {
-      throw new StageError(
-        WF_QUESTION_NOT_BOOL_ERR(Keyword.Or, result.stringify()),
-        node.sourceSpan
-      );
-    }
-    return result;
-  }
-
   visitRequireNode(node: RequireNode, [env, ..._]: [Environment, never[]]): RValue {
     node.used = true;
     /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -534,6 +527,7 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
     node.used = true;
     return env.get(
       node.name,
+      node.label,
       node.sourceSpan
     );
   }
@@ -589,13 +583,18 @@ class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
   }
 
   visitRLambda(rval: RLambda): RValue {
-    const paramEnv = new Environment();
-    for (let idx = 0; idx < this.args.length; idx++) {
-      paramEnv.set(rval.params[idx], this.args[idx].accept(this.evaluator, this.env));
+    if (rval.params.length !== this.args.length) {
+      throw new StageError(
+        FA_ARITY_ERR(rval.getName(), rval.params.length, this.args.length),
+        this.sourceSpan
+      );
     }
     const closureCopy = rval.closure.copy();
     closureCopy.parentEnv = this.env;
-    paramEnv.parentEnv = closureCopy;
+    const paramEnv = new Environment(closureCopy);
+    for (let idx = 0; idx < this.args.length; idx++) {
+      paramEnv.set(rval.paramLabels[idx], this.args[idx].accept(this.evaluator, this.env));
+    }
     return rval.body.accept(this.evaluator, paramEnv);
   }
 

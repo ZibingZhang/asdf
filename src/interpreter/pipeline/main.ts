@@ -37,6 +37,7 @@ import {
 import {
   WellFormedProgram
 } from "./well-formed";
+import { GenerateLabels } from "./label";
 
 export {
   Pipeline
@@ -49,6 +50,7 @@ class Pipeline {
   private LEXING_STAGE = new Lexer();
   private PARSING_SEXPRS_STAGE = new ParseSExpr();
   private WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
+  private GENERATE_LABELS_STAGE = new GenerateLabels();
   private EVALUATE_CODE_STAGE = new EvaluateCode();
   private UNUSED_CODE_STAGE = new UnusedCode(() => { /* do nothing */ });
 
@@ -91,6 +93,7 @@ class Pipeline {
     this.handleErrors(this.parsingOutput);
     const wellFormedOutput = this.WELL_FORMED_PROGRAM_STAGE.run(this.parsingOutput);
     this.handleErrors(wellFormedOutput);
+    this.GENERATE_LABELS_STAGE.run(wellFormedOutput);
     const evaluateCodeOutput = this.EVALUATE_CODE_STAGE.run(wellFormedOutput);
     this.handleErrors(evaluateCodeOutput, true);
     this.successCallback(evaluateCodeOutput.output);

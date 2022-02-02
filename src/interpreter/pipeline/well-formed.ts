@@ -7,9 +7,9 @@ import {
   DefnNode,
   DefnStructNode,
   DefnVarNode,
-  EllipsisFunAppNode,
+  EllipsisProcAppNode,
   EllipsisNode,
-  FunAppNode,
+  ProcAppNode,
   IfNode,
   LambdaNode,
   LetNode,
@@ -119,18 +119,12 @@ class WellFormedProgram extends ASTNodeVisitor<void> implements Stage<Program, P
     }
   }
 
-  visitEllipsisFunAllNode(_: EllipsisFunAppNode): void {
+  visitEllipsisProcAppNode(_: EllipsisProcAppNode): void {
     // skip well-formed check on template
   }
 
   visitEllipsisNode(_: EllipsisNode): void {
     // skip well-formed check on template
-  }
-
-  visitFunAppNode(node: FunAppNode): void {
-    this.incrementLevel();
-    node.fn.accept(this);
-    node.args.forEach(arg => arg.accept(this));
   }
 
   visitIfNode(node: IfNode): void {
@@ -234,6 +228,12 @@ class WellFormedProgram extends ASTNodeVisitor<void> implements Stage<Program, P
 
   visitOrNode(node: OrNode): void {
     this.incrementLevel();
+    node.args.forEach(arg => arg.accept(this));
+  }
+
+  visitProcAppNode(node: ProcAppNode): void {
+    this.incrementLevel();
+    node.fn.accept(this);
     node.args.forEach(arg => arg.accept(this));
   }
 

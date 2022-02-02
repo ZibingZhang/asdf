@@ -41,10 +41,10 @@ export {
   DefnStructNode,
   DefnVarNode,
   DExprNode,
-  EllipsisFunAppNode,
+  EllipsisProcAppNode,
   EllipsisNode,
   ExprNode,
-  FunAppNode,
+  ProcAppNode,
   IfNode,
   LambdaNode,
   LetNode,
@@ -72,9 +72,9 @@ type ExprNode =
   | AndNode
   | AtomNode
   | CondNode
-  | EllipsisFunAppNode
+  | EllipsisProcAppNode
   | EllipsisNode
-  | FunAppNode
+  | ProcAppNode
   | IfNode
   | LambdaNode
   | LetNode
@@ -87,6 +87,7 @@ type DExprNode =
 
 abstract class ASTNodeBase {
   used = false;
+  label = "";
 
   constructor(
     readonly sourceSpan: SourceSpan
@@ -240,7 +241,7 @@ class CondNode extends ASTNodeBase {
   }
 }
 
-class EllipsisFunAppNode extends ASTNodeBase {
+class EllipsisProcAppNode extends ASTNodeBase {
   constructor(
     readonly placeholder: AtomSExpr,
     readonly sourceSpan: SourceSpan
@@ -249,7 +250,7 @@ class EllipsisFunAppNode extends ASTNodeBase {
   }
 
   accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitEllipsisFunAllNode(this, args);
+    return visitor.visitEllipsisProcAppNode(this, args);
   }
 
   isTemplate(): boolean {
@@ -274,24 +275,6 @@ class EllipsisNode extends ASTNodeBase {
   }
 }
 
-class FunAppNode extends ASTNodeBase {
-  constructor(
-    readonly fn: ASTNode,
-    readonly args: ASTNode[],
-    readonly sourceSpan: SourceSpan
-  ) {
-    super(sourceSpan);
-  }
-
-  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
-    return visitor.visitFunAppNode(this, args);
-  }
-
-  isTemplate(): boolean {
-    return this.args.some(arg => arg.isTemplate());
-  }
-}
-
 class IfNode extends ASTNodeBase {
   constructor(
     readonly question: ASTNode,
@@ -313,6 +296,8 @@ class IfNode extends ASTNodeBase {
 
 class LambdaNode extends ASTNodeBase {
   name: string | null;
+  nameLabel = "";
+  paramLabels: string[] = [];
 
   constructor(
     name: string | null,
@@ -383,6 +368,24 @@ class OrNode extends ASTNodeBase {
   }
 }
 
+class ProcAppNode extends ASTNodeBase {
+  constructor(
+    readonly fn: ASTNode,
+    readonly args: ASTNode[],
+    readonly sourceSpan: SourceSpan
+  ) {
+    super(sourceSpan);
+  }
+
+  accept<T>(visitor: ASTNodeVisitor<T>, ...args: any[]): T {
+    return visitor.visitProcAppNode(this, args);
+  }
+
+  isTemplate(): boolean {
+    return this.args.some(arg => arg.isTemplate());
+  }
+}
+
 class RequireNode extends ASTNodeBase {
   global = new Global();
 
@@ -433,6 +436,8 @@ class VarNode extends ASTNodeBase {
 }
 
 abstract class DefnNodeBase extends ASTNodeBase {
+  nameLabel = "";
+
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,
@@ -452,6 +457,10 @@ abstract class DefnNodeBase extends ASTNodeBase {
 }
 
 class DefnStructNode extends DefnNodeBase {
+  makeStructLabel = "";
+  structHuhLabel = "";
+  fieldLabels: string[] = []
+
   constructor(
     readonly name: string,
     readonly nameSourceSpan: SourceSpan,
@@ -548,7 +557,7 @@ class DefnVarNode extends DefnNodeBase {
   }
 }
 
-function isCheckNode(node: ASTNode) {
+function isCheckNode(node: ASTNode): node is CheckNode {
   return node instanceof CheckNode;
 }
 
@@ -591,14 +600,14 @@ abstract class ASTNodeVisitor<T> {
   abstract visitCondNode(node: CondNode, ...args: any[]): T;
   abstract visitDefnVarNode(node: DefnVarNode, ...args: any[]): T;
   abstract visitDefnStructNode(node: DefnStructNode, ...args: any[]): T;
-  abstract visitEllipsisFunAllNode(node: EllipsisFunAppNode, ...args: any[]): T;
+  abstract visitEllipsisProcAppNode(node: EllipsisProcAppNode, ...args: any[]): T;
   abstract visitEllipsisNode(node: EllipsisNode, ...args: any[]): T;
-  abstract visitFunAppNode(node: FunAppNode, ...args: any[]): T;
   abstract visitIfNode(node: IfNode, ...args: any[]): T;
   abstract visitLambdaNode(node: LambdaNode, ...args: any[]): T;
   abstract visitLetNode(node: LetNode, ...args: any[]): T;
   abstract visitLocalNode(node: LocalNode, ...args: any[]): T;
   abstract visitOrNode(node: OrNode, ...args: any[]): T;
+  abstract visitProcAppNode(node: ProcAppNode, ...args: any[]): T;
   abstract visitRequireNode(node: RequireNode, ...args: any[]): T;
   abstract visitVarNode(node: VarNode, ...args: any[]): T;
 }

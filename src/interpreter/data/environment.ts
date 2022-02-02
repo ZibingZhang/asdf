@@ -30,12 +30,14 @@ class Environment {
     this.parentEnv = parentEnv;
   }
 
-  set(name: string, value: RValue) {
-    this.map.set(name, value);
+  set(label: string, value: RValue) {
+    console.log(label)
+    this.map.set(label, value);
   }
 
-  get(name: string, sourceSpan: SourceSpan): RValue {
-    const val = this.map.get(name);
+  get(name: string, label: string, sourceSpan: SourceSpan): RValue {
+    console.log(name, label)
+    const val = this.map.get(label);
     if (val) {
       return val;
     } else if (!this.parentEnv) {
@@ -43,16 +45,16 @@ class Environment {
         !SETTINGS.primitives.blackList.includes(name)
         && this.global.primitiveEnvironment.map.has(name)
       ) {
-        return this.global.primitiveEnvironment.get(name, sourceSpan);
+        return this.global.primitiveEnvironment.get(name, label, sourceSpan);
       } else {
-        console.log(this);
+        console.trace()
         throw new StageError(
           SC_USED_BEFORE_DEFINITION_ERR(name),
           sourceSpan
         );
       }
     } else {
-      return this.parentEnv.get(name, sourceSpan);
+      return this.parentEnv.get(name, label, sourceSpan);
     }
   }
 

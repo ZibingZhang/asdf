@@ -587,7 +587,7 @@ abstract class RProcedure extends RValue {
   abstract getType(args: number): ProcedureType;
 
   getName(): string {
-    throw "illegal state: asking name of anonymous procedure";
+    return "#<procedure>";
   }
 }
 
@@ -672,6 +672,7 @@ class RLambda extends RProcedure {
     readonly name: string | null,
     readonly closure: Environment,
     readonly params: string[],
+    readonly paramLabels: string[] = [],
     readonly body: ASTNode
   ) {
     super();

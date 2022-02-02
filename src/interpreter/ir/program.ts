@@ -1,5 +1,6 @@
 import {
   ASTNode,
+  CheckNode,
   DefnNode,
   RequireNode
 } from "./ast";

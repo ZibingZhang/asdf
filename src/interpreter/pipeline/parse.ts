@@ -12,9 +12,9 @@ import {
   DefnNode,
   DefnStructNode,
   DefnVarNode,
-  EllipsisFunAppNode,
+  EllipsisProcAppNode,
   EllipsisNode,
-  FunAppNode,
+  ProcAppNode,
   IfNode,
   LambdaNode,
   LetNode,
@@ -25,7 +25,8 @@ import {
   isDefnNode,
   isLambdaNode,
   isRequireNode,
-  isVarNode
+  isVarNode,
+  isCheckNode
 } from "../ir/ast";
 import {
   AtomSExpr,
@@ -139,7 +140,9 @@ class ParseSExpr implements Stage<SExpr[], Program> {
     const nodes: ASTNode[] = [];
     for (const sexpr of sexprs) {
       const node = this.toNode(sexpr);
-      if (isDefnNode(node) || isRequireNode(node)) { defns.push(node); }
+      if (isDefnNode(node) || isRequireNode(node)) {
+        defns.push(node);
+      }
       nodes.push(node);
     }
     return new Program(defns, nodes);
@@ -275,7 +278,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       }
       if (isListSExpr(leadingSExpr)) {
         if (SETTINGS.higherOrderFunctions) {
-          return new FunAppNode(
+          return new ProcAppNode(
             this.toNode(leadingSExpr),
             sexpr.subSExprs.slice(1).map(sexpr => this.toNode(sexpr)),
             sexpr.sourceSpan
@@ -289,14 +292,14 @@ class ParseSExpr implements Stage<SExpr[], Program> {
       }
       switch (leadingSExpr.token.type) {
         case TokenType.Name: {
-          return new FunAppNode(
+          return new ProcAppNode(
             this.toNode(leadingSExpr),
             sexpr.subSExprs.slice(1).map(sexpr => this.toNode(sexpr)),
             sexpr.sourceSpan
           );
         }
         case TokenType.Placeholder: {
-          return new EllipsisFunAppNode(
+          return new EllipsisProcAppNode(
             leadingSExpr,
             sexpr.sourceSpan
           );
@@ -998,7 +1001,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
           }
           return this.toNode(quotedSExpr.subSExprs[1]);
         } else {
-          return new FunAppNode(
+          return new ProcAppNode(
             new VarNode("list", sexpr.sourceSpan),
             quotedSExpr.subSExprs.map(subSExpr => this.toQuasiquoteNode(sexpr, subSExpr)),
             sexpr.sourceSpan
@@ -1053,7 +1056,7 @@ class ParseSExpr implements Stage<SExpr[], Program> {
             sexpr.sourceSpan
           );
         }
-        return new FunAppNode(
+        return new ProcAppNode(
           new VarNode("list", sexpr.sourceSpan),
           quotedSExpr.subSExprs.map(subSExpr => this.toQuoteNode(sexpr, subSExpr)),
           sexpr.sourceSpan
