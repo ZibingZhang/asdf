@@ -45,7 +45,8 @@ import {
   FA_WRONG_TYPE_ERR,
   FC_EXPECTED_FUNCTION_ERR,
   HO_EXPECTED_LIST_ARGUMENT_ERR,
-  RT_MAX_CALL_STACK_SIZE_ERR, WF_QUESTION_NOT_BOOL_ERR
+  RT_MAX_CALL_STACK_SIZE_ERR,
+  WF_QUESTION_NOT_BOOL_ERR
 } from "../error";
 import {
   NO_SOURCE_SPAN,
@@ -102,10 +103,41 @@ import {
 
 export {
   EvaluateCode,
+  EvaluateCodeOld,
   EvaluateRProcedureVisitor
 };
 
-class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RValue[]> {
+declare let stopify: any;
+
+class EvaluateCode implements Stage<[string, Map<string, ASTNode>], any> {
+  execEnv = new Environment();
+  globalEnv = new Environment();
+  rvals: RValue[] = [];
+
+  reset() {
+    this.execEnv = new Environment();
+    this.globalEnv = new Environment();
+  }
+
+  run(input: StageOutput<[string, Map<string, ASTNode>]>): StageOutput<[any, RValue[]]> {
+    this.rvals = [];
+    const [compiledCode, labelNodeMap] = input.output;
+    const lookupLabel = (label: string) => {
+      return labelNodeMap.get(label);
+    }
+    const asyncRun = stopify.stopifyLocally(compiledCode);
+    asyncRun.g = {
+      lookupLabel,
+      execEnv: this.execEnv,
+      globalEnv: this.globalEnv,
+      rvals: this.rvals,
+      console  // for debugging
+    };
+    return new StageOutput([asyncRun, this.rvals]);
+  }
+}
+
+class EvaluateCodeOld implements ASTNodeVisitor<RValue>, Stage<Program, RValue[]> {
   env = new Environment();
 
   private globalEnv = new Environment();
@@ -544,16 +576,15 @@ class EvaluateCode extends ASTNodeVisitor<RValue> implements Stage<Program, RVal
   }
 }
 
-
 class EvaluateRProcedureVisitor implements RProcedureVisitor<RValue> {
-  evaluator: EvaluateCode;
+  evaluator: EvaluateCodeOld;
 
   constructor(
     readonly args: ASTNode[],
     readonly env: Environment,
     readonly sourceSpan: SourceSpan
   ) {
-    this.evaluator = new EvaluateCode();
+    this.evaluator = new EvaluateCodeOld();
     this.evaluator.env = env;
   }
 

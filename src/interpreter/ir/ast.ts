@@ -570,36 +570,26 @@ function isVarNode(node: ASTNode): node is VarNode {
   return node instanceof VarNode;
 }
 
-abstract class ASTNodeVisitor<T> {
-  abstract visitAndNode(node: AndNode): T;
-  abstract visitAtomNode(node: AtomNode): T;
-  abstract visitCheckNode(node: CheckNode): T;
-  visitCheckErrorNode(node: CheckErrorNode): T {
-    return this.visitCheckNode(node);
-  }
-  visitCheckMemberOfNode(node: CheckMemberOfNode): T {
-    return this.visitCheckNode(node);
-  }
-  visitCheckRangeNode(node: CheckRangeNode): T {
-    return this.visitCheckNode(node);
-  }
-  visitCheckSatisfiedNode(node: CheckSatisfiedNode): T {
-    return this.visitCheckNode(node);
-  }
-  visitCheckWithinNode(node: CheckWithinNode): T {
-    return this.visitCheckNode(node);
-  }
-  abstract visitCondNode(node: CondNode): T;
-  abstract visitDefnVarNode(node: DefnVarNode): T;
-  abstract visitDefnStructNode(node: DefnStructNode): T;
-  abstract visitEllipsisProcAppNode(node: EllipsisProcAppNode): T;
-  abstract visitEllipsisNode(node: EllipsisNode): T;
-  abstract visitIfNode(node: IfNode): T;
-  abstract visitLambdaNode(node: LambdaNode): T;
-  abstract visitLetNode(node: LetNode): T;
-  abstract visitLocalNode(node: LocalNode): T;
-  abstract visitOrNode(node: OrNode): T;
-  abstract visitProcAppNode(node: ProcAppNode): T;
-  abstract visitRequireNode(node: RequireNode): T;
-  abstract visitVarNode(node: VarNode): T;
+type ASTNodeVisitor<T> = {
+  visitAndNode(node: AndNode): T;
+  visitAtomNode(node: AtomNode): T;
+  visitCheckNode(node: CheckNode): T;
+  visitCheckErrorNode(node: CheckErrorNode): T;
+  visitCheckMemberOfNode(node: CheckMemberOfNode): T;
+  visitCheckRangeNode(node: CheckRangeNode): T;
+  visitCheckSatisfiedNode(node: CheckSatisfiedNode): T;
+  visitCheckWithinNode(node: CheckWithinNode): T;
+  visitCondNode(node: CondNode): T;
+  visitDefnVarNode(node: DefnVarNode): T;
+  visitDefnStructNode(node: DefnStructNode): T;
+  visitEllipsisProcAppNode(node: EllipsisProcAppNode): T;
+  visitEllipsisNode(node: EllipsisNode): T;
+  visitIfNode(node: IfNode): T;
+  visitLambdaNode(node: LambdaNode): T;
+  visitLetNode(node: LetNode): T;
+  visitLocalNode(node: LocalNode): T;
+  visitOrNode(node: OrNode): T;
+  visitProcAppNode(node: ProcAppNode): T;
+  visitRequireNode(node: RequireNode): T;
+  visitVarNode(node: VarNode): T;
 }

@@ -16,7 +16,12 @@ import {
   OrNode,
   ProcAppNode,
   RequireNode,
-  VarNode
+  VarNode,
+  CheckErrorNode,
+  CheckMemberOfNode,
+  CheckRangeNode,
+  CheckSatisfiedNode,
+  CheckWithinNode
 } from "../ir/ast";
 import {
   CE_TEST_NOT_TOP_LEVEL_ERR,
@@ -50,7 +55,7 @@ export {
   WellFormedProgram
 };
 
-class WellFormedProgram extends ASTNodeVisitor<void> implements Stage<Program, Program> {
+class WellFormedProgram implements ASTNodeVisitor<void>, Stage<Program, Program> {
   private level = 0;
   private scope: Scope = new Scope();
 
@@ -89,6 +94,26 @@ class WellFormedProgram extends ASTNodeVisitor<void> implements Stage<Program, P
     }
     this.incrementLevel();
     node.args.forEach(arg => arg.accept(this));
+  }
+
+  visitCheckErrorNode(node: CheckErrorNode): void {
+    this.visitCheckNode(node);
+  }
+
+  visitCheckMemberOfNode(node: CheckMemberOfNode): void {
+    this.visitCheckNode(node);
+  }
+
+  visitCheckRangeNode(node: CheckRangeNode): void {
+    this.visitCheckNode(node);
+  }
+
+  visitCheckSatisfiedNode(node: CheckSatisfiedNode): void {
+    this.visitCheckNode(node);
+  }
+
+  visitCheckWithinNode(node: CheckWithinNode): void {
+    this.visitCheckNode(node);
   }
 
   visitCondNode(node: CondNode): void {

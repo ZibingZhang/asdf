@@ -15,7 +15,12 @@ import {
   OrNode,
   ProcAppNode,
   RequireNode,
-  VarNode
+  VarNode,
+  CheckErrorNode,
+  CheckMemberOfNode,
+  CheckRangeNode,
+  CheckSatisfiedNode,
+  CheckWithinNode
 } from "../ir/ast";
 import {
   Stage,
@@ -32,10 +37,8 @@ export {
   UnusedCode
 };
 
-class UnusedCode extends ASTNodeVisitor<void> implements Stage<Program, void> {
-  constructor(readonly unusedCallback: (sourceSpan: SourceSpan) => void) {
-    super();
-  }
+class UnusedCode implements ASTNodeVisitor<void>, Stage<Program, void> {
+  constructor(readonly unusedCallback: (sourceSpan: SourceSpan) => void) {}
 
   run(input: StageOutput<Program>): StageOutput<void> {
     for (const node of input.output.nodes) {
@@ -64,6 +67,26 @@ class UnusedCode extends ASTNodeVisitor<void> implements Stage<Program, void> {
     if (!node.used) {
       this.unusedCallback(node.sourceSpan);
     }
+  }
+
+  visitCheckErrorNode(node: CheckErrorNode): void {
+    this.visitCheckNode(node);
+  }
+
+  visitCheckMemberOfNode(node: CheckMemberOfNode): void {
+    this.visitCheckNode(node);
+  }
+
+  visitCheckRangeNode(node: CheckRangeNode): void {
+    this.visitCheckNode(node);
+  }
+
+  visitCheckSatisfiedNode(node: CheckSatisfiedNode): void {
+    this.visitCheckNode(node);
+  }
+
+  visitCheckWithinNode(node: CheckWithinNode): void {
+    this.visitCheckNode(node);
   }
 
   visitCondNode(node: CondNode): void {
