@@ -6,12 +6,9 @@ export {
   R2HtdpUniverseModule
 };
 
-class R2HtdpUniverseModule extends RModule {
-  constructor() {
-    super(
-      "2htdp/universe",
-      [],
-      new Map()
-    );
-  }
-}
+
+const R2HtdpUniverseModule: RModule = {
+  name: "2htdp/universe",
+  procedures: [],
+  data: new Map([])
+};

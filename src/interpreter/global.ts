@@ -362,8 +362,8 @@ class Global {
     this.defineScopes();
 
     // modules
-    this.addModule(new R2HtdpImageModule());
-    this.addModule(new R2HtdpUniverseModule());
+    this.addModule(R2HtdpImageModule);
+    this.addModule(R2HtdpUniverseModule);
   }
 
   enableHigherOrderFunctions() {

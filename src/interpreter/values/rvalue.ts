@@ -92,12 +92,10 @@ function gcd(a: bigint, b: bigint): bigint {
   return gcd(b, a % b);
 }
 
-abstract class RModule {
-  constructor(
-    readonly name: string,
-    readonly procedures: RProcedure[],
-    readonly data: Map<string, RValue>
-  ) {}
+type RModule = {
+  readonly name: string;
+  readonly procedures: RProcedure[];
+  readonly data: Map<string, RValue>;
 }
 
 abstract class RValue {

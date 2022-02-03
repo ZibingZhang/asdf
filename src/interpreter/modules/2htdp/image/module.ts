@@ -39,44 +39,41 @@ export {
   R2HtdpImageModule
 };
 
-class R2HtdpImageModule extends RModule {
-  constructor() {
-    const makeColor = new RMakeStructFun("color", 3);
-    makeColor.getType = () => new ProcedureType(new Array(3).fill(new Exact8BitIntegerType()), new ColorType());
-    super(
-      "2htdp/image",
-      [
-        // color structure
-        new RPPMakeColor("color"),
-        new RPPMakeColor(),
-        new RStructHuhProc("color"),
-        new RStructGetProc("color", "red", 0),
-        new RStructGetProc("color", "green", 1),
-        new RStructGetProc("color", "blue", 2),
-        new RStructGetProc("color", "alpha", 3),
+const makeColor = new RMakeStructFun("color", 3);
+makeColor.getType = () => new ProcedureType(new Array(3).fill(new Exact8BitIntegerType()), new ColorType());
 
-        // basic images
-        new RPPCircle(),
-        new RPPEllipse(),
+const R2HtdpImageModule: RModule = {
+  name: "2htdp/image",
+  procedures: [
+    // color structure
+    new RPPMakeColor("color"),
+    new RPPMakeColor(),
+    new RStructHuhProc("color"),
+    new RStructGetProc("color", "red", 0),
+    new RStructGetProc("color", "green", 1),
+    new RStructGetProc("color", "blue", 2),
+    new RStructGetProc("color", "alpha", 3),
 
-        // polygons
-        new RPPSquare(),
-        new RPPRectangle(),
+    // basic images
+    new RPPCircle(),
+    new RPPEllipse(),
 
-        // overlaying images
-        new RPPBeside(),
-        new RPPAbove(),
+    // polygons
+    new RPPSquare(),
+    new RPPRectangle(),
 
-        // image properties
-        new RPPImageWidth(),
-        new RPPImageHeight(),
+    // overlaying images
+    new RPPBeside(),
+    new RPPAbove(),
 
-        // image predicates
-        new RPPImageHuh()
-      ],
-      new Map([
-        ["empty-image", RPC_EMPTY_IMAGE]
-      ])
-    );
-  }
-}
+    // image properties
+    new RPPImageWidth(),
+    new RPPImageHeight(),
+
+    // image predicates
+    new RPPImageHuh()
+  ],
+  data: new Map([
+    ["empty-image", RPC_EMPTY_IMAGE]
+  ])
+};
