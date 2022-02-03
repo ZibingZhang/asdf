@@ -8,7 +8,6 @@ import {
 } from "../values/types";
 import {
   RList,
-  RMath,
   RNumber,
   RPrimProc,
   RValue,
@@ -18,6 +17,7 @@ import {
   isRList,
   toRBoolean
 } from "../values/rvalue";
+import { RMath } from "../values/rmath";
 
 export {
   RPPAppend,

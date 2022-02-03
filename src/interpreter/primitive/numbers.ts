@@ -18,7 +18,6 @@ import {
 import {
   RExactReal,
   RInexactReal,
-  RMath,
   RNumber,
   RPrimProc,
   RString,
@@ -40,6 +39,7 @@ import {
 import {
   StageError
 } from "../data/stage";
+import { RMath } from "../values/rmath";
 
 export {
   RPPMultiply,

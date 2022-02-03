@@ -3,7 +3,6 @@ import {
   ProcedureType
 } from "../../../../values/types";
 import {
-  RMath,
   RPrimProc,
   RValue
 } from "../../../../values/rvalue";
@@ -13,6 +12,7 @@ import {
 import {
   RImage
 } from "../rvalue";
+import { RMath } from "../../../../values/rmath";
 
 export {
   RPPImageWidth,

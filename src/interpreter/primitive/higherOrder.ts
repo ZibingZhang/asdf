@@ -19,7 +19,6 @@ import {
   RBoolean,
   RComposedProcedure,
   RList,
-  RMath,
   RNumber,
   RPrimProc,
   RProcedure,
@@ -47,6 +46,7 @@ import {
 import {
   StageError
 } from "../data/stage";
+import { RMath } from "../values/rmath";
 
 export {
   RPPAndmap,

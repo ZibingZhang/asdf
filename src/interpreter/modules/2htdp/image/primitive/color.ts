@@ -3,7 +3,6 @@ import {
   Exact8BitIntegerType
 } from "../types";
 import {
-  RMath,
   RNumber,
   RPrimProc,
   RStruct,
@@ -12,6 +11,7 @@ import {
 import {
   ProcedureType
 } from "../../../../values/types";
+import { RMath } from "../../../../values/rmath";
 
 export {
   RPPMakeColor
