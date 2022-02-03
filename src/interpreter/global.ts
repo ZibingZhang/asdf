@@ -123,6 +123,10 @@ import {
   RPPSymbolToString
 } from "./primitive/symbols";
 import {
+  RPPCharAlphabeticHuh,
+  RPPCharToInteger
+} from "./primitive/characters";
+import {
   RPPExplode,
   RPPMakeString,
   RPPReplicate,
@@ -317,6 +321,10 @@ class Global {
 
     // posns
     this.addStructToPrimEnv("posn", ["x", "y"]);
+
+    // characters
+    this.addFnToPrimEnv(new RPPCharToInteger());
+    this.addFnToPrimEnv(new RPPCharAlphabeticHuh());
 
     // strings
     this.addFnToPrimEnv(new RPPExplode());
