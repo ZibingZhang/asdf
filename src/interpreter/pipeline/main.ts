@@ -12,9 +12,6 @@ import {
   GenerateLabels
 } from "./label";
 import {
-  Global
-} from "../global";
-import {
   Lexer
 } from "./lexing";
 import {
@@ -30,9 +27,6 @@ import {
   RValue
 } from "../values/rvalue";
 import {
-  SETTINGS
-} from "../settings";
-import {
   SourceSpan
 } from "../data/sourcespan";
 import {
@@ -47,9 +41,6 @@ export {
 };
 
 class Pipeline {
-  private global = new Global();
-  private higherOrderFunctions = false;
-
   private LEXING_STAGE = new Lexer();
   private PARSING_SEXPRS_STAGE = new ParseSExpr();
   private WELL_FORMED_PROGRAM_STAGE = new WellFormedProgram();
@@ -71,14 +62,6 @@ class Pipeline {
   };
 
   evaluateCode(code: string): void {
-    if (this.higherOrderFunctions !== SETTINGS.higherOrderFunctions) {
-      this.higherOrderFunctions = SETTINGS.higherOrderFunctions;
-      if (this.higherOrderFunctions) {
-        this.global.enableHigherOrderFunctions();
-      } else {
-        this.global.disableHigherOrderFunctions();
-      }
-    }
     try {
       this.evaluateCodeHelper(code);
     } catch (e) {
@@ -101,7 +84,9 @@ class Pipeline {
     this.handleErrors(evaluateCodeOutput, true);
     this.successCallback(evaluateCodeOutput.output);
     this.testResultsCallback(evaluateCodeOutput.tests);
-    if (this.unusedCallback) { this.UNUSED_CODE_STAGE.run(this.parsingOutput); }
+    if (this.unusedCallback) {
+      this.UNUSED_CODE_STAGE.run(this.parsingOutput);
+    }
   }
 
   handleErrors(
@@ -111,7 +96,9 @@ class Pipeline {
     if (StageResult.errors.length > 0) {
       this.errorsCallback(StageResult.errors);
       this.testResultsCallback(StageResult.tests);
-      if (this.unusedCallback && runUnusedCallback) { this.UNUSED_CODE_STAGE.run(this.parsingOutput); }
+      if (this.unusedCallback && runUnusedCallback) {
+        this.UNUSED_CODE_STAGE.run(this.parsingOutput);
+      }
       throw new Pipeline.ShortCircuitPipeline(StageResult);
     }
   }
@@ -136,6 +123,8 @@ class Pipeline {
 
   setUnusedCallback(unusedCallback: ((sourceSpan: SourceSpan) => void) | null = null) {
     this.unusedCallback = unusedCallback;
-    if (this.unusedCallback) { this.UNUSED_CODE_STAGE = new UnusedCode(this.unusedCallback); }
+    if (this.unusedCallback) {
+      this.UNUSED_CODE_STAGE = new UnusedCode(this.unusedCallback);
+    }
   }
 }

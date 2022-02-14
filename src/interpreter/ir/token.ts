@@ -8,17 +8,17 @@ export {
 };
 
 enum TokenType {
-  LeftParen = "LEFT_PAREN",
-  True = "TRUE",
-  False = "FALSE",
-  Character = "CHARACTER",
-  String = "STRING",
-  Name = "NAME",
-  Keyword = "KEYWORD",
-  Integer = "INTEGER",
-  Rational = "RATIONAL",
-  Decimal = "DECIMAL",
-  Placeholder = "PLACEHOLDER"
+  LeftParen,
+  True,
+  False,
+  Character,
+  String,
+  Name,
+  Keyword,
+  Integer,
+  Rational,
+  Decimal,
+  Placeholder
 }
 
 class Token {

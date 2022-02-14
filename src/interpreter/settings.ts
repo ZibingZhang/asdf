@@ -1,6 +1,9 @@
 import {
   ALL_KEYWORDS
 } from "./data/keyword";
+import {
+  Global
+} from "./global";
 
 export {
   SETTINGS,
@@ -28,6 +31,11 @@ type Settings = {
 function updateSettings(settings = {}) {
   mergeDeep(SETTINGS, settings);
   SETTINGS.syntax.forms = SETTINGS.syntax.forms.filter(keyword => ALL_KEYWORDS.includes(keyword));
+  if (SETTINGS.higherOrderFunctions) {
+    new Global().enableHigherOrderFunctions();
+  } else {
+    new Global().disableHigherOrderFunctions();
+  }
 }
 
 const DEFAULT_SETTINGS = {
