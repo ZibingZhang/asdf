@@ -70,35 +70,8 @@ class Pipeline {
     }
   }
 
-  evaluateCodeHelper(code: string): void {
-    const initOutput: StageResult<string> = makeStageResult(code);
-    const lexingOutput = this.LEXING_STAGE.run(initOutput);
-    this.handleErrors(lexingOutput, null);
-    const parsingOutput = this.PARSING_SEXPRS_STAGE.run(lexingOutput);
-    this.handleErrors(parsingOutput, parsingOutput);
-    const wellFormedOutput = this.WELL_FORMED_PROGRAM_STAGE.run(parsingOutput);
-    this.handleErrors(wellFormedOutput, parsingOutput);
-    this.GENERATE_LABELS_STAGE.run(wellFormedOutput);
-    const evaluateCodeOutput = this.EVALUATE_CODE_STAGE.run(wellFormedOutput);
-    this.handleErrors(evaluateCodeOutput, parsingOutput, true);
-    this.successCallback(evaluateCodeOutput.output);
-    this.testResultsCallback(evaluateCodeOutput.tests);
-    this.UNUSED_CODE_STAGE.run(parsingOutput);
-  }
-
-  handleErrors(
-    stageResult: StageResult<any>,
-    program: StageResult<Program> | null,
-    runUnusedCallback = false
-  ) {
-    if (stageResult.errors.length > 0) {
-      this.errorsCallback(stageResult.errors);
-      this.testResultsCallback(stageResult.tests);
-      if (runUnusedCallback && program) {
-        this.UNUSED_CODE_STAGE.run(program);
-      }
-      throw new Pipeline.ShortCircuitPipeline(stageResult);
-    }
+  reformatCode(code: string): void {
+    this.reformatCallback(code);
   }
 
   reset() {
@@ -119,8 +92,43 @@ class Pipeline {
     this.testResultsCallback = testResultCallback;
   }
 
-  setUnusedCallback(unusedCallback: ((sourceSpan: SourceSpan) => void)) {
+  setUnusedCallback(unusedCallback: (sourceSpan: SourceSpan) => void) {
     this.unusedCallback = unusedCallback;
     this.UNUSED_CODE_STAGE = new UnusedCode(this.unusedCallback);
+  }
+
+  setReformatCallback(reformatCallback: (code: string) => void) {
+    this.reformatCallback = reformatCallback;
+  }
+
+  private evaluateCodeHelper(code: string): void {
+    const initOutput: StageResult<string> = makeStageResult(code);
+    const lexingOutput = this.LEXING_STAGE.run(initOutput);
+    this.handleErrors(lexingOutput, null);
+    const parsingOutput = this.PARSING_SEXPRS_STAGE.run(lexingOutput);
+    this.handleErrors(parsingOutput, parsingOutput);
+    const wellFormedOutput = this.WELL_FORMED_PROGRAM_STAGE.run(parsingOutput);
+    this.handleErrors(wellFormedOutput, parsingOutput);
+    this.GENERATE_LABELS_STAGE.run(wellFormedOutput);
+    const evaluateCodeOutput = this.EVALUATE_CODE_STAGE.run(wellFormedOutput);
+    this.handleErrors(evaluateCodeOutput, parsingOutput, true);
+    this.successCallback(evaluateCodeOutput.output);
+    this.testResultsCallback(evaluateCodeOutput.tests);
+    this.UNUSED_CODE_STAGE.run(parsingOutput);
+  }
+
+  private handleErrors(
+    stageResult: StageResult<any>,
+    program: StageResult<Program> | null,
+    runUnusedCallback = false
+  ) {
+    if (stageResult.errors.length > 0) {
+      this.errorsCallback(stageResult.errors);
+      this.testResultsCallback(stageResult.tests);
+      if (runUnusedCallback && program) {
+        this.UNUSED_CODE_STAGE.run(program);
+      }
+      throw new Pipeline.ShortCircuitPipeline(stageResult);
+    }
   }
 }

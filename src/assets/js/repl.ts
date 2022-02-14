@@ -147,7 +147,7 @@ class Repl {
       replOutput += "> ";
       this.append(replOutput, "cm-highlight-error-message");
     });
-    window.racket.pipeline.setUnusedCallback(null);
+    window.racket.pipeline.setUnusedCallback(() => {});
     window.racket.pipeline.evaluateCode(code);
   }
 
