@@ -5,8 +5,7 @@ export {
 
 declare let CodeMirror: CodeMirror;
 
-class Info {
-  private INIT_VALUE = `Source code at https://github.com/ZibingZhang/racket-online-ide
+const INIT_VALUE = `Source code at https://github.com/ZibingZhang/racket-online-ide
 
 Keyboard shortcuts
 ==================
@@ -15,10 +14,15 @@ Editor
 --------------------
 Alt-Enter | Run code
 
-Settings
------------------------------------------
-Ctrl-s | Save settings`;
+REPL
+---------------------------
+Alt-p | Previous expression
 
+Settings
+----------------------
+Ctrl-s | Save settings`
+
+class Info {
   cm: CodeMirror;
 
   constructor(elementId: string) {
@@ -29,7 +33,7 @@ Ctrl-s | Save settings`;
       }, {
         lineNumbers: false,
         readOnly: true,
-        value: this.INIT_VALUE,
+        value: INIT_VALUE,
         mode: "text"
       }
     );
