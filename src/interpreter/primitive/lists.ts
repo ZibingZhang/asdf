@@ -17,7 +17,9 @@ import {
   isRList,
   toRBoolean
 } from "../values/rvalue";
-import { RMath } from "../values/rmath";
+import {
+  RMath
+} from "../values/rmath";
 
 export {
   RPPAppend,

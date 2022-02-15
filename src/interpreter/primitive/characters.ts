@@ -1,25 +1,13 @@
 import {
-  AnyType,
   BooleanType,
   CharacterType,
   ExactNonNegativeIntegerType,
-  ListType,
-  ProcedureType,
-  StringType,
-  SymbolType
+  ProcedureType
 } from "../values/types";
 import {
   RCharacter,
-  RExactReal,
-  RList,
-  RNumber,
   RPrimProc,
-  RString,
-  RSymbol,
   RValue,
-  R_FALSE,
-  R_TRUE,
-  isRString,
   toRBoolean
 } from "../values/rvalue";
 import {
@@ -28,7 +16,7 @@ import {
 
 export {
   RPPCharToInteger,
-  RPPCharAlphabeticHuh,
+  RPPCharAlphabeticHuh
 };
 
 class RPPCharToInteger extends RPrimProc {

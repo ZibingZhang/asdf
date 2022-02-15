@@ -31,6 +31,9 @@ import {
   toRBoolean
 } from "../values/rvalue";
 import {
+  RMath
+} from "../values/rmath";
+import {
   RNG
 } from "../random";
 import {
@@ -39,7 +42,6 @@ import {
 import {
   StageError
 } from "../data/stage";
-import { RMath } from "../values/rmath";
 
 export {
   RPPMultiply,

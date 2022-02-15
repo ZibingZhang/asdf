@@ -20,7 +20,7 @@ Alt-p | Previous expression
 
 Settings
 ----------------------
-Ctrl-s | Save settings`
+Ctrl-s | Save settings`;
 
 class Info {
   cm: CodeMirror;

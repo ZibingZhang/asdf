@@ -1,8 +1,8 @@
 import {
-  isRExactReal,
   RExactReal,
   RInexactReal,
-  RNumber
+  RNumber,
+  isRExactReal
 } from "./rvalue";
 
 export {

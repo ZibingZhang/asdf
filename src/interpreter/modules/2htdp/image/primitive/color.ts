@@ -11,7 +11,9 @@ import {
 import {
   ProcedureType
 } from "../../../../values/types";
-import { RMath } from "../../../../values/rmath";
+import {
+  RMath
+} from "../../../../values/rmath";
 
 export {
   RPPMakeColor

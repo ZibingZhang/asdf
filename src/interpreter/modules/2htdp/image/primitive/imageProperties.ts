@@ -12,7 +12,9 @@ import {
 import {
   RImage
 } from "../rvalue";
-import { RMath } from "../../../../values/rmath";
+import {
+  RMath
+} from "../../../../values/rmath";
 
 export {
   RPPImageWidth,

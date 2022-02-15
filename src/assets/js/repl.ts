@@ -34,13 +34,13 @@ class Repl {
             --this.historyIdx;
             const idx = this.historyIdx % (this.history.length + 1);
             const replacement = idx === 0 ? "" : this.history.at(idx);
-            this.cm.replaceRange("> " + replacement, { line: this.cm.lastLine(), ch: 0 }, { line: this.cm.lastLine() })
+            this.cm.replaceRange("> " + replacement, { line: this.cm.lastLine(), ch: 0 }, { line: this.cm.lastLine() });
           },
           "Shift-Alt-P": (_cm: CodeMirror) => {
             this.historyIdx -= this.history.length;
             const idx = this.historyIdx % (this.history.length + 1);
             const replacement = idx === 0 ? "" : this.history.at(idx);
-            this.cm.replaceRange("> " + replacement, { line: this.cm.lastLine(), ch: 0 }, { line: this.cm.lastLine() })
+            this.cm.replaceRange("> " + replacement, { line: this.cm.lastLine(), ch: 0 }, { line: this.cm.lastLine() });
           }
         }
       }
@@ -160,7 +160,7 @@ class Repl {
       replOutput += "> ";
       this.append(replOutput, "cm-highlight-error-message");
     });
-    window.racket.pipeline.setUnusedCallback(() => {});
+    window.racket.pipeline.setUnusedCallback(() => { /* do nothing */ });
     window.racket.pipeline.evaluateCode(code);
   }
 

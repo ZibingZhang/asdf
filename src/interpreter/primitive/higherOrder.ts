@@ -41,12 +41,14 @@ import {
   EvaluateRProcedureVisitor
 } from "../pipeline/evaluate";
 import {
+  RMath
+} from "../values/rmath";
+import {
   SourceSpan
 } from "../data/sourcespan";
 import {
   StageError
 } from "../data/stage";
-import { RMath } from "../values/rmath";
 
 export {
   RPPAndmap,
