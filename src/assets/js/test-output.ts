@@ -7,10 +7,10 @@ export {
   TestOutput
 };
 
-declare let CodeMirror: any;
+declare let CodeMirror: CodeMirror;
 
 class TestOutput {
-  cm: any;
+  cm: CodeMirror;
   failedTests = 0;
   totalTests = 0;
 

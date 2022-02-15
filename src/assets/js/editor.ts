@@ -10,11 +10,11 @@ export {
   Editor
 };
 
-declare let CodeMirror: any;
+declare let CodeMirror: CodeMirror;
 
 class Editor {
   marked = false;
-  cm: any;
+  cm: CodeMirror;
   controller: Controller;
 
   constructor(elementId: string) {

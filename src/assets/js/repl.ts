@@ -8,12 +8,13 @@ export {
   Repl
 };
 
-declare let CodeMirror: any;
+declare let CodeMirror: CodeMirror;
 
 class Repl {
   marked = false;
-  cm: any;
+  cm: CodeMirror;
   history: string[] = [];
+  historyIdx = 0;
 
   constructor(elementId: string) {
     const textArea = document.getElementById(elementId) || new Element();
@@ -29,7 +30,18 @@ class Repl {
         theme: "racket",
         styleSelectedText: true,
         extraKeys: {
-          "Alt-P": () => this.cm.replaceRange("> " + (this.history.at(-1) || ""), { line: this.cm.lastLine(), ch: 0 }, { line: this.cm.lastLine() })
+          "Alt-P": (_cm: CodeMirror) => {
+            --this.historyIdx;
+            const idx = this.historyIdx % (this.history.length + 1);
+            const replacement = idx === 0 ? "" : this.history.at(idx);
+            this.cm.replaceRange("> " + replacement, { line: this.cm.lastLine(), ch: 0 }, { line: this.cm.lastLine() })
+          },
+          "Shift-Alt-P": (_cm: CodeMirror) => {
+            this.historyIdx -= this.history.length;
+            const idx = this.historyIdx % (this.history.length + 1);
+            const replacement = idx === 0 ? "" : this.history.at(idx);
+            this.cm.replaceRange("> " + replacement, { line: this.cm.lastLine(), ch: 0 }, { line: this.cm.lastLine() })
+          }
         }
       }
     );
@@ -38,7 +50,7 @@ class Repl {
       return { from: this.cm.getCursor(true), to: this.cm.getCursor(false) };
     };
     this.cm.on("change",
-      (cm: any, changeObj: any) => {
+      (cm: CodeMirror, changeObj: any) => {
         const match = changeObj.origin?.match(/cm-highlight-error-message (\d+)/);
         if (match) {
           const lines = Number(match[1]);
@@ -51,7 +63,7 @@ class Repl {
           }
         }
 
-        if (this.marked && !changeObj.origin.match("ignore")) {
+        if (this.marked && !changeObj.origin?.match("ignore")) {
           cm.doc.getAllMarks()
             .filter((mark: any) => mark.className !== "cm-highlight-error-message")
             .forEach((mark: any) => mark.clear());
@@ -59,7 +71,7 @@ class Repl {
       }
     );
     this.cm.on("keydown",
-      (cm: any, event: any) => {
+      (cm: CodeMirror, event: any) => {
         switch (event.key) {
           case "Backspace": {
             if (!cm.somethingSelected()) {
@@ -102,6 +114,7 @@ class Repl {
             this.runCode(code);
             if (code.trim() !== "") {
               this.history.push(code);
+              this.historyIdx = 0;
             }
             break;
           }

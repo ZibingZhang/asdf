@@ -3,7 +3,7 @@ export {
   Info
 };
 
-declare let CodeMirror: any;
+declare let CodeMirror: CodeMirror;
 
 class Info {
   private INIT_VALUE = `Source code at https://github.com/ZibingZhang/racket-online-ide
@@ -19,7 +19,7 @@ Settings
 -----------------------------------------
 Ctrl-s | Save settings`;
 
-  cm: any;
+  cm: CodeMirror;
 
   constructor(elementId: string) {
     const textArea = <HTMLElement>document.getElementById(elementId);

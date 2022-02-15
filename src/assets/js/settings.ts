@@ -3,7 +3,7 @@ export {
   Settings
 };
 
-declare let CodeMirror: any;
+declare let CodeMirror: CodeMirror;
 
 class Settings {
   private INIT_VALUE = `{
@@ -62,7 +62,7 @@ class Settings {
   }
 }`;
 
-  cm: any;
+  cm: CodeMirror;
 
   constructor(elementId: string) {
     const textArea = <HTMLElement>document.getElementById(elementId);

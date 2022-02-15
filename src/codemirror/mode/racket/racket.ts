@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-declare let CodeMirror: any;
+type CodeMirror = any;
+declare let CodeMirror: CodeMirror;
 
 type Bracket = {
   ch: string,
@@ -16,7 +17,7 @@ type State = {
 (function(mod) {
   // Plain browser env
   {mod(CodeMirror);}
-})(function(CodeMirror: any) {
+})(function(CodeMirror: CodeMirror) {
   "use strict";
 
   CodeMirror.defineMode("racket", function(_config: any) {
