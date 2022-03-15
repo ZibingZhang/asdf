@@ -28,6 +28,7 @@ import {
 } from "../ir/ast";
 import {
   CE_ACTUAL_VALUE_NOT_EXPECTED_ERR,
+  CE_CANT_COMPARE_FUNCTIONS_ERR,
   CE_CANT_COMPARE_INEXACT_ERR,
   CE_EXPECTED_AN_ERROR_ERR,
   CE_EXPECTED_ERROR_MESSAGE_ERR,
@@ -210,14 +211,14 @@ class EvaluateCode implements ASTNodeExtendedVisitor<RValue>, Stage<Program, RVa
           RNG.reset(seed);
           expectedVal = node.args[1].accept(this);
         }
-        if (isRInexactReal(actualVal) || isRInexactReal(expectedVal)) {
-          return new RTestResult(
-            false,
-            CE_CANT_COMPARE_INEXACT_ERR(
-              node.name,
-              actualVal.stringify(),
-              expectedVal.stringify()
-            ),
+        if (isRProcedure(actualVal) || isRProcedure(expectedVal)) {
+          throw new StageError(
+            CE_CANT_COMPARE_FUNCTIONS_ERR(node.name),
+            node.sourceSpan
+          );
+        } else if (isRInexactReal(actualVal) || isRInexactReal(expectedVal)) {
+          throw new StageError(
+            CE_CANT_COMPARE_INEXACT_ERR(node.name, actualVal.stringify(), expectedVal.stringify()),
             node.sourceSpan
           );
         } else if (isRData(actualVal) && actualVal.equal(expectedVal)) {

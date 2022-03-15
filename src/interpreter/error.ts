@@ -12,6 +12,7 @@ import {
 
 export {
   CE_ACTUAL_VALUE_NOT_EXPECTED_ERR,
+  CE_CANT_COMPARE_FUNCTIONS_ERR,
   CE_CANT_COMPARE_INEXACT_ERR,
   CE_EXPECTED_AN_ERROR_ERR,
   CE_EXPECTED_ERROR_MESSAGE_ERR,
@@ -141,6 +142,10 @@ function foundStr(found: SExpr | string): string {
 
 const CE_ACTUAL_VALUE_NOT_EXPECTED_ERR = (actual: string, expected: string) => {
   return `Actual value ${actual} differs from ${expected}, the expected value.`;
+};
+// TODO: add check for this everywhere
+const CE_CANT_COMPARE_FUNCTIONS_ERR = (name: string) => {
+  return `${name} cannot compare functions.`;
 };
 const CE_CANT_COMPARE_INEXACT_ERR = (name: string, actual: string, expected: string) => {
   return `${name} cannot compare inexact numbers. Try (check-within ${actual} ${expected} range).`;
