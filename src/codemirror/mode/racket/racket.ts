@@ -3,15 +3,18 @@
 type CodeMirror = any;
 declare let CodeMirror: CodeMirror;
 
-type Bracket = {
+type SExpr = {
   ch: string,
   col: number,
-  imm: string | null  // first name token following the open bracket
+  parent: SExpr | null,
+  exprCounter: number,
+  firstChildCol: number | null,
+  secondChildCol: number | null
 }
 
 type State = {
   tokenize: (stream: any, state: State) => string | null,
-  bracketStack: Bracket[]
+  sexpr: SExpr | null
 }
 
 (function(mod) {
@@ -37,25 +40,44 @@ type State = {
       ["{", "}"]
     ]);
 
+    function setChildCol(state: State, col: number) {
+      if (state.sexpr === null) return;
+      if (state.sexpr.firstChildCol === null) {
+        state.sexpr.firstChildCol = col;
+      } else if (state.sexpr.secondChildCol === null) {
+        state.sexpr.secondChildCol = col;
+      }
+    }
+
     function tokenBase(stream: any, state: State) {
       if (stream.eatSpace()) {
         return null;
       }
 
+      if (state.sexpr !== null) {
+        state.sexpr.exprCounter++;
+      }
       let ch = stream.next();
+      let col = stream.column();
 
       if (openBrackets.includes(ch)) {
-        state.bracketStack.push({
+        setChildCol(state, col);
+        state.sexpr = {
           ch,
-          col: stream.column(),
-          imm: null
-        });
+          col,
+          parent: state.sexpr,
+          exprCounter: 0,
+          firstChildCol: null,
+          secondChildCol: null
+        }
         return "bracket";
       } else if (closeBrackets.includes(ch)) {
-        if (state.bracketStack.length === 0) {
+        if (state.sexpr === null) {
           return "error";
         } else {
-          if (ch === bracketMap.get(state.bracketStack.pop()!.ch)) {
+          let openingBracket = state.sexpr.ch;
+          state.sexpr = state.sexpr.parent;
+          if (ch === bracketMap.get(openingBracket)) {
             return "bracket";
           } else {
             return "error";
@@ -64,15 +86,16 @@ type State = {
       } else if (ch === ";") {
         stream.skipToEnd();
         return "comment";
-      } else if (ch.match(/^['`]/)) {
-        return "keyword";
       } else if (ch.match(/^['`,]/)) {
+        setChildCol(state, col);
         return "keyword";
       } else if (ch === "\"") {
         state.tokenize = tokenString;
+        setChildCol(state, col);
         return "string";
       } else if (ch === "#") {
         if (stream.eol() || stream.peek().match(/^\s/)) {
+          setChildCol(state, col);
           return "error";
         } else if (stream.match(/^![/ ]/)) {
           stream.skipToEnd();
@@ -83,59 +106,70 @@ type State = {
         if (ch === ";") {
           return "comment";
         } else if (ch === "|") {
-          state.tokenize = tokenComment(0);
+          state.tokenize = tokenBlockComment(0);
           return state.tokenize(stream, state);
         } else if (ch === "\\") {
           if (stream.eol()) {
             if (stream.lookAhead(1) === undefined) {
               return "error";
             } else {
+              setChildCol(state, col);
               return "character";
             }
           }
           ch = stream.next();
           if (!ch.match(/[a-z]/i)) {
+            setChildCol(state, col);
             return "character";
           }
           const characterName = ch + stream.match(/[a-z]*/)[0];
           if (characterName.length === 1 || characterName.match(specialCharacter)) {
+            setChildCol(state, col);
             return "character";
           } else {
+            setChildCol(state, col);
             return "error";
           }
         }
 
         const poundName = ch + stream.match(untilDelimiter)[0];
         if (poundName.match(booleanLiteral)) {
+          setChildCol(state, col);
           return "boolean";
         } else if (poundName.match(exactnessNumLiteral)) {
+          setChildCol(state, col);
           return "number";
         } else {
+          setChildCol(state, col);
           return "error";
         }
       }
 
       const name = ch + stream.match(untilDelimiter);
       if (name.match(specialForm)) {
+        setChildCol(state, col);
         return "keyword";
       } else if (name.match(numLiteral)) {
+        setChildCol(state, col);
         return "number";
       } else if (name.match(placeholder)) {
+        setChildCol(state, col);
         return "placeholder";
       } else {
+        setChildCol(state, col);
         return null;
       }
     }
 
-    function tokenComment(depth: number): ((stream: any, state: State) => string | null) {
+    function tokenBlockComment(depth: number): ((stream: any, state: State) => string | null) {
       return function(stream: any, state: State) {
         const m = stream.match(/^.*?(#\||\|#)/);
         if (!m) {
           stream.skipToEnd();
         } else if (m[1] == "#|") {
-          state.tokenize = tokenComment(depth + 1);
+          state.tokenize = tokenBlockComment(depth + 1);
         } else if (depth > 0) {
-          state.tokenize = tokenComment(depth - 1);
+          state.tokenize = tokenBlockComment(depth - 1);
         } else {
           state.tokenize = tokenBase;
         }
@@ -180,7 +214,7 @@ type State = {
       startState: function (): State {
         return {
           tokenize: tokenBase,
-          bracketStack: []
+          sexpr: null
         };
       },
 
@@ -190,10 +224,19 @@ type State = {
       },
 
       indent: function (state: State, _textAfter: any): number {
-        if (state.bracketStack.length === 0) {
+        if (state.sexpr === null) {
           return 0;
         } else {
-          return state.bracketStack.at(-1)!.col + 1;
+          return (
+            state.sexpr.secondChildCol
+            || state.sexpr.firstChildCol
+            || state.sexpr.col + 1
+          );
+          // if (state.sexpr.secondChildCol) {
+
+          //   return state.sexpr.secondChildCol
+          // }
+          // return state.sexpr.col + 1;
         }
       },
 
