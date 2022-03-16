@@ -37,10 +37,22 @@ enum TokenType {
   COMMENT = "comment",
   ERROR = "error",
   KEYWORD = "keyword",
+  NAME = "name",
   NUMBER = "number",
   PLACEHOLDER = "placeholder",
   STRING = "string"
 }
+
+const QUOTABLE_TYPES = new Set([
+  TokenType.BOOLEAN,
+  TokenType.CHARACTER,
+  TokenType.ERROR,
+  TokenType.KEYWORD,
+  TokenType.NAME,
+  TokenType.NUMBER,
+  TokenType.PLACEHOLDER,
+  TokenType.STRING
+]);
 
 (function(mod) {
   // Plain browser env
@@ -74,12 +86,14 @@ enum TokenType {
       }
     }
 
-    function tokenType(state: State, type: TokenType | null, col: number | false): TokenType | null {
-      if (state.sexpr !== null) {
+    function tokenType(state: State, type: TokenType, col: number | false): TokenType {
+      if (type && state.expectingQuoted && QUOTABLE_TYPES.has(type)) {
+        state.expectingQuoted = false;
+      } else if (state.sexpr !== null && col !== false) {
         state.sexpr.exprCounter++;
-      }
-      if (col) {
-        setChildCol(state, col);
+        if (type !== TokenType.BRACKET) {
+          setChildCol(state, col);
+        }
       }
       if (state.sexpr && state.sexpr.isCommented) {
         return TokenType.COMMENT;
@@ -100,6 +114,11 @@ enum TokenType {
       let col = stream.column();
 
       if (openBrackets.includes(ch)) {
+        if (state.expectingQuoted) {
+          state.expectingQuoted = false;
+        } else {
+          setChildCol(state, col);
+        }
         state.sexpr = {
           ch,
           col,
@@ -124,7 +143,9 @@ enum TokenType {
         stream.skipToEnd();
         return TokenType.COMMENT;
       } else if (ch.match(/^['`,]/)) {
-        return tokenType(state, TokenType.KEYWORD, col);
+        let type = tokenType(state, TokenType.KEYWORD, col);
+        state.expectingQuoted = true;
+        return type;
       } else if (ch === "\"") {
         state.tokenize = tokenString;
         return tokenType(state, TokenType.STRING, col);
@@ -192,7 +213,7 @@ enum TokenType {
       } else if (name.match(placeholder)) {
         return tokenType(state, TokenType.PLACEHOLDER, col);
       } else {
-        return tokenType(state, null, col);
+        return tokenType(state, TokenType.NAME, col);
       }
     }
 
@@ -212,14 +233,13 @@ enum TokenType {
       };
     }
 
-    function tokenString(stream: any, state: State): TokenType | null {
+    function tokenString(stream: any, state: State): TokenType {
       if (stream.eatSpace()) {
-        return null;
+        return TokenType.STRING;
       }
       while (!stream.eol()) {
-        if (stream.peek() === "\\") {
-          state.tokenize = tokenEscapedCharacter;
-          return tokenType(state, TokenType.STRING, false);
+        if (stream.match("\\\"")) {
+          continue;
         }
         const ch = stream.next();
         if (ch === "\"") {
@@ -228,21 +248,6 @@ enum TokenType {
         }
       }
       return tokenType(state, TokenType.STRING, false);
-    }
-
-    function tokenEscapedCharacter(stream: any, state: State): TokenType | null {
-      stream.next();
-      if (stream.eol()) {
-        state.tokenize = tokenString;
-        return tokenType(state, TokenType.STRING, false);
-      }
-      const ch = stream.next();
-      state.tokenize = tokenString;
-      if (ch.match(/[abtnvfre"'\\]/)) {
-        return tokenType(state, TokenType.STRING, false);
-      } else {
-        return tokenType(state, TokenType.ERROR, false);
-      }
     }
 
     return {
@@ -264,6 +269,7 @@ enum TokenType {
         if (state.sexpr === null) {
           return 0;
         } else {
+          // console.log(JSON.stringify(state.sexpr));
           return ((
               state.sexpr.specialIndent
               && state.sexpr.specialIndent + state.sexpr.col
