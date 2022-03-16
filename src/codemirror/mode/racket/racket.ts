@@ -3,14 +3,13 @@
 type CodeMirror = any;
 declare let CodeMirror: CodeMirror;
 
-// TODO: take into account atoms that are composed of multiple tokens
-
 type SExpr = {
   ch: string,
   col: number,
   parent: SExpr | null,
   exprCounter: number,
   specialIndent: number | null,
+  specialIndentName: string | null,
   firstChildCol: number | null,
   secondChildCol: number | null,
   isCommented: boolean
@@ -19,6 +18,7 @@ type SExpr = {
 const BASE_SEXPR = {
   exprCounter: 0,
   specialIndent: null,
+  specialIndentName: null,
   firstChildCol: null,
   secondChildCol: null
 }
@@ -196,13 +196,13 @@ const QUOTABLE_TYPES = new Set([
 
       const name = ch + stream.match(untilDelimiter);
       if (name.match(specialForm)) {
-        // TODO: handle other `let' case
         if (state.sexpr) {
           switch (name) {
             case "cond":
             case "define":
             case "let": {
               state.sexpr.specialIndent = 2;
+              state.sexpr.specialIndentName = name;
               break;
             }
           }
@@ -269,14 +269,22 @@ const QUOTABLE_TYPES = new Set([
         if (state.sexpr === null) {
           return 0;
         } else {
-          // console.log(JSON.stringify(state.sexpr));
-          return ((
-              state.sexpr.specialIndent
-              && state.sexpr.specialIndent + state.sexpr.col
-            ) || state.sexpr.secondChildCol
+          if (state.sexpr.specialIndent) {
+            if (
+              state.sexpr.specialIndentName === "let"
+              && state.sexpr.secondChildCol === null
+            ) {
+              return (state.sexpr.firstChildCol || 0) + 3
+            } else {
+              return state.sexpr.specialIndent;
+            }
+          } else {
+            return (
+            state.sexpr.secondChildCol
             || state.sexpr.firstChildCol
             || state.sexpr.col + 1
           );
+          }
         }
       },
 
