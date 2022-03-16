@@ -74,9 +74,12 @@ enum TokenType {
       }
     }
 
-    function tokenType(state: State, type: TokenType | null): TokenType | null {
+    function tokenType(state: State, type: TokenType | null, col: number | false): TokenType | null {
       if (state.sexpr !== null) {
         state.sexpr.exprCounter++;
+      }
+      if (col) {
+        setChildCol(state, col);
       }
       if (state.sexpr && state.sexpr.isCommented) {
         return TokenType.COMMENT;
@@ -97,7 +100,6 @@ enum TokenType {
       let col = stream.column();
 
       if (openBrackets.includes(ch)) {
-        setChildCol(state, col);
         state.sexpr = {
           ch,
           col,
@@ -105,33 +107,30 @@ enum TokenType {
           isCommented: state.sexprComment > 0,
           ...BASE_SEXPR
         }
-        return tokenType(state, TokenType.BRACKET);
+        return tokenType(state, TokenType.BRACKET, col);
       } else if (closeBrackets.includes(ch)) {
         if (state.sexpr === null) {
-          return tokenType(state, TokenType.ERROR);
+          return tokenType(state, TokenType.ERROR, col);
         } else {
           let openingBracket = state.sexpr.ch;
           state.sexpr = state.sexpr.parent;
           if (ch === bracketMap.get(openingBracket)) {
-            return tokenType(state, TokenType.BRACKET);
+            return tokenType(state, TokenType.BRACKET, col);
           } else {
-            return tokenType(state, TokenType.ERROR);
+            return tokenType(state, TokenType.ERROR, col);
           }
         }
       } else if (ch === ";") {
         stream.skipToEnd();
         return TokenType.COMMENT;
       } else if (ch.match(/^['`,]/)) {
-        setChildCol(state, col);
-        return tokenType(state, TokenType.KEYWORD);
+        return tokenType(state, TokenType.KEYWORD, col);
       } else if (ch === "\"") {
         state.tokenize = tokenString;
-        setChildCol(state, col);
-        return tokenType(state, TokenType.STRING);
+        return tokenType(state, TokenType.STRING, col);
       } else if (ch === "#") {
         if (stream.eol() || stream.peek().match(/^\s/)) {
-          setChildCol(state, col);
-          return tokenType(state, TokenType.ERROR);
+          return tokenType(state, TokenType.ERROR, col);
         } else if (stream.match(/^![/ ]/)) {
           stream.skipToEnd();
           return TokenType.COMMENT;
@@ -147,43 +146,35 @@ enum TokenType {
         } else if (ch === "\\") {
           if (stream.eol()) {
             if (stream.lookAhead(1) === undefined) {
-              return tokenType(state, TokenType.ERROR);
+              return tokenType(state, TokenType.ERROR, col);
             } else {
-              setChildCol(state, col);
-              return tokenType(state, TokenType.CHARACTER);
+              return tokenType(state, TokenType.CHARACTER, col);
             }
           }
           ch = stream.next();
           if (!ch.match(/[a-z]/i)) {
-            setChildCol(state, col);
-            return tokenType(state, TokenType.CHARACTER);
+            return tokenType(state, TokenType.CHARACTER, col);
           }
           const characterName = ch + stream.match(/[a-z]*/)[0];
           if (characterName.length === 1 || characterName.match(specialCharacter)) {
-            setChildCol(state, col);
-            return tokenType(state, TokenType.CHARACTER);
+            return tokenType(state, TokenType.CHARACTER, col);
           } else {
-            setChildCol(state, col);
-            return tokenType(state, TokenType.ERROR);
+            return tokenType(state, TokenType.ERROR, col);
           }
         }
 
         const poundName = ch + stream.match(untilDelimiter)[0];
         if (poundName.match(booleanLiteral)) {
-          setChildCol(state, col);
-          return tokenType(state, TokenType.BOOLEAN);
+          return tokenType(state, TokenType.BOOLEAN, col);
         } else if (poundName.match(exactnessNumLiteral)) {
-          setChildCol(state, col);
-          return tokenType(state, TokenType.NUMBER);
+          return tokenType(state, TokenType.NUMBER, col);
         } else {
-          setChildCol(state, col);
-          return tokenType(state, TokenType.ERROR);
+          return tokenType(state, TokenType.ERROR, col);
         }
       }
 
       const name = ch + stream.match(untilDelimiter);
       if (name.match(specialForm)) {
-        setChildCol(state, col);
         // TODO: handle other `let' case
         if (state.sexpr) {
           switch (name) {
@@ -195,16 +186,13 @@ enum TokenType {
             }
           }
         }
-        return tokenType(state, TokenType.KEYWORD);
+        return tokenType(state, TokenType.KEYWORD, col);
       } else if (name.match(numLiteral)) {
-        setChildCol(state, col);
-        return tokenType(state, TokenType.NUMBER);
+        return tokenType(state, TokenType.NUMBER, col);
       } else if (name.match(placeholder)) {
-        setChildCol(state, col);
-        return tokenType(state, TokenType.PLACEHOLDER);
+        return tokenType(state, TokenType.PLACEHOLDER, col);
       } else {
-        setChildCol(state, col);
-        return tokenType(state, null);
+        return tokenType(state, null, col);
       }
     }
 
@@ -231,29 +219,29 @@ enum TokenType {
       while (!stream.eol()) {
         if (stream.peek() === "\\") {
           state.tokenize = tokenEscapedCharacter;
-          return tokenType(state, TokenType.STRING);
+          return tokenType(state, TokenType.STRING, false);
         }
         const ch = stream.next();
         if (ch === "\"") {
           state.tokenize = tokenBase;
-          return tokenType(state, TokenType.STRING);
+          return tokenType(state, TokenType.STRING, false);
         }
       }
-      return tokenType(state, TokenType.STRING);
+      return tokenType(state, TokenType.STRING, false);
     }
 
     function tokenEscapedCharacter(stream: any, state: State): TokenType | null {
       stream.next();
       if (stream.eol()) {
         state.tokenize = tokenString;
-        return tokenType(state, TokenType.STRING);
+        return tokenType(state, TokenType.STRING, false);
       }
       const ch = stream.next();
       state.tokenize = tokenString;
       if (ch.match(/[abtnvfre"'\\]/)) {
-        return tokenType(state, TokenType.STRING);
+        return tokenType(state, TokenType.STRING, false);
       } else {
-        return tokenType(state, TokenType.ERROR);
+        return tokenType(state, TokenType.ERROR, false);
       }
     }
 
