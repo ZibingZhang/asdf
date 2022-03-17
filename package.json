@@ -1,10 +1,19 @@
 {
-  "name": "jsracket",
+  "name": "racket-online-ide",
   "author": "Zibing Zhang",
-  "private": true,
+  "license": "AGPL-3.0-only",
+  "homepage": "https://github.com/ZibingZhang/racket-online-ide",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com:ZibingZhang/racket-online-ide.git"
+  },
+  "config": {
+    "hot_reload_port": "8080",
+    "prod_build_port": "9000"
+  },
   "scripts": {
-    "serve": "python3 -m http.server 9000 --directory ./dist",
-    "start": "npx webpack-dev-server --config webpack.dev.js",
+    "serve": "python3 -m http.server $npm_package_config_prod_build_port --directory ./dist",
+    "start": "npx webpack-dev-server --port $npm_package_config_hot_reload_port --config webpack.dev.js",
     "build": "npx webpack --config webpack.prod.js",
     "lint": "npx eslint ./src --fix"
   },
