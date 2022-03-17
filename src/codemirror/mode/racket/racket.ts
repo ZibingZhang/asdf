@@ -288,10 +288,12 @@ const QUOTABLE_TYPES = new Set([
         }
       },
 
-      closeBrackets: { pairs: "()[]{}\"\"" },
-      lineComment: ";",
-      blockCommentStart: "#|",
-      blockCommentEnd: "|#"
+      // closeBrackets: "()[]{}",
+      // closeBrackets: { pairs: "()[]{}\"\"" },
+      // lineComment: ";",
+      // blockCommentStart: "#|",
+      // blockCommentEnd: "|#",
+      // fold: "brace"
     };
   });
 });

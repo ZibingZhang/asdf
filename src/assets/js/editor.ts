@@ -28,9 +28,12 @@ class Editor {
         mode: "racket",
         theme: "racket",
         styleSelectedText: true,
+        // foldGutter: true,
+        // gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
         extraKeys: {
           "Alt-Enter": () => this.runCode(),
           "Ctrl-/": () => this.cm.execCommand("toggleComment")
+          // "Ctrl-Q": function(cm: CodeMirror){ cm.foldCode(cm.getCursor()); }
         }
       }
     );
