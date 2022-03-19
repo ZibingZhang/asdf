@@ -3,6 +3,9 @@
 type CodeMirror = any;
 declare let CodeMirror: CodeMirror;
 
+// TODO:
+//  - handle expressions that contain `|'
+
 type SExpr = {
   ch: string,
   col: number,
@@ -10,8 +13,8 @@ type SExpr = {
   exprCounter: number,
   specialIndent: number | null,
   specialIndentName: string | null,
-  firstChildCol: number | null,
-  secondChildCol: number | null,
+  firstChildSExprCol: number | null,
+  secondChildSExprCol: number | null,
   isCommented: boolean
 }
 
@@ -19,8 +22,8 @@ const BASE_SEXPR = {
   exprCounter: 0,
   specialIndent: null,
   specialIndentName: null,
-  firstChildCol: null,
-  secondChildCol: null
+  firstChildSExprCol: null,
+  secondChildSExprCol: null
 }
 
 type State = {
@@ -61,28 +64,29 @@ const QUOTABLE_TYPES = new Set([
   "use strict";
 
   CodeMirror.defineMode("racket", function(_config: any) {
-    const untilDelimiter = /^[^\s"'([{)\]};`,]*/;
     const openBrackets = "([{";
     const closeBrackets = ")]}";
+    const delimiter = /^[^\s"'([{)\]};`,]*/;
     const booleanLiteral = /^(T|t|true|F|f|false)$/;
+    const numericLiteral = /^[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
+    const exactnessNumericLiteral = /^[ei][+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
     const specialForm = /^(and|check-error|check-expect|check-member-of|check-random|check-range|check-satisfied|check-within|cond|define|define-struct|else|if|lambda|letrec|let\*|let|local|or|quasiquote|quote|require|unquote)$/;
-    const numLiteral = /^[+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
-    const exactnessNumLiteral = /^[ei][+-]?(\.\d+|\d+(\.\d*|\/\d+)?)$/;
     const specialCharacter = /^(nul|null|backspace|tab|newline|linefeed|vtab|page|return|space|rubout)$/;
     const placeholder = /^\.{2,6}$/;
 
-    const bracketMap = new Map([
+    const bracketPair = new Map([
       ["(", ")"],
       ["[", "]"],
       ["{", "}"]
     ]);
 
     function setChildCol(state: State, col: number) {
-      if (state.sexpr === null) return;
-      if (state.sexpr.firstChildCol === null) {
-        state.sexpr.firstChildCol = col;
-      } else if (state.sexpr.secondChildCol === null) {
-        state.sexpr.secondChildCol = col;
+      if (state.sexpr === null) {
+        return;
+      } else if (state.sexpr.firstChildSExprCol === null) {
+        state.sexpr.firstChildSExprCol = col;
+      } else if (state.sexpr.secondChildSExprCol === null) {
+        state.sexpr.secondChildSExprCol = col;
       }
     }
 
@@ -133,7 +137,7 @@ const QUOTABLE_TYPES = new Set([
         } else {
           let openingBracket = state.sexpr.ch;
           state.sexpr = state.sexpr.parent;
-          if (ch === bracketMap.get(openingBracket)) {
+          if (ch === bracketPair.get(openingBracket)) {
             return tokenType(state, TokenType.BRACKET, col);
           } else {
             return tokenType(state, TokenType.ERROR, col);
@@ -184,17 +188,17 @@ const QUOTABLE_TYPES = new Set([
           }
         }
 
-        const poundName = ch + stream.match(untilDelimiter)[0];
+        const poundName = ch + stream.match(delimiter)[0];
         if (poundName.match(booleanLiteral)) {
           return tokenType(state, TokenType.BOOLEAN, col);
-        } else if (poundName.match(exactnessNumLiteral)) {
+        } else if (poundName.match(exactnessNumericLiteral)) {
           return tokenType(state, TokenType.NUMBER, col);
         } else {
           return tokenType(state, TokenType.ERROR, col);
         }
       }
 
-      const name = ch + stream.match(untilDelimiter);
+      const name = ch + stream.match(delimiter);
       if (name.match(specialForm)) {
         if (state.sexpr) {
           switch (name) {
@@ -208,7 +212,7 @@ const QUOTABLE_TYPES = new Set([
           }
         }
         return tokenType(state, TokenType.KEYWORD, col);
-      } else if (name.match(numLiteral)) {
+      } else if (name.match(numericLiteral)) {
         return tokenType(state, TokenType.NUMBER, col);
       } else if (name.match(placeholder)) {
         return tokenType(state, TokenType.PLACEHOLDER, col);
@@ -272,16 +276,16 @@ const QUOTABLE_TYPES = new Set([
           if (state.sexpr.specialIndent) {
             if (
               state.sexpr.specialIndentName === "let"
-              && state.sexpr.secondChildCol === null
+              && state.sexpr.secondChildSExprCol === null
             ) {
-              return (state.sexpr.firstChildCol || 0) + 3
+              return (state.sexpr.firstChildSExprCol || 0) + 3
             } else {
               return state.sexpr.specialIndent;
             }
           } else {
             return (
-            state.sexpr.secondChildCol
-            || state.sexpr.firstChildCol
+            state.sexpr.secondChildSExprCol
+            || state.sexpr.firstChildSExprCol
             || state.sexpr.col + 1
           );
           }
