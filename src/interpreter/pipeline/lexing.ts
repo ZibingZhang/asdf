@@ -72,13 +72,13 @@ const ESCAPED_R = String.fromCharCode(13);
 const ESCAPED_E = String.fromCharCode(27);
 
 class Lexer implements Stage<string, SExpr[]> {
-  private position = 0;
-  private lineno = 1;
-  private colno = 0;
-  private input = "";
-  private atEnd = false;
-  private quoting = false;
-  private quasiQuoting = false;
+  private position: number;
+  private lineno: number;
+  private colno: number;
+  private input: string;
+  private atEnd: boolean;
+  private quoting: boolean;
+  private quasiQuoting: boolean;
 
   run(result: StageResult<string>): StageResult<SExpr[]> {
     this.position = 0;
